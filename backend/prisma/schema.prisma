@@ -1,0 +1,442 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  COACH
+  PLAYER
+}
+
+enum PlayerStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum TraitCategory {
+  STRENGTH
+  WEAKNESS
+}
+
+enum PointStatus {
+  OPEN
+  IN_PROGRESS
+  DONE
+}
+
+enum OccurrenceStatus {
+  PLANNED
+  CANCELLED
+}
+
+enum MediaType {
+  PHOTO
+  VIDEO
+}
+
+// ---------- Saisons & utilisateurs ----------
+
+model Season {
+  id        String   @id @default(cuid())
+  name      String
+  startDate DateTime
+  endDate   DateTime
+  isActive  Boolean  @default(false)
+  settings  Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  playerSeasons    PlayerSeason[]
+  rankingHistories RankingHistory[]
+  trainingGroups   TrainingGroup[]
+  trainings        Training[]
+  trainingPlans    TrainingPlan[]
+  camps            Camp[]
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  role         Role
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  playerId String? @unique
+  player   Player? @relation(fields: [playerId], references: [id])
+
+  coachId String? @unique
+  coach   Coach?  @relation(fields: [coachId], references: [id])
+}
+
+// ---------- Joueurs ----------
+
+model Player {
+  id            String   @id @default(cuid())
+  firstName     String
+  lastName      String
+  birthDate     DateTime
+  licenseNumber String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user             User?
+  playerSeasons    PlayerSeason[]
+  rankingHistories RankingHistory[]
+  equipment        Equipment[]
+  traits           PlayerTrait[]
+  pointsToWork     PointToWork[]
+  evolutionNotes   EvolutionNote[]
+  media            PlayerMedia[]
+  groupAssignments PlayerGroupAssignment[]
+  attendances      Attendance[]
+  campEnrollments  CampPeriodGroupPlayer[]
+  campAttendances  CampAttendance[]
+  sparringProfile  Sparring?
+}
+
+model PlayerSeason {
+  id       String       @id @default(cuid())
+  playerId String
+  seasonId String
+  status   PlayerStatus @default(ACTIVE)
+
+  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  season Season @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+
+  @@unique([playerId, seasonId])
+}
+
+model RankingHistory {
+  id            String   @id @default(cuid())
+  playerId      String
+  seasonId      String
+  rankingValue  String
+  effectiveDate DateTime @default(now())
+  createdAt     DateTime @default(now())
+
+  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  season Season @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+
+  @@index([playerId, seasonId])
+}
+
+model Equipment {
+  id            String    @id @default(cuid())
+  playerId      String
+  type          String
+  brand         String?
+  model         String?
+  effectiveFrom DateTime  @default(now())
+  effectiveTo   DateTime?
+  createdAt     DateTime  @default(now())
+
+  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@index([playerId])
+}
+
+model PlayerTrait {
+  id            String        @id @default(cuid())
+  playerId      String
+  category      TraitCategory
+  description   String
+  effectiveFrom DateTime      @default(now())
+  effectiveTo   DateTime?
+  createdAt     DateTime      @default(now())
+
+  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@index([playerId])
+}
+
+model PointToWork {
+  id          String      @id @default(cuid())
+  playerId    String
+  description String
+  status      PointStatus @default(OPEN)
+  createdById String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  player    Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  createdBy Coach? @relation(fields: [createdById], references: [id])
+
+  @@index([playerId])
+}
+
+model EvolutionNote {
+  id        String   @id @default(cuid())
+  playerId  String
+  coachId   String?
+  date      DateTime @default(now())
+  note      String
+  createdAt DateTime @default(now())
+
+  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  coach  Coach? @relation(fields: [coachId], references: [id])
+
+  @@index([playerId])
+}
+
+model PlayerMedia {
+  id        String    @id @default(cuid())
+  playerId  String
+  type      MediaType
+  url       String
+  createdAt DateTime  @default(now())
+
+  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+}
+
+// ---------- Groupes & entrainements ----------
+
+model TrainingGroup {
+  id              String   @id @default(cuid())
+  seasonId        String
+  name            String
+  rankingCriteria String?
+  createdAt       DateTime @default(now())
+
+  season            Season                   @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  playerAssignments PlayerGroupAssignment[]
+  trainings         Training[]
+}
+
+model PlayerGroupAssignment {
+  id        String    @id @default(cuid())
+  playerId  String
+  groupId   String
+  startDate DateTime  @default(now())
+  endDate   DateTime?
+
+  player Player        @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  group  TrainingGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@index([playerId])
+  @@index([groupId])
+}
+
+model Coach {
+  id        String   @id @default(cuid())
+  firstName String
+  lastName  String
+  email     String?  @unique
+  phone     String?
+  createdAt DateTime @default(now())
+
+  user                User?
+  trainingOccurrences TrainingOccurrenceCoach[]
+  trainingPlans       TrainingPlan[]
+  exercisesCreated    Exercise[]
+  pointsToWork        PointToWork[]
+  evolutionNotes      EvolutionNote[]
+  campPeriodGroups    CampPeriodGroupCoach[]
+}
+
+model Sparring {
+  id           String   @id @default(cuid())
+  firstName    String
+  lastName     String
+  ranking      String?
+  isClubMember Boolean  @default(false)
+  playerId     String?  @unique
+  externalClub String?
+  createdAt    DateTime @default(now())
+
+  player              Player?                   @relation(fields: [playerId], references: [id])
+  trainingOccurrences TrainingOccurrenceCoach[]
+}
+
+model Training {
+  id        String   @id @default(cuid())
+  seasonId  String
+  groupId   String
+  name      String
+  location  String?
+  weekday   Int? // 0=lundi ... 6=dimanche
+  startTime String? // "18:00"
+  endTime   String?
+  createdAt DateTime @default(now())
+
+  season      Season               @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  group       TrainingGroup        @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  occurrences TrainingOccurrence[]
+}
+
+model TrainingOccurrence {
+  id         String           @id @default(cuid())
+  trainingId String
+  date       DateTime
+  startTime  String
+  endTime    String
+  status     OccurrenceStatus @default(PLANNED)
+
+  training    Training                  @relation(fields: [trainingId], references: [id], onDelete: Cascade)
+  coaches     TrainingOccurrenceCoach[]
+  attendances Attendance[]
+}
+
+model TrainingOccurrenceCoach {
+  id           String  @id @default(cuid())
+  occurrenceId String
+  coachId      String?
+  sparringId   String?
+
+  occurrence TrainingOccurrence @relation(fields: [occurrenceId], references: [id], onDelete: Cascade)
+  coach      Coach?             @relation(fields: [coachId], references: [id])
+  sparring   Sparring?          @relation(fields: [sparringId], references: [id])
+}
+
+model Attendance {
+  id           String  @id @default(cuid())
+  occurrenceId String
+  playerId     String
+  present      Boolean @default(false)
+  note         String?
+
+  occurrence TrainingOccurrence @relation(fields: [occurrenceId], references: [id], onDelete: Cascade)
+  player     Player             @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@unique([occurrenceId, playerId])
+}
+
+// ---------- Plans d'entrainement & exercices ----------
+
+model TrainingPlan {
+  id          String    @id @default(cuid())
+  seasonId    String
+  coachId     String?
+  title       String
+  description String?
+  periodStart DateTime?
+  periodEnd   DateTime?
+  createdAt   DateTime  @default(now())
+
+  season    Season                  @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  coach     Coach?                  @relation(fields: [coachId], references: [id])
+  exercises TrainingPlanExercise[]
+}
+
+model Exercise {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  category    String?
+  difficulty  String?
+  createdById String?
+  createdAt   DateTime @default(now())
+
+  createdBy Coach?                  @relation(fields: [createdById], references: [id])
+  plans     TrainingPlanExercise[]
+}
+
+model TrainingPlanExercise {
+  id             String @id @default(cuid())
+  trainingPlanId String
+  exerciseId     String
+
+  trainingPlan TrainingPlan @relation(fields: [trainingPlanId], references: [id], onDelete: Cascade)
+  exercise     Exercise     @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+
+  @@unique([trainingPlanId, exerciseId])
+}
+
+// ---------- Stages ----------
+
+model Camp {
+  id        String   @id @default(cuid())
+  seasonId  String
+  name      String
+  location  String?
+  startDate DateTime
+  endDate   DateTime
+  createdAt DateTime @default(now())
+
+  season Season      @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  days   CampDay[]
+  groups CampGroup[]
+}
+
+model CampDay {
+  id     String   @id @default(cuid())
+  campId String
+  date   DateTime
+
+  camp    Camp         @relation(fields: [campId], references: [id], onDelete: Cascade)
+  periods CampPeriod[]
+}
+
+model CampPeriod {
+  id        String @id @default(cuid())
+  campDayId String
+  label     String // "Matinée", "Après-midi", ...
+  startTime String
+  endTime   String
+
+  campDay CampDay           @relation(fields: [campDayId], references: [id], onDelete: Cascade)
+  groups  CampPeriodGroup[]
+}
+
+model CampGroup {
+  id     String @id @default(cuid())
+  campId String
+  name   String // "Initiation", "Perfectionnement", "Psychomotricité", ...
+
+  camp    Camp              @relation(fields: [campId], references: [id], onDelete: Cascade)
+  periods CampPeriodGroup[]
+}
+
+model CampPeriodGroup {
+  id           String @id @default(cuid())
+  campPeriodId String
+  campGroupId  String
+
+  period      CampPeriod               @relation(fields: [campPeriodId], references: [id], onDelete: Cascade)
+  group       CampGroup                @relation(fields: [campGroupId], references: [id], onDelete: Cascade)
+  coaches     CampPeriodGroupCoach[]
+  players     CampPeriodGroupPlayer[]
+  attendances CampAttendance[]
+
+  @@unique([campPeriodId, campGroupId])
+}
+
+model CampPeriodGroupCoach {
+  id                String @id @default(cuid())
+  campPeriodGroupId String
+  coachId           String
+
+  campPeriodGroup CampPeriodGroup @relation(fields: [campPeriodGroupId], references: [id], onDelete: Cascade)
+  coach           Coach           @relation(fields: [coachId], references: [id], onDelete: Cascade)
+
+  @@unique([campPeriodGroupId, coachId])
+}
+
+model CampPeriodGroupPlayer {
+  id                String @id @default(cuid())
+  campPeriodGroupId String
+  playerId          String
+
+  campPeriodGroup CampPeriodGroup @relation(fields: [campPeriodGroupId], references: [id], onDelete: Cascade)
+  player          Player          @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@unique([campPeriodGroupId, playerId])
+}
+
+model CampAttendance {
+  id                String  @id @default(cuid())
+  campPeriodGroupId String
+  playerId          String
+  present           Boolean @default(false)
+
+  campPeriodGroup CampPeriodGroup @relation(fields: [campPeriodGroupId], references: [id], onDelete: Cascade)
+  player          Player          @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@unique([campPeriodGroupId, playerId])
+}
