@@ -1,4 +1,4 @@
-# Club Tennis de Table — application de gestion
+# ping-club-manager
 
 Application de gestion d'un club de tennis de table : saisons, joueurs, entraineurs, groupes d'entrainement, entrainements, stages, présences.
 
@@ -28,7 +28,7 @@ npm run seed             # crée le compte admin initial
 npm run dev
 ```
 
-Le compte admin créé par défaut est `admin@pingpong-club.local` / `changeme123` (modifiable via `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD`).
+Le compte admin créé par défaut est `admin@ping-club-manager.local` / `changeme123` (modifiable via `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD`).
 
 ### Frontend
 
@@ -46,9 +46,9 @@ L'application est accessible sur http://localhost:5173.
 1. Pousser le dépôt sur GitHub/GitLab.
 2. Sur Render, créer un nouveau **Blueprint** en pointant vers ce dépôt (`render.yaml` à la racine).
 3. Après le premier déploiement, renseigner manuellement :
-   - `CORS_ORIGIN` sur le service `pingpong-api` avec l'URL publique de `pingpong-web`.
-   - `VITE_API_URL` sur le service `pingpong-web` avec l'URL publique de `pingpong-api` + `/api`, puis redéployer le frontend (Vite fige les variables au build).
-4. Exécuter le seed du compte admin (Shell Render sur `pingpong-api`) : `npm run seed`.
+   - `CORS_ORIGIN` sur le service `ping-club-manager-api` avec l'URL publique de `ping-club-manager-web`.
+   - `VITE_API_URL` sur le service `ping-club-manager-web` avec l'URL publique de `ping-club-manager-api` + `/api`, puis redéployer le frontend (Vite fige les variables au build).
+4. Exécuter le seed du compte admin (Shell Render sur `ping-club-manager-api`) : `npm run seed`.
 
 ## État actuel
 

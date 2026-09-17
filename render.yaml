@@ -1,12 +1,12 @@
 databases:
-  - name: pingpong-db
-    databaseName: pingpong_club
-    user: pingpong
+  - name: ping-club-manager-db
+    databaseName: ping_club_manager
+    user: ping_club_manager
     plan: free
 
 services:
   - type: web
-    name: pingpong-api
+    name: ping-club-manager-api
     runtime: node
     rootDir: backend
     plan: free
@@ -15,7 +15,7 @@ services:
     envVars:
       - key: DATABASE_URL
         fromDatabase:
-          name: pingpong-db
+          name: ping-club-manager-db
           property: connectionString
       - key: JWT_SECRET
         generateValue: true
@@ -23,21 +23,21 @@ services:
         value: 8h
       - key: NODE_ENV
         value: production
-      # À renseigner après le premier déploiement avec l'URL publique de pingpong-web
-      # (ex. https://pingpong-web.onrender.com), Render ne permet pas toujours de la
+      # À renseigner après le premier déploiement avec l'URL publique de ping-club-manager-web
+      # (ex. https://ping-club-manager-web.onrender.com), Render ne permet pas toujours de la
       # référencer automatiquement selon la propriété disponible sur ton plan.
       - key: CORS_ORIGIN
         sync: false
 
   - type: web
-    name: pingpong-web
+    name: ping-club-manager-web
     runtime: static
     rootDir: frontend
     buildCommand: npm install && npm run build
     staticPublishPath: dist
     envVars:
-      # À renseigner avec l'URL publique de pingpong-api + "/api"
-      # (ex. https://pingpong-api.onrender.com/api) avant le build,
+      # À renseigner avec l'URL publique de ping-club-manager-api + "/api"
+      # (ex. https://ping-club-manager-api.onrender.com/api) avant le build,
       # car Vite fige les variables d'environnement à la compilation.
       - key: VITE_API_URL
         sync: false

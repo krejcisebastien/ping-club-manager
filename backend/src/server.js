@@ -5,5 +5,5 @@ const app = createApp();
 const port = process.env.PORT || 4000;
 
 app.listen(port, () => {
-  console.log(`API pingpong-club démarrée sur le port ${port}`);
+  console.log(`API ping-club-manager démarrée sur le port ${port}`);
 });

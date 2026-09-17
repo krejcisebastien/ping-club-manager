@@ -5,7 +5,7 @@ import { hashPassword } from "../src/utils/password.js";
 const prisma = new PrismaClient();
 
 async function main() {
-  const email = process.env.SEED_ADMIN_EMAIL || "admin@pingpong-club.local";
+  const email = process.env.SEED_ADMIN_EMAIL || "admin@ping-club-manager.local";
   const password = process.env.SEED_ADMIN_PASSWORD || "changeme123";
 
   const existing = await prisma.user.findUnique({ where: { email } });
