@@ -23,11 +23,10 @@ services:
         value: 8h
       - key: NODE_ENV
         value: production
-      # À renseigner après le premier déploiement avec l'URL publique de ping-club-manager-web
-      # (ex. https://ping-club-manager-web.onrender.com), Render ne permet pas toujours de la
-      # référencer automatiquement selon la propriété disponible sur ton plan.
+      # Si Render doit suffixer le nom du service (nom déjà pris sur onrender.com),
+      # l'URL réelle différera — corrige alors cette valeur après le premier déploiement.
       - key: CORS_ORIGIN
-        sync: false
+        value: https://ping-club-manager-web.onrender.com
 
   - type: web
     name: ping-club-manager-web
@@ -36,11 +35,11 @@ services:
     buildCommand: npm install && npm run build
     staticPublishPath: dist
     envVars:
-      # À renseigner avec l'URL publique de ping-club-manager-api + "/api"
-      # (ex. https://ping-club-manager-api.onrender.com/api) avant le build,
-      # car Vite fige les variables d'environnement à la compilation.
+      # Si Render doit suffixer le nom du service (nom déjà pris sur onrender.com),
+      # l'URL réelle différera — corrige alors cette valeur et redéploie (Vite fige
+      # les variables d'environnement au moment du build).
       - key: VITE_API_URL
-        sync: false
+        value: https://ping-club-manager-api.onrender.com/api
     routes:
       - type: rewrite
         source: /*
