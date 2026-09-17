@@ -68,11 +68,24 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  playerId String? @unique
-  player   Player? @relation(fields: [playerId], references: [id])
+  players UserPlayer[]
 
   coachId String? @unique
   coach   Coach?  @relation(fields: [coachId], references: [id])
+}
+
+// Association many-to-many : un compte (ex. parent) peut voir la fiche de
+// plusieurs joueurs (ex. ses enfants), utile quand une famille partage un
+// seul email pour plusieurs inscriptions.
+model UserPlayer {
+  id       String @id @default(cuid())
+  userId   String
+  playerId String
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, playerId])
 }
 
 // ---------- Joueurs ----------
@@ -86,7 +99,7 @@ model Player {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  user             User?
+  users            UserPlayer[]
   playerSeasons    PlayerSeason[]
   rankingHistories RankingHistory[]
   equipment        Equipment[]

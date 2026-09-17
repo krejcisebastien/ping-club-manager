@@ -23,11 +23,12 @@ export function requireRole(...roles) {
   };
 }
 
-// Autorise un admin/coach, ou un joueur consultant uniquement sa propre fiche.
+// Autorise un admin/coach, ou un joueur consultant la fiche d'un des joueurs
+// rattachés à son compte (compte familial : plusieurs joueurs possibles).
 export function requireSelfPlayerOrRole(playerIdParam, ...roles) {
   return (req, res, next) => {
     if (roles.includes(req.user.role)) return next();
-    if (req.user.role === "PLAYER" && req.user.playerId === req.params[playerIdParam]) {
+    if (req.user.role === "PLAYER" && req.user.playerIds?.includes(req.params[playerIdParam])) {
       return next();
     }
     return res.status(403).json({ error: "Accès refusé." });

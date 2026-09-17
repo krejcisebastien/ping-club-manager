@@ -12,7 +12,10 @@ router.post("/login", async (req, res) => {
     return res.status(400).json({ error: "Email et mot de passe requis." });
   }
 
-  const user = await prisma.user.findUnique({ where: { email } });
+  const user = await prisma.user.findUnique({
+    where: { email },
+    include: { players: { select: { playerId: true } } },
+  });
   if (!user || !user.isActive) {
     return res.status(401).json({ error: "Identifiants invalides." });
   }
@@ -26,7 +29,7 @@ router.post("/login", async (req, res) => {
     sub: user.id,
     email: user.email,
     role: user.role,
-    playerId: user.playerId,
+    playerIds: user.players.map((p) => p.playerId),
     coachId: user.coachId,
   };
   const token = signToken(payload);
@@ -47,25 +50,28 @@ router.get("/users", requireAuth, requireRole("ADMIN"), async (req, res) => {
       role: true,
       isActive: true,
       createdAt: true,
-      player: { select: { id: true, firstName: true, lastName: true } },
+      players: { select: { player: { select: { id: true, firstName: true, lastName: true } } } },
       coach: { select: { id: true, firstName: true, lastName: true } },
     },
     orderBy: { createdAt: "desc" },
   });
-  res.json({ users });
+  res.json({
+    users: users.map((u) => ({ ...u, players: u.players.map((p) => p.player) })),
+  });
 });
 
-// Création d'un compte utilisateur (admin uniquement) — lié à un joueur ou un entraineur existant.
+// Création d'un compte utilisateur (admin uniquement) — lié à un ou plusieurs joueurs
+// (ex. compte familial) ou à un entraineur existant.
 router.post("/users", requireAuth, requireRole("ADMIN"), async (req, res) => {
-  const { email, password, role, playerId, coachId } = req.body ?? {};
+  const { email, password, role, playerIds, coachId } = req.body ?? {};
   if (!email || !password || !role) {
     return res.status(400).json({ error: "Email, mot de passe et rôle requis." });
   }
   if (!["ADMIN", "COACH", "PLAYER"].includes(role)) {
     return res.status(400).json({ error: "Rôle invalide." });
   }
-  if (role === "PLAYER" && !playerId) {
-    return res.status(400).json({ error: "playerId requis pour un compte joueur." });
+  if (role === "PLAYER" && !(Array.isArray(playerIds) && playerIds.length)) {
+    return res.status(400).json({ error: "Au moins un joueur requis pour un compte joueur." });
   }
   if (role === "COACH" && !coachId) {
     return res.status(400).json({ error: "coachId requis pour un compte entraineur." });
@@ -78,33 +84,48 @@ router.post("/users", requireAuth, requireRole("ADMIN"), async (req, res) => {
         email,
         passwordHash,
         role,
-        playerId: role === "PLAYER" ? playerId : null,
         coachId: role === "COACH" ? coachId : null,
+        players:
+          role === "PLAYER"
+            ? { create: playerIds.map((playerId) => ({ playerId })) }
+            : undefined,
       },
-      select: { id: true, email: true, role: true, playerId: true, coachId: true, isActive: true },
+      select: {
+        id: true,
+        email: true,
+        role: true,
+        coachId: true,
+        isActive: true,
+        players: { select: { playerId: true } },
+      },
     });
-    res.status(201).json({ user });
+    res.status(201).json({ user: { ...user, playerIds: user.players.map((p) => p.playerId) } });
   } catch (err) {
     if (err.code === "P2002") {
-      return res.status(409).json({ error: "Un compte existe déjà avec cet email ou pour ce joueur/entraineur." });
+      return res.status(409).json({ error: "Un compte existe déjà avec cet email, ou un joueur est déjà rattaché à ce compte." });
     }
     throw err;
   }
 });
 
 router.put("/users/:id", requireAuth, requireRole("ADMIN"), async (req, res) => {
-  const { isActive, password } = req.body ?? {};
+  const { isActive, password, playerIds } = req.body ?? {};
   try {
     const data = {};
     if (isActive !== undefined) data.isActive = isActive;
     if (password) data.passwordHash = await hashPassword(password);
 
+    if (Array.isArray(playerIds)) {
+      await prisma.userPlayer.deleteMany({ where: { userId: req.params.id } });
+      data.players = { create: playerIds.map((playerId) => ({ playerId })) };
+    }
+
     const user = await prisma.user.update({
       where: { id: req.params.id },
       data,
-      select: { id: true, email: true, role: true, isActive: true },
+      select: { id: true, email: true, role: true, isActive: true, players: { select: { playerId: true } } },
     });
-    res.json({ user });
+    res.json({ user: { ...user, playerIds: user.players.map((p) => p.playerId) } });
   } catch {
     res.status(404).json({ error: "Compte introuvable." });
   }

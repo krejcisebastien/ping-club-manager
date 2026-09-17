@@ -120,8 +120,14 @@ const routes = [
   },
   {
     path: "/player",
-    name: "player-dashboard",
-    component: () => import("../views/player/DashboardView.vue"),
+    name: "player-selector",
+    component: () => import("../views/player/SelectorView.vue"),
+    meta: { roles: ["PLAYER"] },
+  },
+  {
+    path: "/player/:id",
+    name: "player-detail",
+    component: () => import("../views/player/PlayerDetailView.vue"),
     meta: { roles: ["PLAYER"] },
   },
 ];

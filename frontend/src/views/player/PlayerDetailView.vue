@@ -1,17 +1,21 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import AppLayout from "../../components/AppLayout.vue";
 import { api } from "../../lib/api.js";
 import { useAuthStore } from "../../stores/auth.js";
 
+const route = useRoute();
+const router = useRouter();
 const auth = useAuthStore();
+
 const player = ref(null);
 const pointsToWork = ref([]);
 const attendances = ref([]);
 const campAttendances = ref([]);
 
-onMounted(async () => {
-  const playerId = auth.user.playerId;
+async function load() {
+  const playerId = route.params.id;
   const [p, pts, att, campAtt] = await Promise.all([
     api.get(`/players/${playerId}`),
     api.get(`/players/${playerId}/points-to-work`),
@@ -22,11 +26,22 @@ onMounted(async () => {
   pointsToWork.value = pts.data.pointsToWork;
   attendances.value = att.data.attendances;
   campAttendances.value = campAtt.data.attendances;
-});
+}
+
+onMounted(load);
+watch(() => route.params.id, load);
 </script>
 
 <template>
   <AppLayout title="Mon espace joueur">
+    <button
+      v-if="auth.user.playerIds.length > 1"
+      class="text-sm text-sky-600 hover:underline mb-3"
+      @click="router.push('/player')"
+    >
+      ← changer de joueur
+    </button>
+
     <div v-if="player" class="space-y-4">
       <div class="bg-white rounded-xl shadow-sm p-4">
         <p class="text-lg font-medium">{{ player.firstName }} {{ player.lastName }}</p>
