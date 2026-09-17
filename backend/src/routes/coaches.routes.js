@@ -22,8 +22,15 @@ router.post("/", requireRole("ADMIN"), async (req, res) => {
   if (!firstName || !lastName) {
     return res.status(400).json({ error: "firstName et lastName sont requis." });
   }
-  const coach = await prisma.coach.create({ data: { firstName, lastName, email, phone } });
-  res.status(201).json({ coach });
+  try {
+    const coach = await prisma.coach.create({ data: { firstName, lastName, email, phone } });
+    res.status(201).json({ coach });
+  } catch (err) {
+    if (err.code === "P2002") {
+      return res.status(409).json({ error: "Un entraineur existe déjà avec cet email." });
+    }
+    throw err;
+  }
 });
 
 router.put("/:id", requireRole("ADMIN"), async (req, res) => {
@@ -39,7 +46,10 @@ router.put("/:id", requireRole("ADMIN"), async (req, res) => {
       },
     });
     res.json({ coach });
-  } catch {
+  } catch (err) {
+    if (err.code === "P2002") {
+      return res.status(409).json({ error: "Un entraineur existe déjà avec cet email." });
+    }
     res.status(404).json({ error: "Entraineur introuvable." });
   }
 });

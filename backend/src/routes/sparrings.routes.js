@@ -22,17 +22,24 @@ router.post("/", requireRole("ADMIN", "COACH"), async (req, res) => {
   if (!firstName || !lastName) {
     return res.status(400).json({ error: "firstName et lastName sont requis." });
   }
-  const sparring = await prisma.sparring.create({
-    data: {
-      firstName,
-      lastName,
-      ranking,
-      isClubMember: !!isClubMember,
-      playerId: isClubMember ? playerId ?? null : null,
-      externalClub: isClubMember ? null : externalClub ?? null,
-    },
-  });
-  res.status(201).json({ sparring });
+  try {
+    const sparring = await prisma.sparring.create({
+      data: {
+        firstName,
+        lastName,
+        ranking,
+        isClubMember: !!isClubMember,
+        playerId: isClubMember ? playerId ?? null : null,
+        externalClub: isClubMember ? null : externalClub ?? null,
+      },
+    });
+    res.status(201).json({ sparring });
+  } catch (err) {
+    if (err.code === "P2002") {
+      return res.status(409).json({ error: "Ce joueur du club est déjà enregistré comme sparring." });
+    }
+    throw err;
+  }
 });
 
 router.put("/:id", requireRole("ADMIN", "COACH"), async (req, res) => {
@@ -50,7 +57,10 @@ router.put("/:id", requireRole("ADMIN", "COACH"), async (req, res) => {
       },
     });
     res.json({ sparring });
-  } catch {
+  } catch (err) {
+    if (err.code === "P2002") {
+      return res.status(409).json({ error: "Ce joueur du club est déjà enregistré comme sparring." });
+    }
     res.status(404).json({ error: "Sparring introuvable." });
   }
 });
