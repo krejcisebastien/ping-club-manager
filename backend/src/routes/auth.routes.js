@@ -6,19 +6,6 @@ import { requireAuth, requireRole } from "../middleware/auth.js";
 
 const router = Router();
 
-const IS_PRODUCTION = process.env.NODE_ENV === "production";
-
-// En production, frontend et backend vivent sur des sous-domaines onrender.com
-// distincts (des "sites" différents au sens des cookies) : il faut SameSite=None
-// (qui impose Secure) pour que le cookie de session suive les requêtes cross-site.
-// En local, frontend/backend partagent le même site (localhost), donc "lax" suffit.
-const COOKIE_OPTIONS = {
-  httpOnly: true,
-  sameSite: IS_PRODUCTION ? "none" : "lax",
-  secure: IS_PRODUCTION,
-  maxAge: 8 * 60 * 60 * 1000,
-};
-
 router.post("/login", async (req, res) => {
   const { email, password } = req.body ?? {};
   if (!email || !password) {
@@ -43,13 +30,7 @@ router.post("/login", async (req, res) => {
     coachId: user.coachId,
   };
   const token = signToken(payload);
-  res.cookie("token", token, COOKIE_OPTIONS);
-  res.json({ user: payload });
-});
-
-router.post("/logout", (req, res) => {
-  res.clearCookie("token", COOKIE_OPTIONS);
-  res.status(204).end();
+  res.json({ user: payload, token });
 });
 
 router.get("/me", requireAuth, (req, res) => {

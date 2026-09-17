@@ -1,6 +1,5 @@
 import express from "express";
 import cors from "cors";
-import cookieParser from "cookie-parser";
 import apiRouter from "./routes/index.js";
 
 export function createApp() {
@@ -9,11 +8,9 @@ export function createApp() {
   app.use(
     cors({
       origin: process.env.CORS_ORIGIN || "http://localhost:5173",
-      credentials: true,
     })
   );
   app.use(express.json());
-  app.use(cookieParser());
 
   app.get("/health", (req, res) => res.json({ status: "ok" }));
   app.use("/api", apiRouter);
