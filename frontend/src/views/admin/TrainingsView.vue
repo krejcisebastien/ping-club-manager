@@ -72,7 +72,7 @@ async function onCreateTraining() {
       </select>
     </div>
 
-    <div class="bg-white rounded-xl shadow-sm p-4 mb-4">
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 mb-4">
       <p class="text-sm font-medium text-slate-600 mb-3">Liste</p>
       <ul class="divide-y divide-slate-100">
         <li
@@ -90,7 +90,7 @@ async function onCreateTraining() {
       </ul>
     </div>
 
-    <div class="bg-white rounded-xl shadow-sm p-4">
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
       <p class="text-sm font-medium text-slate-600 mb-3">Nouvel entrainement</p>
       <form class="grid gap-2 sm:grid-cols-2" @submit.prevent="onCreateTraining">
         <input v-model="newTraining.name" placeholder="Nom" required class="rounded-lg border border-slate-300 px-2 py-1.5" />

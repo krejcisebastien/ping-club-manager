@@ -78,7 +78,7 @@ async function onRemoveExercise(exerciseId) {
     <Button label="Retour" icon="pi pi-arrow-left" text class="mb-3 -ml-2" @click="router.back()" />
 
     <div v-if="plan" class="space-y-4">
-      <div class="bg-white rounded-xl shadow-sm p-4">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
         <form class="grid gap-3 sm:grid-cols-2" @submit.prevent="onSaveInfo">
           <div class="sm:col-span-2">
             <label class="text-xs text-slate-500 block mb-1">Titre</label>
@@ -100,7 +100,7 @@ async function onRemoveExercise(exerciseId) {
         </form>
       </div>
 
-      <div class="bg-white rounded-xl shadow-sm p-4">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
         <p class="text-sm font-medium text-slate-600 mb-3">Exercices du plan</p>
         <ul class="divide-y divide-slate-100 mb-3">
           <li v-for="link in plan.exercises" :key="link.id" class="py-2 flex items-center justify-between text-sm">

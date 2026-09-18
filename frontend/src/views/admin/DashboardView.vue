@@ -90,15 +90,15 @@ function formatDate(d) {
 <template>
   <AppLayout title="Espace administrateur" :nav-links="navLinks">
     <div class="grid gap-4 sm:grid-cols-3 mb-6">
-      <div class="bg-white rounded-xl shadow-sm p-4">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
         <p class="text-sm text-slate-500">Saisons</p>
         <p class="text-2xl font-semibold">{{ seasons.length }}</p>
       </div>
-      <RouterLink to="/admin/players" class="bg-white rounded-xl shadow-sm p-4 hover:ring-1 hover:ring-sky-300">
+      <RouterLink to="/admin/players" class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 hover:ring-1 hover:ring-sky-300">
         <p class="text-sm text-slate-500">Joueurs</p>
         <p class="text-2xl font-semibold">{{ players.length }}</p>
       </RouterLink>
-      <RouterLink to="/admin/coaches" class="bg-white rounded-xl shadow-sm p-4 hover:ring-1 hover:ring-sky-300">
+      <RouterLink to="/admin/coaches" class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 hover:ring-1 hover:ring-sky-300">
         <p class="text-sm text-slate-500">Entraineurs</p>
         <p class="text-2xl font-semibold">{{ coaches.length }}</p>
       </RouterLink>
@@ -109,7 +109,7 @@ function formatDate(d) {
       <Button label="Nouvelle saison" icon="pi pi-plus" @click="openCreate" />
     </div>
 
-    <DataTable :value="seasons" :loading="loading" class="bg-white rounded-xl shadow-sm overflow-hidden" striped-rows>
+    <DataTable :value="seasons" :loading="loading" class="bg-white rounded-xl shadow border border-slate-200 overflow-hidden" striped-rows>
       <template #empty>
         <p class="text-slate-400 text-sm py-4">Aucune saison créée.</p>
       </template>

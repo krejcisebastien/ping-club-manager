@@ -109,7 +109,7 @@ function onDelete(sparring) {
       <Button label="Nouveau sparring" icon="pi pi-plus" @click="openCreate" />
     </div>
 
-    <DataTable :value="sparrings" :loading="loading" class="bg-white rounded-xl shadow-sm overflow-hidden" striped-rows>
+    <DataTable :value="sparrings" :loading="loading" class="bg-white rounded-xl shadow border border-slate-200 overflow-hidden" striped-rows>
       <template #empty>
         <p class="text-slate-400 text-sm py-4">Aucun sparring.</p>
       </template>

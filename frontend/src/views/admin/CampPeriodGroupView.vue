@@ -79,7 +79,7 @@ async function onRemovePlayer(playerId) {
       </div>
 
       <div class="grid gap-4 md:grid-cols-2">
-        <div class="bg-white rounded-xl shadow-sm p-4">
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
           <p class="text-sm font-medium text-slate-600 mb-3">Entraineurs</p>
           <ul class="divide-y divide-slate-100 mb-3">
             <li v-for="c in periodGroup.coaches" :key="c.id" class="py-2 flex items-center justify-between">
@@ -99,7 +99,7 @@ async function onRemovePlayer(playerId) {
           </div>
         </div>
 
-        <div class="bg-white rounded-xl shadow-sm p-4">
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
           <p class="text-sm font-medium text-slate-600 mb-3">Joueurs inscrits</p>
           <ul class="divide-y divide-slate-100 mb-3">
             <li v-for="p in periodGroup.players" :key="p.id" class="py-2 flex items-center justify-between">

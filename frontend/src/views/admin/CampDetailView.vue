@@ -132,7 +132,7 @@ async function onRemovePeriodGroup(periodGroupId) {
 <template>
   <AppLayout :title="camp ? `Stage — ${camp.name}` : 'Stage'" :nav-links="navLinks">
     <div v-if="camp" class="space-y-4">
-      <div class="bg-white rounded-xl shadow-sm p-4">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
         <p class="text-sm font-medium text-slate-600 mb-3">Informations</p>
         <form class="grid gap-2 sm:grid-cols-2" @submit.prevent="onSaveInfo">
           <input v-model="editForm.name" placeholder="Nom" required class="rounded-lg border border-slate-300 px-2 py-1.5" />
@@ -145,7 +145,7 @@ async function onRemovePeriodGroup(periodGroupId) {
         </form>
       </div>
 
-      <div class="bg-white rounded-xl shadow-sm p-4">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
         <p class="text-sm font-medium text-slate-600 mb-3">Groupes du stage (initiation, perfectionnement...)</p>
         <ul class="flex flex-wrap gap-2 mb-3">
           <li v-for="g in camp.groups" :key="g.id" class="flex items-center gap-1 bg-slate-100 rounded-full px-3 py-1 text-sm">
@@ -170,7 +170,7 @@ async function onRemovePeriodGroup(periodGroupId) {
         </div>
       </div>
 
-      <div class="bg-white rounded-xl shadow-sm p-4">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
         <p class="text-sm font-medium text-slate-600 mb-3">Journées</p>
         <ul class="divide-y divide-slate-100">
           <li v-for="day in camp.days" :key="day.id" class="py-2">

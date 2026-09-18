@@ -65,7 +65,7 @@ watch(selectedTrainingId, loadOccurrences);
       </div>
     </div>
 
-    <div class="bg-white rounded-xl shadow-sm p-4">
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
       <p class="text-sm font-medium text-slate-600 mb-3">Séances</p>
       <ul class="divide-y divide-slate-100">
         <li

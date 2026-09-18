@@ -113,7 +113,7 @@ async function onUnassign(assignmentId) {
 <template>
   <AppLayout :title="training ? `Entrainement — ${training.name}` : 'Entrainement'" :nav-links="navLinks">
     <div v-if="training" class="space-y-4">
-      <div class="bg-white rounded-xl shadow-sm p-4">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
         <p class="text-sm font-medium text-slate-600 mb-3">Informations</p>
         <form class="grid gap-2 sm:grid-cols-2" @submit.prevent="onSaveInfo">
           <input v-model="editForm.name" placeholder="Nom" required class="rounded-lg border border-slate-300 px-2 py-1.5" />
@@ -133,7 +133,7 @@ async function onUnassign(assignmentId) {
         </form>
       </div>
 
-      <div class="bg-white rounded-xl shadow-sm p-4">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
         <p class="text-sm font-medium text-slate-600 mb-3">Générer les séances de la période</p>
         <form class="grid gap-2 sm:grid-cols-3 sm:items-end" @submit.prevent="onGenerate">
           <div>
@@ -152,7 +152,7 @@ async function onUnassign(assignmentId) {
         <p v-if="error" class="text-sm text-red-600 mt-2">{{ error }}</p>
       </div>
 
-      <div class="bg-white rounded-xl shadow-sm p-4">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
         <p class="text-sm font-medium text-slate-600 mb-3">Séances</p>
         <ul class="divide-y divide-slate-100">
           <li v-for="o in occurrences" :key="o.id" class="py-2">

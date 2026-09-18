@@ -43,10 +43,10 @@ watch(() => route.params.id, load);
     </button>
 
     <div v-if="player" class="space-y-4">
-      <div class="bg-white rounded-xl shadow-sm p-4">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
         <p class="text-lg font-medium">{{ player.firstName }} {{ player.lastName }}</p>
       </div>
-      <div class="bg-white rounded-xl shadow-sm p-4">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
         <p class="text-sm text-slate-500 mb-2">Points à travailler</p>
         <ul class="divide-y divide-slate-100">
           <li v-for="pt in pointsToWork" :key="pt.id" class="py-2 text-slate-700">
@@ -56,7 +56,7 @@ watch(() => route.params.id, load);
           <li v-if="!pointsToWork.length" class="py-2 text-slate-400 text-sm">Aucun point enregistré.</li>
         </ul>
       </div>
-      <div class="bg-white rounded-xl shadow-sm p-4">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
         <p class="text-sm text-slate-500 mb-2">Participation aux entrainements</p>
         <ul class="divide-y divide-slate-100">
           <li v-for="a in attendances" :key="a.id" class="py-2 flex items-center justify-between text-slate-700">
@@ -71,7 +71,7 @@ watch(() => route.params.id, load);
           <li v-if="!attendances.length" class="py-2 text-slate-400 text-sm">Aucune présence enregistrée.</li>
         </ul>
       </div>
-      <div class="bg-white rounded-xl shadow-sm p-4">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
         <p class="text-sm text-slate-500 mb-2">Participation aux stages</p>
         <ul class="divide-y divide-slate-100">
           <li v-for="a in campAttendances" :key="a.id" class="py-2 flex items-center justify-between text-slate-700">

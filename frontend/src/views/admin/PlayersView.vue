@@ -87,7 +87,7 @@ function formatDate(d) {
       <Button label="Nouveau joueur" icon="pi pi-plus" @click="openCreate" />
     </div>
 
-    <DataTable :value="players" :loading="loading" class="bg-white rounded-xl shadow-sm overflow-hidden" striped-rows @row-click="router.push(`/admin/players/${$event.data.id}`)">
+    <DataTable :value="players" :loading="loading" class="bg-white rounded-xl shadow border border-slate-200 overflow-hidden" striped-rows @row-click="router.push(`/admin/players/${$event.data.id}`)">
       <template #empty>
         <p class="text-slate-400 text-sm py-4">Aucun joueur.</p>
       </template>

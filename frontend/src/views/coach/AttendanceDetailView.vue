@@ -38,7 +38,7 @@ async function onSave() {
   <AppLayout title="Feuille de présence" :nav-links="navLinks">
     <button class="text-sm text-sky-600 hover:underline mb-3" @click="router.back()">← retour</button>
 
-    <div class="bg-white rounded-xl shadow-sm p-4">
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
       <ul class="divide-y divide-slate-100 mb-4">
         <li v-for="row in attendance" :key="row.playerId" class="py-2 flex items-center justify-between gap-3">
           <label class="flex items-center gap-2 flex-1">

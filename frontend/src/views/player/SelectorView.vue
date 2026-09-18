@@ -23,7 +23,7 @@ onMounted(async () => {
 
 <template>
   <AppLayout title="Mon espace joueur">
-    <div v-if="!loading" class="bg-white rounded-xl shadow-sm p-4">
+    <div v-if="!loading" class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
       <p class="text-sm text-slate-500 mb-3">Choisis un joueur</p>
       <ul class="divide-y divide-slate-100">
         <li

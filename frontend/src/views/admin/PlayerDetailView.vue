@@ -144,7 +144,7 @@ function pointStatusSeverity(status) {
     <Button label="Retour" icon="pi pi-arrow-left" text class="mb-3 -ml-2" @click="router.push('/admin/players')" />
 
     <div v-if="player" class="space-y-4">
-      <div class="bg-white rounded-xl shadow-sm p-4">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
         <p class="text-sm font-medium text-slate-600 mb-3">Signalétique</p>
         <form class="grid gap-3 sm:grid-cols-2" @submit.prevent="onSaveInfo">
           <div>
@@ -167,7 +167,7 @@ function pointStatusSeverity(status) {
         </form>
       </div>
 
-      <div class="bg-white rounded-xl shadow-sm p-4">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
         <p class="text-sm font-medium text-slate-600 mb-3">Classement</p>
         <ul class="divide-y divide-slate-100 mb-3 text-sm">
           <li v-for="r in rankings" :key="r.id" class="py-1.5 flex items-center justify-between">
@@ -183,7 +183,7 @@ function pointStatusSeverity(status) {
         </div>
       </div>
 
-      <div class="bg-white rounded-xl shadow-sm p-4">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
         <p class="text-sm font-medium text-slate-600 mb-3">Matériel</p>
         <ul class="divide-y divide-slate-100 mb-3 text-sm">
           <li v-for="e in equipment" :key="e.id" class="py-1.5 flex items-center justify-between">
@@ -201,7 +201,7 @@ function pointStatusSeverity(status) {
         </div>
       </div>
 
-      <div class="bg-white rounded-xl shadow-sm p-4">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
         <p class="text-sm font-medium text-slate-600 mb-3">Points forts / défauts</p>
         <ul class="divide-y divide-slate-100 mb-3 text-sm">
           <li v-for="t in traits" :key="t.id" class="py-1.5 flex items-center gap-2">
@@ -217,7 +217,7 @@ function pointStatusSeverity(status) {
         </div>
       </div>
 
-      <div class="bg-white rounded-xl shadow-sm p-4">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
         <p class="text-sm font-medium text-slate-600 mb-3">Points à travailler</p>
         <ul class="divide-y divide-slate-100 mb-3 text-sm">
           <li v-for="pt in pointsToWork" :key="pt.id" class="py-1.5 flex items-center justify-between gap-2">
@@ -241,7 +241,7 @@ function pointStatusSeverity(status) {
         </div>
       </div>
 
-      <div class="bg-white rounded-xl shadow-sm p-4">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
         <p class="text-sm font-medium text-slate-600 mb-3">Notes d'évolution</p>
         <ul class="divide-y divide-slate-100 mb-3 text-sm">
           <li v-for="n in evolutionNotes" :key="n.id" class="py-1.5">

@@ -122,7 +122,7 @@ async function onRemovePlayer(playerId) {
       <Dropdown v-model="selectedSeasonId" :options="seasons" option-label="name" option-value="id" class="w-full" />
     </div>
 
-    <div class="grid gap-4 lg:grid-cols-2">
+    <div class="grid gap-4 lg:grid-cols-[minmax(0,1fr)_22rem]">
       <div>
         <div class="flex items-center justify-between mb-3">
           <h2 class="text-sm font-medium text-slate-600">{{ groups.length }} groupe(s)</h2>
@@ -134,7 +134,7 @@ async function onRemovePlayer(playerId) {
           v-model:selection="selectedGroup"
           selection-mode="single"
           data-key="id"
-          class="bg-white rounded-xl shadow-sm overflow-hidden"
+          class="bg-white rounded-xl shadow border border-slate-200 overflow-hidden"
           striped-rows
           @row-select="onRowSelect"
         >
@@ -153,7 +153,7 @@ async function onRemovePlayer(playerId) {
 
       <div>
         <h2 class="text-sm font-medium text-slate-600 mb-3">Composition</h2>
-        <div class="bg-white rounded-xl shadow-sm p-4">
+        <div class="bg-white rounded-xl shadow border border-slate-200 p-4">
           <template v-if="selectedGroup">
             <p class="text-sm font-medium text-slate-700 mb-3">{{ selectedGroup.name }}</p>
             <ul class="divide-y divide-slate-100 mb-4">

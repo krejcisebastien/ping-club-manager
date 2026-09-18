@@ -16,7 +16,7 @@ onMounted(async () => {
 
 <template>
   <AppLayout title="Espace entraineur" :nav-links="navLinks">
-    <div class="bg-white rounded-xl shadow-sm p-4">
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
       <p class="text-sm text-slate-500 mb-2">Joueurs du club</p>
       <ul class="divide-y divide-slate-100">
         <li v-for="p in players" :key="p.id" class="py-2 text-slate-700">
