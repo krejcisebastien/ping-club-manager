@@ -1,6 +1,8 @@
 <script setup>
 import { ref, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
+import Dropdown from "primevue/dropdown";
+import Tag from "primevue/tag";
 import AppLayout from "../../components/AppLayout.vue";
 import { api } from "../../lib/api.js";
 import { useNavLinks } from "../../composables/useNavLinks.js";
@@ -11,7 +13,7 @@ const router = useRouter();
 const seasons = ref([]);
 const selectedSeasonId = ref("");
 const trainings = ref([]);
-const selectedTrainingId = ref("");
+const selectedTrainingId = ref(null);
 const occurrences = ref([]);
 
 async function loadSeasons() {
@@ -25,7 +27,7 @@ async function loadSeasons() {
 async function loadTrainings() {
   trainings.value = [];
   occurrences.value = [];
-  selectedTrainingId.value = "";
+  selectedTrainingId.value = null;
   if (!selectedSeasonId.value) return;
   const { data } = await api.get("/trainings", { params: { seasonId: selectedSeasonId.value } });
   trainings.value = data.trainings;
@@ -45,23 +47,29 @@ onMounted(async () => {
 
 watch(selectedSeasonId, loadTrainings);
 watch(selectedTrainingId, loadOccurrences);
+
+function statusSeverity(status) {
+  return status === "CANCELLED" ? "danger" : "info";
+}
 </script>
 
 <template>
   <AppLayout title="Prise de présence" :nav-links="navLinks">
     <div class="grid gap-3 sm:grid-cols-2 mb-4">
       <div>
-        <label class="text-xs text-slate-500">Saison</label>
-        <select v-model="selectedSeasonId" class="block w-full rounded-lg border border-slate-300 px-2 py-1.5">
-          <option v-for="s in seasons" :key="s.id" :value="s.id">{{ s.name }}</option>
-        </select>
+        <label class="text-xs text-slate-500 block mb-1">Saison</label>
+        <Dropdown v-model="selectedSeasonId" :options="seasons" option-label="name" option-value="id" class="w-full" />
       </div>
       <div>
-        <label class="text-xs text-slate-500">Entrainement</label>
-        <select v-model="selectedTrainingId" class="block w-full rounded-lg border border-slate-300 px-2 py-1.5">
-          <option value="" disabled>Choisir…</option>
-          <option v-for="t in trainings" :key="t.id" :value="t.id">{{ t.name }} — {{ t.group?.name }}</option>
-        </select>
+        <label class="text-xs text-slate-500 block mb-1">Entrainement</label>
+        <Dropdown
+          v-model="selectedTrainingId"
+          :options="trainings.map((t) => ({ label: `${t.name} — ${t.group?.name}`, value: t.id }))"
+          option-label="label"
+          option-value="value"
+          placeholder="Choisir…"
+          class="w-full"
+        />
       </div>
     </div>
 
@@ -71,11 +79,14 @@ watch(selectedTrainingId, loadOccurrences);
         <li
           v-for="o in occurrences"
           :key="o.id"
-          class="py-2 flex items-center justify-between cursor-pointer hover:text-sky-600"
+          class="py-3 flex items-center justify-between cursor-pointer hover:text-sky-600"
           @click="router.push(`/coach/attendance/${o.id}`)"
         >
           <span>{{ new Date(o.date).toLocaleDateString("fr-FR") }} · {{ o.startTime }}–{{ o.endTime }}</span>
-          <span class="text-xs text-slate-400">{{ o.status }}</span>
+          <div class="flex items-center gap-2">
+            <Tag :severity="statusSeverity(o.status)" :value="o.status" />
+            <i class="pi pi-chevron-right text-xs text-slate-400"></i>
+          </div>
         </li>
         <li v-if="!occurrences.length" class="py-2 text-slate-400 text-sm">Sélectionne un entrainement.</li>
       </ul>

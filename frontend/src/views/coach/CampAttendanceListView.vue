@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted, watch, computed } from "vue";
 import { useRouter } from "vue-router";
+import Dropdown from "primevue/dropdown";
 import AppLayout from "../../components/AppLayout.vue";
 import { api } from "../../lib/api.js";
 import { useNavLinks } from "../../composables/useNavLinks.js";
@@ -11,7 +12,7 @@ const router = useRouter();
 const seasons = ref([]);
 const selectedSeasonId = ref("");
 const camps = ref([]);
-const selectedCampId = ref("");
+const selectedCampId = ref(null);
 const camp = ref(null);
 
 const periodGroups = computed(() => {
@@ -20,7 +21,8 @@ const periodGroups = computed(() => {
     day.periods.flatMap((period) =>
       period.groups.map((pg) => ({
         id: pg.id,
-        label: `${new Date(day.date).toLocaleDateString("fr-FR")} · ${period.label} · ${pg.group.name}`,
+        date: new Date(day.date).toLocaleDateString("fr-FR"),
+        label: `${period.label} · ${pg.group.name}`,
       }))
     )
   );
@@ -36,7 +38,7 @@ async function loadSeasons() {
 
 async function loadCamps() {
   camps.value = [];
-  selectedCampId.value = "";
+  selectedCampId.value = null;
   camp.value = null;
   if (!selectedSeasonId.value) return;
   const { data } = await api.get("/camps", { params: { seasonId: selectedSeasonId.value } });
@@ -63,17 +65,12 @@ watch(selectedCampId, loadCamp);
   <AppLayout title="Présences — stages" :nav-links="navLinks">
     <div class="grid gap-3 sm:grid-cols-2 mb-4">
       <div>
-        <label class="text-xs text-slate-500">Saison</label>
-        <select v-model="selectedSeasonId" class="block w-full rounded-lg border border-slate-300 px-2 py-1.5">
-          <option v-for="s in seasons" :key="s.id" :value="s.id">{{ s.name }}</option>
-        </select>
+        <label class="text-xs text-slate-500 block mb-1">Saison</label>
+        <Dropdown v-model="selectedSeasonId" :options="seasons" option-label="name" option-value="id" class="w-full" />
       </div>
       <div>
-        <label class="text-xs text-slate-500">Stage</label>
-        <select v-model="selectedCampId" class="block w-full rounded-lg border border-slate-300 px-2 py-1.5">
-          <option value="" disabled>Choisir…</option>
-          <option v-for="c in camps" :key="c.id" :value="c.id">{{ c.name }}</option>
-        </select>
+        <label class="text-xs text-slate-500 block mb-1">Stage</label>
+        <Dropdown v-model="selectedCampId" :options="camps" option-label="name" option-value="id" placeholder="Choisir…" class="w-full" />
       </div>
     </div>
 
@@ -83,10 +80,11 @@ watch(selectedCampId, loadCamp);
         <li
           v-for="pg in periodGroups"
           :key="pg.id"
-          class="py-2 cursor-pointer hover:text-sky-600"
+          class="py-3 flex items-center justify-between cursor-pointer hover:text-sky-600"
           @click="router.push(`/coach/camp-attendance/${pg.id}`)"
         >
-          {{ pg.label }}
+          <span>{{ pg.date }} · {{ pg.label }}</span>
+          <i class="pi pi-chevron-right text-xs text-slate-400"></i>
         </li>
         <li v-if="!periodGroups.length" class="py-2 text-slate-400 text-sm">Sélectionne un stage.</li>
       </ul>
