@@ -3,6 +3,7 @@ import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "../stores/auth.js";
 import { CLUB_NAME } from "../lib/config.js";
+import { roleHome } from "../lib/roles.js";
 
 const email = ref("");
 const password = ref("");
@@ -12,18 +13,12 @@ const loading = ref(false);
 const auth = useAuthStore();
 const router = useRouter();
 
-const roleHome = {
-  ADMIN: "/admin",
-  COACH: "/coach",
-  PLAYER: "/player",
-};
-
 async function onSubmit() {
   error.value = "";
   loading.value = true;
   try {
-    const user = await auth.login(email.value, password.value);
-    router.push(roleHome[user.role] ?? "/");
+    await auth.login(email.value, password.value);
+    router.push(roleHome(auth.activeRole));
   } catch (err) {
     error.value = err.response?.data?.error ?? "Erreur de connexion.";
   } finally {

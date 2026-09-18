@@ -19,7 +19,7 @@ const navLinks = useNavLinks();
 const toast = useToast();
 const confirm = useConfirm();
 
-const emptyForm = () => ({ email: "", password: "", role: "PLAYER", playerIds: [], coachId: null });
+const emptyForm = () => ({ email: "", password: "", roles: [], playerIds: [], coachId: null });
 const roleOptions = [
   { label: "Administrateur", value: "ADMIN" },
   { label: "Entraineur", value: "COACH" },
@@ -35,9 +35,9 @@ const createDialogVisible = ref(false);
 const form = ref(emptyForm());
 const saving = ref(false);
 
-const playersDialogVisible = ref(false);
+const editDialogVisible = ref(false);
 const editingUser = ref(null);
-const editPlayerIds = ref([]);
+const editForm = ref(emptyForm());
 
 async function loadUsers() {
   loading.value = true;
@@ -102,19 +102,31 @@ function onDelete(user) {
   });
 }
 
-function openPlayersDialog(user) {
+function openEdit(user) {
   editingUser.value = user;
-  editPlayerIds.value = user.players.map((p) => p.id);
-  playersDialogVisible.value = true;
+  editForm.value = {
+    email: user.email,
+    password: "",
+    roles: [...user.roles],
+    playerIds: user.players.map((p) => p.id),
+    coachId: user.coach?.id ?? null,
+  };
+  editDialogVisible.value = true;
 }
 
-async function onSavePlayers() {
+async function onSaveEdit() {
   saving.value = true;
   try {
-    await api.put(`/auth/users/${editingUser.value.id}`, { playerIds: editPlayerIds.value });
-    playersDialogVisible.value = false;
-    toast.add({ severity: "success", summary: "Joueurs rattachés mis à jour", life: 3000 });
+    await api.put(`/auth/users/${editingUser.value.id}`, {
+      roles: editForm.value.roles,
+      playerIds: editForm.value.playerIds,
+      coachId: editForm.value.coachId,
+    });
+    editDialogVisible.value = false;
+    toast.add({ severity: "success", summary: "Compte mis à jour", life: 3000 });
     await loadUsers();
+  } catch (err) {
+    toast.add({ severity: "error", summary: "Erreur", detail: err.response?.data?.error ?? "Une erreur est survenue.", life: 4000 });
   } finally {
     saving.value = false;
   }
@@ -143,21 +155,25 @@ function roleSeverity(role) {
         <p class="text-slate-400 text-sm py-4">Aucun compte.</p>
       </template>
       <Column field="email" header="Email" sortable />
-      <Column header="Rôle">
-        <template #body="{ data }"><Tag :severity="roleSeverity(data.role)" :value="data.role" /></template>
+      <Column header="Rôle(s)">
+        <template #body="{ data }">
+          <div class="flex flex-wrap gap-1">
+            <Tag v-for="r in data.roles" :key="r" :severity="roleSeverity(r)" :value="r" />
+          </div>
+        </template>
       </Column>
       <Column header="Rattaché à">
         <template #body="{ data }">
           <span class="text-sm text-slate-600">{{ linkedName(data) }}</span>
-          <Button v-if="data.role === 'PLAYER'" icon="pi pi-pencil" severity="secondary" text rounded size="small" aria-label="Modifier les joueurs" @click="openPlayersDialog(data)" />
         </template>
       </Column>
       <Column header="Statut">
         <template #body="{ data }"><Tag :severity="data.isActive ? 'success' : 'secondary'" :value="data.isActive ? 'actif' : 'inactif'" /></template>
       </Column>
-      <Column header="" style="width: 9rem">
+      <Column header="" style="width: 11rem">
         <template #body="{ data }">
           <div class="flex gap-1 justify-end">
+            <Button icon="pi pi-pencil" severity="secondary" text rounded aria-label="Modifier" @click="openEdit(data)" />
             <Button
               :icon="data.isActive ? 'pi pi-ban' : 'pi pi-check'"
               severity="secondary"
@@ -183,15 +199,16 @@ function roleSeverity(role) {
           <Password v-model="form.password" required toggle-mask :feedback="false" class="w-full" input-class="w-full" />
         </div>
         <div>
-          <label class="text-xs text-slate-500 block mb-1">Rôle</label>
-          <Dropdown v-model="form.role" :options="roleOptions" option-label="label" option-value="value" class="w-full" />
+          <label class="text-xs text-slate-500 block mb-1">Rôle(s)</label>
+          <MultiSelect v-model="form.roles" :options="roleOptions" option-label="label" option-value="value" placeholder="Choisir un ou plusieurs rôles…" class="w-full" display="chip" />
+          <p class="text-xs text-slate-400 mt-1">Un compte peut cumuler plusieurs rôles (ex. entraineur qui est aussi joueur).</p>
         </div>
-        <div v-if="form.role === 'PLAYER'">
+        <div v-if="form.roles.includes('PLAYER')">
           <label class="text-xs text-slate-500 block mb-1">Joueur(s) rattaché(s)</label>
           <MultiSelect v-model="form.playerIds" :options="playerOptions()" option-label="label" option-value="value" filter placeholder="Choisir un ou plusieurs joueurs…" class="w-full" display="chip" />
           <p class="text-xs text-slate-400 mt-1">Plusieurs joueurs = compte familial partagé.</p>
         </div>
-        <div v-if="form.role === 'COACH'">
+        <div v-if="form.roles.includes('COACH')">
           <label class="text-xs text-slate-500 block mb-1">Entraineur rattaché</label>
           <Dropdown v-model="form.coachId" :options="coachOptions()" option-label="label" option-value="value" placeholder="Choisir l'entraineur…" class="w-full" />
         </div>
@@ -202,12 +219,23 @@ function roleSeverity(role) {
       </form>
     </Dialog>
 
-    <Dialog v-model:visible="playersDialogVisible" header="Joueurs rattachés" modal style="width: 24rem" class="mx-4">
+    <Dialog v-model:visible="editDialogVisible" header="Modifier le compte" modal style="width: 28rem" class="mx-4">
       <div class="grid gap-3 pt-2">
-        <MultiSelect v-model="editPlayerIds" :options="playerOptions()" option-label="label" option-value="value" filter class="w-full" display="chip" />
+        <div>
+          <label class="text-xs text-slate-500 block mb-1">Rôle(s)</label>
+          <MultiSelect v-model="editForm.roles" :options="roleOptions" option-label="label" option-value="value" placeholder="Choisir un ou plusieurs rôles…" class="w-full" display="chip" />
+        </div>
+        <div v-if="editForm.roles.includes('PLAYER')">
+          <label class="text-xs text-slate-500 block mb-1">Joueur(s) rattaché(s)</label>
+          <MultiSelect v-model="editForm.playerIds" :options="playerOptions()" option-label="label" option-value="value" filter class="w-full" display="chip" />
+        </div>
+        <div v-if="editForm.roles.includes('COACH')">
+          <label class="text-xs text-slate-500 block mb-1">Entraineur rattaché</label>
+          <Dropdown v-model="editForm.coachId" :options="coachOptions()" option-label="label" option-value="value" placeholder="Choisir l'entraineur…" class="w-full" />
+        </div>
         <div class="flex justify-end gap-2 mt-2">
-          <Button type="button" label="Annuler" severity="secondary" outlined @click="playersDialogVisible = false" />
-          <Button label="Enregistrer" :loading="saving" @click="onSavePlayers" />
+          <Button type="button" label="Annuler" severity="secondary" outlined @click="editDialogVisible = false" />
+          <Button label="Enregistrer" :loading="saving" @click="onSaveEdit" />
         </div>
       </div>
     </Dialog>

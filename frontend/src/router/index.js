@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
 import { useAuthStore } from "../stores/auth.js";
+import { roleHome } from "../lib/roles.js";
 
 const routes = [
   { path: "/", redirect: "/login" },
@@ -155,12 +156,6 @@ const router = createRouter({
   routes,
 });
 
-const roleHome = {
-  ADMIN: "/admin",
-  COACH: "/coach",
-  PLAYER: "/player",
-};
-
 router.beforeEach(async (to) => {
   const auth = useAuthStore();
 
@@ -169,15 +164,15 @@ router.beforeEach(async (to) => {
   }
 
   if (to.name === "login") {
-    if (auth.isAuthenticated) return roleHome[auth.role] ?? "/login";
+    if (auth.isAuthenticated) return roleHome(auth.activeRole);
     return true;
   }
 
   if (!auth.isAuthenticated) return "/login";
 
   const allowedRoles = to.meta.roles;
-  if (allowedRoles && !allowedRoles.includes(auth.role)) {
-    return roleHome[auth.role] ?? "/login";
+  if (allowedRoles && !allowedRoles.some((r) => auth.roles.includes(r))) {
+    return roleHome(auth.activeRole);
   }
 
   return true;

@@ -6,6 +6,7 @@ import Button from "primevue/button";
 import Sidebar from "primevue/sidebar";
 import { useAuthStore } from "../stores/auth.js";
 import { CLUB_NAME, CLUB_ICON } from "../lib/config.js";
+import { ROLE_LABELS, roleHome } from "../lib/roles.js";
 
 defineProps({
   title: { type: String, required: true },
@@ -18,6 +19,13 @@ const drawerOpen = ref(false);
 
 function initials(email) {
   return (email || "?").slice(0, 2).toUpperCase();
+}
+
+function onSwitchRole(role) {
+  if (role === auth.activeRole) return;
+  auth.setActiveRole(role);
+  drawerOpen.value = false;
+  router.push(roleHome(role));
 }
 
 function onLogout() {
@@ -46,10 +54,28 @@ function onLogout() {
           {{ link.label }}
         </RouterLink>
       </nav>
-      <div class="border-t border-slate-200 p-3 flex items-center gap-2">
-        <Avatar :label="initials(auth.user?.email)" shape="circle" class="bg-sky-100 text-sky-700 shrink-0" />
-        <span class="text-sm text-slate-600 truncate flex-1">{{ auth.user?.email }}</span>
-        <Button icon="pi pi-sign-out" severity="secondary" text rounded aria-label="Déconnexion" @click="onLogout" />
+      <div class="border-t border-slate-200 p-3 space-y-2">
+        <div v-if="auth.roles.length > 1" class="flex gap-1">
+          <button
+            v-for="r in auth.roles"
+            :key="r"
+            type="button"
+            class="flex-1 text-xs px-1.5 py-1 rounded-md border transition-colors"
+            :class="
+              auth.activeRole === r
+                ? 'bg-sky-600 border-sky-600 text-white font-medium'
+                : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'
+            "
+            @click="onSwitchRole(r)"
+          >
+            {{ ROLE_LABELS[r] }}
+          </button>
+        </div>
+        <div class="flex items-center gap-2">
+          <Avatar :label="initials(auth.user?.email)" shape="circle" class="bg-sky-100 text-sky-700 shrink-0" />
+          <span class="text-sm text-slate-600 truncate flex-1">{{ auth.user?.email }}</span>
+          <Button icon="pi pi-sign-out" severity="secondary" text rounded aria-label="Déconnexion" @click="onLogout" />
+        </div>
       </div>
     </aside>
 
@@ -68,10 +94,28 @@ function onLogout() {
           {{ link.label }}
         </RouterLink>
       </nav>
-      <div class="flex items-center gap-2 px-2 pt-4 mt-4 border-t border-slate-200">
-        <Avatar :label="initials(auth.user?.email)" shape="circle" class="bg-sky-100 text-sky-700 shrink-0" />
-        <span class="text-sm text-slate-600 truncate flex-1">{{ auth.user?.email }}</span>
-        <Button icon="pi pi-sign-out" severity="secondary" text rounded aria-label="Déconnexion" @click="onLogout" />
+      <div class="px-2 pt-4 mt-4 border-t border-slate-200 space-y-2">
+        <div v-if="auth.roles.length > 1" class="flex gap-1">
+          <button
+            v-for="r in auth.roles"
+            :key="r"
+            type="button"
+            class="flex-1 text-xs px-1.5 py-1 rounded-md border transition-colors"
+            :class="
+              auth.activeRole === r
+                ? 'bg-sky-600 border-sky-600 text-white font-medium'
+                : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'
+            "
+            @click="onSwitchRole(r)"
+          >
+            {{ ROLE_LABELS[r] }}
+          </button>
+        </div>
+        <div class="flex items-center gap-2">
+          <Avatar :label="initials(auth.user?.email)" shape="circle" class="bg-sky-100 text-sky-700 shrink-0" />
+          <span class="text-sm text-slate-600 truncate flex-1">{{ auth.user?.email }}</span>
+          <Button icon="pi pi-sign-out" severity="secondary" text rounded aria-label="Déconnexion" @click="onLogout" />
+        </div>
       </div>
     </Sidebar>
 

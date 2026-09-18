@@ -28,7 +28,7 @@ router.post("/login", async (req, res) => {
   const payload = {
     sub: user.id,
     email: user.email,
-    role: user.role,
+    roles: user.roles,
     playerIds: user.players.map((p) => p.playerId),
     coachId: user.coachId,
   };
@@ -47,7 +47,7 @@ router.get("/users", requireAuth, requireRole("ADMIN"), async (req, res) => {
     select: {
       id: true,
       email: true,
-      role: true,
+      roles: true,
       isActive: true,
       createdAt: true,
       players: { select: { player: { select: { id: true, firstName: true, lastName: true } } } },
@@ -63,17 +63,17 @@ router.get("/users", requireAuth, requireRole("ADMIN"), async (req, res) => {
 // Création d'un compte utilisateur (admin uniquement) — lié à un ou plusieurs joueurs
 // (ex. compte familial) ou à un entraineur existant.
 router.post("/users", requireAuth, requireRole("ADMIN"), async (req, res) => {
-  const { email, password, role, playerIds, coachId } = req.body ?? {};
-  if (!email || !password || !role) {
-    return res.status(400).json({ error: "Email, mot de passe et rôle requis." });
+  const { email, password, roles, playerIds, coachId } = req.body ?? {};
+  if (!email || !password || !Array.isArray(roles) || !roles.length) {
+    return res.status(400).json({ error: "Email, mot de passe et au moins un rôle sont requis." });
   }
-  if (!["ADMIN", "COACH", "PLAYER"].includes(role)) {
+  if (roles.some((r) => !["ADMIN", "COACH", "PLAYER"].includes(r))) {
     return res.status(400).json({ error: "Rôle invalide." });
   }
-  if (role === "PLAYER" && !(Array.isArray(playerIds) && playerIds.length)) {
+  if (roles.includes("PLAYER") && !(Array.isArray(playerIds) && playerIds.length)) {
     return res.status(400).json({ error: "Au moins un joueur requis pour un compte joueur." });
   }
-  if (role === "COACH" && !coachId) {
+  if (roles.includes("COACH") && !coachId) {
     return res.status(400).json({ error: "coachId requis pour un compte entraineur." });
   }
 
@@ -83,17 +83,17 @@ router.post("/users", requireAuth, requireRole("ADMIN"), async (req, res) => {
       data: {
         email,
         passwordHash,
-        role,
-        coachId: role === "COACH" ? coachId : null,
+        roles,
+        coachId: roles.includes("COACH") ? coachId : null,
         players:
-          role === "PLAYER"
+          roles.includes("PLAYER")
             ? { create: playerIds.map((playerId) => ({ playerId })) }
             : undefined,
       },
       select: {
         id: true,
         email: true,
-        role: true,
+        roles: true,
         coachId: true,
         isActive: true,
         players: { select: { playerId: true } },
@@ -109,11 +109,27 @@ router.post("/users", requireAuth, requireRole("ADMIN"), async (req, res) => {
 });
 
 router.put("/users/:id", requireAuth, requireRole("ADMIN"), async (req, res) => {
-  const { isActive, password, playerIds } = req.body ?? {};
+  const { isActive, password, roles, playerIds, coachId } = req.body ?? {};
+  if (roles !== undefined) {
+    if (!Array.isArray(roles) || !roles.length || roles.some((r) => !["ADMIN", "COACH", "PLAYER"].includes(r))) {
+      return res.status(400).json({ error: "Au moins un rôle valide est requis." });
+    }
+    if (roles.includes("COACH") && !coachId) {
+      return res.status(400).json({ error: "coachId requis pour un compte entraineur." });
+    }
+    if (roles.includes("PLAYER") && !(Array.isArray(playerIds) && playerIds.length)) {
+      return res.status(400).json({ error: "Au moins un joueur requis pour un compte joueur." });
+    }
+  }
+
   try {
     const data = {};
     if (isActive !== undefined) data.isActive = isActive;
     if (password) data.passwordHash = await hashPassword(password);
+    if (roles !== undefined) {
+      data.roles = roles;
+      data.coachId = roles.includes("COACH") ? coachId : null;
+    }
 
     if (Array.isArray(playerIds)) {
       await prisma.userPlayer.deleteMany({ where: { userId: req.params.id } });
@@ -123,10 +139,13 @@ router.put("/users/:id", requireAuth, requireRole("ADMIN"), async (req, res) => 
     const user = await prisma.user.update({
       where: { id: req.params.id },
       data,
-      select: { id: true, email: true, role: true, isActive: true, players: { select: { playerId: true } } },
+      select: { id: true, email: true, roles: true, coachId: true, isActive: true, players: { select: { playerId: true } } },
     });
     res.json({ user: { ...user, playerIds: user.players.map((p) => p.playerId) } });
-  } catch {
+  } catch (err) {
+    if (err.code === "P2002") {
+      return res.status(409).json({ error: "Cet entraineur est déjà rattaché à un autre compte." });
+    }
     res.status(404).json({ error: "Compte introuvable." });
   }
 });

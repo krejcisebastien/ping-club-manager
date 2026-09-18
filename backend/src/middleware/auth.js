@@ -14,9 +14,11 @@ export function requireAuth(req, res, next) {
   }
 }
 
+// Un compte peut avoir plusieurs rôles (ex. ADMIN + COACH) : autorisé dès
+// qu'il possède au moins un des rôles requis par la route.
 export function requireRole(...roles) {
   return (req, res, next) => {
-    if (!req.user || !roles.includes(req.user.role)) {
+    if (!req.user || !roles.some((r) => req.user.roles?.includes(r))) {
       return res.status(403).json({ error: "Accès refusé." });
     }
     next();
@@ -27,8 +29,8 @@ export function requireRole(...roles) {
 // rattachés à son compte (compte familial : plusieurs joueurs possibles).
 export function requireSelfPlayerOrRole(playerIdParam, ...roles) {
   return (req, res, next) => {
-    if (roles.includes(req.user.role)) return next();
-    if (req.user.role === "PLAYER" && req.user.playerIds?.includes(req.params[playerIdParam])) {
+    if (roles.some((r) => req.user.roles?.includes(r))) return next();
+    if (req.user.roles?.includes("PLAYER") && req.user.playerIds?.includes(req.params[playerIdParam])) {
       return next();
     }
     return res.status(403).json({ error: "Accès refusé." });

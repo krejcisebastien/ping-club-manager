@@ -24,10 +24,15 @@ const COACH_LINKS = [
   { to: "/coach/training-plans", label: "Plans d'entrainement", icon: "pi pi-clipboard" },
 ];
 
-// Renvoie les liens de navigation adaptés au rôle réel de l'utilisateur connecté,
-// même sur les pages accessibles à la fois par l'admin et l'entraineur (ex. fiche joueur) —
-// pour ne jamais afficher de lien vers une page que l'utilisateur ne peut pas ouvrir.
+const PLAYER_LINKS = [{ to: "/player", label: "Mon espace joueur", icon: "pi pi-user" }];
+
+const LINKS_BY_ROLE = { ADMIN: ADMIN_LINKS, COACH: COACH_LINKS, PLAYER: PLAYER_LINKS };
+
+// Un compte peut cumuler plusieurs rôles (ADMIN + COACH + PLAYER), mais la
+// navigation n'affiche que le menu du rôle actif à un instant donné
+// (auth.activeRole), pour rester lisible — un bouton dans la zone de compte
+// permet de basculer d'un rôle à l'autre.
 export function useNavLinks() {
   const auth = useAuthStore();
-  return computed(() => (auth.role === "ADMIN" ? ADMIN_LINKS : COACH_LINKS));
+  return computed(() => LINKS_BY_ROLE[auth.activeRole] ?? []);
 }
