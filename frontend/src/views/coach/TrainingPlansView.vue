@@ -6,11 +6,11 @@ import Column from "primevue/column";
 import Dialog from "primevue/dialog";
 import Button from "primevue/button";
 import InputText from "primevue/inputtext";
-import Textarea from "primevue/textarea";
 import Calendar from "primevue/calendar";
 import Dropdown from "primevue/dropdown";
 import { useToast } from "primevue/usetoast";
 import AppLayout from "../../components/AppLayout.vue";
+import RichTextEditor from "../../components/RichTextEditor.vue";
 import { api } from "../../lib/api.js";
 import { toDateOnly } from "../../lib/date.js";
 import { useNavLinks } from "../../composables/useNavLinks.js";
@@ -107,7 +107,7 @@ function coachName(p) {
       </Column>
     </DataTable>
 
-    <Dialog v-model:visible="dialogVisible" header="Nouveau plan" modal style="width: 28rem" class="mx-4">
+    <Dialog v-model:visible="dialogVisible" header="Nouveau plan" modal style="width: 34rem" class="mx-4">
       <form class="grid gap-3 pt-2" @submit.prevent="onCreate">
         <div>
           <label class="text-xs text-slate-500 block mb-1">Titre</label>
@@ -125,7 +125,7 @@ function coachName(p) {
         </div>
         <div>
           <label class="text-xs text-slate-500 block mb-1">Description (optionnel)</label>
-          <Textarea v-model="form.description" rows="3" class="w-full" />
+          <RichTextEditor v-model="form.description" placeholder="Objectifs, déroulé de la semaine…" />
         </div>
         <div class="flex justify-end gap-2 mt-2">
           <Button type="button" label="Annuler" severity="secondary" outlined @click="dialogVisible = false" />

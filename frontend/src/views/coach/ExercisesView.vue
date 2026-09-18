@@ -5,12 +5,13 @@ import Column from "primevue/column";
 import Dialog from "primevue/dialog";
 import Button from "primevue/button";
 import InputText from "primevue/inputtext";
-import Textarea from "primevue/textarea";
 import Tag from "primevue/tag";
 import { useToast } from "primevue/usetoast";
 import { useConfirm } from "primevue/useconfirm";
 import AppLayout from "../../components/AppLayout.vue";
+import RichTextEditor from "../../components/RichTextEditor.vue";
 import { api } from "../../lib/api.js";
+import { stripHtml } from "../../lib/richtext.js";
 import { useNavLinks } from "../../composables/useNavLinks.js";
 
 const navLinks = useNavLinks();
@@ -99,8 +100,8 @@ function onDelete(ex) {
         <template #body="{ data }"><Tag v-if="data.category" severity="secondary" :value="data.category" /></template>
       </Column>
       <Column field="difficulty" header="Difficulté" />
-      <Column field="description" header="Description">
-        <template #body="{ data }"><span class="text-slate-500 text-sm line-clamp-1">{{ data.description }}</span></template>
+      <Column header="Description">
+        <template #body="{ data }"><span class="text-slate-500 text-sm line-clamp-1">{{ stripHtml(data.description) }}</span></template>
       </Column>
       <Column header="" style="width: 7rem">
         <template #body="{ data }">
@@ -112,7 +113,7 @@ function onDelete(ex) {
       </Column>
     </DataTable>
 
-    <Dialog v-model:visible="dialogVisible" :header="editingId ? 'Modifier l\'exercice' : 'Nouvel exercice'" modal style="width: 28rem" class="mx-4">
+    <Dialog v-model:visible="dialogVisible" :header="editingId ? 'Modifier l\'exercice' : 'Nouvel exercice'" modal style="width: 34rem" class="mx-4">
       <form class="grid gap-3 pt-2" @submit.prevent="onSave">
         <div>
           <label class="text-xs text-slate-500 block mb-1">Titre</label>
@@ -130,7 +131,7 @@ function onDelete(ex) {
         </div>
         <div>
           <label class="text-xs text-slate-500 block mb-1">Description</label>
-          <Textarea v-model="form.description" rows="3" class="w-full" />
+          <RichTextEditor v-model="form.description" placeholder="Déroulé de l'exercice, consignes…" />
         </div>
         <div class="flex justify-end gap-2 mt-2">
           <Button type="button" label="Annuler" severity="secondary" outlined @click="dialogVisible = false" />

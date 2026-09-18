@@ -3,11 +3,11 @@ import { ref, onMounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import Button from "primevue/button";
 import InputText from "primevue/inputtext";
-import Textarea from "primevue/textarea";
 import Calendar from "primevue/calendar";
 import Dropdown from "primevue/dropdown";
 import { useToast } from "primevue/usetoast";
 import AppLayout from "../../components/AppLayout.vue";
+import RichTextEditor from "../../components/RichTextEditor.vue";
 import { api } from "../../lib/api.js";
 import { toDateOnly } from "../../lib/date.js";
 import { useNavLinks } from "../../composables/useNavLinks.js";
@@ -94,7 +94,7 @@ async function onRemoveExercise(exerciseId) {
           </div>
           <div class="sm:col-span-2">
             <label class="text-xs text-slate-500 block mb-1">Description</label>
-            <Textarea v-model="editForm.description" rows="3" class="w-full" />
+            <RichTextEditor v-model="editForm.description" placeholder="Objectifs, déroulé de la semaine…" />
           </div>
           <Button type="submit" label="Enregistrer" :loading="savingInfo" class="sm:col-span-2 w-fit" />
         </form>
