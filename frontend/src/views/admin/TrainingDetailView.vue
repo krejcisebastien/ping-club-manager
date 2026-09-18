@@ -42,6 +42,8 @@ const activeOccurrence = ref(null);
 const occurrenceCoaches = ref([]);
 const assignForm = ref({ type: "coach", id: null });
 
+const defaultAssignForm = ref({ type: "coach", id: null });
+
 function timeToString(date) {
   if (!date) return null;
   return `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
@@ -140,6 +142,19 @@ async function onUnassign(assignmentId) {
   occurrenceCoaches.value = occurrenceCoaches.value.filter((a) => a.id !== assignmentId);
 }
 
+async function onAssignDefault() {
+  if (!defaultAssignForm.value.id) return;
+  const payload = defaultAssignForm.value.type === "coach" ? { coachId: defaultAssignForm.value.id } : { sparringId: defaultAssignForm.value.id };
+  await api.post(`/trainings/${trainingId}/coaches`, payload);
+  defaultAssignForm.value.id = null;
+  await loadTraining();
+}
+
+async function onUnassignDefault(assignmentId) {
+  await api.delete(`/trainings/${trainingId}/coaches/${assignmentId}`);
+  await loadTraining();
+}
+
 function statusSeverity(status) {
   return status === "CANCELLED" ? "danger" : "info";
 }
@@ -183,6 +198,31 @@ const calendarOptions = computed(() => ({
           <Calendar v-model="editForm.endTime" time-only hour-format="24" placeholder="Fin" class="w-full" input-class="w-full" />
           <Button type="submit" label="Enregistrer" :loading="savingInfo" class="sm:col-span-2 w-fit" />
         </form>
+      </div>
+
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+        <p class="text-sm font-medium text-slate-600 mb-1">Encadrants par défaut</p>
+        <p class="text-xs text-slate-400 mb-3">Affectés automatiquement à chaque nouvelle séance générée. Modifiable ensuite au cas par cas sur une séance.</p>
+        <ul class="text-sm divide-y divide-slate-100 mb-3">
+          <li v-for="a in training.coaches" :key="a.id" class="flex items-center justify-between py-2">
+            <span>{{ a.coach ? `${a.coach.firstName} ${a.coach.lastName}` : `${a.sparring.firstName} ${a.sparring.lastName} (sparring)` }}</span>
+            <Button icon="pi pi-times" severity="danger" text rounded size="small" aria-label="Retirer" @click="onUnassignDefault(a.id)" />
+          </li>
+          <li v-if="!training.coaches.length" class="text-slate-400 py-2">Aucun encadrant par défaut.</li>
+        </ul>
+        <div class="flex flex-wrap gap-2">
+          <Dropdown v-model="defaultAssignForm.type" :options="[{ label: 'Entraineur', value: 'coach' }, { label: 'Sparring', value: 'sparring' }]" option-label="label" option-value="value" class="w-full sm:w-32" />
+          <Dropdown
+            v-model="defaultAssignForm.id"
+            :options="(defaultAssignForm.type === 'coach' ? coaches : sparrings).map((c) => ({ label: `${c.firstName} ${c.lastName}`, value: c.id }))"
+            option-label="label"
+            option-value="value"
+            filter
+            placeholder="Choisir…"
+            class="flex-1 min-w-0"
+          />
+          <Button label="Affecter" @click="onAssignDefault" class="w-full sm:w-auto" />
+        </div>
       </div>
 
       <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">

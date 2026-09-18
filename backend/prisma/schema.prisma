@@ -251,6 +251,7 @@ model Coach {
   pointsToWork        PointToWork[]
   evolutionNotes      EvolutionNote[]
   campPeriodGroups    CampPeriodGroupCoach[]
+  trainings           TrainingCoach[]
 }
 
 model Sparring {
@@ -266,6 +267,7 @@ model Sparring {
   player              Player?                   @relation(fields: [playerId], references: [id])
   trainingOccurrences TrainingOccurrenceCoach[]
   campPeriodGroups    CampPeriodGroupCoach[]
+  trainings           TrainingCoach[]
 }
 
 model Training {
@@ -282,6 +284,21 @@ model Training {
   season      Season               @relation(fields: [seasonId], references: [id], onDelete: Cascade)
   group       TrainingGroup        @relation(fields: [groupId], references: [id], onDelete: Cascade)
   occurrences TrainingOccurrence[]
+  coaches     TrainingCoach[]
+}
+
+// Encadrants (entraineurs / sparrings) affectés par défaut à l'entrainement :
+// copiés sur chaque séance générée, modifiable ensuite au cas par cas sur la
+// séance via TrainingOccurrenceCoach.
+model TrainingCoach {
+  id         String  @id @default(cuid())
+  trainingId String
+  coachId    String?
+  sparringId String?
+
+  training Training  @relation(fields: [trainingId], references: [id], onDelete: Cascade)
+  coach    Coach?    @relation(fields: [coachId], references: [id], onDelete: Cascade)
+  sparring Sparring? @relation(fields: [sparringId], references: [id], onDelete: Cascade)
 }
 
 model TrainingOccurrence {
