@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from "vue";
-import { useRouter } from "vue-router";
+import { useRouter, RouterLink } from "vue-router";
 import { useAuthStore } from "../stores/auth.js";
 import { CLUB_NAME } from "../lib/config.js";
 import { roleHome } from "../lib/roles.js";
@@ -66,6 +66,10 @@ async function onSubmit() {
       >
         {{ loading ? "Connexion..." : "Se connecter" }}
       </button>
+
+      <RouterLink to="/forgot-password" class="block text-center text-sm text-sky-600 hover:text-sky-700">
+        Mot de passe oublié ?
+      </RouterLink>
     </form>
   </div>
 </template>

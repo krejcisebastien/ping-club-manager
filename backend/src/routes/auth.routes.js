@@ -1,10 +1,19 @@
 import { Router } from "express";
+import { randomBytes, createHash } from "node:crypto";
 import { prisma } from "../lib/prisma.js";
 import { hashPassword, verifyPassword } from "../utils/password.js";
 import { signToken } from "../utils/jwt.js";
+import { sendEmail } from "../utils/email.js";
 import { requireAuth, requireRole } from "../middleware/auth.js";
 
 const router = Router();
+
+const RESET_TOKEN_TTL_MS = 60 * 60 * 1000; // 1h
+const FRONTEND_URL = process.env.CORS_ORIGIN || "http://localhost:5173";
+
+function hashResetToken(token) {
+  return createHash("sha256").update(token).digest("hex");
+}
 
 router.post("/login", async (req, res) => {
   const { email, password } = req.body ?? {};
@@ -38,6 +47,76 @@ router.post("/login", async (req, res) => {
 
 router.get("/me", requireAuth, (req, res) => {
   res.json({ user: req.user });
+});
+
+// Toujours une réponse générique : on ne révèle pas si l'email existe.
+router.post("/forgot-password", async (req, res) => {
+  const { email } = req.body ?? {};
+  if (!email) {
+    return res.status(400).json({ error: "Email requis." });
+  }
+
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (user && user.isActive) {
+    const token = randomBytes(32).toString("hex");
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { resetTokenHash: hashResetToken(token), resetTokenExpiresAt: new Date(Date.now() + RESET_TOKEN_TTL_MS) },
+    });
+    const link = `${FRONTEND_URL}/reset-password?token=${token}`;
+    try {
+      await sendEmail({
+        to: user.email,
+        subject: "Réinitialisation de votre mot de passe",
+        html: `<p>Vous avez demandé la réinitialisation de votre mot de passe.</p><p><a href="${link}">Choisir un nouveau mot de passe</a></p><p>Ce lien expire dans 1 heure. Si vous n'êtes pas à l'origine de cette demande, ignorez cet email.</p>`,
+      });
+    } catch (err) {
+      console.error("Échec de l'envoi de l'email de réinitialisation :", err);
+    }
+  }
+
+  res.json({ message: "Si un compte existe avec cet email, un lien de réinitialisation a été envoyé." });
+});
+
+router.post("/reset-password", async (req, res) => {
+  const { token, password } = req.body ?? {};
+  if (!token || !password) {
+    return res.status(400).json({ error: "Jeton et nouveau mot de passe requis." });
+  }
+  if (password.length < 8) {
+    return res.status(400).json({ error: "Le mot de passe doit contenir au moins 8 caractères." });
+  }
+
+  const user = await prisma.user.findFirst({
+    where: { resetTokenHash: hashResetToken(token), resetTokenExpiresAt: { gt: new Date() } },
+  });
+  if (!user) {
+    return res.status(400).json({ error: "Ce lien de réinitialisation est invalide ou a expiré." });
+  }
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { passwordHash: await hashPassword(password), resetTokenHash: null, resetTokenExpiresAt: null },
+  });
+  res.json({ message: "Mot de passe mis à jour." });
+});
+
+router.put("/change-password", requireAuth, async (req, res) => {
+  const { currentPassword, newPassword } = req.body ?? {};
+  if (!currentPassword || !newPassword) {
+    return res.status(400).json({ error: "Mot de passe actuel et nouveau mot de passe requis." });
+  }
+  if (newPassword.length < 8) {
+    return res.status(400).json({ error: "Le nouveau mot de passe doit contenir au moins 8 caractères." });
+  }
+
+  const user = await prisma.user.findUnique({ where: { id: req.user.sub } });
+  if (!user || !(await verifyPassword(currentPassword, user.passwordHash))) {
+    return res.status(401).json({ error: "Mot de passe actuel incorrect." });
+  }
+
+  await prisma.user.update({ where: { id: user.id }, data: { passwordHash: await hashPassword(newPassword) } });
+  res.json({ message: "Mot de passe mis à jour." });
 });
 
 // ---------- Gestion des comptes utilisateurs (admin uniquement) ----------

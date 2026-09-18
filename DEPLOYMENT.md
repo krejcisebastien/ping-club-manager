@@ -8,6 +8,7 @@ L'application est conçue pour qu'**un club = une instance** : chaque club dispo
 2. Sur Render, créer un nouveau **Blueprint** en pointant vers ce dépôt (`render.yaml` à la racine). Ça crée d'un coup la base Postgres, le service API et le site statique.
 3. `CORS_ORIGIN` et `VITE_API_URL` sont préremplis dans `render.yaml` avec les URLs `onrender.com` attendues (basées sur les noms de service). Si Render suffixe un nom de service (nom déjà pris par quelqu'un d'autre sur onrender.com), corrige la valeur concernée dans l'onglet **Environment** du service concerné, puis redéploie (le frontend a besoin d'un nouveau build, pas juste d'un restart, car Vite fige les variables d'environnement au moment de la compilation).
 4. Exécuter le seed du compte admin (Shell Render sur le service API) : `npm run seed`. Le compte créé est `admin@ping-club-manager.local` / `changeme123` par défaut — voir ci-dessous pour le personnaliser.
+5. Renseigner `RESEND_API_KEY` dans l'onglet **Environment** du service API (clé générée sur resend.com — pas de valeur par défaut dans `render.yaml` car c'est un secret). Sans ça, le lien "mot de passe oublié" ne pourra pas envoyer d'email.
 
 ## Déployer une nouvelle instance pour un autre club
 

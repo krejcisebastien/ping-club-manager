@@ -39,6 +39,14 @@ services:
       # l'URL réelle différera — corrige alors cette valeur après le premier déploiement.
       - key: CORS_ORIGIN
         value: https://ping-club-manager-web.onrender.com
+      # Clé API Resend (resend.com) pour l'envoi des emails de
+      # réinitialisation de mot de passe — à renseigner manuellement dans le
+      # dashboard Render après le premier déploiement (pas de valeur par
+      # défaut ici, c'est une clé secrète).
+      - key: RESEND_API_KEY
+        sync: false
+      - key: RESEND_FROM
+        value: onboarding@resend.dev
 
   - type: web
     name: ping-club-manager-web

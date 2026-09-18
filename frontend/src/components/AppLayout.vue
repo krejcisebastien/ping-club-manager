@@ -4,9 +4,13 @@ import { useRouter, RouterLink } from "vue-router";
 import Avatar from "primevue/avatar";
 import Button from "primevue/button";
 import Sidebar from "primevue/sidebar";
+import Dialog from "primevue/dialog";
+import Password from "primevue/password";
+import { useToast } from "primevue/usetoast";
 import { useAuthStore } from "../stores/auth.js";
 import { CLUB_NAME, CLUB_ICON } from "../lib/config.js";
 import { ROLE_LABELS, roleHome } from "../lib/roles.js";
+import { api } from "../lib/api.js";
 
 defineProps({
   title: { type: String, required: true },
@@ -15,6 +19,7 @@ defineProps({
 
 const auth = useAuthStore();
 const router = useRouter();
+const toast = useToast();
 const drawerOpen = ref(false);
 
 function initials(email) {
@@ -31,6 +36,39 @@ function onSwitchRole(role) {
 function onLogout() {
   auth.logout();
   router.push("/login");
+}
+
+const passwordDialogVisible = ref(false);
+const passwordForm = ref({ currentPassword: "", newPassword: "", confirmPassword: "" });
+const passwordSaving = ref(false);
+const passwordError = ref("");
+
+function openPasswordDialog() {
+  passwordForm.value = { currentPassword: "", newPassword: "", confirmPassword: "" };
+  passwordError.value = "";
+  passwordDialogVisible.value = true;
+  drawerOpen.value = false;
+}
+
+async function onChangePassword() {
+  passwordError.value = "";
+  if (passwordForm.value.newPassword !== passwordForm.value.confirmPassword) {
+    passwordError.value = "Les deux mots de passe ne correspondent pas.";
+    return;
+  }
+  passwordSaving.value = true;
+  try {
+    await api.put("/auth/change-password", {
+      currentPassword: passwordForm.value.currentPassword,
+      newPassword: passwordForm.value.newPassword,
+    });
+    passwordDialogVisible.value = false;
+    toast.add({ severity: "success", summary: "Mot de passe mis à jour", life: 3000 });
+  } catch (err) {
+    passwordError.value = err.response?.data?.error ?? "Une erreur est survenue.";
+  } finally {
+    passwordSaving.value = false;
+  }
 }
 </script>
 
@@ -74,6 +112,7 @@ function onLogout() {
         <div class="flex items-center gap-2">
           <Avatar :label="initials(auth.user?.email)" shape="circle" class="bg-sky-100 text-sky-700 shrink-0" />
           <span class="text-sm text-slate-600 truncate flex-1">{{ auth.user?.email }}</span>
+          <Button icon="pi pi-lock" severity="secondary" text rounded aria-label="Changer le mot de passe" @click="openPasswordDialog" />
           <Button icon="pi pi-sign-out" severity="secondary" text rounded aria-label="Déconnexion" @click="onLogout" />
         </div>
       </div>
@@ -114,6 +153,7 @@ function onLogout() {
         <div class="flex items-center gap-2">
           <Avatar :label="initials(auth.user?.email)" shape="circle" class="bg-sky-100 text-sky-700 shrink-0" />
           <span class="text-sm text-slate-600 truncate flex-1">{{ auth.user?.email }}</span>
+          <Button icon="pi pi-lock" severity="secondary" text rounded aria-label="Changer le mot de passe" @click="openPasswordDialog" />
           <Button icon="pi pi-sign-out" severity="secondary" text rounded aria-label="Déconnexion" @click="onLogout" />
         </div>
       </div>
@@ -135,5 +175,27 @@ function onLogout() {
         <slot />
       </main>
     </div>
+
+    <Dialog v-model:visible="passwordDialogVisible" header="Changer le mot de passe" modal style="width: 26rem" class="mx-4">
+      <form class="grid gap-3 pt-2" @submit.prevent="onChangePassword">
+        <div>
+          <label class="text-xs text-slate-500 block mb-1">Mot de passe actuel</label>
+          <Password v-model="passwordForm.currentPassword" required toggle-mask :feedback="false" class="w-full" input-class="w-full" />
+        </div>
+        <div>
+          <label class="text-xs text-slate-500 block mb-1">Nouveau mot de passe</label>
+          <Password v-model="passwordForm.newPassword" required toggle-mask :feedback="false" class="w-full" input-class="w-full" />
+        </div>
+        <div>
+          <label class="text-xs text-slate-500 block mb-1">Confirmer le nouveau mot de passe</label>
+          <Password v-model="passwordForm.confirmPassword" required toggle-mask :feedback="false" class="w-full" input-class="w-full" />
+        </div>
+        <p v-if="passwordError" class="text-sm text-red-600">{{ passwordError }}</p>
+        <div class="flex justify-end gap-2 mt-2">
+          <Button type="button" label="Annuler" severity="secondary" outlined @click="passwordDialogVisible = false" />
+          <Button type="submit" label="Enregistrer" :loading="passwordSaving" />
+        </div>
+      </form>
+    </Dialog>
   </div>
 </template>
