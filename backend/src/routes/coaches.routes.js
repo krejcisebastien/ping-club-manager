@@ -23,7 +23,9 @@ router.post("/", requireRole("ADMIN"), async (req, res) => {
     return res.status(400).json({ error: "firstName et lastName sont requis." });
   }
   try {
-    const coach = await prisma.coach.create({ data: { firstName, lastName, email, phone } });
+    // Chaîne vide -> null : Postgres n'applique la contrainte unique qu'entre valeurs
+    // non nulles, donc plusieurs entraineurs sans email ne doivent pas être bloqués.
+    const coach = await prisma.coach.create({ data: { firstName, lastName, email: email || null, phone } });
     res.status(201).json({ coach });
   } catch (err) {
     if (err.code === "P2002") {
@@ -41,7 +43,7 @@ router.put("/:id", requireRole("ADMIN"), async (req, res) => {
       data: {
         ...(firstName !== undefined && { firstName }),
         ...(lastName !== undefined && { lastName }),
-        ...(email !== undefined && { email }),
+        ...(email !== undefined && { email: email || null }),
         ...(phone !== undefined && { phone }),
       },
     });
