@@ -11,7 +11,9 @@ export function createApp() {
       origin: process.env.CORS_ORIGIN || "http://localhost:5173",
     })
   );
-  app.use(express.json());
+  // Limite relevée par rapport au défaut (100kb) : les illustrations
+  // d'exercice sont envoyées en data URL (base64) dans le JSON.
+  app.use(express.json({ limit: "6mb" }));
 
   app.get("/health", (req, res) => res.json({ status: "ok" }));
   app.use("/api", apiRouter);

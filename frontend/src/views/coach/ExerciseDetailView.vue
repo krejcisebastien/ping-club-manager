@@ -8,6 +8,8 @@ import { useToast } from "primevue/usetoast";
 import { useConfirm } from "primevue/useconfirm";
 import AppLayout from "../../components/AppLayout.vue";
 import RichTextEditor from "../../components/RichTextEditor.vue";
+import ImageUpload from "../../components/ImageUpload.vue";
+import TableDiagramEditor from "../../components/TableDiagramEditor.vue";
 import { api } from "../../lib/api.js";
 import { sanitizeHtml } from "../../lib/richtext.js";
 import { useNavLinks } from "../../composables/useNavLinks.js";
@@ -21,7 +23,7 @@ const exerciseId = route.params.id;
 
 const exercise = ref(null);
 const editing = ref(false);
-const form = ref({ title: "", description: "", category: "", difficulty: "" });
+const form = ref({ title: "", description: "", category: "", difficulty: "", illustrationUrl: null, diagram: null });
 const saving = ref(false);
 
 async function load() {
@@ -37,6 +39,8 @@ function openEdit() {
     description: exercise.value.description ?? "",
     category: exercise.value.category ?? "",
     difficulty: exercise.value.difficulty ?? "",
+    illustrationUrl: exercise.value.illustrationUrl ?? null,
+    diagram: exercise.value.diagram ?? { points: [] },
   };
   editing.value = true;
 }
@@ -97,6 +101,14 @@ function onDelete() {
           <label class="text-xs text-slate-500 block mb-1">Description</label>
           <RichTextEditor v-model="form.description" placeholder="Déroulé de l'exercice, consignes…" />
         </div>
+        <div>
+          <label class="text-xs text-slate-500 block mb-1">Illustration</label>
+          <ImageUpload v-model="form.illustrationUrl" />
+        </div>
+        <div>
+          <label class="text-xs text-slate-500 block mb-1">Schéma de la table (échanges, points à jouer)</label>
+          <TableDiagramEditor v-model="form.diagram" />
+        </div>
         <div class="flex justify-end gap-2 mt-2">
           <Button type="button" label="Annuler" severity="secondary" outlined @click="editing = false" />
           <Button type="submit" label="Enregistrer" :loading="saving" />
@@ -114,8 +126,15 @@ function onDelete() {
             <Button icon="pi pi-trash" severity="danger" text rounded aria-label="Supprimer" @click="onDelete" />
           </div>
         </div>
-        <div v-if="exercise.description" class="rich-text-content" v-html="sanitizeHtml(exercise.description)"></div>
-        <p v-else class="text-slate-400 text-sm">Aucune description.</p>
+        <div v-if="exercise.description" class="rich-text-content mb-3" v-html="sanitizeHtml(exercise.description)"></div>
+        <p v-else class="text-slate-400 text-sm mb-3">Aucune description.</p>
+
+        <img v-if="exercise.illustrationUrl" :src="exercise.illustrationUrl" alt="Illustration de l'exercice" class="max-h-64 rounded-lg border border-slate-200 mb-3" />
+
+        <div v-if="exercise.diagram?.points?.length">
+          <p class="text-xs text-slate-500 mb-1">Schéma de la table</p>
+          <TableDiagramEditor :model-value="exercise.diagram" readonly />
+        </div>
       </div>
     </div>
   </AppLayout>

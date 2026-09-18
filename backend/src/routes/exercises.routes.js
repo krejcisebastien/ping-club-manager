@@ -22,16 +22,16 @@ router.get("/:id", async (req, res) => {
 });
 
 router.post("/", requireRole("ADMIN", "COACH"), async (req, res) => {
-  const { title, description, category, difficulty } = req.body ?? {};
+  const { title, description, category, difficulty, illustrationUrl, diagram } = req.body ?? {};
   if (!title) return res.status(400).json({ error: "title est requis." });
   const exercise = await prisma.exercise.create({
-    data: { title, description, category, difficulty, createdById: req.user.coachId ?? null },
+    data: { title, description, category, difficulty, illustrationUrl, diagram, createdById: req.user.coachId ?? null },
   });
   res.status(201).json({ exercise });
 });
 
 router.put("/:id", requireRole("ADMIN", "COACH"), async (req, res) => {
-  const { title, description, category, difficulty } = req.body ?? {};
+  const { title, description, category, difficulty, illustrationUrl, diagram } = req.body ?? {};
   try {
     const exercise = await prisma.exercise.update({
       where: { id: req.params.id },
@@ -40,6 +40,8 @@ router.put("/:id", requireRole("ADMIN", "COACH"), async (req, res) => {
         ...(description !== undefined && { description }),
         ...(category !== undefined && { category }),
         ...(difficulty !== undefined && { difficulty }),
+        ...(illustrationUrl !== undefined && { illustrationUrl }),
+        ...(diagram !== undefined && { diagram }),
       },
     });
     res.json({ exercise });

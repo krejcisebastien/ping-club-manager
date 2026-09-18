@@ -340,13 +340,15 @@ model TrainingPlan {
 }
 
 model Exercise {
-  id          String   @id @default(cuid())
-  title       String
-  description String?
-  category    String?
-  difficulty  String?
-  createdById String?
-  createdAt   DateTime @default(now())
+  id               String   @id @default(cuid())
+  title            String
+  description      String?
+  category         String?
+  difficulty       String?
+  illustrationUrl  String? // data URL (base64) de l'illustration uploadée
+  diagram          Json? // schéma table de ping-pong : { points: [{ id, x, y }] }
+  createdById      String?
+  createdAt        DateTime @default(now())
 
   createdBy Coach?                  @relation(fields: [createdById], references: [id])
   plans     TrainingPlanExercise[]
