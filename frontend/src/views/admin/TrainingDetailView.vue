@@ -1,32 +1,62 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import DataTable from "primevue/datatable";
+import Column from "primevue/column";
+import Dialog from "primevue/dialog";
+import Button from "primevue/button";
+import InputText from "primevue/inputtext";
+import Dropdown from "primevue/dropdown";
+import Calendar from "primevue/calendar";
+import Tag from "primevue/tag";
+import TabView from "primevue/tabview";
+import TabPanel from "primevue/tabpanel";
+import FullCalendar from "@fullcalendar/vue3";
+import { useToast } from "primevue/usetoast";
+import { CALENDAR_PLUGINS } from "../../lib/calendar.js";
 import AppLayout from "../../components/AppLayout.vue";
 import { api } from "../../lib/api.js";
 import { useNavLinks } from "../../composables/useNavLinks.js";
 
 const navLinks = useNavLinks();
-
 const route = useRoute();
 const router = useRouter();
+const toast = useToast();
 const trainingId = route.params.id;
 
 const WEEKDAYS = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
+const weekdayOptions = WEEKDAYS.map((label, value) => ({ label, value }));
 
 const training = ref(null);
 const occurrences = ref([]);
 const coaches = ref([]);
 const sparrings = ref([]);
 const groups = ref([]);
-const editForm = ref({ name: "", location: "", weekday: "", startTime: "", endTime: "", groupId: "" });
+const editForm = ref({ name: "", location: "", weekday: null, startTime: null, endTime: null, groupId: null });
 const savingInfo = ref(false);
-const generateForm = ref({ startDate: "", endDate: "" });
-const generateResult = ref("");
-const error = ref("");
+const generateForm = ref({ startDate: null, endDate: null });
+const generating = ref(false);
 
-const expandedOccurrenceId = ref("");
+const assignDialogVisible = ref(false);
+const activeOccurrence = ref(null);
 const occurrenceCoaches = ref([]);
-const assignForm = ref({ type: "coach", id: "" });
+const assignForm = ref({ type: "coach", id: null });
+
+function timeToString(date) {
+  if (!date) return null;
+  return `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
+}
+function stringToTime(str) {
+  if (!str) return null;
+  const [h, m] = str.split(":").map(Number);
+  const d = new Date();
+  d.setHours(h, m, 0, 0);
+  return d;
+}
+function toDateOnly(date) {
+  if (!date) return null;
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
 
 async function loadTraining() {
   const { data } = await api.get(`/trainings/${trainingId}`);
@@ -34,9 +64,9 @@ async function loadTraining() {
   editForm.value = {
     name: data.training.name,
     location: data.training.location ?? "",
-    weekday: data.training.weekday ?? "",
-    startTime: data.training.startTime ?? "",
-    endTime: data.training.endTime ?? "",
+    weekday: data.training.weekday ?? null,
+    startTime: stringToTime(data.training.startTime),
+    endTime: stringToTime(data.training.endTime),
     groupId: data.training.groupId,
   };
 }
@@ -46,8 +76,10 @@ async function onSaveInfo() {
   try {
     await api.put(`/trainings/${trainingId}`, {
       ...editForm.value,
-      weekday: editForm.value.weekday === "" ? null : Number(editForm.value.weekday),
+      startTime: timeToString(editForm.value.startTime),
+      endTime: timeToString(editForm.value.endTime),
     });
+    toast.add({ severity: "success", summary: "Entrainement mis à jour", life: 3000 });
     await loadTraining();
   } finally {
     savingInfo.value = false;
@@ -73,129 +105,157 @@ onMounted(async () => {
 });
 
 async function onGenerate() {
-  error.value = "";
-  generateResult.value = "";
+  generating.value = true;
   try {
-    const { data } = await api.post(`/trainings/${trainingId}/generate-occurrences`, generateForm.value);
-    generateResult.value = `${data.created} séance(s) créée(s), ${data.skipped} déjà existante(s).`;
+    const { data } = await api.post(`/trainings/${trainingId}/generate-occurrences`, {
+      startDate: toDateOnly(generateForm.value.startDate),
+      endDate: toDateOnly(generateForm.value.endDate),
+    });
+    toast.add({ severity: "success", summary: `${data.created} séance(s) créée(s)`, detail: `${data.skipped} déjà existante(s).`, life: 4000 });
     await loadOccurrences();
   } catch (err) {
-    error.value = err.response?.data?.error ?? "Erreur lors de la génération.";
+    toast.add({ severity: "error", summary: "Erreur", detail: err.response?.data?.error ?? "Une erreur est survenue.", life: 4000 });
+  } finally {
+    generating.value = false;
   }
 }
 
-async function onToggleOccurrence(occurrenceId) {
-  if (expandedOccurrenceId.value === occurrenceId) {
-    expandedOccurrenceId.value = "";
-    return;
-  }
-  expandedOccurrenceId.value = occurrenceId;
-  const { data } = await api.get(`/occurrences/${occurrenceId}`);
+async function openAssignDialog(occurrence) {
+  activeOccurrence.value = occurrence;
+  assignForm.value = { type: "coach", id: null };
+  assignDialogVisible.value = true;
+  const { data } = await api.get(`/occurrences/${occurrence.id}`);
   occurrenceCoaches.value = data.occurrence.coaches;
 }
 
 async function onAssign() {
   if (!assignForm.value.id) return;
-  const payload = assignForm.value.type === "coach"
-    ? { coachId: assignForm.value.id }
-    : { sparringId: assignForm.value.id };
-  const { data } = await api.post(`/occurrences/${expandedOccurrenceId.value}/coaches`, payload);
+  const payload = assignForm.value.type === "coach" ? { coachId: assignForm.value.id } : { sparringId: assignForm.value.id };
+  const { data } = await api.post(`/occurrences/${activeOccurrence.value.id}/coaches`, payload);
   occurrenceCoaches.value.push(data.assignment);
-  assignForm.value.id = "";
+  assignForm.value.id = null;
 }
 
 async function onUnassign(assignmentId) {
-  await api.delete(`/occurrences/${expandedOccurrenceId.value}/coaches/${assignmentId}`);
+  await api.delete(`/occurrences/${activeOccurrence.value.id}/coaches/${assignmentId}`);
   occurrenceCoaches.value = occurrenceCoaches.value.filter((a) => a.id !== assignmentId);
 }
+
+function statusSeverity(status) {
+  return status === "CANCELLED" ? "danger" : "info";
+}
+
+const calendarEvents = computed(() =>
+  occurrences.value.map((o) => ({
+    id: o.id,
+    title: `${o.startTime}–${o.endTime}`,
+    start: `${o.date.slice(0, 10)}T${o.startTime}`,
+    end: `${o.date.slice(0, 10)}T${o.endTime}`,
+    color: o.status === "CANCELLED" ? "#94a3b8" : "#0284c7",
+  }))
+);
+
+const calendarOptions = computed(() => ({
+  plugins: CALENDAR_PLUGINS,
+  initialView: "dayGridMonth",
+  headerToolbar: { left: "prev,next today", center: "title", right: "dayGridMonth,timeGridWeek" },
+  events: calendarEvents.value,
+  height: "auto",
+  locale: "fr",
+  eventClick: (info) => {
+    const occurrence = occurrences.value.find((o) => o.id === info.event.id);
+    if (occurrence) openAssignDialog(occurrence);
+  },
+}));
 </script>
 
 <template>
   <AppLayout :title="training ? `Entrainement — ${training.name}` : 'Entrainement'" :nav-links="navLinks">
+    <Button label="Retour" icon="pi pi-arrow-left" text class="mb-3 -ml-2" @click="router.push('/admin/trainings')" />
+
     <div v-if="training" class="space-y-4">
       <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
         <p class="text-sm font-medium text-slate-600 mb-3">Informations</p>
-        <form class="grid gap-2 sm:grid-cols-2" @submit.prevent="onSaveInfo">
-          <input v-model="editForm.name" placeholder="Nom" required class="rounded-lg border border-slate-300 px-2 py-1.5" />
-          <select v-model="editForm.groupId" required class="rounded-lg border border-slate-300 px-2 py-1.5">
-            <option v-for="g in groups" :key="g.id" :value="g.id">{{ g.name }}</option>
-          </select>
-          <input v-model="editForm.location" placeholder="Lieu" class="rounded-lg border border-slate-300 px-2 py-1.5" />
-          <select v-model="editForm.weekday" class="rounded-lg border border-slate-300 px-2 py-1.5">
-            <option value="">Jour de semaine…</option>
-            <option v-for="(d, i) in WEEKDAYS" :key="i" :value="i">{{ d }}</option>
-          </select>
-          <input v-model="editForm.startTime" type="time" class="rounded-lg border border-slate-300 px-2 py-1.5" />
-          <input v-model="editForm.endTime" type="time" class="rounded-lg border border-slate-300 px-2 py-1.5" />
-          <button type="submit" :disabled="savingInfo" class="sm:col-span-2 rounded-lg bg-sky-600 text-white py-1.5 font-medium hover:bg-sky-700 disabled:opacity-60">
-            Enregistrer
-          </button>
+        <form class="grid gap-3 sm:grid-cols-2" @submit.prevent="onSaveInfo">
+          <InputText v-model="editForm.name" placeholder="Nom" required class="w-full" />
+          <Dropdown v-model="editForm.groupId" :options="groups" option-label="name" option-value="id" required class="w-full" />
+          <InputText v-model="editForm.location" placeholder="Lieu" class="w-full" />
+          <Dropdown v-model="editForm.weekday" :options="weekdayOptions" option-label="label" option-value="value" placeholder="Jour de semaine…" class="w-full" />
+          <Calendar v-model="editForm.startTime" time-only hour-format="24" placeholder="Début" class="w-full" input-class="w-full" />
+          <Calendar v-model="editForm.endTime" time-only hour-format="24" placeholder="Fin" class="w-full" input-class="w-full" />
+          <Button type="submit" label="Enregistrer" :loading="savingInfo" class="sm:col-span-2 w-fit" />
         </form>
       </div>
 
       <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
         <p class="text-sm font-medium text-slate-600 mb-3">Générer les séances de la période</p>
-        <form class="grid gap-2 sm:grid-cols-3 sm:items-end" @submit.prevent="onGenerate">
-          <div>
-            <label class="text-xs text-slate-500">Du</label>
-            <input v-model="generateForm.startDate" type="date" required class="w-full rounded-lg border border-slate-300 px-2 py-1.5" />
-          </div>
-          <div>
-            <label class="text-xs text-slate-500">Au</label>
-            <input v-model="generateForm.endDate" type="date" required class="w-full rounded-lg border border-slate-300 px-2 py-1.5" />
-          </div>
-          <button type="submit" class="rounded-lg bg-sky-600 text-white py-1.5 font-medium hover:bg-sky-700">
-            Générer
-          </button>
+        <form class="grid gap-3 sm:grid-cols-3 sm:items-end" @submit.prevent="onGenerate">
+          <Calendar v-model="generateForm.startDate" date-format="dd/mm/yy" show-icon placeholder="Du" required class="w-full" input-class="w-full" />
+          <Calendar v-model="generateForm.endDate" date-format="dd/mm/yy" show-icon placeholder="Au" required class="w-full" input-class="w-full" />
+          <Button type="submit" label="Générer" :loading="generating" />
         </form>
-        <p v-if="generateResult" class="text-sm text-emerald-600 mt-2">{{ generateResult }}</p>
-        <p v-if="error" class="text-sm text-red-600 mt-2">{{ error }}</p>
       </div>
 
       <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-        <p class="text-sm font-medium text-slate-600 mb-3">Séances</p>
-        <ul class="divide-y divide-slate-100">
-          <li v-for="o in occurrences" :key="o.id" class="py-2">
-            <div class="flex items-center justify-between cursor-pointer" @click="onToggleOccurrence(o.id)">
-              <span>{{ new Date(o.date).toLocaleDateString("fr-FR") }} · {{ o.startTime }}–{{ o.endTime }}</span>
-              <div class="flex items-center gap-3">
-                <span class="text-xs" :class="o.status === 'CANCELLED' ? 'text-red-500' : 'text-slate-400'">
-                  {{ o.status }}
-                </span>
-                <button class="text-xs text-sky-600 hover:underline" @click.stop="router.push(`/coach/attendance/${o.id}`)">
-                  présences
-                </button>
-              </div>
-            </div>
-
-            <div v-if="expandedOccurrenceId === o.id" class="mt-2 pl-2 border-l-2 border-slate-100 space-y-2">
-              <ul class="text-sm">
-                <li v-for="a in occurrenceCoaches" :key="a.id" class="flex items-center justify-between py-1">
-                  <span>{{ a.coach ? `${a.coach.firstName} ${a.coach.lastName}` : `${a.sparring.firstName} ${a.sparring.lastName} (sparring)` }}</span>
-                  <button class="text-xs text-red-500 hover:underline" @click="onUnassign(a.id)">retirer</button>
-                </li>
-                <li v-if="!occurrenceCoaches.length" class="text-slate-400 py-1">Aucun encadrant affecté.</li>
-              </ul>
-              <div class="flex gap-2">
-                <select v-model="assignForm.type" class="rounded-lg border border-slate-300 px-2 py-1.5 text-sm">
-                  <option value="coach">Entraineur</option>
-                  <option value="sparring">Sparring</option>
-                </select>
-                <select v-model="assignForm.id" class="flex-1 rounded-lg border border-slate-300 px-2 py-1.5 text-sm">
-                  <option value="" disabled>Choisir…</option>
-                  <option v-for="c in (assignForm.type === 'coach' ? coaches : sparrings)" :key="c.id" :value="c.id">
-                    {{ c.firstName }} {{ c.lastName }}
-                  </option>
-                </select>
-                <button class="rounded-lg bg-sky-600 text-white px-3 py-1.5 text-sm font-medium hover:bg-sky-700" @click="onAssign">
-                  Affecter
-                </button>
-              </div>
-            </div>
-          </li>
-          <li v-if="!occurrences.length" class="py-2 text-slate-400 text-sm">Aucune séance générée.</li>
-        </ul>
+        <p class="text-sm font-medium text-slate-600 mb-3">Séances ({{ occurrences.length }})</p>
+        <TabView lazy>
+          <TabPanel header="Liste">
+            <DataTable :value="occurrences" class="border border-slate-200 rounded-lg overflow-hidden">
+              <template #empty>
+                <p class="text-slate-400 text-sm py-4">Aucune séance générée.</p>
+              </template>
+              <Column header="Date">
+                <template #body="{ data }">{{ new Date(data.date).toLocaleDateString("fr-FR") }}</template>
+              </Column>
+              <Column header="Horaire">
+                <template #body="{ data }">{{ data.startTime }}–{{ data.endTime }}</template>
+              </Column>
+              <Column header="Statut">
+                <template #body="{ data }"><Tag :severity="statusSeverity(data.status)" :value="data.status" /></template>
+              </Column>
+              <Column header="" style="width: 14rem">
+                <template #body="{ data }">
+                  <div class="flex gap-1 justify-end">
+                    <Button label="Encadrants" icon="pi pi-users" size="small" text @click="openAssignDialog(data)" />
+                    <Button label="Présences" icon="pi pi-check-square" size="small" text @click="router.push(`/coach/attendance/${data.id}`)" />
+                  </div>
+                </template>
+              </Column>
+            </DataTable>
+          </TabPanel>
+          <TabPanel header="Calendrier">
+            <FullCalendar :options="calendarOptions" />
+          </TabPanel>
+        </TabView>
       </div>
     </div>
+
+    <Dialog v-model:visible="assignDialogVisible" header="Encadrants de la séance" modal style="width: 26rem" class="mx-4">
+      <div v-if="activeOccurrence" class="pt-2">
+        <p class="text-sm text-slate-500 mb-3">
+          {{ new Date(activeOccurrence.date).toLocaleDateString("fr-FR") }} · {{ activeOccurrence.startTime }}–{{ activeOccurrence.endTime }}
+        </p>
+        <ul class="text-sm divide-y divide-slate-100 mb-3">
+          <li v-for="a in occurrenceCoaches" :key="a.id" class="flex items-center justify-between py-2">
+            <span>{{ a.coach ? `${a.coach.firstName} ${a.coach.lastName}` : `${a.sparring.firstName} ${a.sparring.lastName} (sparring)` }}</span>
+            <Button icon="pi pi-times" severity="danger" text rounded size="small" aria-label="Retirer" @click="onUnassign(a.id)" />
+          </li>
+          <li v-if="!occurrenceCoaches.length" class="text-slate-400 py-2">Aucun encadrant affecté.</li>
+        </ul>
+        <div class="flex gap-2">
+          <Dropdown v-model="assignForm.type" :options="[{ label: 'Entraineur', value: 'coach' }, { label: 'Sparring', value: 'sparring' }]" option-label="label" option-value="value" class="w-36" />
+          <Dropdown
+            v-model="assignForm.id"
+            :options="(assignForm.type === 'coach' ? coaches : sparrings).map((c) => ({ label: `${c.firstName} ${c.lastName}`, value: c.id }))"
+            option-label="label"
+            option-value="value"
+            filter
+            placeholder="Choisir…"
+            class="flex-1"
+          />
+          <Button label="Affecter" @click="onAssign" />
+        </div>
+      </div>
+    </Dialog>
   </AppLayout>
 </template>

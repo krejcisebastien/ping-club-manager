@@ -37,3 +37,110 @@
   border-style: solid !important;
   border-color: #cbd5e1 !important;
 }
+
+/* Même écrasement du preflight pour les boutons PrimeVue : sans ces règles,
+   `button { padding: 0; background: transparent }` de Tailwind rend tous les
+   boutons (primaires, secondaires, danger...) invisibles hormis leur texte. */
+.p-button {
+  padding: 0.55rem 1.1rem !important;
+  border-radius: 0.5rem !important;
+  border-width: 1px !important;
+  border-style: solid !important;
+  font-weight: 500 !important;
+}
+
+.p-button:not(.p-button-text):not(.p-button-outlined):not(.p-button-link):not(.p-button-secondary):not(.p-button-danger) {
+  background-color: #0284c7 !important; /* sky-600 */
+  border-color: #0284c7 !important;
+  color: #fff !important;
+}
+.p-button:not(.p-button-text):not(.p-button-outlined):not(.p-button-link):not(.p-button-secondary):not(.p-button-danger):not(.p-disabled):hover {
+  background-color: #0369a1 !important; /* sky-700 */
+  border-color: #0369a1 !important;
+}
+
+.p-button.p-button-secondary:not(.p-button-text):not(.p-button-outlined) {
+  background-color: #64748b !important; /* slate-500 */
+  border-color: #64748b !important;
+  color: #fff !important;
+}
+.p-button.p-button-danger:not(.p-button-text):not(.p-button-outlined) {
+  background-color: #dc2626 !important; /* red-600 */
+  border-color: #dc2626 !important;
+  color: #fff !important;
+}
+
+.p-button-outlined {
+  background-color: transparent !important;
+}
+.p-button-outlined.p-button-secondary {
+  border-color: #cbd5e1 !important; /* slate-300 */
+  color: #334155 !important; /* slate-700 */
+}
+.p-button-outlined.p-button-danger {
+  border-color: #dc2626 !important;
+  color: #dc2626 !important;
+}
+
+.p-button-text {
+  border-width: 0 !important;
+  background-color: transparent !important;
+}
+.p-button-text.p-button-danger {
+  color: #dc2626 !important;
+}
+.p-button-text:not(.p-disabled):hover {
+  background-color: rgba(15, 23, 42, 0.04) !important;
+}
+
+.p-button-icon-only {
+  width: 2.5rem !important;
+  padding: 0.55rem !important;
+  justify-content: center !important;
+}
+.p-button-icon-only.p-button-rounded {
+  border-radius: 50% !important;
+  width: 2.25rem !important;
+  height: 2.25rem !important;
+  padding: 0 !important;
+}
+
+.p-button-sm {
+  padding: 0.35rem 0.75rem !important;
+  font-size: 0.8125rem !important;
+}
+.p-button-sm.p-button-icon-only {
+  width: 2rem !important;
+  padding: 0.35rem !important;
+}
+
+.p-button:disabled,
+.p-button.p-disabled {
+  opacity: 0.6 !important;
+}
+
+.p-button .p-button-icon {
+  margin: 0 !important;
+}
+.p-button .p-button-icon-left {
+  margin-right: 0.5rem !important;
+}
+
+/* La barre d'outils FullCalendar ne passe pas à la ligne par défaut : sur
+   mobile le titre (septembre 2026) chevauche les boutons prev/next et
+   month/week. On la rend responsive en autorisant le retour à la ligne. */
+.fc .fc-toolbar {
+  flex-wrap: wrap;
+  row-gap: 0.5rem;
+}
+.fc .fc-toolbar-title {
+  font-size: 1.1rem !important;
+}
+@media (max-width: 480px) {
+  .fc .fc-toolbar-title {
+    font-size: 1rem !important;
+    width: 100%;
+    order: -1;
+    text-align: center;
+  }
+}

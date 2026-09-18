@@ -1,6 +1,8 @@
 <script setup>
 import { ref, onMounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import Button from "primevue/button";
+import Dropdown from "primevue/dropdown";
 import AppLayout from "../../components/AppLayout.vue";
 import { api } from "../../lib/api.js";
 import { useNavLinks } from "../../composables/useNavLinks.js";
@@ -14,16 +16,16 @@ const id = route.params.id;
 const periodGroup = ref(null);
 const allCoaches = ref([]);
 const allPlayers = ref([]);
-const coachToAdd = ref("");
-const playerToAdd = ref("");
+const coachToAdd = ref(null);
+const playerToAdd = ref(null);
 
 const availableCoaches = computed(() => {
   const ids = new Set((periodGroup.value?.coaches ?? []).map((c) => c.coach.id));
-  return allCoaches.value.filter((c) => !ids.has(c.id));
+  return allCoaches.value.filter((c) => !ids.has(c.id)).map((c) => ({ label: `${c.firstName} ${c.lastName}`, value: c.id }));
 });
 const availablePlayers = computed(() => {
   const ids = new Set((periodGroup.value?.players ?? []).map((p) => p.player.id));
-  return allPlayers.value.filter((p) => !ids.has(p.id));
+  return allPlayers.value.filter((p) => !ids.has(p.id)).map((p) => ({ label: `${p.firstName} ${p.lastName}`, value: p.id }));
 });
 
 async function load() {
@@ -40,7 +42,7 @@ onMounted(async () => {
 async function onAddCoach() {
   if (!coachToAdd.value) return;
   await api.post(`/camp-period-groups/${id}/coaches`, { coachId: coachToAdd.value });
-  coachToAdd.value = "";
+  coachToAdd.value = null;
   await load();
 }
 
@@ -52,7 +54,7 @@ async function onRemoveCoach(assignmentId) {
 async function onAddPlayer() {
   if (!playerToAdd.value) return;
   await api.post(`/camp-period-groups/${id}/players`, { playerId: playerToAdd.value });
-  playerToAdd.value = "";
+  playerToAdd.value = null;
   await load();
 }
 
@@ -64,58 +66,45 @@ async function onRemovePlayer(playerId) {
 
 <template>
   <AppLayout title="Groupe de stage" :nav-links="navLinks">
+    <Button label="Retour" icon="pi pi-arrow-left" text class="mb-3 -ml-2" @click="router.back()" />
+
     <div v-if="periodGroup" class="space-y-4">
-      <div class="flex items-center justify-between">
-        <p class="text-sm text-slate-500">
-          {{ periodGroup.group.name }} — {{ periodGroup.period.label }}
-          ({{ new Date(periodGroup.period.campDay.date).toLocaleDateString("fr-FR") }})
+      <div class="flex items-center justify-between bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+        <p class="text-sm text-slate-600">
+          <span class="font-medium">{{ periodGroup.group.name }}</span> — {{ periodGroup.period.label }}
+          <span class="text-slate-400">({{ new Date(periodGroup.period.campDay.date).toLocaleDateString("fr-FR") }})</span>
         </p>
-        <button
-          class="text-sm text-sky-600 hover:underline"
-          @click="router.push(`/coach/camp-attendance/${id}`)"
-        >
-          Prendre les présences →
-        </button>
+        <Button label="Prendre les présences" icon="pi pi-check-square" size="small" @click="router.push(`/coach/camp-attendance/${id}`)" />
       </div>
 
       <div class="grid gap-4 md:grid-cols-2">
         <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
           <p class="text-sm font-medium text-slate-600 mb-3">Entraineurs</p>
           <ul class="divide-y divide-slate-100 mb-3">
-            <li v-for="c in periodGroup.coaches" :key="c.id" class="py-2 flex items-center justify-between">
+            <li v-for="c in periodGroup.coaches" :key="c.id" class="py-2 flex items-center justify-between text-sm">
               <span>{{ c.coach.firstName }} {{ c.coach.lastName }}</span>
-              <button class="text-xs text-red-500 hover:underline" @click="onRemoveCoach(c.id)">retirer</button>
+              <Button icon="pi pi-times" severity="danger" text rounded size="small" aria-label="Retirer" @click="onRemoveCoach(c.id)" />
             </li>
             <li v-if="!periodGroup.coaches.length" class="py-2 text-slate-400 text-sm">Aucun entraineur affecté.</li>
           </ul>
           <div class="flex gap-2">
-            <select v-model="coachToAdd" class="flex-1 rounded-lg border border-slate-300 px-2 py-1.5 text-sm">
-              <option value="" disabled>Ajouter un entraineur…</option>
-              <option v-for="c in availableCoaches" :key="c.id" :value="c.id">{{ c.firstName }} {{ c.lastName }}</option>
-            </select>
-            <button class="rounded-lg bg-sky-600 text-white px-3 py-1.5 text-sm font-medium hover:bg-sky-700" @click="onAddCoach">
-              Ajouter
-            </button>
+            <Dropdown v-model="coachToAdd" :options="availableCoaches" option-label="label" option-value="value" filter placeholder="Ajouter un entraineur…" class="flex-1" />
+            <Button label="Ajouter" @click="onAddCoach" />
           </div>
         </div>
 
         <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
           <p class="text-sm font-medium text-slate-600 mb-3">Joueurs inscrits</p>
           <ul class="divide-y divide-slate-100 mb-3">
-            <li v-for="p in periodGroup.players" :key="p.id" class="py-2 flex items-center justify-between">
+            <li v-for="p in periodGroup.players" :key="p.id" class="py-2 flex items-center justify-between text-sm">
               <span>{{ p.player.firstName }} {{ p.player.lastName }}</span>
-              <button class="text-xs text-red-500 hover:underline" @click="onRemovePlayer(p.player.id)">retirer</button>
+              <Button icon="pi pi-times" severity="danger" text rounded size="small" aria-label="Retirer" @click="onRemovePlayer(p.player.id)" />
             </li>
             <li v-if="!periodGroup.players.length" class="py-2 text-slate-400 text-sm">Aucun joueur inscrit.</li>
           </ul>
           <div class="flex gap-2">
-            <select v-model="playerToAdd" class="flex-1 rounded-lg border border-slate-300 px-2 py-1.5 text-sm">
-              <option value="" disabled>Inscrire un joueur…</option>
-              <option v-for="p in availablePlayers" :key="p.id" :value="p.id">{{ p.firstName }} {{ p.lastName }}</option>
-            </select>
-            <button class="rounded-lg bg-sky-600 text-white px-3 py-1.5 text-sm font-medium hover:bg-sky-700" @click="onAddPlayer">
-              Ajouter
-            </button>
+            <Dropdown v-model="playerToAdd" :options="availablePlayers" option-label="label" option-value="value" filter placeholder="Inscrire un joueur…" class="flex-1" />
+            <Button label="Ajouter" @click="onAddPlayer" />
           </div>
         </div>
       </div>

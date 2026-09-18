@@ -1,18 +1,31 @@
 <script setup>
 import { ref, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
+import DataTable from "primevue/datatable";
+import Column from "primevue/column";
+import Dialog from "primevue/dialog";
+import Button from "primevue/button";
+import InputText from "primevue/inputtext";
+import Dropdown from "primevue/dropdown";
+import Calendar from "primevue/calendar";
+import { useToast } from "primevue/usetoast";
 import AppLayout from "../../components/AppLayout.vue";
 import { api } from "../../lib/api.js";
+import { toDateOnly } from "../../lib/date.js";
 import { useNavLinks } from "../../composables/useNavLinks.js";
 
 const navLinks = useNavLinks();
-
+const toast = useToast();
 const router = useRouter();
+
 const seasons = ref([]);
 const selectedSeasonId = ref("");
 const camps = ref([]);
-const newCamp = ref({ name: "", location: "", startDate: "", endDate: "" });
-const error = ref("");
+const loading = ref(true);
+
+const dialogVisible = ref(false);
+const form = ref({ name: "", location: "", startDate: null, endDate: null });
+const saving = ref(false);
 
 async function loadSeasons() {
   const { data } = await api.get("/seasons");
@@ -27,8 +40,10 @@ async function loadCamps() {
     camps.value = [];
     return;
   }
+  loading.value = true;
   const { data } = await api.get("/camps", { params: { seasonId: selectedSeasonId.value } });
   camps.value = data.camps;
+  loading.value = false;
 }
 
 onMounted(async () => {
@@ -38,64 +53,69 @@ onMounted(async () => {
 
 watch(selectedSeasonId, loadCamps);
 
-async function onCreateCamp() {
-  error.value = "";
+function openCreate() {
+  form.value = { name: "", location: "", startDate: null, endDate: null };
+  dialogVisible.value = true;
+}
+
+async function onCreate() {
+  saving.value = true;
   try {
-    await api.post("/camps", { seasonId: selectedSeasonId.value, ...newCamp.value });
-    newCamp.value = { name: "", location: "", startDate: "", endDate: "" };
+    await api.post("/camps", {
+      seasonId: selectedSeasonId.value,
+      ...form.value,
+      startDate: toDateOnly(form.value.startDate),
+      endDate: toDateOnly(form.value.endDate),
+    });
+    dialogVisible.value = false;
+    toast.add({ severity: "success", summary: "Stage créé", life: 3000 });
     await loadCamps();
   } catch (err) {
-    error.value = err.response?.data?.error ?? "Erreur lors de la création.";
+    toast.add({ severity: "error", summary: "Erreur", detail: err.response?.data?.error ?? "Une erreur est survenue.", life: 4000 });
+  } finally {
+    saving.value = false;
   }
 }
 </script>
 
 <template>
   <AppLayout title="Stages" :nav-links="navLinks">
-    <div class="mb-4">
-      <label class="text-xs text-slate-500">Saison</label>
-      <select v-model="selectedSeasonId" class="block rounded-lg border border-slate-300 px-2 py-1.5">
-        <option v-for="s in seasons" :key="s.id" :value="s.id">{{ s.name }}</option>
-      </select>
+    <div class="mb-4 max-w-xs">
+      <label class="text-xs text-slate-500 block mb-1">Saison</label>
+      <Dropdown v-model="selectedSeasonId" :options="seasons" option-label="name" option-value="id" class="w-full" />
     </div>
 
-    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 mb-4">
-      <p class="text-sm font-medium text-slate-600 mb-3">Liste</p>
-      <ul class="divide-y divide-slate-100">
-        <li
-          v-for="c in camps"
-          :key="c.id"
-          class="py-2 flex items-center justify-between cursor-pointer hover:text-sky-600"
-          @click="router.push(`/admin/camps/${c.id}`)"
-        >
-          <span>{{ c.name }} <span class="text-xs text-slate-400">{{ c.location }}</span></span>
-          <span class="text-xs text-slate-400">
-            {{ new Date(c.startDate).toLocaleDateString("fr-FR") }} →
-            {{ new Date(c.endDate).toLocaleDateString("fr-FR") }}
-          </span>
-        </li>
-        <li v-if="!camps.length" class="py-2 text-slate-400 text-sm">Aucun stage pour cette saison.</li>
-      </ul>
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-sm font-medium text-slate-600">{{ camps.length }} stage(s)</h2>
+      <Button label="Nouveau stage" icon="pi pi-plus" @click="openCreate" />
     </div>
 
-    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-      <p class="text-sm font-medium text-slate-600 mb-3">Nouveau stage</p>
-      <form class="grid gap-2 sm:grid-cols-2" @submit.prevent="onCreateCamp">
-        <input v-model="newCamp.name" placeholder="Nom" required class="rounded-lg border border-slate-300 px-2 py-1.5" />
-        <input v-model="newCamp.location" placeholder="Lieu (optionnel)" class="rounded-lg border border-slate-300 px-2 py-1.5" />
-        <div>
-          <label class="text-xs text-slate-500">Début</label>
-          <input v-model="newCamp.startDate" type="date" required class="w-full rounded-lg border border-slate-300 px-2 py-1.5" />
+    <DataTable :value="camps" :loading="loading" class="bg-white rounded-xl shadow border border-slate-200 overflow-hidden" striped-rows @row-click="router.push(`/admin/camps/${$event.data.id}`)">
+      <template #empty>
+        <p class="text-slate-400 text-sm py-4">Aucun stage pour cette saison.</p>
+      </template>
+      <Column field="name" header="Nom" sortable>
+        <template #body="{ data }"><span class="cursor-pointer">{{ data.name }}</span></template>
+      </Column>
+      <Column field="location" header="Lieu" />
+      <Column header="Période">
+        <template #body="{ data }">
+          {{ new Date(data.startDate).toLocaleDateString("fr-FR") }} → {{ new Date(data.endDate).toLocaleDateString("fr-FR") }}
+        </template>
+      </Column>
+    </DataTable>
+
+    <Dialog v-model:visible="dialogVisible" header="Nouveau stage" modal style="width: 28rem" class="mx-4">
+      <form class="grid gap-3 sm:grid-cols-2" @submit.prevent="onCreate">
+        <InputText v-model="form.name" placeholder="Nom" required class="sm:col-span-2 w-full" />
+        <InputText v-model="form.location" placeholder="Lieu (optionnel)" class="sm:col-span-2 w-full" />
+        <Calendar v-model="form.startDate" date-format="dd/mm/yy" show-icon placeholder="Début" required class="w-full" input-class="w-full" />
+        <Calendar v-model="form.endDate" date-format="dd/mm/yy" show-icon placeholder="Fin" required class="w-full" input-class="w-full" />
+        <div class="sm:col-span-2 flex justify-end gap-2 mt-2">
+          <Button type="button" label="Annuler" severity="secondary" outlined @click="dialogVisible = false" />
+          <Button type="submit" label="Créer" :loading="saving" />
         </div>
-        <div>
-          <label class="text-xs text-slate-500">Fin</label>
-          <input v-model="newCamp.endDate" type="date" required class="w-full rounded-lg border border-slate-300 px-2 py-1.5" />
-        </div>
-        <button type="submit" class="sm:col-span-2 rounded-lg bg-sky-600 text-white py-1.5 font-medium hover:bg-sky-700">
-          Créer
-        </button>
       </form>
-      <p v-if="error" class="text-sm text-red-600 mt-2">{{ error }}</p>
-    </div>
+    </Dialog>
   </AppLayout>
 </template>
