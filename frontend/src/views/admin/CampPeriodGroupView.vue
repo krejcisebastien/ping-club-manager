@@ -4,6 +4,7 @@ import { useRoute, useRouter } from "vue-router";
 import Button from "primevue/button";
 import Dropdown from "primevue/dropdown";
 import AppLayout from "../../components/AppLayout.vue";
+import CoachAssignmentList from "../../components/CoachAssignmentList.vue";
 import { api } from "../../lib/api.js";
 import { useNavLinks } from "../../composables/useNavLinks.js";
 
@@ -17,7 +18,6 @@ const periodGroup = ref(null);
 const allCoaches = ref([]);
 const allSparrings = ref([]);
 const allPlayers = ref([]);
-const assignForm = ref({ type: "coach", id: null });
 const playerToAdd = ref(null);
 
 const availablePlayers = computed(() => {
@@ -37,11 +37,8 @@ onMounted(async () => {
   allPlayers.value = p.data.players;
 });
 
-async function onAddCoach() {
-  if (!assignForm.value.id) return;
-  const payload = assignForm.value.type === "coach" ? { coachId: assignForm.value.id } : { sparringId: assignForm.value.id };
+async function onAddCoach(payload) {
   await api.post(`/camp-period-groups/${id}/coaches`, payload);
-  assignForm.value.id = null;
   await load();
 }
 
@@ -79,28 +76,7 @@ async function onRemovePlayer(playerId) {
       <div class="grid gap-4 md:grid-cols-2">
         <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
           <p class="text-sm font-medium text-slate-600 mb-3">Encadrants</p>
-          <ul class="divide-y divide-slate-100 mb-3">
-            <li v-for="c in periodGroup.coaches" :key="c.id" class="py-2 flex items-center justify-between text-sm">
-              <span>{{ c.coach ? `${c.coach.firstName} ${c.coach.lastName}` : `${c.sparring.firstName} ${c.sparring.lastName} (sparring)` }}</span>
-              <Button icon="pi pi-times" severity="danger" text rounded size="small" aria-label="Retirer" @click="onRemoveCoach(c.id)" />
-            </li>
-            <li v-if="!periodGroup.coaches.length" class="py-2 text-slate-400 text-sm">Aucun encadrant affecté.</li>
-          </ul>
-          <div class="flex flex-col gap-2">
-            <div class="flex gap-2">
-              <Dropdown v-model="assignForm.type" :options="[{ label: 'Entraineur', value: 'coach' }, { label: 'Sparring', value: 'sparring' }]" option-label="label" option-value="value" class="w-32 shrink-0" />
-              <Dropdown
-                v-model="assignForm.id"
-                :options="(assignForm.type === 'coach' ? allCoaches : allSparrings).map((c) => ({ label: `${c.firstName} ${c.lastName}`, value: c.id }))"
-                option-label="label"
-                option-value="value"
-                filter
-                placeholder="Choisir…"
-                class="flex-1 min-w-0"
-              />
-            </div>
-            <Button label="Ajouter" @click="onAddCoach" />
-          </div>
+          <CoachAssignmentList :assignments="periodGroup.coaches" :coaches="allCoaches" :sparrings="allSparrings" @add="onAddCoach" @remove="onRemoveCoach" />
         </div>
 
         <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">

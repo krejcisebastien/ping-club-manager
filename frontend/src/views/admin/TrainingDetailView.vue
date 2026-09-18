@@ -15,6 +15,7 @@ import FullCalendar from "@fullcalendar/vue3";
 import { useToast } from "primevue/usetoast";
 import { CALENDAR_PLUGINS } from "../../lib/calendar.js";
 import AppLayout from "../../components/AppLayout.vue";
+import CoachAssignmentList from "../../components/CoachAssignmentList.vue";
 import { api } from "../../lib/api.js";
 import { useNavLinks } from "../../composables/useNavLinks.js";
 
@@ -40,9 +41,6 @@ const generating = ref(false);
 const assignDialogVisible = ref(false);
 const activeOccurrence = ref(null);
 const occurrenceCoaches = ref([]);
-const assignForm = ref({ type: "coach", id: null });
-
-const defaultAssignForm = ref({ type: "coach", id: null });
 
 function timeToString(date) {
   if (!date) return null;
@@ -123,18 +121,14 @@ async function onGenerate() {
 
 async function openAssignDialog(occurrence) {
   activeOccurrence.value = occurrence;
-  assignForm.value = { type: "coach", id: null };
   assignDialogVisible.value = true;
   const { data } = await api.get(`/occurrences/${occurrence.id}`);
   occurrenceCoaches.value = data.occurrence.coaches;
 }
 
-async function onAssign() {
-  if (!assignForm.value.id) return;
-  const payload = assignForm.value.type === "coach" ? { coachId: assignForm.value.id } : { sparringId: assignForm.value.id };
+async function onAssign(payload) {
   const { data } = await api.post(`/occurrences/${activeOccurrence.value.id}/coaches`, payload);
   occurrenceCoaches.value.push(data.assignment);
-  assignForm.value.id = null;
 }
 
 async function onUnassign(assignmentId) {
@@ -142,11 +136,8 @@ async function onUnassign(assignmentId) {
   occurrenceCoaches.value = occurrenceCoaches.value.filter((a) => a.id !== assignmentId);
 }
 
-async function onAssignDefault() {
-  if (!defaultAssignForm.value.id) return;
-  const payload = defaultAssignForm.value.type === "coach" ? { coachId: defaultAssignForm.value.id } : { sparringId: defaultAssignForm.value.id };
+async function onAssignDefault(payload) {
   await api.post(`/trainings/${trainingId}/coaches`, payload);
-  defaultAssignForm.value.id = null;
   await loadTraining();
 }
 
@@ -203,26 +194,14 @@ const calendarOptions = computed(() => ({
       <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
         <p class="text-sm font-medium text-slate-600 mb-1">Encadrants par défaut</p>
         <p class="text-xs text-slate-400 mb-3">Affectés automatiquement à chaque nouvelle séance générée. Modifiable ensuite au cas par cas sur une séance.</p>
-        <ul class="text-sm divide-y divide-slate-100 mb-3">
-          <li v-for="a in training.coaches" :key="a.id" class="flex items-center justify-between py-2">
-            <span>{{ a.coach ? `${a.coach.firstName} ${a.coach.lastName}` : `${a.sparring.firstName} ${a.sparring.lastName} (sparring)` }}</span>
-            <Button icon="pi pi-times" severity="danger" text rounded size="small" aria-label="Retirer" @click="onUnassignDefault(a.id)" />
-          </li>
-          <li v-if="!training.coaches.length" class="text-slate-400 py-2">Aucun encadrant par défaut.</li>
-        </ul>
-        <div class="flex flex-wrap gap-2">
-          <Dropdown v-model="defaultAssignForm.type" :options="[{ label: 'Entraineur', value: 'coach' }, { label: 'Sparring', value: 'sparring' }]" option-label="label" option-value="value" class="w-full sm:w-32" />
-          <Dropdown
-            v-model="defaultAssignForm.id"
-            :options="(defaultAssignForm.type === 'coach' ? coaches : sparrings).map((c) => ({ label: `${c.firstName} ${c.lastName}`, value: c.id }))"
-            option-label="label"
-            option-value="value"
-            filter
-            placeholder="Choisir…"
-            class="flex-1 min-w-0"
-          />
-          <Button label="Affecter" @click="onAssignDefault" class="w-full sm:w-auto" />
-        </div>
+        <CoachAssignmentList
+          :assignments="training.coaches"
+          :coaches="coaches"
+          :sparrings="sparrings"
+          empty-label="Aucun encadrant par défaut."
+          @add="onAssignDefault"
+          @remove="onUnassignDefault"
+        />
       </div>
 
       <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
@@ -273,26 +252,7 @@ const calendarOptions = computed(() => ({
         <p class="text-sm text-slate-500 mb-3">
           {{ new Date(activeOccurrence.date).toLocaleDateString("fr-FR") }} · {{ activeOccurrence.startTime }}–{{ activeOccurrence.endTime }}
         </p>
-        <ul class="text-sm divide-y divide-slate-100 mb-3">
-          <li v-for="a in occurrenceCoaches" :key="a.id" class="flex items-center justify-between py-2">
-            <span>{{ a.coach ? `${a.coach.firstName} ${a.coach.lastName}` : `${a.sparring.firstName} ${a.sparring.lastName} (sparring)` }}</span>
-            <Button icon="pi pi-times" severity="danger" text rounded size="small" aria-label="Retirer" @click="onUnassign(a.id)" />
-          </li>
-          <li v-if="!occurrenceCoaches.length" class="text-slate-400 py-2">Aucun encadrant affecté.</li>
-        </ul>
-        <div class="flex flex-wrap gap-2">
-          <Dropdown v-model="assignForm.type" :options="[{ label: 'Entraineur', value: 'coach' }, { label: 'Sparring', value: 'sparring' }]" option-label="label" option-value="value" class="w-full sm:w-32" />
-          <Dropdown
-            v-model="assignForm.id"
-            :options="(assignForm.type === 'coach' ? coaches : sparrings).map((c) => ({ label: `${c.firstName} ${c.lastName}`, value: c.id }))"
-            option-label="label"
-            option-value="value"
-            filter
-            placeholder="Choisir…"
-            class="flex-1 min-w-0"
-          />
-          <Button label="Affecter" @click="onAssign" class="w-full sm:w-auto" />
-        </div>
+        <CoachAssignmentList :assignments="occurrenceCoaches" :coaches="coaches" :sparrings="sparrings" @add="onAssign" @remove="onUnassign" />
       </div>
     </Dialog>
   </AppLayout>
