@@ -1,142 +1,169 @@
 <script setup>
 import { ref, onMounted } from "vue";
+import DataTable from "primevue/datatable";
+import Column from "primevue/column";
+import Dialog from "primevue/dialog";
+import Button from "primevue/button";
+import InputText from "primevue/inputtext";
+import Dropdown from "primevue/dropdown";
+import Checkbox from "primevue/checkbox";
+import Tag from "primevue/tag";
+import { useToast } from "primevue/usetoast";
+import { useConfirm } from "primevue/useconfirm";
 import AppLayout from "../../components/AppLayout.vue";
 import { api } from "../../lib/api.js";
 import { useNavLinks } from "../../composables/useNavLinks.js";
 
 const navLinks = useNavLinks();
+const toast = useToast();
+const confirm = useConfirm();
 
-const emptyForm = () => ({ firstName: "", lastName: "", ranking: "", isClubMember: false, playerId: "", externalClub: "" });
+const emptyForm = () => ({ firstName: "", lastName: "", ranking: "", isClubMember: false, playerId: null, externalClub: "" });
 
 const sparrings = ref([]);
 const players = ref([]);
-const newSparring = ref(emptyForm());
-const editingId = ref("");
-const editForm = ref(emptyForm());
-const error = ref("");
+const loading = ref(true);
+const dialogVisible = ref(false);
+const editingId = ref(null);
+const form = ref(emptyForm());
+const saving = ref(false);
 
-async function loadSparrings() {
-  const { data } = await api.get("/sparrings");
-  sparrings.value = data.sparrings;
-}
-
-onMounted(async () => {
+async function load() {
+  loading.value = true;
   const [s, p] = await Promise.all([api.get("/sparrings"), api.get("/players")]);
   sparrings.value = s.data.sparrings;
   players.value = p.data.players;
-});
-
-async function onCreate() {
-  error.value = "";
-  try {
-    await api.post("/sparrings", newSparring.value);
-    newSparring.value = emptyForm();
-    await loadSparrings();
-  } catch (err) {
-    error.value = err.response?.data?.error ?? "Erreur lors de la création.";
-  }
+  loading.value = false;
 }
 
-function onStartEdit(sparring) {
-  editingId.value = sparring.id;
-  editForm.value = {
-    firstName: sparring.firstName,
-    lastName: sparring.lastName,
-    ranking: sparring.ranking ?? "",
-    isClubMember: sparring.isClubMember,
-    playerId: sparring.playerId ?? "",
-    externalClub: sparring.externalClub ?? "",
-  };
-}
+onMounted(load);
 
-async function onSaveEdit(id) {
-  error.value = "";
-  try {
-    await api.put(`/sparrings/${id}`, editForm.value);
-    editingId.value = "";
-    await loadSparrings();
-  } catch (err) {
-    error.value = err.response?.data?.error ?? "Erreur lors de la modification.";
-  }
-}
-
-async function onDelete(id) {
-  await api.delete(`/sparrings/${id}`);
-  await loadSparrings();
+function playerOptions() {
+  return players.value.map((p) => ({ label: `${p.firstName} ${p.lastName}`, value: p.id }));
 }
 
 function playerName(playerId) {
   const p = players.value.find((pl) => pl.id === playerId);
   return p ? `${p.firstName} ${p.lastName}` : "";
 }
+
+function openCreate() {
+  editingId.value = null;
+  form.value = emptyForm();
+  dialogVisible.value = true;
+}
+
+function openEdit(sparring) {
+  editingId.value = sparring.id;
+  form.value = {
+    firstName: sparring.firstName,
+    lastName: sparring.lastName,
+    ranking: sparring.ranking ?? "",
+    isClubMember: sparring.isClubMember,
+    playerId: sparring.playerId ?? null,
+    externalClub: sparring.externalClub ?? "",
+  };
+  dialogVisible.value = true;
+}
+
+async function onSave() {
+  saving.value = true;
+  try {
+    if (editingId.value) {
+      await api.put(`/sparrings/${editingId.value}`, form.value);
+    } else {
+      await api.post("/sparrings", form.value);
+    }
+    dialogVisible.value = false;
+    toast.add({ severity: "success", summary: editingId.value ? "Sparring modifié" : "Sparring créé", life: 3000 });
+    await load();
+  } catch (err) {
+    toast.add({ severity: "error", summary: "Erreur", detail: err.response?.data?.error ?? "Une erreur est survenue.", life: 4000 });
+  } finally {
+    saving.value = false;
+  }
+}
+
+function onDelete(sparring) {
+  confirm.require({
+    message: `Supprimer ${sparring.firstName} ${sparring.lastName} ?`,
+    header: "Confirmation",
+    icon: "pi pi-exclamation-triangle",
+    acceptLabel: "Supprimer",
+    acceptClass: "p-button-danger",
+    rejectLabel: "Annuler",
+    rejectClass: "p-button-secondary p-button-outlined",
+    accept: async () => {
+      await api.delete(`/sparrings/${sparring.id}`);
+      toast.add({ severity: "success", summary: "Sparring supprimé", life: 3000 });
+      await load();
+    },
+  });
+}
 </script>
 
 <template>
   <AppLayout title="Sparrings" :nav-links="navLinks">
-    <div class="bg-white rounded-xl shadow-sm p-4 mb-4">
-      <p class="text-sm font-medium text-slate-600 mb-3">Liste</p>
-      <ul class="divide-y divide-slate-100">
-        <li v-for="s in sparrings" :key="s.id" class="py-2">
-          <template v-if="editingId === s.id">
-            <form class="grid gap-2 sm:grid-cols-2" @submit.prevent="onSaveEdit(s.id)">
-              <input v-model="editForm.firstName" placeholder="Prénom" required class="rounded-lg border border-slate-300 px-2 py-1 text-sm" />
-              <input v-model="editForm.lastName" placeholder="Nom" required class="rounded-lg border border-slate-300 px-2 py-1 text-sm" />
-              <input v-model="editForm.ranking" placeholder="Classement (optionnel)" class="rounded-lg border border-slate-300 px-2 py-1 text-sm" />
-              <label class="flex items-center gap-2 text-sm text-slate-600">
-                <input v-model="editForm.isClubMember" type="checkbox" /> Joueur du club
-              </label>
-              <select v-if="editForm.isClubMember" v-model="editForm.playerId" class="sm:col-span-2 rounded-lg border border-slate-300 px-2 py-1 text-sm">
-                <option value="" disabled>Choisir le joueur…</option>
-                <option v-for="p in players" :key="p.id" :value="p.id">{{ p.firstName }} {{ p.lastName }}</option>
-              </select>
-              <input v-else v-model="editForm.externalClub" placeholder="Club extérieur (optionnel)" class="sm:col-span-2 rounded-lg border border-slate-300 px-2 py-1 text-sm" />
-              <div class="sm:col-span-2 flex gap-2">
-                <button type="submit" class="rounded-lg bg-sky-600 text-white px-3 py-1 text-sm font-medium hover:bg-sky-700">
-                  Enregistrer
-                </button>
-                <button type="button" class="text-sm text-slate-500 hover:underline" @click="editingId = ''">annuler</button>
-              </div>
-            </form>
-          </template>
-          <template v-else>
-            <div class="flex items-center justify-between">
-              <span>
-                {{ s.firstName }} {{ s.lastName }}
-                <span class="text-xs text-slate-400">
-                  {{ s.ranking }}
-                  · {{ s.isClubMember ? `joueur du club${s.playerId ? " (" + playerName(s.playerId) + ")" : ""}` : (s.externalClub || "extérieur") }}
-                </span>
-              </span>
-              <div class="flex items-center gap-3 text-xs">
-                <button class="text-sky-600 hover:underline" @click="onStartEdit(s)">modifier</button>
-                <button class="text-red-500 hover:underline" @click="onDelete(s.id)">supprimer</button>
-              </div>
-            </div>
-          </template>
-        </li>
-        <li v-if="!sparrings.length" class="py-2 text-slate-400 text-sm">Aucun sparring.</li>
-      </ul>
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-sm font-medium text-slate-600">{{ sparrings.length }} sparring(s)</h2>
+      <Button label="Nouveau sparring" icon="pi pi-plus" @click="openCreate" />
     </div>
 
-    <div class="bg-white rounded-xl shadow-sm p-4">
-      <p class="text-sm font-medium text-slate-600 mb-3">Nouveau sparring</p>
-      <form class="grid gap-2 sm:grid-cols-2" @submit.prevent="onCreate">
-        <input v-model="newSparring.firstName" placeholder="Prénom" required class="rounded-lg border border-slate-300 px-2 py-1.5" />
-        <input v-model="newSparring.lastName" placeholder="Nom" required class="rounded-lg border border-slate-300 px-2 py-1.5" />
-        <input v-model="newSparring.ranking" placeholder="Classement (optionnel)" class="rounded-lg border border-slate-300 px-2 py-1.5" />
-        <label class="flex items-center gap-2 text-sm text-slate-600">
-          <input v-model="newSparring.isClubMember" type="checkbox" /> Joueur du club
-        </label>
-        <select v-if="newSparring.isClubMember" v-model="newSparring.playerId" class="sm:col-span-2 rounded-lg border border-slate-300 px-2 py-1.5">
-          <option value="" disabled>Choisir le joueur…</option>
-          <option v-for="p in players" :key="p.id" :value="p.id">{{ p.firstName }} {{ p.lastName }}</option>
-        </select>
-        <input v-else v-model="newSparring.externalClub" placeholder="Club extérieur (optionnel)" class="sm:col-span-2 rounded-lg border border-slate-300 px-2 py-1.5" />
-        <button type="submit" class="sm:col-span-2 rounded-lg bg-sky-600 text-white py-1.5 font-medium hover:bg-sky-700">
-          Créer
-        </button>
+    <DataTable :value="sparrings" :loading="loading" class="bg-white rounded-xl shadow-sm overflow-hidden" striped-rows>
+      <template #empty>
+        <p class="text-slate-400 text-sm py-4">Aucun sparring.</p>
+      </template>
+      <Column field="lastName" header="Nom" sortable>
+        <template #body="{ data }">{{ data.firstName }} {{ data.lastName }}</template>
+      </Column>
+      <Column field="ranking" header="Classement" />
+      <Column header="Origine">
+        <template #body="{ data }">
+          <Tag v-if="data.isClubMember" severity="info" :value="`Club — ${playerName(data.playerId)}`" />
+          <Tag v-else severity="secondary" :value="data.externalClub || 'Extérieur'" />
+        </template>
+      </Column>
+      <Column header="" style="width: 7rem">
+        <template #body="{ data }">
+          <div class="flex gap-1 justify-end">
+            <Button icon="pi pi-pencil" severity="secondary" text rounded aria-label="Modifier" @click="openEdit(data)" />
+            <Button icon="pi pi-trash" severity="danger" text rounded aria-label="Supprimer" @click="onDelete(data)" />
+          </div>
+        </template>
+      </Column>
+    </DataTable>
+
+    <Dialog v-model:visible="dialogVisible" :header="editingId ? 'Modifier le sparring' : 'Nouveau sparring'" modal style="width: 28rem" class="mx-4">
+      <form class="grid gap-3 pt-2" @submit.prevent="onSave">
+        <div>
+          <label class="text-xs text-slate-500 block mb-1">Prénom</label>
+          <InputText v-model="form.firstName" required class="w-full" />
+        </div>
+        <div>
+          <label class="text-xs text-slate-500 block mb-1">Nom</label>
+          <InputText v-model="form.lastName" required class="w-full" />
+        </div>
+        <div>
+          <label class="text-xs text-slate-500 block mb-1">Classement (optionnel)</label>
+          <InputText v-model="form.ranking" class="w-full" />
+        </div>
+        <div class="flex items-center gap-2">
+          <Checkbox v-model="form.isClubMember" binary input-id="isClubMember" />
+          <label for="isClubMember" class="text-sm text-slate-600">Joueur du club</label>
+        </div>
+        <div v-if="form.isClubMember">
+          <label class="text-xs text-slate-500 block mb-1">Joueur</label>
+          <Dropdown v-model="form.playerId" :options="playerOptions()" option-label="label" option-value="value" placeholder="Choisir le joueur…" class="w-full" />
+        </div>
+        <div v-else>
+          <label class="text-xs text-slate-500 block mb-1">Club extérieur (optionnel)</label>
+          <InputText v-model="form.externalClub" class="w-full" />
+        </div>
+        <div class="flex justify-end gap-2 mt-2">
+          <Button type="button" label="Annuler" severity="secondary" outlined @click="dialogVisible = false" />
+          <Button type="submit" label="Enregistrer" :loading="saving" />
+        </div>
       </form>
-      <p v-if="error" class="text-sm text-red-600 mt-2">{{ error }}</p>
-    </div>
+    </Dialog>
   </AppLayout>
 </template>

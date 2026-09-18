@@ -1,24 +1,38 @@
 <script setup>
 import { ref, onMounted } from "vue";
+import { RouterLink } from "vue-router";
+import DataTable from "primevue/datatable";
+import Column from "primevue/column";
+import Dialog from "primevue/dialog";
+import Button from "primevue/button";
+import InputText from "primevue/inputtext";
+import Calendar from "primevue/calendar";
+import Checkbox from "primevue/checkbox";
+import Tag from "primevue/tag";
+import { useToast } from "primevue/usetoast";
 import AppLayout from "../../components/AppLayout.vue";
 import { api } from "../../lib/api.js";
+import { toDateOnly } from "../../lib/date.js";
 import { useNavLinks } from "../../composables/useNavLinks.js";
 
 const navLinks = useNavLinks();
+const toast = useToast();
 
 const seasons = ref([]);
 const players = ref([]);
 const coaches = ref([]);
+const loading = ref(true);
 
-const newSeason = ref({ name: "", startDate: "", endDate: "" });
-const creating = ref(false);
-const editingSeasonId = ref("");
-const editSeasonForm = ref({ name: "", startDate: "", endDate: "", isActive: false });
-const error = ref("");
+const dialogVisible = ref(false);
+const editingId = ref(null);
+const form = ref({ name: "", startDate: null, endDate: null, isActive: false });
+const saving = ref(false);
 
 async function loadSeasons() {
+  loading.value = true;
   const { data } = await api.get("/seasons");
   seasons.value = data.seasons;
+  loading.value = false;
 }
 
 onMounted(async () => {
@@ -28,34 +42,48 @@ onMounted(async () => {
   await loadSeasons();
 });
 
-async function onCreateSeason() {
-  error.value = "";
-  creating.value = true;
+function openCreate() {
+  editingId.value = null;
+  form.value = { name: "", startDate: null, endDate: null, isActive: false };
+  dialogVisible.value = true;
+}
+
+function openEdit(season) {
+  editingId.value = season.id;
+  form.value = {
+    name: season.name,
+    startDate: new Date(season.startDate),
+    endDate: new Date(season.endDate),
+    isActive: season.isActive,
+  };
+  dialogVisible.value = true;
+}
+
+async function onSave() {
+  saving.value = true;
+  const payload = {
+    ...form.value,
+    startDate: toDateOnly(form.value.startDate),
+    endDate: toDateOnly(form.value.endDate),
+  };
   try {
-    await api.post("/seasons", newSeason.value);
-    newSeason.value = { name: "", startDate: "", endDate: "" };
+    if (editingId.value) {
+      await api.put(`/seasons/${editingId.value}`, payload);
+    } else {
+      await api.post("/seasons", payload);
+    }
+    dialogVisible.value = false;
+    toast.add({ severity: "success", summary: editingId.value ? "Saison modifiée" : "Saison créée", life: 3000 });
     await loadSeasons();
   } catch (err) {
-    error.value = err.response?.data?.error ?? "Erreur lors de la création.";
+    toast.add({ severity: "error", summary: "Erreur", detail: err.response?.data?.error ?? "Une erreur est survenue.", life: 4000 });
   } finally {
-    creating.value = false;
+    saving.value = false;
   }
 }
 
-function onStartEditSeason(season) {
-  editingSeasonId.value = season.id;
-  editSeasonForm.value = {
-    name: season.name,
-    startDate: season.startDate.slice(0, 10),
-    endDate: season.endDate.slice(0, 10),
-    isActive: season.isActive,
-  };
-}
-
-async function onSaveSeason(id) {
-  await api.put(`/seasons/${id}`, editSeasonForm.value);
-  editingSeasonId.value = "";
-  await loadSeasons();
+function formatDate(d) {
+  return new Date(d).toLocaleDateString("fr-FR");
 }
 </script>
 
@@ -76,61 +104,56 @@ async function onSaveSeason(id) {
       </RouterLink>
     </div>
 
-    <div class="bg-white rounded-xl shadow-sm p-4">
-      <p class="text-sm font-medium text-slate-600 mb-3">Saisons</p>
-      <ul class="divide-y divide-slate-100 mb-4">
-        <li v-for="s in seasons" :key="s.id" class="py-2">
-          <form v-if="editingSeasonId === s.id" class="grid gap-2 sm:grid-cols-4 sm:items-end" @submit.prevent="onSaveSeason(s.id)">
-            <input v-model="editSeasonForm.name" required class="rounded-lg border border-slate-300 px-2 py-1 text-sm" />
-            <input v-model="editSeasonForm.startDate" type="date" required class="rounded-lg border border-slate-300 px-2 py-1 text-sm" />
-            <input v-model="editSeasonForm.endDate" type="date" required class="rounded-lg border border-slate-300 px-2 py-1 text-sm" />
-            <div class="flex items-center gap-2">
-              <label class="flex items-center gap-1 text-xs text-slate-500">
-                <input v-model="editSeasonForm.isActive" type="checkbox" /> active
-              </label>
-              <button type="submit" class="rounded-lg bg-sky-600 text-white px-3 py-1 text-sm font-medium hover:bg-sky-700">OK</button>
-              <button type="button" class="text-sm text-slate-500" @click="editingSeasonId = ''">annuler</button>
-            </div>
-          </form>
-          <div v-else class="flex items-center justify-between">
-            <span>
-              {{ s.name }}
-              <span v-if="s.isActive" class="text-xs text-emerald-600 font-medium">· active</span>
-            </span>
-            <div class="flex items-center gap-3">
-              <span class="text-xs text-slate-400">
-                {{ new Date(s.startDate).toLocaleDateString("fr-FR") }} →
-                {{ new Date(s.endDate).toLocaleDateString("fr-FR") }}
-              </span>
-              <button class="text-xs text-sky-600 hover:underline" @click="onStartEditSeason(s)">modifier</button>
-            </div>
-          </div>
-        </li>
-        <li v-if="!seasons.length" class="py-2 text-slate-400 text-sm">Aucune saison créée.</li>
-      </ul>
-
-      <form class="grid gap-2 sm:grid-cols-4 sm:items-end" @submit.prevent="onCreateSeason">
-        <div class="sm:col-span-2">
-          <label class="text-xs text-slate-500">Nom</label>
-          <input v-model="newSeason.name" required class="w-full rounded-lg border border-slate-300 px-2 py-1.5" />
-        </div>
-        <div>
-          <label class="text-xs text-slate-500">Début</label>
-          <input v-model="newSeason.startDate" type="date" required class="w-full rounded-lg border border-slate-300 px-2 py-1.5" />
-        </div>
-        <div>
-          <label class="text-xs text-slate-500">Fin</label>
-          <input v-model="newSeason.endDate" type="date" required class="w-full rounded-lg border border-slate-300 px-2 py-1.5" />
-        </div>
-        <button
-          type="submit"
-          :disabled="creating"
-          class="sm:col-span-4 rounded-lg bg-sky-600 text-white py-1.5 font-medium hover:bg-sky-700 disabled:opacity-60"
-        >
-          Créer la saison
-        </button>
-      </form>
-      <p v-if="error" class="text-sm text-red-600 mt-2">{{ error }}</p>
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-sm font-medium text-slate-600">Saisons</h2>
+      <Button label="Nouvelle saison" icon="pi pi-plus" @click="openCreate" />
     </div>
+
+    <DataTable :value="seasons" :loading="loading" class="bg-white rounded-xl shadow-sm overflow-hidden" striped-rows>
+      <template #empty>
+        <p class="text-slate-400 text-sm py-4">Aucune saison créée.</p>
+      </template>
+      <Column field="name" header="Nom" sortable>
+        <template #body="{ data }">
+          {{ data.name }}
+          <Tag v-if="data.isActive" severity="success" value="active" class="ml-2" />
+        </template>
+      </Column>
+      <Column header="Période">
+        <template #body="{ data }">{{ formatDate(data.startDate) }} → {{ formatDate(data.endDate) }}</template>
+      </Column>
+      <Column header="" style="width: 4rem">
+        <template #body="{ data }">
+          <Button icon="pi pi-pencil" severity="secondary" text rounded aria-label="Modifier" @click="openEdit(data)" />
+        </template>
+      </Column>
+    </DataTable>
+
+    <Dialog v-model:visible="dialogVisible" :header="editingId ? 'Modifier la saison' : 'Nouvelle saison'" modal style="width: 26rem" class="mx-4">
+      <form class="grid gap-3 pt-2" @submit.prevent="onSave">
+        <div>
+          <label class="text-xs text-slate-500 block mb-1">Nom</label>
+          <InputText v-model="form.name" required class="w-full" />
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs text-slate-500 block mb-1">Début</label>
+            <Calendar v-model="form.startDate" date-format="dd/mm/yy" show-icon required class="w-full" input-class="w-full" />
+          </div>
+          <div>
+            <label class="text-xs text-slate-500 block mb-1">Fin</label>
+            <Calendar v-model="form.endDate" date-format="dd/mm/yy" show-icon required class="w-full" input-class="w-full" />
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <Checkbox v-model="form.isActive" binary input-id="isActive" />
+          <label for="isActive" class="text-sm text-slate-600">Saison active</label>
+        </div>
+        <div class="flex justify-end gap-2 mt-2">
+          <Button type="button" label="Annuler" severity="secondary" outlined @click="dialogVisible = false" />
+          <Button type="submit" label="Enregistrer" :loading="saving" />
+        </div>
+      </form>
+    </Dialog>
   </AppLayout>
 </template>

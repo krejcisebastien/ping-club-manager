@@ -1,98 +1,135 @@
 <script setup>
 import { ref, onMounted } from "vue";
+import DataTable from "primevue/datatable";
+import Column from "primevue/column";
+import Dialog from "primevue/dialog";
+import Button from "primevue/button";
+import InputText from "primevue/inputtext";
+import { useToast } from "primevue/usetoast";
+import { useConfirm } from "primevue/useconfirm";
 import AppLayout from "../../components/AppLayout.vue";
 import { api } from "../../lib/api.js";
 import { useNavLinks } from "../../composables/useNavLinks.js";
 
 const navLinks = useNavLinks();
+const toast = useToast();
+const confirm = useConfirm();
+
+const emptyForm = () => ({ firstName: "", lastName: "", email: "", phone: "" });
 
 const coaches = ref([]);
-const newCoach = ref({ firstName: "", lastName: "", email: "", phone: "" });
-const editingId = ref("");
-const editForm = ref({ firstName: "", lastName: "", email: "", phone: "" });
-const error = ref("");
+const loading = ref(true);
+const dialogVisible = ref(false);
+const editingId = ref(null);
+const form = ref(emptyForm());
+const saving = ref(false);
 
-async function loadCoaches() {
+async function load() {
+  loading.value = true;
   const { data } = await api.get("/coaches");
   coaches.value = data.coaches;
+  loading.value = false;
 }
 
-onMounted(loadCoaches);
+onMounted(load);
 
-async function onCreate() {
-  error.value = "";
+function openCreate() {
+  editingId.value = null;
+  form.value = emptyForm();
+  dialogVisible.value = true;
+}
+
+function openEdit(coach) {
+  editingId.value = coach.id;
+  form.value = { firstName: coach.firstName, lastName: coach.lastName, email: coach.email ?? "", phone: coach.phone ?? "" };
+  dialogVisible.value = true;
+}
+
+async function onSave() {
+  saving.value = true;
   try {
-    await api.post("/coaches", newCoach.value);
-    newCoach.value = { firstName: "", lastName: "", email: "", phone: "" };
-    await loadCoaches();
+    if (editingId.value) {
+      await api.put(`/coaches/${editingId.value}`, form.value);
+    } else {
+      await api.post("/coaches", form.value);
+    }
+    dialogVisible.value = false;
+    toast.add({ severity: "success", summary: editingId.value ? "Entraineur modifié" : "Entraineur créé", life: 3000 });
+    await load();
   } catch (err) {
-    error.value = err.response?.data?.error ?? "Erreur lors de la création.";
+    toast.add({ severity: "error", summary: "Erreur", detail: err.response?.data?.error ?? "Une erreur est survenue.", life: 4000 });
+  } finally {
+    saving.value = false;
   }
 }
 
-function onStartEdit(coach) {
-  editingId.value = coach.id;
-  editForm.value = { firstName: coach.firstName, lastName: coach.lastName, email: coach.email ?? "", phone: coach.phone ?? "" };
-}
-
-async function onSaveEdit(id) {
-  await api.put(`/coaches/${id}`, editForm.value);
-  editingId.value = "";
-  await loadCoaches();
-}
-
-async function onDelete(id) {
-  await api.delete(`/coaches/${id}`);
-  await loadCoaches();
+function onDelete(coach) {
+  confirm.require({
+    message: `Supprimer ${coach.firstName} ${coach.lastName} ?`,
+    header: "Confirmation",
+    icon: "pi pi-exclamation-triangle",
+    acceptLabel: "Supprimer",
+    acceptClass: "p-button-danger",
+    rejectLabel: "Annuler",
+    rejectClass: "p-button-secondary p-button-outlined",
+    accept: async () => {
+      await api.delete(`/coaches/${coach.id}`);
+      toast.add({ severity: "success", summary: "Entraineur supprimé", life: 3000 });
+      await load();
+    },
+  });
 }
 </script>
 
 <template>
   <AppLayout title="Entraineurs" :nav-links="navLinks">
-    <div class="bg-white rounded-xl shadow-sm p-4 mb-4">
-      <p class="text-sm font-medium text-slate-600 mb-3">Liste</p>
-      <ul class="divide-y divide-slate-100">
-        <li v-for="c in coaches" :key="c.id" class="py-2">
-          <template v-if="editingId === c.id">
-            <form class="grid gap-2 sm:grid-cols-2" @submit.prevent="onSaveEdit(c.id)">
-              <input v-model="editForm.firstName" placeholder="Prénom" required class="rounded-lg border border-slate-300 px-2 py-1 text-sm" />
-              <input v-model="editForm.lastName" placeholder="Nom" required class="rounded-lg border border-slate-300 px-2 py-1 text-sm" />
-              <input v-model="editForm.email" placeholder="Email" class="rounded-lg border border-slate-300 px-2 py-1 text-sm" />
-              <input v-model="editForm.phone" placeholder="Téléphone" class="rounded-lg border border-slate-300 px-2 py-1 text-sm" />
-              <div class="sm:col-span-2 flex gap-2">
-                <button type="submit" class="rounded-lg bg-sky-600 text-white px-3 py-1 text-sm font-medium hover:bg-sky-700">
-                  Enregistrer
-                </button>
-                <button type="button" class="text-sm text-slate-500 hover:underline" @click="editingId = ''">annuler</button>
-              </div>
-            </form>
-          </template>
-          <template v-else>
-            <div class="flex items-center justify-between">
-              <span>{{ c.firstName }} {{ c.lastName }} <span class="text-xs text-slate-400">{{ c.email }}</span></span>
-              <div class="flex items-center gap-3 text-xs">
-                <button class="text-sky-600 hover:underline" @click="onStartEdit(c)">modifier</button>
-                <button class="text-red-500 hover:underline" @click="onDelete(c.id)">supprimer</button>
-              </div>
-            </div>
-          </template>
-        </li>
-        <li v-if="!coaches.length" class="py-2 text-slate-400 text-sm">Aucun entraineur.</li>
-      </ul>
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-sm font-medium text-slate-600">{{ coaches.length }} entraineur(s)</h2>
+      <Button label="Nouvel entraineur" icon="pi pi-plus" @click="openCreate" />
     </div>
 
-    <div class="bg-white rounded-xl shadow-sm p-4">
-      <p class="text-sm font-medium text-slate-600 mb-3">Nouvel entraineur</p>
-      <form class="grid gap-2 sm:grid-cols-2" @submit.prevent="onCreate">
-        <input v-model="newCoach.firstName" placeholder="Prénom" required class="rounded-lg border border-slate-300 px-2 py-1.5" />
-        <input v-model="newCoach.lastName" placeholder="Nom" required class="rounded-lg border border-slate-300 px-2 py-1.5" />
-        <input v-model="newCoach.email" placeholder="Email (optionnel)" class="rounded-lg border border-slate-300 px-2 py-1.5" />
-        <input v-model="newCoach.phone" placeholder="Téléphone (optionnel)" class="rounded-lg border border-slate-300 px-2 py-1.5" />
-        <button type="submit" class="sm:col-span-2 rounded-lg bg-sky-600 text-white py-1.5 font-medium hover:bg-sky-700">
-          Créer
-        </button>
+    <DataTable :value="coaches" :loading="loading" class="bg-white rounded-xl shadow-sm overflow-hidden" striped-rows>
+      <template #empty>
+        <p class="text-slate-400 text-sm py-4">Aucun entraineur.</p>
+      </template>
+      <Column field="lastName" header="Nom" sortable>
+        <template #body="{ data }">{{ data.firstName }} {{ data.lastName }}</template>
+      </Column>
+      <Column field="email" header="Email" />
+      <Column field="phone" header="Téléphone" />
+      <Column header="" style="width: 7rem">
+        <template #body="{ data }">
+          <div class="flex gap-1 justify-end">
+            <Button icon="pi pi-pencil" severity="secondary" text rounded aria-label="Modifier" @click="openEdit(data)" />
+            <Button icon="pi pi-trash" severity="danger" text rounded aria-label="Supprimer" @click="onDelete(data)" />
+          </div>
+        </template>
+      </Column>
+    </DataTable>
+
+    <Dialog v-model:visible="dialogVisible" :header="editingId ? 'Modifier l\'entraineur' : 'Nouvel entraineur'" modal style="width: 26rem" class="mx-4">
+      <form class="grid gap-3 pt-2" @submit.prevent="onSave">
+        <div>
+          <label class="text-xs text-slate-500 block mb-1">Prénom</label>
+          <InputText v-model="form.firstName" required class="w-full" />
+        </div>
+        <div>
+          <label class="text-xs text-slate-500 block mb-1">Nom</label>
+          <InputText v-model="form.lastName" required class="w-full" />
+        </div>
+        <div>
+          <label class="text-xs text-slate-500 block mb-1">Email (optionnel)</label>
+          <InputText v-model="form.email" class="w-full" />
+        </div>
+        <div>
+          <label class="text-xs text-slate-500 block mb-1">Téléphone (optionnel)</label>
+          <InputText v-model="form.phone" class="w-full" />
+        </div>
+        <div class="flex justify-end gap-2 mt-2">
+          <Button type="button" label="Annuler" severity="secondary" outlined @click="dialogVisible = false" />
+          <Button type="submit" label="Enregistrer" :loading="saving" />
+        </div>
       </form>
-      <p v-if="error" class="text-sm text-red-600 mt-2">{{ error }}</p>
-    </div>
+    </Dialog>
   </AppLayout>
 </template>

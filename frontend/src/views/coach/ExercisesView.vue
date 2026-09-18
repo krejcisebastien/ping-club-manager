@@ -1,97 +1,142 @@
 <script setup>
 import { ref, onMounted } from "vue";
+import DataTable from "primevue/datatable";
+import Column from "primevue/column";
+import Dialog from "primevue/dialog";
+import Button from "primevue/button";
+import InputText from "primevue/inputtext";
+import Textarea from "primevue/textarea";
+import Tag from "primevue/tag";
+import { useToast } from "primevue/usetoast";
+import { useConfirm } from "primevue/useconfirm";
 import AppLayout from "../../components/AppLayout.vue";
 import { api } from "../../lib/api.js";
 import { useNavLinks } from "../../composables/useNavLinks.js";
 
 const navLinks = useNavLinks();
+const toast = useToast();
+const confirm = useConfirm();
+
+const emptyForm = () => ({ title: "", description: "", category: "", difficulty: "" });
 
 const exercises = ref([]);
-const newExercise = ref({ title: "", description: "", category: "", difficulty: "" });
-const editingId = ref("");
-const editForm = ref({ title: "", description: "", category: "", difficulty: "" });
-const error = ref("");
+const loading = ref(true);
+const dialogVisible = ref(false);
+const editingId = ref(null);
+const form = ref(emptyForm());
+const saving = ref(false);
 
-async function loadExercises() {
+async function load() {
+  loading.value = true;
   const { data } = await api.get("/exercises");
   exercises.value = data.exercises;
+  loading.value = false;
 }
 
-onMounted(loadExercises);
+onMounted(load);
 
-async function onCreate() {
-  error.value = "";
+function openCreate() {
+  editingId.value = null;
+  form.value = emptyForm();
+  dialogVisible.value = true;
+}
+
+function openEdit(ex) {
+  editingId.value = ex.id;
+  form.value = { title: ex.title, description: ex.description ?? "", category: ex.category ?? "", difficulty: ex.difficulty ?? "" };
+  dialogVisible.value = true;
+}
+
+async function onSave() {
+  saving.value = true;
   try {
-    await api.post("/exercises", newExercise.value);
-    newExercise.value = { title: "", description: "", category: "", difficulty: "" };
-    await loadExercises();
+    if (editingId.value) {
+      await api.put(`/exercises/${editingId.value}`, form.value);
+    } else {
+      await api.post("/exercises", form.value);
+    }
+    dialogVisible.value = false;
+    toast.add({ severity: "success", summary: editingId.value ? "Exercice modifié" : "Exercice créé", life: 3000 });
+    await load();
   } catch (err) {
-    error.value = err.response?.data?.error ?? "Erreur lors de la création.";
+    toast.add({ severity: "error", summary: "Erreur", detail: err.response?.data?.error ?? "Une erreur est survenue.", life: 4000 });
+  } finally {
+    saving.value = false;
   }
 }
 
-async function onDelete(id) {
-  await api.delete(`/exercises/${id}`);
-  await loadExercises();
-}
-
-function onStartEdit(ex) {
-  editingId.value = ex.id;
-  editForm.value = { title: ex.title, description: ex.description ?? "", category: ex.category ?? "", difficulty: ex.difficulty ?? "" };
-}
-
-async function onSaveEdit(id) {
-  await api.put(`/exercises/${id}`, editForm.value);
-  editingId.value = "";
-  await loadExercises();
+function onDelete(ex) {
+  confirm.require({
+    message: `Supprimer l'exercice « ${ex.title} » ?`,
+    header: "Confirmation",
+    icon: "pi pi-exclamation-triangle",
+    acceptLabel: "Supprimer",
+    acceptClass: "p-button-danger",
+    rejectLabel: "Annuler",
+    rejectClass: "p-button-secondary p-button-outlined",
+    accept: async () => {
+      await api.delete(`/exercises/${ex.id}`);
+      toast.add({ severity: "success", summary: "Exercice supprimé", life: 3000 });
+      await load();
+    },
+  });
 }
 </script>
 
 <template>
   <AppLayout title="Bibliothèque d'exercices" :nav-links="navLinks">
-    <div class="bg-white rounded-xl shadow-sm p-4 mb-4">
-      <p class="text-sm font-medium text-slate-600 mb-3">Exercices</p>
-      <ul class="divide-y divide-slate-100">
-        <li v-for="ex in exercises" :key="ex.id" class="py-2">
-          <form v-if="editingId === ex.id" class="grid gap-2 sm:grid-cols-2" @submit.prevent="onSaveEdit(ex.id)">
-            <input v-model="editForm.title" placeholder="Titre" required class="rounded-lg border border-slate-300 px-2 py-1 text-sm" />
-            <input v-model="editForm.category" placeholder="Catégorie" class="rounded-lg border border-slate-300 px-2 py-1 text-sm" />
-            <input v-model="editForm.difficulty" placeholder="Difficulté" class="rounded-lg border border-slate-300 px-2 py-1 text-sm" />
-            <textarea v-model="editForm.description" placeholder="Description" class="sm:col-span-2 rounded-lg border border-slate-300 px-2 py-1 text-sm" rows="2"></textarea>
-            <div class="sm:col-span-2 flex gap-2">
-              <button type="submit" class="rounded-lg bg-sky-600 text-white px-3 py-1 text-sm font-medium hover:bg-sky-700">Enregistrer</button>
-              <button type="button" class="text-sm text-slate-500 hover:underline" @click="editingId = ''">annuler</button>
-            </div>
-          </form>
-          <template v-else>
-            <div class="flex items-center justify-between">
-              <span class="font-medium">{{ ex.title }}</span>
-              <div class="flex items-center gap-2 text-xs text-slate-400">
-                <span v-if="ex.category">{{ ex.category }}</span>
-                <span v-if="ex.difficulty">· {{ ex.difficulty }}</span>
-                <button class="text-sky-600 hover:underline" @click="onStartEdit(ex)">modifier</button>
-                <button class="text-red-500 hover:underline" @click="onDelete(ex.id)">supprimer</button>
-              </div>
-            </div>
-            <p v-if="ex.description" class="text-sm text-slate-500 mt-1">{{ ex.description }}</p>
-          </template>
-        </li>
-        <li v-if="!exercises.length" class="py-2 text-slate-400 text-sm">Aucun exercice.</li>
-      </ul>
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-sm font-medium text-slate-600">{{ exercises.length }} exercice(s)</h2>
+      <Button label="Nouvel exercice" icon="pi pi-plus" @click="openCreate" />
     </div>
 
-    <div class="bg-white rounded-xl shadow-sm p-4">
-      <p class="text-sm font-medium text-slate-600 mb-3">Nouvel exercice</p>
-      <form class="grid gap-2 sm:grid-cols-2" @submit.prevent="onCreate">
-        <input v-model="newExercise.title" placeholder="Titre" required class="rounded-lg border border-slate-300 px-2 py-1.5" />
-        <input v-model="newExercise.category" placeholder="Catégorie (optionnel)" class="rounded-lg border border-slate-300 px-2 py-1.5" />
-        <input v-model="newExercise.difficulty" placeholder="Difficulté (optionnel)" class="rounded-lg border border-slate-300 px-2 py-1.5" />
-        <textarea v-model="newExercise.description" placeholder="Description (optionnel)" class="sm:col-span-2 rounded-lg border border-slate-300 px-2 py-1.5" rows="3"></textarea>
-        <button type="submit" class="sm:col-span-2 rounded-lg bg-sky-600 text-white py-1.5 font-medium hover:bg-sky-700">
-          Créer
-        </button>
+    <DataTable :value="exercises" :loading="loading" class="bg-white rounded-xl shadow-sm overflow-hidden" striped-rows>
+      <template #empty>
+        <p class="text-slate-400 text-sm py-4">Aucun exercice.</p>
+      </template>
+      <Column field="title" header="Titre" sortable />
+      <Column header="Catégorie">
+        <template #body="{ data }"><Tag v-if="data.category" severity="secondary" :value="data.category" /></template>
+      </Column>
+      <Column field="difficulty" header="Difficulté" />
+      <Column field="description" header="Description">
+        <template #body="{ data }"><span class="text-slate-500 text-sm line-clamp-1">{{ data.description }}</span></template>
+      </Column>
+      <Column header="" style="width: 7rem">
+        <template #body="{ data }">
+          <div class="flex gap-1 justify-end">
+            <Button icon="pi pi-pencil" severity="secondary" text rounded aria-label="Modifier" @click="openEdit(data)" />
+            <Button icon="pi pi-trash" severity="danger" text rounded aria-label="Supprimer" @click="onDelete(data)" />
+          </div>
+        </template>
+      </Column>
+    </DataTable>
+
+    <Dialog v-model:visible="dialogVisible" :header="editingId ? 'Modifier l\'exercice' : 'Nouvel exercice'" modal style="width: 28rem" class="mx-4">
+      <form class="grid gap-3 pt-2" @submit.prevent="onSave">
+        <div>
+          <label class="text-xs text-slate-500 block mb-1">Titre</label>
+          <InputText v-model="form.title" required class="w-full" />
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs text-slate-500 block mb-1">Catégorie</label>
+            <InputText v-model="form.category" class="w-full" />
+          </div>
+          <div>
+            <label class="text-xs text-slate-500 block mb-1">Difficulté</label>
+            <InputText v-model="form.difficulty" class="w-full" />
+          </div>
+        </div>
+        <div>
+          <label class="text-xs text-slate-500 block mb-1">Description</label>
+          <Textarea v-model="form.description" rows="3" class="w-full" />
+        </div>
+        <div class="flex justify-end gap-2 mt-2">
+          <Button type="button" label="Annuler" severity="secondary" outlined @click="dialogVisible = false" />
+          <Button type="submit" label="Enregistrer" :loading="saving" />
+        </div>
       </form>
-      <p v-if="error" class="text-sm text-red-600 mt-2">{{ error }}</p>
-    </div>
+    </Dialog>
   </AppLayout>
 </template>

@@ -1,23 +1,49 @@
 <script setup>
 import { ref, onMounted } from "vue";
+import DataTable from "primevue/datatable";
+import Column from "primevue/column";
+import Dialog from "primevue/dialog";
+import Button from "primevue/button";
+import InputText from "primevue/inputtext";
+import Password from "primevue/password";
+import Dropdown from "primevue/dropdown";
+import MultiSelect from "primevue/multiselect";
+import Tag from "primevue/tag";
+import { useToast } from "primevue/usetoast";
+import { useConfirm } from "primevue/useconfirm";
 import AppLayout from "../../components/AppLayout.vue";
 import { api } from "../../lib/api.js";
 import { useNavLinks } from "../../composables/useNavLinks.js";
 
 const navLinks = useNavLinks();
+const toast = useToast();
+const confirm = useConfirm();
+
+const emptyForm = () => ({ email: "", password: "", role: "PLAYER", playerIds: [], coachId: null });
+const roleOptions = [
+  { label: "Administrateur", value: "ADMIN" },
+  { label: "Entraineur", value: "COACH" },
+  { label: "Joueur", value: "PLAYER" },
+];
 
 const users = ref([]);
 const players = ref([]);
 const coaches = ref([]);
-const newUser = ref({ email: "", password: "", role: "PLAYER", playerIds: [], coachId: "" });
-const error = ref("");
+const loading = ref(true);
 
-const editingId = ref("");
+const createDialogVisible = ref(false);
+const form = ref(emptyForm());
+const saving = ref(false);
+
+const playersDialogVisible = ref(false);
+const editingUser = ref(null);
 const editPlayerIds = ref([]);
 
 async function loadUsers() {
+  loading.value = true;
   const { data } = await api.get("/auth/users");
   users.value = data.users;
+  loading.value = false;
 }
 
 onMounted(async () => {
@@ -27,36 +53,71 @@ onMounted(async () => {
   await loadUsers();
 });
 
+function playerOptions() {
+  return players.value.map((p) => ({ label: `${p.firstName} ${p.lastName}`, value: p.id }));
+}
+function coachOptions() {
+  return coaches.value.map((c) => ({ label: `${c.firstName} ${c.lastName}`, value: c.id }));
+}
+
+function openCreate() {
+  form.value = emptyForm();
+  createDialogVisible.value = true;
+}
+
 async function onCreate() {
-  error.value = "";
+  saving.value = true;
   try {
-    await api.post("/auth/users", newUser.value);
-    newUser.value = { email: "", password: "", role: "PLAYER", playerIds: [], coachId: "" };
+    await api.post("/auth/users", form.value);
+    createDialogVisible.value = false;
+    toast.add({ severity: "success", summary: "Compte créé", life: 3000 });
     await loadUsers();
   } catch (err) {
-    error.value = err.response?.data?.error ?? "Erreur lors de la création.";
+    toast.add({ severity: "error", summary: "Erreur", detail: err.response?.data?.error ?? "Une erreur est survenue.", life: 4000 });
+  } finally {
+    saving.value = false;
   }
 }
 
 async function onToggleActive(user) {
   await api.put(`/auth/users/${user.id}`, { isActive: !user.isActive });
+  toast.add({ severity: "success", summary: user.isActive ? "Compte désactivé" : "Compte activé", life: 3000 });
   await loadUsers();
 }
 
-async function onDelete(id) {
-  await api.delete(`/auth/users/${id}`);
-  await loadUsers();
+function onDelete(user) {
+  confirm.require({
+    message: `Supprimer le compte ${user.email} ?`,
+    header: "Confirmation",
+    icon: "pi pi-exclamation-triangle",
+    acceptLabel: "Supprimer",
+    acceptClass: "p-button-danger",
+    rejectLabel: "Annuler",
+    rejectClass: "p-button-secondary p-button-outlined",
+    accept: async () => {
+      await api.delete(`/auth/users/${user.id}`);
+      toast.add({ severity: "success", summary: "Compte supprimé", life: 3000 });
+      await loadUsers();
+    },
+  });
 }
 
-function onStartEditPlayers(user) {
-  editingId.value = user.id;
+function openPlayersDialog(user) {
+  editingUser.value = user;
   editPlayerIds.value = user.players.map((p) => p.id);
+  playersDialogVisible.value = true;
 }
 
-async function onSavePlayers(id) {
-  await api.put(`/auth/users/${id}`, { playerIds: editPlayerIds.value });
-  editingId.value = "";
-  await loadUsers();
+async function onSavePlayers() {
+  saving.value = true;
+  try {
+    await api.put(`/auth/users/${editingUser.value.id}`, { playerIds: editPlayerIds.value });
+    playersDialogVisible.value = false;
+    toast.add({ severity: "success", summary: "Joueurs rattachés mis à jour", life: 3000 });
+    await loadUsers();
+  } finally {
+    saving.value = false;
+  }
 }
 
 function linkedName(user) {
@@ -64,70 +125,91 @@ function linkedName(user) {
   if (user.coach) return `${user.coach.firstName} ${user.coach.lastName}`;
   return "—";
 }
+
+function roleSeverity(role) {
+  return { ADMIN: "danger", COACH: "warn", PLAYER: "info" }[role] ?? "secondary";
+}
 </script>
 
 <template>
   <AppLayout title="Comptes utilisateurs" :nav-links="navLinks">
-    <div class="bg-white rounded-xl shadow-sm p-4 mb-4">
-      <p class="text-sm font-medium text-slate-600 mb-3">Liste</p>
-      <ul class="divide-y divide-slate-100">
-        <li v-for="u in users" :key="u.id" class="py-2">
-          <div class="flex items-center justify-between">
-            <span>
-              {{ u.email }}
-              <span class="text-xs text-slate-400">{{ u.role }} · {{ linkedName(u) }}</span>
-            </span>
-            <div class="flex items-center gap-3 text-xs">
-              <button v-if="u.role === 'PLAYER'" class="text-sky-600 hover:underline" @click="onStartEditPlayers(u)">
-                joueurs rattachés
-              </button>
-              <button class="hover:underline" :class="u.isActive ? 'text-amber-600' : 'text-emerald-600'" @click="onToggleActive(u)">
-                {{ u.isActive ? "désactiver" : "activer" }}
-              </button>
-              <button class="text-red-500 hover:underline" @click="onDelete(u.id)">supprimer</button>
-            </div>
-          </div>
-          <div v-if="editingId === u.id" class="mt-2 flex items-start gap-2">
-            <select multiple v-model="editPlayerIds" class="flex-1 rounded-lg border border-slate-300 px-2 py-1.5 text-sm h-32">
-              <option v-for="p in players" :key="p.id" :value="p.id">{{ p.firstName }} {{ p.lastName }}</option>
-            </select>
-            <div class="flex flex-col gap-1">
-              <button class="rounded-lg bg-sky-600 text-white px-3 py-1 text-sm font-medium hover:bg-sky-700" @click="onSavePlayers(u.id)">
-                Enregistrer
-              </button>
-              <button class="text-sm text-slate-500" @click="editingId = ''">annuler</button>
-            </div>
-          </div>
-        </li>
-        <li v-if="!users.length" class="py-2 text-slate-400 text-sm">Aucun compte.</li>
-      </ul>
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-sm font-medium text-slate-600">{{ users.length }} compte(s)</h2>
+      <Button label="Nouveau compte" icon="pi pi-plus" @click="openCreate" />
     </div>
 
-    <div class="bg-white rounded-xl shadow-sm p-4">
-      <p class="text-sm font-medium text-slate-600 mb-3">Nouveau compte</p>
-      <form class="grid gap-2 sm:grid-cols-2" @submit.prevent="onCreate">
-        <input v-model="newUser.email" type="email" placeholder="Email" required class="rounded-lg border border-slate-300 px-2 py-1.5" />
-        <input v-model="newUser.password" type="password" placeholder="Mot de passe" required class="rounded-lg border border-slate-300 px-2 py-1.5" />
-        <select v-model="newUser.role" class="rounded-lg border border-slate-300 px-2 py-1.5">
-          <option value="ADMIN">Administrateur</option>
-          <option value="COACH">Entraineur</option>
-          <option value="PLAYER">Joueur</option>
-        </select>
-        <div v-if="newUser.role === 'PLAYER'">
-          <select multiple v-model="newUser.playerIds" required class="w-full rounded-lg border border-slate-300 px-2 py-1.5 h-28">
-            <option v-for="p in players" :key="p.id" :value="p.id">{{ p.firstName }} {{ p.lastName }}</option>
-          </select>
-          <p class="text-xs text-slate-400 mt-1">Ctrl/Cmd + clic pour sélectionner plusieurs joueurs (ex. compte familial).</p>
+    <DataTable :value="users" :loading="loading" class="bg-white rounded-xl shadow-sm overflow-hidden" striped-rows>
+      <template #empty>
+        <p class="text-slate-400 text-sm py-4">Aucun compte.</p>
+      </template>
+      <Column field="email" header="Email" sortable />
+      <Column header="Rôle">
+        <template #body="{ data }"><Tag :severity="roleSeverity(data.role)" :value="data.role" /></template>
+      </Column>
+      <Column header="Rattaché à">
+        <template #body="{ data }">
+          <span class="text-sm text-slate-600">{{ linkedName(data) }}</span>
+          <Button v-if="data.role === 'PLAYER'" icon="pi pi-pencil" severity="secondary" text rounded size="small" aria-label="Modifier les joueurs" @click="openPlayersDialog(data)" />
+        </template>
+      </Column>
+      <Column header="Statut">
+        <template #body="{ data }"><Tag :severity="data.isActive ? 'success' : 'secondary'" :value="data.isActive ? 'actif' : 'inactif'" /></template>
+      </Column>
+      <Column header="" style="width: 9rem">
+        <template #body="{ data }">
+          <div class="flex gap-1 justify-end">
+            <Button
+              :icon="data.isActive ? 'pi pi-ban' : 'pi pi-check'"
+              severity="secondary"
+              text
+              rounded
+              :aria-label="data.isActive ? 'Désactiver' : 'Activer'"
+              @click="onToggleActive(data)"
+            />
+            <Button icon="pi pi-trash" severity="danger" text rounded aria-label="Supprimer" @click="onDelete(data)" />
+          </div>
+        </template>
+      </Column>
+    </DataTable>
+
+    <Dialog v-model:visible="createDialogVisible" header="Nouveau compte" modal style="width: 28rem" class="mx-4">
+      <form class="grid gap-3 pt-2" @submit.prevent="onCreate">
+        <div>
+          <label class="text-xs text-slate-500 block mb-1">Email</label>
+          <InputText v-model="form.email" type="email" required class="w-full" />
         </div>
-        <select v-if="newUser.role === 'COACH'" v-model="newUser.coachId" required class="rounded-lg border border-slate-300 px-2 py-1.5">
-          <option value="" disabled>Rattacher à l'entraineur…</option>
-          <option v-for="c in coaches" :key="c.id" :value="c.id">{{ c.firstName }} {{ c.lastName }}</option>
-        </select>
-        <button type="submit" class="sm:col-span-2 rounded-lg bg-sky-600 text-white py-1.5 font-medium hover:bg-sky-700">
-          Créer le compte
-        </button>
+        <div>
+          <label class="text-xs text-slate-500 block mb-1">Mot de passe</label>
+          <Password v-model="form.password" required toggle-mask :feedback="false" class="w-full" input-class="w-full" />
+        </div>
+        <div>
+          <label class="text-xs text-slate-500 block mb-1">Rôle</label>
+          <Dropdown v-model="form.role" :options="roleOptions" option-label="label" option-value="value" class="w-full" />
+        </div>
+        <div v-if="form.role === 'PLAYER'">
+          <label class="text-xs text-slate-500 block mb-1">Joueur(s) rattaché(s)</label>
+          <MultiSelect v-model="form.playerIds" :options="playerOptions()" option-label="label" option-value="value" filter placeholder="Choisir un ou plusieurs joueurs…" class="w-full" display="chip" />
+          <p class="text-xs text-slate-400 mt-1">Plusieurs joueurs = compte familial partagé.</p>
+        </div>
+        <div v-if="form.role === 'COACH'">
+          <label class="text-xs text-slate-500 block mb-1">Entraineur rattaché</label>
+          <Dropdown v-model="form.coachId" :options="coachOptions()" option-label="label" option-value="value" placeholder="Choisir l'entraineur…" class="w-full" />
+        </div>
+        <div class="flex justify-end gap-2 mt-2">
+          <Button type="button" label="Annuler" severity="secondary" outlined @click="createDialogVisible = false" />
+          <Button type="submit" label="Créer" :loading="saving" />
+        </div>
       </form>
-      <p v-if="error" class="text-sm text-red-600 mt-2">{{ error }}</p>
-    </div>
+    </Dialog>
+
+    <Dialog v-model:visible="playersDialogVisible" header="Joueurs rattachés" modal style="width: 24rem" class="mx-4">
+      <div class="grid gap-3 pt-2">
+        <MultiSelect v-model="editPlayerIds" :options="playerOptions()" option-label="label" option-value="value" filter class="w-full" display="chip" />
+        <div class="flex justify-end gap-2 mt-2">
+          <Button type="button" label="Annuler" severity="secondary" outlined @click="playersDialogVisible = false" />
+          <Button label="Enregistrer" :loading="saving" @click="onSavePlayers" />
+        </div>
+      </div>
+    </Dialog>
   </AppLayout>
 </template>

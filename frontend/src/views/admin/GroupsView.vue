@@ -1,26 +1,37 @@
 <script setup>
 import { ref, onMounted, watch, computed } from "vue";
+import DataTable from "primevue/datatable";
+import Column from "primevue/column";
+import Dialog from "primevue/dialog";
+import Button from "primevue/button";
+import InputText from "primevue/inputtext";
+import Dropdown from "primevue/dropdown";
+import { useToast } from "primevue/usetoast";
 import AppLayout from "../../components/AppLayout.vue";
 import { api } from "../../lib/api.js";
 import { useNavLinks } from "../../composables/useNavLinks.js";
 
 const navLinks = useNavLinks();
+const toast = useToast();
 
 const seasons = ref([]);
 const selectedSeasonId = ref("");
 const groups = ref([]);
 const allPlayers = ref([]);
-const newGroup = ref({ name: "", rankingCriteria: "" });
-const error = ref("");
+const loading = ref(true);
 
-const selectedGroupId = ref("");
+const selectedGroup = ref(null);
 const roster = ref([]);
-const playerToAdd = ref("");
-const editGroupForm = ref({ name: "", rankingCriteria: "" });
+const playerToAdd = ref(null);
+
+const groupDialogVisible = ref(false);
+const editingGroupId = ref(null);
+const groupForm = ref({ name: "", rankingCriteria: "" });
+const saving = ref(false);
 
 const availablePlayers = computed(() => {
   const rosterIds = new Set(roster.value.map((a) => a.player.id));
-  return allPlayers.value.filter((p) => !rosterIds.has(p.id));
+  return allPlayers.value.filter((p) => !rosterIds.has(p.id)).map((p) => ({ label: `${p.firstName} ${p.lastName}`, value: p.id }));
 });
 
 async function loadSeasons() {
@@ -32,12 +43,15 @@ async function loadSeasons() {
 }
 
 async function loadGroups() {
+  selectedGroup.value = null;
   if (!selectedSeasonId.value) {
     groups.value = [];
     return;
   }
+  loading.value = true;
   const { data } = await api.get("/groups", { params: { seasonId: selectedSeasonId.value } });
   groups.value = data.groups;
+  loading.value = false;
 }
 
 async function loadRoster(groupId) {
@@ -53,109 +67,135 @@ onMounted(async () => {
 
 watch(selectedSeasonId, loadGroups);
 
-async function onCreateGroup() {
-  error.value = "";
+function onRowSelect(event) {
+  loadRoster(event.data.id);
+}
+
+function openCreate() {
+  editingGroupId.value = null;
+  groupForm.value = { name: "", rankingCriteria: "" };
+  groupDialogVisible.value = true;
+}
+
+function openEdit(group) {
+  editingGroupId.value = group.id;
+  groupForm.value = { name: group.name, rankingCriteria: group.rankingCriteria ?? "" };
+  groupDialogVisible.value = true;
+}
+
+async function onSaveGroup() {
+  saving.value = true;
   try {
-    await api.post("/groups", { seasonId: selectedSeasonId.value, ...newGroup.value });
-    newGroup.value = { name: "", rankingCriteria: "" };
+    if (editingGroupId.value) {
+      await api.put(`/groups/${editingGroupId.value}`, groupForm.value);
+    } else {
+      await api.post("/groups", { seasonId: selectedSeasonId.value, ...groupForm.value });
+    }
+    groupDialogVisible.value = false;
+    toast.add({ severity: "success", summary: editingGroupId.value ? "Groupe modifié" : "Groupe créé", life: 3000 });
     await loadGroups();
   } catch (err) {
-    error.value = err.response?.data?.error ?? "Erreur lors de la création.";
+    toast.add({ severity: "error", summary: "Erreur", detail: err.response?.data?.error ?? "Une erreur est survenue.", life: 4000 });
+  } finally {
+    saving.value = false;
   }
-}
-
-async function onSelectGroup(groupId) {
-  selectedGroupId.value = groupId;
-  const group = groups.value.find((g) => g.id === groupId);
-  editGroupForm.value = { name: group.name, rankingCriteria: group.rankingCriteria ?? "" };
-  await loadRoster(groupId);
-}
-
-async function onSaveGroupEdit() {
-  await api.put(`/groups/${selectedGroupId.value}`, editGroupForm.value);
-  await loadGroups();
 }
 
 async function onAddPlayer() {
   if (!playerToAdd.value) return;
-  await api.post(`/groups/${selectedGroupId.value}/players`, { playerId: playerToAdd.value });
-  playerToAdd.value = "";
-  await loadRoster(selectedGroupId.value);
+  await api.post(`/groups/${selectedGroup.value.id}/players`, { playerId: playerToAdd.value });
+  playerToAdd.value = null;
+  await loadRoster(selectedGroup.value.id);
+  toast.add({ severity: "success", summary: "Joueur ajouté au groupe", life: 3000 });
 }
 
 async function onRemovePlayer(playerId) {
-  await api.delete(`/groups/${selectedGroupId.value}/players/${playerId}`);
-  await loadRoster(selectedGroupId.value);
+  await api.delete(`/groups/${selectedGroup.value.id}/players/${playerId}`);
+  await loadRoster(selectedGroup.value.id);
 }
 </script>
 
 <template>
   <AppLayout title="Groupes d'entrainement" :nav-links="navLinks">
-    <div class="mb-4">
-      <label class="text-xs text-slate-500">Saison</label>
-      <select v-model="selectedSeasonId" class="block rounded-lg border border-slate-300 px-2 py-1.5">
-        <option v-for="s in seasons" :key="s.id" :value="s.id">{{ s.name }}</option>
-      </select>
+    <div class="mb-4 max-w-xs">
+      <label class="text-xs text-slate-500 block mb-1">Saison</label>
+      <Dropdown v-model="selectedSeasonId" :options="seasons" option-label="name" option-value="id" class="w-full" />
     </div>
 
-    <div class="grid gap-4 md:grid-cols-2">
-      <div class="bg-white rounded-xl shadow-sm p-4">
-        <p class="text-sm font-medium text-slate-600 mb-3">Groupes</p>
-        <ul class="divide-y divide-slate-100 mb-4">
-          <li
-            v-for="g in groups"
-            :key="g.id"
-            class="py-2 flex items-center justify-between cursor-pointer hover:text-sky-600"
-            :class="{ 'text-sky-600 font-medium': g.id === selectedGroupId }"
-            @click="onSelectGroup(g.id)"
-          >
-            <span>{{ g.name }}</span>
-            <span class="text-xs text-slate-400">{{ g.rankingCriteria }}</span>
-          </li>
-          <li v-if="!groups.length" class="py-2 text-slate-400 text-sm">Aucun groupe pour cette saison.</li>
-        </ul>
-
-        <form class="grid gap-2" @submit.prevent="onCreateGroup">
-          <input v-model="newGroup.name" placeholder="Nom du groupe" required class="rounded-lg border border-slate-300 px-2 py-1.5" />
-          <input v-model="newGroup.rankingCriteria" placeholder="Critère de classement (optionnel)" class="rounded-lg border border-slate-300 px-2 py-1.5" />
-          <button type="submit" class="rounded-lg bg-sky-600 text-white py-1.5 font-medium hover:bg-sky-700">
-            Créer le groupe
-          </button>
-        </form>
-        <p v-if="error" class="text-sm text-red-600 mt-2">{{ error }}</p>
+    <div class="grid gap-4 lg:grid-cols-2">
+      <div>
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-sm font-medium text-slate-600">{{ groups.length }} groupe(s)</h2>
+          <Button label="Nouveau groupe" icon="pi pi-plus" size="small" @click="openCreate" />
+        </div>
+        <DataTable
+          :value="groups"
+          :loading="loading"
+          v-model:selection="selectedGroup"
+          selection-mode="single"
+          data-key="id"
+          class="bg-white rounded-xl shadow-sm overflow-hidden"
+          striped-rows
+          @row-select="onRowSelect"
+        >
+          <template #empty>
+            <p class="text-slate-400 text-sm py-4">Aucun groupe pour cette saison.</p>
+          </template>
+          <Column field="name" header="Nom" sortable />
+          <Column field="rankingCriteria" header="Critère de classement" />
+          <Column header="" style="width: 4rem">
+            <template #body="{ data }">
+              <Button icon="pi pi-pencil" severity="secondary" text rounded aria-label="Modifier" @click.stop="openEdit(data)" />
+            </template>
+          </Column>
+        </DataTable>
       </div>
 
-      <div class="bg-white rounded-xl shadow-sm p-4">
-        <p class="text-sm font-medium text-slate-600 mb-3">Composition</p>
-        <template v-if="selectedGroupId">
-          <form class="grid gap-2 mb-4 pb-4 border-b border-slate-100" @submit.prevent="onSaveGroupEdit">
-            <input v-model="editGroupForm.name" placeholder="Nom du groupe" required class="rounded-lg border border-slate-300 px-2 py-1.5 text-sm" />
-            <input v-model="editGroupForm.rankingCriteria" placeholder="Critère de classement" class="rounded-lg border border-slate-300 px-2 py-1.5 text-sm" />
-            <button type="submit" class="rounded-lg bg-sky-600 text-white py-1.5 text-sm font-medium hover:bg-sky-700">
-              Enregistrer les modifications
-            </button>
-          </form>
-          <ul class="divide-y divide-slate-100 mb-4">
-            <li v-for="a in roster" :key="a.id" class="py-2 flex items-center justify-between">
-              <span>{{ a.player.firstName }} {{ a.player.lastName }}</span>
-              <button class="text-xs text-red-500 hover:underline" @click="onRemovePlayer(a.player.id)">retirer</button>
-            </li>
-            <li v-if="!roster.length" class="py-2 text-slate-400 text-sm">Aucun joueur dans ce groupe.</li>
-          </ul>
-          <div class="flex gap-2">
-            <select v-model="playerToAdd" class="flex-1 rounded-lg border border-slate-300 px-2 py-1.5">
-              <option value="" disabled>Ajouter un joueur…</option>
-              <option v-for="p in availablePlayers" :key="p.id" :value="p.id">
-                {{ p.firstName }} {{ p.lastName }}
-              </option>
-            </select>
-            <button class="rounded-lg bg-sky-600 text-white px-3 py-1.5 font-medium hover:bg-sky-700" @click="onAddPlayer">
-              Ajouter
-            </button>
-          </div>
-        </template>
-        <p v-else class="text-slate-400 text-sm">Sélectionne un groupe à gauche.</p>
+      <div>
+        <h2 class="text-sm font-medium text-slate-600 mb-3">Composition</h2>
+        <div class="bg-white rounded-xl shadow-sm p-4">
+          <template v-if="selectedGroup">
+            <p class="text-sm font-medium text-slate-700 mb-3">{{ selectedGroup.name }}</p>
+            <ul class="divide-y divide-slate-100 mb-4">
+              <li v-for="a in roster" :key="a.id" class="py-2 flex items-center justify-between text-sm">
+                <span>{{ a.player.firstName }} {{ a.player.lastName }}</span>
+                <Button icon="pi pi-times" severity="danger" text rounded size="small" aria-label="Retirer" @click="onRemovePlayer(a.player.id)" />
+              </li>
+              <li v-if="!roster.length" class="py-2 text-slate-400 text-sm">Aucun joueur dans ce groupe.</li>
+            </ul>
+            <div class="flex gap-2">
+              <Dropdown
+                v-model="playerToAdd"
+                :options="availablePlayers"
+                option-label="label"
+                option-value="value"
+                placeholder="Ajouter un joueur…"
+                filter
+                class="flex-1"
+              />
+              <Button label="Ajouter" @click="onAddPlayer" />
+            </div>
+          </template>
+          <p v-else class="text-slate-400 text-sm">Sélectionne un groupe à gauche.</p>
+        </div>
       </div>
     </div>
+
+    <Dialog v-model:visible="groupDialogVisible" :header="editingGroupId ? 'Modifier le groupe' : 'Nouveau groupe'" modal style="width: 26rem" class="mx-4">
+      <form class="grid gap-3 pt-2" @submit.prevent="onSaveGroup">
+        <div>
+          <label class="text-xs text-slate-500 block mb-1">Nom</label>
+          <InputText v-model="groupForm.name" required class="w-full" />
+        </div>
+        <div>
+          <label class="text-xs text-slate-500 block mb-1">Critère de classement (optionnel)</label>
+          <InputText v-model="groupForm.rankingCriteria" class="w-full" />
+        </div>
+        <div class="flex justify-end gap-2 mt-2">
+          <Button type="button" label="Annuler" severity="secondary" outlined @click="groupDialogVisible = false" />
+          <Button type="submit" label="Enregistrer" :loading="saving" />
+        </div>
+      </form>
+    </Dialog>
   </AppLayout>
 </template>
