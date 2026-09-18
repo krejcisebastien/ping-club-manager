@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted } from "vue";
+import { useRouter } from "vue-router";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import Dialog from "primevue/dialog";
@@ -15,6 +16,7 @@ import { stripHtml } from "../../lib/richtext.js";
 import { useNavLinks } from "../../composables/useNavLinks.js";
 
 const navLinks = useNavLinks();
+const router = useRouter();
 const toast = useToast();
 const confirm = useConfirm();
 
@@ -23,7 +25,6 @@ const emptyForm = () => ({ title: "", description: "", category: "", difficulty:
 const exercises = ref([]);
 const loading = ref(true);
 const dialogVisible = ref(false);
-const editingId = ref(null);
 const form = ref(emptyForm());
 const saving = ref(false);
 
@@ -37,27 +38,16 @@ async function load() {
 onMounted(load);
 
 function openCreate() {
-  editingId.value = null;
   form.value = emptyForm();
   dialogVisible.value = true;
 }
 
-function openEdit(ex) {
-  editingId.value = ex.id;
-  form.value = { title: ex.title, description: ex.description ?? "", category: ex.category ?? "", difficulty: ex.difficulty ?? "" };
-  dialogVisible.value = true;
-}
-
-async function onSave() {
+async function onCreate() {
   saving.value = true;
   try {
-    if (editingId.value) {
-      await api.put(`/exercises/${editingId.value}`, form.value);
-    } else {
-      await api.post("/exercises", form.value);
-    }
+    await api.post("/exercises", form.value);
     dialogVisible.value = false;
-    toast.add({ severity: "success", summary: editingId.value ? "Exercice modifié" : "Exercice créé", life: 3000 });
+    toast.add({ severity: "success", summary: "Exercice créé", life: 3000 });
     await load();
   } catch (err) {
     toast.add({ severity: "error", summary: "Erreur", detail: err.response?.data?.error ?? "Une erreur est survenue.", life: 4000 });
@@ -82,6 +72,10 @@ function onDelete(ex) {
     },
   });
 }
+
+function onRowClick(event) {
+  router.push(`/coach/exercises/${event.data.id}`);
+}
 </script>
 
 <template>
@@ -91,11 +85,13 @@ function onDelete(ex) {
       <Button label="Nouvel exercice" icon="pi pi-plus" @click="openCreate" />
     </div>
 
-    <DataTable :value="exercises" :loading="loading" class="bg-white rounded-xl shadow border border-slate-200 overflow-hidden" striped-rows>
+    <DataTable :value="exercises" :loading="loading" class="bg-white rounded-xl shadow border border-slate-200 overflow-hidden" striped-rows @row-click="onRowClick">
       <template #empty>
         <p class="text-slate-400 text-sm py-4">Aucun exercice.</p>
       </template>
-      <Column field="title" header="Titre" sortable />
+      <Column field="title" header="Titre" sortable>
+        <template #body="{ data }"><span class="cursor-pointer">{{ data.title }}</span></template>
+      </Column>
       <Column header="Catégorie">
         <template #body="{ data }"><Tag v-if="data.category" severity="secondary" :value="data.category" /></template>
       </Column>
@@ -103,18 +99,17 @@ function onDelete(ex) {
       <Column header="Description">
         <template #body="{ data }"><span class="text-slate-500 text-sm line-clamp-1">{{ stripHtml(data.description) }}</span></template>
       </Column>
-      <Column header="" style="width: 7rem">
+      <Column header="" style="width: 4rem">
         <template #body="{ data }">
           <div class="flex gap-1 justify-end">
-            <Button icon="pi pi-pencil" severity="secondary" text rounded aria-label="Modifier" @click="openEdit(data)" />
-            <Button icon="pi pi-trash" severity="danger" text rounded aria-label="Supprimer" @click="onDelete(data)" />
+            <Button icon="pi pi-trash" severity="danger" text rounded aria-label="Supprimer" @click.stop="onDelete(data)" />
           </div>
         </template>
       </Column>
     </DataTable>
 
-    <Dialog v-model:visible="dialogVisible" :header="editingId ? 'Modifier l\'exercice' : 'Nouvel exercice'" modal style="width: 34rem" class="mx-4">
-      <form class="grid gap-3 pt-2" @submit.prevent="onSave">
+    <Dialog v-model:visible="dialogVisible" header="Nouvel exercice" modal style="width: 34rem" class="mx-4">
+      <form class="grid gap-3 pt-2" @submit.prevent="onCreate">
         <div>
           <label class="text-xs text-slate-500 block mb-1">Titre</label>
           <InputText v-model="form.title" required class="w-full" />
@@ -135,7 +130,7 @@ function onDelete(ex) {
         </div>
         <div class="flex justify-end gap-2 mt-2">
           <Button type="button" label="Annuler" severity="secondary" outlined @click="dialogVisible = false" />
-          <Button type="submit" label="Enregistrer" :loading="saving" />
+          <Button type="submit" label="Créer" :loading="saving" />
         </div>
       </form>
     </Dialog>
