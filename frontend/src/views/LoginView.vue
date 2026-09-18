@@ -2,6 +2,7 @@
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "../stores/auth.js";
+import { CLUB_NAME } from "../lib/config.js";
 
 const email = ref("");
 const password = ref("");
@@ -37,7 +38,7 @@ async function onSubmit() {
       class="w-full max-w-sm bg-white rounded-xl shadow-md p-6 space-y-4"
       @submit.prevent="onSubmit"
     >
-      <h1 class="text-xl font-semibold text-slate-800 text-center">Club Tennis de Table</h1>
+      <h1 class="text-xl font-semibold text-slate-800 text-center">{{ CLUB_NAME }}</h1>
 
       <div class="space-y-1">
         <label class="text-sm font-medium text-slate-600" for="email">Email</label>

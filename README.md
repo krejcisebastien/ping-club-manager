@@ -41,12 +41,9 @@ npm run dev
 
 L'application est accessible sur http://localhost:5173.
 
-## Déploiement sur Render (Blueprint)
+## Déploiement
 
-1. Pousser le dépôt sur GitHub/GitLab.
-2. Sur Render, créer un nouveau **Blueprint** en pointant vers ce dépôt (`render.yaml` à la racine).
-3. `CORS_ORIGIN` et `VITE_API_URL` sont préremplis dans `render.yaml` avec les URLs `onrender.com` attendues (basées sur les noms de service). Si Render suffixe un nom de service (nom déjà pris par quelqu'un d'autre sur onrender.com), corrige la valeur concernée dans l'onglet **Environment** du service, puis redéploie (le frontend a besoin d'un nouveau build, pas juste d'un restart, car Vite fige les variables à la compilation).
-4. Exécuter le seed du compte admin (Shell Render sur `ping-club-manager-api`) : `npm run seed`.
+Voir [DEPLOYMENT.md](DEPLOYMENT.md) — déploiement Render (Blueprint), et comment déployer une nouvelle instance dédiée pour un autre club (un club = une instance + sa propre base de données, à partir du même code).
 
 ## État actuel
 

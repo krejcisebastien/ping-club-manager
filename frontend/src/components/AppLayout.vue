@@ -5,6 +5,7 @@ import Avatar from "primevue/avatar";
 import Button from "primevue/button";
 import Sidebar from "primevue/sidebar";
 import { useAuthStore } from "../stores/auth.js";
+import { CLUB_NAME, CLUB_ICON } from "../lib/config.js";
 
 defineProps({
   title: { type: String, required: true },
@@ -30,8 +31,8 @@ function onLogout() {
     <!-- Sidebar desktop -->
     <aside class="hidden md:flex md:w-64 md:flex-col md:shrink-0 bg-white border-r border-slate-200">
       <div class="h-16 flex items-center gap-2 px-5 border-b border-slate-200">
-        <i class="pi pi-star-fill text-xl text-sky-600" aria-hidden="true"></i>
-        <span class="font-semibold text-slate-800">Club Tennis de Table</span>
+        <i :class="CLUB_ICON" class="pi text-xl text-sky-600" aria-hidden="true"></i>
+        <span class="font-semibold text-slate-800">{{ CLUB_NAME }}</span>
       </div>
       <nav class="flex-1 overflow-y-auto py-3 px-2 space-y-0.5">
         <RouterLink

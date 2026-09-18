@@ -1,3 +1,15 @@
+# Blueprint Render pour UNE instance de ping-club-manager (un club = une
+# instance, sa propre base de données, son propre déploiement).
+#
+# Pour déployer pour un NOUVEAU club à partir de ce même code, voir le guide
+# complet dans DEPLOYMENT.md. En résumé, il faut adapter dans ce fichier :
+#   - tous les "name:" (préfixe "ping-club-manager" -> "<nom-du-club>")
+#   - CORS_ORIGIN et VITE_API_URL, qui se référencent mutuellement par URL
+#     onrender.com (à corriger après le premier déploiement si Render a
+#     suffixé un nom de service déjà pris)
+#   - VITE_CLUB_NAME (et éventuellement VITE_CLUB_ICON) pour personnaliser
+#     le nom affiché dans l'application, sans toucher au code
+
 databases:
   - name: ping-club-manager-db
     databaseName: ping_club_manager
@@ -40,6 +52,14 @@ services:
       # les variables d'environnement au moment du build).
       - key: VITE_API_URL
         value: https://ping-club-manager-api.onrender.com/api
+      # Nom du club affiché dans l'application (titre de l'onglet, écran de
+      # connexion, barre latérale). À adapter par instance — aucun changement
+      # de code nécessaire.
+      - key: VITE_CLUB_NAME
+        value: Club Tennis de Table
+      # Icône PrimeIcons affichée à côté du nom (optionnel, défaut : pi-star-fill).
+      # - key: VITE_CLUB_ICON
+      #   value: pi-star-fill
     routes:
       - type: rewrite
         source: /*
