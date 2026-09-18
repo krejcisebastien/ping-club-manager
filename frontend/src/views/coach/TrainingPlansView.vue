@@ -107,7 +107,7 @@ function coachName(p) {
       </Column>
     </DataTable>
 
-    <Dialog v-model:visible="dialogVisible" header="Nouveau plan" modal style="width: 34rem" class="mx-4">
+    <Dialog v-model:visible="dialogVisible" header="Nouveau plan" modal style="width: 42rem" class="mx-4">
       <form class="grid gap-3 pt-2" @submit.prevent="onCreate">
         <div>
           <label class="text-xs text-slate-500 block mb-1">Titre</label>

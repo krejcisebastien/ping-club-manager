@@ -11,7 +11,7 @@ const emit = defineEmits(["update:modelValue"]);
 
 const editorRef = ref(null);
 
-const EMOJIS = ["🏓", "🎯", "⚠️", "✅", "🔄", "➡️"];
+const EMOJIS = ["🏓", "🎯", "⚠️", "✅", "❌", "🔄", "➡️", "⬅️", "⬆️", "⬇️", "💪", "🔥", "⭐", "👍", "⏱️", "📏", "🔴", "🟢"];
 
 const toolbarOptions = [
   ["bold", "italic", "underline"],
@@ -45,18 +45,26 @@ function insertEmoji(emoji) {
       :placeholder="placeholder"
       @update:content="onUpdate"
     />
-    <div class="flex items-center gap-1 mt-1.5">
-      <span class="text-xs text-slate-400 mr-1">Insérer :</span>
-      <button
-        v-for="e in EMOJIS"
-        :key="e"
-        type="button"
-        class="text-base w-7 h-7 rounded hover:bg-slate-100 transition-colors"
-        :title="`Insérer ${e}`"
-        @click="insertEmoji(e)"
-      >
-        {{ e }}
-      </button>
+    <div class="flex items-start gap-1 mt-1.5">
+      <span class="text-xs text-slate-400 mr-1 mt-1.5 shrink-0">Insérer :</span>
+      <div class="flex flex-wrap gap-1">
+        <button
+          v-for="e in EMOJIS"
+          :key="e"
+          type="button"
+          class="text-base w-8 h-8 rounded hover:bg-slate-100 transition-colors"
+          :title="`Insérer ${e}`"
+          @click="insertEmoji(e)"
+        >
+          {{ e }}
+        </button>
+      </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+.rich-text-editor :deep(.ql-editor) {
+  min-height: 12rem;
+}
+</style>

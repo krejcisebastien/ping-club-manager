@@ -21,8 +21,8 @@ function svgPoint(event) {
   pt.y = event.clientY;
   const cursor = pt.matrixTransform(svg.getScreenCTM().inverse());
   return {
-    x: Math.min(100, Math.max(0, cursor.x)),
-    y: Math.min(56, Math.max(0, cursor.y)),
+    x: Math.min(56, Math.max(0, cursor.x)),
+    y: Math.min(100, Math.max(0, cursor.y)),
   };
 }
 
@@ -69,18 +69,18 @@ function clearAll() {
   <div>
     <svg
       ref="svgRef"
-      viewBox="0 0 100 56"
-      class="w-full rounded-lg border border-slate-200 select-none"
+      viewBox="0 0 56 100"
+      class="w-full max-w-[240px] mx-auto block rounded-lg border border-slate-200 select-none"
       :class="readonly ? '' : 'cursor-crosshair'"
       @click="onBackgroundClick"
       @mousemove="onSvgMouseMove"
       @mouseup="onSvgMouseUp"
       @mouseleave="onSvgMouseUp"
     >
-      <rect x="0" y="0" width="100" height="56" rx="1.5" fill="#0f766e" />
-      <rect x="1" y="1" width="98" height="54" fill="none" stroke="white" stroke-width="0.6" />
-      <line x1="0" y1="28" x2="100" y2="28" stroke="white" stroke-width="1" />
-      <line x1="50" y1="0" x2="50" y2="56" stroke="#134e4a" stroke-width="0.3" stroke-dasharray="1,1" />
+      <rect x="0" y="0" width="56" height="100" rx="1.5" fill="#1d4ed8" />
+      <rect x="1" y="1" width="54" height="98" fill="none" stroke="white" stroke-width="0.6" />
+      <line x1="0" y1="50" x2="56" y2="50" stroke="white" stroke-width="1" />
+      <line x1="28" y1="0" x2="28" y2="100" stroke="#1e3a8a" stroke-width="0.3" stroke-dasharray="1,1" />
 
       <defs>
         <marker id="diagram-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
