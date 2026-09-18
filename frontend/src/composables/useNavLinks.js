@@ -5,6 +5,7 @@ const ADMIN_LINKS = [
   { to: "/admin", label: "Vue d'ensemble" },
   { to: "/admin/players", label: "Joueurs" },
   { to: "/admin/coaches", label: "Entraineurs" },
+  { to: "/admin/sparrings", label: "Sparrings" },
   { to: "/admin/users", label: "Utilisateurs" },
   { to: "/admin/groups", label: "Groupes" },
   { to: "/admin/trainings", label: "Entrainements" },
@@ -16,6 +17,7 @@ const ADMIN_LINKS = [
 const COACH_LINKS = [
   { to: "/coach", label: "Tableau de bord" },
   { to: "/admin/players", label: "Joueurs" },
+  { to: "/admin/sparrings", label: "Sparrings" },
   { to: "/coach/attendance", label: "Présences entrainements" },
   { to: "/coach/camps", label: "Présences stages" },
   { to: "/coach/exercises", label: "Exercices" },

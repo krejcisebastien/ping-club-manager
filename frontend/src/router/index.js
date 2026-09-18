@@ -29,6 +29,12 @@ const routes = [
     meta: { roles: ["ADMIN"] },
   },
   {
+    path: "/admin/sparrings",
+    name: "admin-sparrings",
+    component: () => import("../views/admin/SparringsView.vue"),
+    meta: { roles: ["ADMIN", "COACH"] },
+  },
+  {
     path: "/admin/users",
     name: "admin-users",
     component: () => import("../views/admin/UsersView.vue"),

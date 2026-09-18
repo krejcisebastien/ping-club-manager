@@ -51,9 +51,11 @@ router.put("/:id", requireRole("ADMIN", "COACH"), async (req, res) => {
         ...(firstName !== undefined && { firstName }),
         ...(lastName !== undefined && { lastName }),
         ...(ranking !== undefined && { ranking }),
-        ...(isClubMember !== undefined && { isClubMember }),
-        ...(playerId !== undefined && { playerId }),
-        ...(externalClub !== undefined && { externalClub }),
+        ...(isClubMember !== undefined && {
+          isClubMember: !!isClubMember,
+          playerId: isClubMember ? playerId ?? null : null,
+          externalClub: isClubMember ? null : externalClub ?? null,
+        }),
       },
     });
     res.json({ sparring });
