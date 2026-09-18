@@ -30,6 +30,7 @@ const campId = route.params.id;
 const camp = ref(null);
 const editForm = ref({ name: "", location: "", startDate: null, endDate: null });
 const savingInfo = ref(false);
+const trainingPlans = ref([]);
 
 const groupDialogVisible = ref(false);
 const groupForm = ref({ id: null, name: "" });
@@ -64,7 +65,11 @@ async function loadCamp() {
   };
 }
 
-onMounted(loadCamp);
+onMounted(async () => {
+  await loadCamp();
+  const { data } = await api.get("/training-plans", { params: { seasonId: camp.value.seasonId } });
+  trainingPlans.value = data.plans;
+});
 
 async function onSaveInfo() {
   savingInfo.value = true;
@@ -97,6 +102,11 @@ async function onSaveGroup() {
   }
   groupDialogVisible.value = false;
   toast.add({ severity: "success", summary: "Groupe enregistré", life: 3000 });
+  await loadCamp();
+}
+async function onAssignPlan(group, trainingPlanId) {
+  await api.put(`/camps/groups/${group.id}`, { trainingPlanId });
+  toast.add({ severity: "success", summary: "Plan d'entrainement mis à jour", life: 3000 });
   await loadCamp();
 }
 function confirmRemoveGroup(group) {
@@ -237,14 +247,26 @@ const calendarOptions = computed(() => ({
           <p class="text-sm font-medium text-slate-600">Groupes du stage (initiation, perfectionnement…)</p>
           <Button label="Ajouter" icon="pi pi-plus" size="small" @click="openCreateGroup" />
         </div>
-        <div class="flex flex-wrap gap-2">
-          <div v-for="g in camp.groups" :key="g.id" class="flex items-center gap-1 bg-slate-100 rounded-full pl-3 pr-1 py-1 text-sm">
-            {{ g.name }}
-            <Button icon="pi pi-pencil" text rounded size="small" class="!w-6 !h-6" @click="openEditGroup(g)" />
-            <Button icon="pi pi-times" severity="danger" text rounded size="small" class="!w-6 !h-6" @click="confirmRemoveGroup(g)" />
-          </div>
-          <p v-if="!camp.groups.length" class="text-slate-400 text-sm">Aucun groupe défini.</p>
-        </div>
+        <ul class="divide-y divide-slate-100">
+          <li v-for="g in camp.groups" :key="g.id" class="py-2 flex flex-wrap items-center gap-2">
+            <span class="font-medium text-sm w-32 shrink-0">{{ g.name }}</span>
+            <Dropdown
+              :model-value="g.trainingPlanId"
+              :options="trainingPlans"
+              option-label="title"
+              option-value="id"
+              show-clear
+              placeholder="Plan d'entrainement…"
+              class="flex-1 min-w-[12rem]"
+              @update:model-value="(planId) => onAssignPlan(g, planId)"
+            />
+            <div class="flex gap-1 shrink-0">
+              <Button icon="pi pi-pencil" text rounded size="small" @click="openEditGroup(g)" />
+              <Button icon="pi pi-times" severity="danger" text rounded size="small" @click="confirmRemoveGroup(g)" />
+            </div>
+          </li>
+          <li v-if="!camp.groups.length" class="py-2 text-slate-400 text-sm">Aucun groupe défini.</li>
+        </ul>
       </div>
 
       <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">

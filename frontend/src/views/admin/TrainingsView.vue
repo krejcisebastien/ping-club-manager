@@ -27,7 +27,7 @@ const trainings = ref([]);
 const loading = ref(true);
 
 const dialogVisible = ref(false);
-const form = ref({ name: "", groupId: null, location: "", weekday: null, startTime: null, endTime: null });
+const form = ref({ name: "", groupId: null, weekday: null, startTime: null, endTime: null });
 const saving = ref(false);
 
 async function loadSeasons() {
@@ -67,7 +67,7 @@ function timeToString(date) {
 }
 
 function openCreate() {
-  form.value = { name: "", groupId: null, location: "", weekday: null, startTime: null, endTime: null };
+  form.value = { name: "", groupId: null, weekday: null, startTime: null, endTime: null };
   dialogVisible.value = true;
 }
 
@@ -120,14 +120,12 @@ function weekdayLabel(w) {
       <Column header="Horaire">
         <template #body="{ data }">{{ weekdayLabel(data.weekday) }} {{ data.startTime }}–{{ data.endTime }}</template>
       </Column>
-      <Column field="location" header="Lieu" />
     </DataTable>
 
     <Dialog v-model:visible="dialogVisible" header="Nouvel entrainement" modal style="width: 28rem" class="mx-4">
       <form class="grid gap-3 sm:grid-cols-2" @submit.prevent="onCreate">
         <InputText v-model="form.name" placeholder="Nom" required class="sm:col-span-2 w-full" />
         <Dropdown v-model="form.groupId" :options="groups" option-label="name" option-value="id" placeholder="Groupe…" required class="sm:col-span-2 w-full" />
-        <InputText v-model="form.location" placeholder="Lieu (optionnel)" class="sm:col-span-2 w-full" />
         <Dropdown v-model="form.weekday" :options="weekdayOptions" option-label="label" option-value="value" placeholder="Jour de semaine…" class="sm:col-span-2 w-full" />
         <Calendar v-model="form.startTime" time-only hour-format="24" placeholder="Début" class="w-full" input-class="w-full" />
         <Calendar v-model="form.endTime" time-only hour-format="24" placeholder="Fin" class="w-full" input-class="w-full" />

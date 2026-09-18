@@ -32,7 +32,7 @@ const occurrences = ref([]);
 const coaches = ref([]);
 const sparrings = ref([]);
 const groups = ref([]);
-const editForm = ref({ name: "", location: "", weekday: null, startTime: null, endTime: null, groupId: null });
+const editForm = ref({ name: "", weekday: null, startTime: null, endTime: null, groupId: null });
 const savingInfo = ref(false);
 const generateForm = ref({ startDate: null, endDate: null });
 const generating = ref(false);
@@ -63,7 +63,6 @@ async function loadTraining() {
   training.value = data.training;
   editForm.value = {
     name: data.training.name,
-    location: data.training.location ?? "",
     weekday: data.training.weekday ?? null,
     startTime: stringToTime(data.training.startTime),
     endTime: stringToTime(data.training.endTime),
@@ -179,8 +178,7 @@ const calendarOptions = computed(() => ({
         <form class="grid gap-3 sm:grid-cols-2" @submit.prevent="onSaveInfo">
           <InputText v-model="editForm.name" placeholder="Nom" required class="w-full" />
           <Dropdown v-model="editForm.groupId" :options="groups" option-label="name" option-value="id" required class="w-full" />
-          <InputText v-model="editForm.location" placeholder="Lieu" class="w-full" />
-          <Dropdown v-model="editForm.weekday" :options="weekdayOptions" option-label="label" option-value="value" placeholder="Jour de semaine…" class="w-full" />
+          <Dropdown v-model="editForm.weekday" :options="weekdayOptions" option-label="label" option-value="value" placeholder="Jour de semaine…" class="sm:col-span-2 w-full" />
           <Calendar v-model="editForm.startTime" time-only hour-format="24" placeholder="Début" class="w-full" input-class="w-full" />
           <Calendar v-model="editForm.endTime" time-only hour-format="24" placeholder="Fin" class="w-full" input-class="w-full" />
           <Button type="submit" label="Enregistrer" :loading="savingInfo" class="sm:col-span-2 w-fit" />
@@ -230,7 +228,7 @@ const calendarOptions = computed(() => ({
       </div>
     </div>
 
-    <Dialog v-model:visible="assignDialogVisible" header="Encadrants de la séance" modal style="width: 26rem" class="mx-4">
+    <Dialog v-model:visible="assignDialogVisible" header="Encadrants de la séance" modal style="width: 32rem" class="mx-4">
       <div v-if="activeOccurrence" class="pt-2">
         <p class="text-sm text-slate-500 mb-3">
           {{ new Date(activeOccurrence.date).toLocaleDateString("fr-FR") }} · {{ activeOccurrence.startTime }}–{{ activeOccurrence.endTime }}
@@ -242,8 +240,8 @@ const calendarOptions = computed(() => ({
           </li>
           <li v-if="!occurrenceCoaches.length" class="text-slate-400 py-2">Aucun encadrant affecté.</li>
         </ul>
-        <div class="flex gap-2">
-          <Dropdown v-model="assignForm.type" :options="[{ label: 'Entraineur', value: 'coach' }, { label: 'Sparring', value: 'sparring' }]" option-label="label" option-value="value" class="w-36" />
+        <div class="flex flex-wrap gap-2">
+          <Dropdown v-model="assignForm.type" :options="[{ label: 'Entraineur', value: 'coach' }, { label: 'Sparring', value: 'sparring' }]" option-label="label" option-value="value" class="w-full sm:w-32" />
           <Dropdown
             v-model="assignForm.id"
             :options="(assignForm.type === 'coach' ? coaches : sparrings).map((c) => ({ label: `${c.firstName} ${c.lastName}`, value: c.id }))"
@@ -251,9 +249,9 @@ const calendarOptions = computed(() => ({
             option-value="value"
             filter
             placeholder="Choisir…"
-            class="flex-1"
+            class="flex-1 min-w-0"
           />
-          <Button label="Affecter" @click="onAssign" />
+          <Button label="Affecter" @click="onAssign" class="w-full sm:w-auto" />
         </div>
       </div>
     </Dialog>

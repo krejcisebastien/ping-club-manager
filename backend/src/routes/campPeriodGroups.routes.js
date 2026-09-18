@@ -10,9 +10,9 @@ router.get("/:id", async (req, res) => {
   const periodGroup = await prisma.campPeriodGroup.findUnique({
     where: { id: req.params.id },
     include: {
-      group: true,
+      group: { include: { trainingPlan: true } },
       period: { include: { campDay: true } },
-      coaches: { include: { coach: true } },
+      coaches: { include: { coach: true, sparring: true } },
       players: { include: { player: true } },
     },
   });
@@ -20,23 +20,18 @@ router.get("/:id", async (req, res) => {
   res.json({ periodGroup });
 });
 
-// ---------- Entraineurs affectés ----------
+// ---------- Encadrants (entraineurs / sparrings) affectés ----------
 
 router.post("/:id/coaches", requireRole("ADMIN"), async (req, res) => {
-  const { coachId } = req.body ?? {};
-  if (!coachId) return res.status(400).json({ error: "coachId est requis." });
-  try {
-    const assignment = await prisma.campPeriodGroupCoach.create({
-      data: { campPeriodGroupId: req.params.id, coachId },
-      include: { coach: true },
-    });
-    res.status(201).json({ assignment });
-  } catch (err) {
-    if (err.code === "P2002") {
-      return res.status(409).json({ error: "Cet entraineur est déjà affecté." });
-    }
-    throw err;
+  const { coachId, sparringId } = req.body ?? {};
+  if ((!coachId && !sparringId) || (coachId && sparringId)) {
+    return res.status(400).json({ error: "Fournir soit coachId, soit sparringId." });
   }
+  const assignment = await prisma.campPeriodGroupCoach.create({
+    data: { campPeriodGroupId: req.params.id, coachId: coachId ?? null, sparringId: sparringId ?? null },
+    include: { coach: true, sparring: true },
+  });
+  res.status(201).json({ assignment });
 });
 
 router.delete("/:id/coaches/:assignmentId", requireRole("ADMIN"), async (req, res) => {

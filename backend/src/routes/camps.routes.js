@@ -21,7 +21,7 @@ router.get("/:campId", async (req, res) => {
   const camp = await prisma.camp.findUnique({
     where: { id: req.params.campId },
     include: {
-      groups: true,
+      groups: { include: { trainingPlan: true } },
       days: {
         orderBy: { date: "asc" },
         include: {
@@ -85,9 +85,16 @@ router.post("/:campId/groups", requireRole("ADMIN"), async (req, res) => {
 });
 
 router.put("/groups/:groupId", requireRole("ADMIN"), async (req, res) => {
-  const { name } = req.body ?? {};
+  const { name, trainingPlanId } = req.body ?? {};
   try {
-    const group = await prisma.campGroup.update({ where: { id: req.params.groupId }, data: { name } });
+    const group = await prisma.campGroup.update({
+      where: { id: req.params.groupId },
+      data: {
+        ...(name !== undefined && { name }),
+        ...(trainingPlanId !== undefined && { trainingPlanId: trainingPlanId || null }),
+      },
+      include: { trainingPlan: true },
+    });
     res.json({ group });
   } catch {
     res.status(404).json({ error: "Groupe de stage introuvable." });

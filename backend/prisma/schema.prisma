@@ -265,6 +265,7 @@ model Sparring {
 
   player              Player?                   @relation(fields: [playerId], references: [id])
   trainingOccurrences TrainingOccurrenceCoach[]
+  campPeriodGroups    CampPeriodGroupCoach[]
 }
 
 model Training {
@@ -332,9 +333,10 @@ model TrainingPlan {
   periodEnd   DateTime?
   createdAt   DateTime  @default(now())
 
-  season    Season                  @relation(fields: [seasonId], references: [id], onDelete: Cascade)
-  coach     Coach?                  @relation(fields: [coachId], references: [id])
-  exercises TrainingPlanExercise[]
+  season     Season                  @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  coach      Coach?                  @relation(fields: [coachId], references: [id])
+  exercises  TrainingPlanExercise[]
+  campGroups CampGroup[]
 }
 
 model Exercise {
@@ -398,12 +400,14 @@ model CampPeriod {
 }
 
 model CampGroup {
-  id     String @id @default(cuid())
-  campId String
-  name   String // "Initiation", "Perfectionnement", "Psychomotricité", ...
+  id             String  @id @default(cuid())
+  campId         String
+  name           String // "Initiation", "Perfectionnement", "Psychomotricité", ...
+  trainingPlanId String?
 
-  camp    Camp              @relation(fields: [campId], references: [id], onDelete: Cascade)
-  periods CampPeriodGroup[]
+  camp         Camp              @relation(fields: [campId], references: [id], onDelete: Cascade)
+  trainingPlan TrainingPlan?     @relation(fields: [trainingPlanId], references: [id])
+  periods      CampPeriodGroup[]
 }
 
 model CampPeriodGroup {
@@ -421,14 +425,14 @@ model CampPeriodGroup {
 }
 
 model CampPeriodGroupCoach {
-  id                String @id @default(cuid())
+  id                String  @id @default(cuid())
   campPeriodGroupId String
-  coachId           String
+  coachId           String?
+  sparringId        String?
 
   campPeriodGroup CampPeriodGroup @relation(fields: [campPeriodGroupId], references: [id], onDelete: Cascade)
-  coach           Coach           @relation(fields: [coachId], references: [id], onDelete: Cascade)
-
-  @@unique([campPeriodGroupId, coachId])
+  coach           Coach?          @relation(fields: [coachId], references: [id], onDelete: Cascade)
+  sparring        Sparring?       @relation(fields: [sparringId], references: [id], onDelete: Cascade)
 }
 
 model CampPeriodGroupPlayer {
