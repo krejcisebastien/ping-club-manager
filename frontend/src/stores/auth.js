@@ -48,6 +48,12 @@ export const useAuthStore = defineStore("auth", {
       }
       try {
         const { data } = await api.get("/auth/me");
+        if (!Array.isArray(data.user?.roles)) {
+          // Jeton émis avant le passage aux rôles multiples (ancien format
+          // { role: "..." }) : session invalide, on force une reconnexion.
+          this.logout();
+          return;
+        }
         this.user = data.user;
         this.syncActiveRole();
       } catch {
