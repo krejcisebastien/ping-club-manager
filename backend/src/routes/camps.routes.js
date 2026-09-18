@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { prisma } from "../lib/prisma.js";
 import { requireAuth, requireRole } from "../middleware/auth.js";
+import { datesInRange } from "../utils/occurrences.js";
 
 const router = Router();
 
@@ -197,25 +198,45 @@ async function copyGroupDefaults(campGroupId, campPeriodGroupId) {
   ]);
 }
 
+// Ajoute une ou plusieurs journées d'un coup, entre startDate et endDate
+// (inclus). Idempotent : ne recrée pas une journée déjà existante à la même
+// date. endDate peut être égal à startDate pour n'ajouter qu'un seul jour.
 router.post("/:campId/days", requireRole("ADMIN"), async (req, res) => {
-  const { date, withDefaultPeriods } = req.body ?? {};
-  if (!date) return res.status(400).json({ error: "date est requise." });
-  const day = await prisma.campDay.create({
-    data: {
-      campId: req.params.campId,
-      date: new Date(date),
-      ...(withDefaultPeriods && {
-        periods: {
-          create: [
-            { label: "Matinée", startTime: "09:00", endTime: "12:00" },
-            { label: "Après-midi", startTime: "13:00", endTime: "16:00" },
-          ],
-        },
-      }),
-    },
-    include: { periods: true },
+  const { startDate, endDate, withDefaultPeriods } = req.body ?? {};
+  if (!startDate || !endDate) {
+    return res.status(400).json({ error: "startDate et endDate sont requis." });
+  }
+
+  const dates = datesInRange(new Date(startDate), new Date(endDate));
+  const existing = await prisma.campDay.findMany({
+    where: { campId: req.params.campId, date: { in: dates } },
+    select: { date: true },
   });
-  res.status(201).json({ day });
+  const existingTimes = new Set(existing.map((d) => d.date.getTime()));
+  const toCreate = dates.filter((d) => !existingTimes.has(d.getTime()));
+
+  if (toCreate.length > 0) {
+    await prisma.$transaction(
+      toCreate.map((date) =>
+        prisma.campDay.create({
+          data: {
+            campId: req.params.campId,
+            date,
+            ...(withDefaultPeriods && {
+              periods: {
+                create: [
+                  { label: "Matinée", startTime: "09:00", endTime: "12:00" },
+                  { label: "Après-midi", startTime: "13:00", endTime: "16:00" },
+                ],
+              },
+            }),
+          },
+        })
+      )
+    );
+  }
+
+  res.status(201).json({ created: toCreate.length, skipped: dates.length - toCreate.length });
 });
 
 router.delete("/days/:dayId", requireRole("ADMIN"), async (req, res) => {
@@ -238,6 +259,41 @@ router.post("/days/:dayId/periods", requireRole("ADMIN"), async (req, res) => {
     data: { campDayId: req.params.dayId, label, startTime, endTime },
   });
   res.status(201).json({ period });
+});
+
+// Ajoute la même période (label + horaires) sur chaque journée du stage comprise
+// entre startDate et endDate (inclus). Crée la journée si elle n'existe pas
+// encore à cette date. Idempotent : ne recrée pas une période du même label
+// déjà présente sur une journée donnée.
+router.post("/:campId/periods/generate", requireRole("ADMIN"), async (req, res) => {
+  const { startDate, endDate, label, startTime, endTime } = req.body ?? {};
+  if (!startDate || !endDate || !label || !startTime || !endTime) {
+    return res.status(400).json({ error: "startDate, endDate, label, startTime et endTime sont requis." });
+  }
+
+  const dates = datesInRange(new Date(startDate), new Date(endDate));
+  const existingDays = await prisma.campDay.findMany({
+    where: { campId: req.params.campId, date: { in: dates } },
+    include: { periods: true },
+  });
+  const dayByTime = new Map(existingDays.map((d) => [d.date.getTime(), d]));
+
+  let created = 0;
+  let skipped = 0;
+  for (const date of dates) {
+    let day = dayByTime.get(date.getTime());
+    if (!day) {
+      day = await prisma.campDay.create({ data: { campId: req.params.campId, date }, include: { periods: true } });
+    }
+    if (day.periods.some((p) => p.label === label)) {
+      skipped += 1;
+      continue;
+    }
+    await prisma.campPeriod.create({ data: { campDayId: day.id, label, startTime, endTime } });
+    created += 1;
+  }
+
+  res.status(201).json({ created, skipped });
 });
 
 router.put("/periods/:periodId", requireRole("ADMIN"), async (req, res) => {

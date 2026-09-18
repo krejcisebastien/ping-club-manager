@@ -2,6 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Le conteneur .p-dialog lui-même n'a pas de fond opaque (seuls ses enfants
+   header/content en ont un) : invisible la plupart du temps car ces enfants
+   se touchent, mais un espace transparent apparaît par endroits sur mobile,
+   laissant transparaître le masque assombri derrière. */
+.p-dialog {
+  background-color: white;
+}
+
 /* Le "preflight" de Tailwind (reset CSS global) écrase les bordures et le
    padding par défaut des champs PrimeVue (border-width: 0, padding: 0),
    les rendant invisibles. On les restaure explicitement ici. */

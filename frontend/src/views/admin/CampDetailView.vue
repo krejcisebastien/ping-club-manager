@@ -36,12 +36,16 @@ const groupDialogVisible = ref(false);
 const groupForm = ref({ name: "" });
 
 const dayDialogVisible = ref(false);
-const newDayDate = ref(null);
+const newDayRange = ref({ startDate: null, endDate: null });
 const withDefaultPeriods = ref(true);
 
 const periodDialogVisible = ref(false);
 const periodForm = ref({ id: null, dayId: null, label: "", startTime: null, endTime: null });
 const assignGroupId = ref({});
+
+const generatePeriodDialogVisible = ref(false);
+const generatePeriodForm = ref({ label: "", startTime: null, endTime: null, startDate: null, endDate: null });
+const generatingPeriod = ref(false);
 
 function timeToString(date) {
   if (!date) return null;
@@ -110,15 +114,19 @@ function confirmRemoveGroup(group) {
 }
 
 function openAddDay() {
-  newDayDate.value = null;
+  newDayRange.value = { startDate: null, endDate: null };
   withDefaultPeriods.value = true;
   dayDialogVisible.value = true;
 }
 async function onAddDay() {
-  if (!newDayDate.value) return;
-  await api.post(`/camps/${campId}/days`, { date: toDateOnly(newDayDate.value), withDefaultPeriods: withDefaultPeriods.value });
+  if (!newDayRange.value.startDate || !newDayRange.value.endDate) return;
+  const { data } = await api.post(`/camps/${campId}/days`, {
+    startDate: toDateOnly(newDayRange.value.startDate),
+    endDate: toDateOnly(newDayRange.value.endDate),
+    withDefaultPeriods: withDefaultPeriods.value,
+  });
   dayDialogVisible.value = false;
-  toast.add({ severity: "success", summary: "Journée ajoutée", life: 3000 });
+  toast.add({ severity: "success", summary: `${data.created} journée(s) ajoutée(s)`, detail: `${data.skipped} déjà existante(s).`, life: 4000 });
   await loadCamp();
 }
 function confirmRemoveDay(day) {
@@ -178,6 +186,30 @@ function confirmRemovePeriod(period) {
       await loadCamp();
     },
   });
+}
+
+function openGeneratePeriod() {
+  generatePeriodForm.value = { label: "", startTime: null, endTime: null, startDate: null, endDate: null };
+  generatePeriodDialogVisible.value = true;
+}
+async function onGeneratePeriod() {
+  generatingPeriod.value = true;
+  try {
+    const { data } = await api.post(`/camps/${campId}/periods/generate`, {
+      startDate: toDateOnly(generatePeriodForm.value.startDate),
+      endDate: toDateOnly(generatePeriodForm.value.endDate),
+      label: generatePeriodForm.value.label,
+      startTime: timeToString(generatePeriodForm.value.startTime),
+      endTime: timeToString(generatePeriodForm.value.endTime),
+    });
+    generatePeriodDialogVisible.value = false;
+    toast.add({ severity: "success", summary: `${data.created} période(s) créée(s)`, detail: `${data.skipped} déjà existante(s) pour ce libellé.`, life: 4000 });
+    await loadCamp();
+  } catch (err) {
+    toast.add({ severity: "error", summary: "Erreur", detail: err.response?.data?.error ?? "Une erreur est survenue.", life: 4000 });
+  } finally {
+    generatingPeriod.value = false;
+  }
 }
 
 async function onAssignGroup(periodId) {
@@ -245,9 +277,12 @@ const calendarOptions = computed(() => ({
       </div>
 
       <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-        <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
           <p class="text-sm font-medium text-slate-600">Journées ({{ camp.days.length }})</p>
-          <Button label="Ajouter une journée" icon="pi pi-plus" size="small" @click="openAddDay" />
+          <div class="flex gap-2">
+            <Button label="Générer une période" icon="pi pi-clock" size="small" outlined @click="openGeneratePeriod" />
+            <Button label="Ajouter des journées" icon="pi pi-plus" size="small" @click="openAddDay" />
+          </div>
         </div>
 
         <TabView lazy>
@@ -316,16 +351,33 @@ const calendarOptions = computed(() => ({
       </form>
     </Dialog>
 
-    <Dialog v-model:visible="dayDialogVisible" header="Nouvelle journée" modal style="width: 26rem" class="mx-4">
-      <form class="grid gap-3" @submit.prevent="onAddDay">
-        <Calendar v-model="newDayDate" date-format="dd/mm/yy" show-icon required class="w-full" input-class="w-full" />
-        <label class="flex items-start gap-2 text-sm text-slate-600 cursor-pointer">
+    <Dialog v-model:visible="dayDialogVisible" header="Ajouter des journées" modal style="width: 28rem" class="mx-4">
+      <form class="grid gap-3 sm:grid-cols-2" @submit.prevent="onAddDay">
+        <Calendar v-model="newDayRange.startDate" date-format="dd/mm/yy" show-icon placeholder="Du" required class="w-full" input-class="w-full" />
+        <Calendar v-model="newDayRange.endDate" date-format="dd/mm/yy" show-icon placeholder="Au" required class="w-full" input-class="w-full" />
+        <p class="text-xs text-slate-400 sm:col-span-2 -mt-1">Une seule journée ? Choisis la même date pour "Du" et "Au".</p>
+        <label class="flex items-start gap-2 text-sm text-slate-600 cursor-pointer sm:col-span-2">
           <Checkbox v-model="withDefaultPeriods" :binary="true" />
           Créer aussi les périodes standard (Matinée 09:00–12:00, Après-midi 13:00–16:00)
         </label>
-        <div class="flex justify-end gap-2">
+        <div class="sm:col-span-2 flex justify-end gap-2">
           <Button type="button" label="Annuler" severity="secondary" outlined @click="dayDialogVisible = false" />
           <Button type="submit" label="Ajouter" />
+        </div>
+      </form>
+    </Dialog>
+
+    <Dialog v-model:visible="generatePeriodDialogVisible" header="Générer une période" modal style="width: 28rem" class="mx-4">
+      <form class="grid gap-3 sm:grid-cols-2" @submit.prevent="onGeneratePeriod">
+        <InputText v-model="generatePeriodForm.label" placeholder="Matinée, après-midi, soirée…" required class="sm:col-span-2 w-full" />
+        <Calendar v-model="generatePeriodForm.startTime" time-only hour-format="24" placeholder="Début" required class="w-full" input-class="w-full" />
+        <Calendar v-model="generatePeriodForm.endTime" time-only hour-format="24" placeholder="Fin" required class="w-full" input-class="w-full" />
+        <Calendar v-model="generatePeriodForm.startDate" date-format="dd/mm/yy" show-icon placeholder="Du" required class="w-full" input-class="w-full" />
+        <Calendar v-model="generatePeriodForm.endDate" date-format="dd/mm/yy" show-icon placeholder="Au" required class="w-full" input-class="w-full" />
+        <p class="text-xs text-slate-400 sm:col-span-2 -mt-1">Ajoute cette période à chaque journée de la plage (les journées manquantes sont créées automatiquement).</p>
+        <div class="sm:col-span-2 flex justify-end gap-2">
+          <Button type="button" label="Annuler" severity="secondary" outlined @click="generatePeriodDialogVisible = false" />
+          <Button type="submit" label="Générer" :loading="generatingPeriod" />
         </div>
       </form>
     </Dialog>
