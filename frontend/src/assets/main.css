@@ -1,3 +1,39 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Le "preflight" de Tailwind (reset CSS global) écrase les bordures et le
+   padding par défaut des champs PrimeVue (border-width: 0, padding: 0),
+   les rendant invisibles. On les restaure explicitement ici. */
+.p-inputtext,
+.p-dropdown,
+.p-multiselect,
+.p-password,
+.p-password-input,
+.p-calendar .p-inputtext {
+  border-width: 1px !important;
+  border-style: solid !important;
+  border-color: #cbd5e1 !important; /* slate-300 */
+  padding: 0.5rem 0.75rem !important;
+  border-radius: 0.5rem !important;
+}
+
+.p-dropdown .p-inputtext,
+.p-multiselect .p-multiselect-label {
+  border: 0 !important;
+  padding: 0 !important;
+}
+
+.p-inputtext:enabled:focus,
+.p-dropdown:not(.p-disabled).p-focus,
+.p-multiselect:not(.p-disabled).p-focus,
+.p-calendar .p-inputtext:enabled:focus {
+  border-color: #0284c7 !important; /* sky-600 */
+  box-shadow: 0 0 0 1px #0284c7 !important;
+}
+
+.p-checkbox .p-checkbox-box {
+  border-width: 1px !important;
+  border-style: solid !important;
+  border-color: #cbd5e1 !important;
+}
