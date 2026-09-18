@@ -110,12 +110,111 @@ router.delete("/groups/:groupId", requireRole("ADMIN"), async (req, res) => {
   }
 });
 
+router.get("/groups/:groupId", async (req, res) => {
+  const group = await prisma.campGroup.findUnique({
+    where: { id: req.params.groupId },
+    include: {
+      camp: true,
+      trainingPlan: true,
+      coaches: { include: { coach: true, sparring: true } },
+      players: { include: { player: true } },
+    },
+  });
+  if (!group) return res.status(404).json({ error: "Groupe de stage introuvable." });
+  res.json({ group });
+});
+
+// ---------- Encadrants par défaut du groupe (copiés sur chaque période affectée) ----------
+
+router.post("/groups/:groupId/coaches", requireRole("ADMIN"), async (req, res) => {
+  const { coachId, sparringId } = req.body ?? {};
+  if ((!coachId && !sparringId) || (coachId && sparringId)) {
+    return res.status(400).json({ error: "Fournir soit coachId, soit sparringId." });
+  }
+  const assignment = await prisma.campGroupCoach.create({
+    data: { campGroupId: req.params.groupId, coachId: coachId ?? null, sparringId: sparringId ?? null },
+    include: { coach: true, sparring: true },
+  });
+  res.status(201).json({ assignment });
+});
+
+router.delete("/groups/:groupId/coaches/:assignmentId", requireRole("ADMIN"), async (req, res) => {
+  try {
+    await prisma.campGroupCoach.delete({ where: { id: req.params.assignmentId } });
+    res.status(204).end();
+  } catch {
+    res.status(404).json({ error: "Affectation introuvable." });
+  }
+});
+
+// ---------- Joueurs par défaut du groupe (copiés sur chaque période affectée) ----------
+
+router.post("/groups/:groupId/players", requireRole("ADMIN", "COACH"), async (req, res) => {
+  const { playerId } = req.body ?? {};
+  if (!playerId) return res.status(400).json({ error: "playerId est requis." });
+  try {
+    const enrollment = await prisma.campGroupPlayer.create({
+      data: { campGroupId: req.params.groupId, playerId },
+      include: { player: true },
+    });
+    res.status(201).json({ enrollment });
+  } catch (err) {
+    if (err.code === "P2002") {
+      return res.status(409).json({ error: "Ce joueur est déjà dans ce groupe." });
+    }
+    throw err;
+  }
+});
+
+router.delete("/groups/:groupId/players/:playerId", requireRole("ADMIN", "COACH"), async (req, res) => {
+  try {
+    await prisma.campGroupPlayer.delete({
+      where: { campGroupId_playerId: { campGroupId: req.params.groupId, playerId: req.params.playerId } },
+    });
+    res.status(204).end();
+  } catch {
+    res.status(404).json({ error: "Inscription introuvable." });
+  }
+});
+
 // ---------- Jours du stage ----------
 
+// Copie les encadrants et joueurs par défaut du groupe sur la période-groupe donnée.
+async function copyGroupDefaults(campGroupId, campPeriodGroupId) {
+  const [defaultCoaches, defaultPlayers] = await Promise.all([
+    prisma.campGroupCoach.findMany({ where: { campGroupId } }),
+    prisma.campGroupPlayer.findMany({ where: { campGroupId } }),
+  ]);
+  await Promise.all([
+    defaultCoaches.length &&
+      prisma.campPeriodGroupCoach.createMany({
+        data: defaultCoaches.map((d) => ({ campPeriodGroupId, coachId: d.coachId, sparringId: d.sparringId })),
+      }),
+    defaultPlayers.length &&
+      prisma.campPeriodGroupPlayer.createMany({
+        data: defaultPlayers.map((d) => ({ campPeriodGroupId, playerId: d.playerId })),
+      }),
+  ]);
+}
+
 router.post("/:campId/days", requireRole("ADMIN"), async (req, res) => {
-  const { date } = req.body ?? {};
+  const { date, withDefaultPeriods } = req.body ?? {};
   if (!date) return res.status(400).json({ error: "date est requise." });
-  const day = await prisma.campDay.create({ data: { campId: req.params.campId, date: new Date(date) } });
+  const day = await prisma.campDay.create({
+    data: {
+      campId: req.params.campId,
+      date: new Date(date),
+      ...(withDefaultPeriods && {
+        periods: {
+          create: [
+            { label: "Matinée", startTime: "09:00", endTime: "12:00" },
+            { label: "Après-midi", startTime: "13:00", endTime: "16:00" },
+          ],
+        },
+      }),
+    },
+    include: { periods: true },
+  });
   res.status(201).json({ day });
 });
 
@@ -177,6 +276,7 @@ router.post("/periods/:periodId/groups", requireRole("ADMIN"), async (req, res) 
       data: { campPeriodId: req.params.periodId, campGroupId },
       include: { group: true },
     });
+    await copyGroupDefaults(campGroupId, periodGroup.id);
     res.status(201).json({ periodGroup });
   } catch (err) {
     if (err.code === "P2002") {

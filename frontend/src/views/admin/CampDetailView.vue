@@ -7,6 +7,7 @@ import Dropdown from "primevue/dropdown";
 import Calendar from "primevue/calendar";
 import Dialog from "primevue/dialog";
 import Tag from "primevue/tag";
+import Checkbox from "primevue/checkbox";
 import Accordion from "primevue/accordion";
 import AccordionTab from "primevue/accordiontab";
 import TabView from "primevue/tabview";
@@ -30,13 +31,13 @@ const campId = route.params.id;
 const camp = ref(null);
 const editForm = ref({ name: "", location: "", startDate: null, endDate: null });
 const savingInfo = ref(false);
-const trainingPlans = ref([]);
 
 const groupDialogVisible = ref(false);
-const groupForm = ref({ id: null, name: "" });
+const groupForm = ref({ name: "" });
 
 const dayDialogVisible = ref(false);
 const newDayDate = ref(null);
+const withDefaultPeriods = ref(true);
 
 const periodDialogVisible = ref(false);
 const periodForm = ref({ id: null, dayId: null, label: "", startTime: null, endTime: null });
@@ -65,11 +66,7 @@ async function loadCamp() {
   };
 }
 
-onMounted(async () => {
-  await loadCamp();
-  const { data } = await api.get("/training-plans", { params: { seasonId: camp.value.seasonId } });
-  trainingPlans.value = data.plans;
-});
+onMounted(loadCamp);
 
 async function onSaveInfo() {
   savingInfo.value = true;
@@ -87,26 +84,13 @@ async function onSaveInfo() {
 }
 
 function openCreateGroup() {
-  groupForm.value = { id: null, name: "" };
-  groupDialogVisible.value = true;
-}
-function openEditGroup(group) {
-  groupForm.value = { id: group.id, name: group.name };
+  groupForm.value = { name: "" };
   groupDialogVisible.value = true;
 }
 async function onSaveGroup() {
-  if (groupForm.value.id) {
-    await api.put(`/camps/groups/${groupForm.value.id}`, { name: groupForm.value.name });
-  } else {
-    await api.post(`/camps/${campId}/groups`, { name: groupForm.value.name });
-  }
+  await api.post(`/camps/${campId}/groups`, { name: groupForm.value.name });
   groupDialogVisible.value = false;
-  toast.add({ severity: "success", summary: "Groupe enregistré", life: 3000 });
-  await loadCamp();
-}
-async function onAssignPlan(group, trainingPlanId) {
-  await api.put(`/camps/groups/${group.id}`, { trainingPlanId });
-  toast.add({ severity: "success", summary: "Plan d'entrainement mis à jour", life: 3000 });
+  toast.add({ severity: "success", summary: "Groupe créé", life: 3000 });
   await loadCamp();
 }
 function confirmRemoveGroup(group) {
@@ -127,11 +111,12 @@ function confirmRemoveGroup(group) {
 
 function openAddDay() {
   newDayDate.value = null;
+  withDefaultPeriods.value = true;
   dayDialogVisible.value = true;
 }
 async function onAddDay() {
   if (!newDayDate.value) return;
-  await api.post(`/camps/${campId}/days`, { date: toDateOnly(newDayDate.value) });
+  await api.post(`/camps/${campId}/days`, { date: toDateOnly(newDayDate.value), withDefaultPeriods: withDefaultPeriods.value });
   dayDialogVisible.value = false;
   toast.add({ severity: "success", summary: "Journée ajoutée", life: 3000 });
   await loadCamp();
@@ -248,22 +233,12 @@ const calendarOptions = computed(() => ({
           <Button label="Ajouter" icon="pi pi-plus" size="small" @click="openCreateGroup" />
         </div>
         <ul class="divide-y divide-slate-100">
-          <li v-for="g in camp.groups" :key="g.id" class="py-2 flex flex-wrap items-center gap-2">
-            <span class="font-medium text-sm w-32 shrink-0">{{ g.name }}</span>
-            <Dropdown
-              :model-value="g.trainingPlanId"
-              :options="trainingPlans"
-              option-label="title"
-              option-value="id"
-              show-clear
-              placeholder="Plan d'entrainement…"
-              class="flex-1 min-w-[12rem]"
-              @update:model-value="(planId) => onAssignPlan(g, planId)"
-            />
-            <div class="flex gap-1 shrink-0">
-              <Button icon="pi pi-pencil" text rounded size="small" @click="openEditGroup(g)" />
-              <Button icon="pi pi-times" severity="danger" text rounded size="small" @click="confirmRemoveGroup(g)" />
+          <li v-for="g in camp.groups" :key="g.id" class="py-2 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2 min-w-0 cursor-pointer" @click="router.push(`/admin/camp-groups/${g.id}`)">
+              <span class="font-medium text-sm text-sky-700 hover:underline truncate">{{ g.name }}</span>
+              <Tag v-if="g.trainingPlan" severity="secondary" :value="g.trainingPlan.title" />
             </div>
+            <Button icon="pi pi-times" severity="danger" text rounded size="small" class="shrink-0" @click="confirmRemoveGroup(g)" />
           </li>
           <li v-if="!camp.groups.length" class="py-2 text-slate-400 text-sm">Aucun groupe défini.</li>
         </ul>
@@ -297,11 +272,17 @@ const calendarOptions = computed(() => ({
                     </div>
 
                     <ul class="mt-2 flex flex-wrap gap-2">
-                      <li v-for="pg in period.groups" :key="pg.id">
-                        <Tag severity="info" class="cursor-pointer" @click="router.push(`/admin/camp-period-groups/${pg.id}`)">
-                          {{ pg.group.name }}
-                          <i class="pi pi-times text-xs ml-1" @click.stop="onRemovePeriodGroup(pg.id)"></i>
-                        </Tag>
+                      <li v-for="pg in period.groups" :key="pg.id" class="inline-flex items-center gap-0.5 bg-sky-50 border border-sky-200 rounded-full pl-1 pr-1 py-1">
+                        <Button
+                          :label="pg.group.name"
+                          icon="pi pi-users"
+                          text
+                          size="small"
+                          title="Gérer les encadrants et joueurs de ce groupe"
+                          class="!py-0.5 !px-2 !text-sky-700 !gap-1.5"
+                          @click="router.push(`/admin/camp-period-groups/${pg.id}`)"
+                        />
+                        <Button icon="pi pi-times" severity="danger" text rounded size="small" class="!w-6 !h-6" aria-label="Retirer le groupe" @click="onRemovePeriodGroup(pg.id)" />
                       </li>
                       <li v-if="!period.groups.length" class="text-slate-400 text-sm">Aucun groupe affecté.</li>
                     </ul>
@@ -325,19 +306,23 @@ const calendarOptions = computed(() => ({
       </div>
     </div>
 
-    <Dialog v-model:visible="groupDialogVisible" :header="groupForm.id ? 'Modifier le groupe' : 'Nouveau groupe'" modal style="width: 24rem" class="mx-4">
+    <Dialog v-model:visible="groupDialogVisible" header="Nouveau groupe" modal style="width: 24rem" class="mx-4">
       <form class="grid gap-3" @submit.prevent="onSaveGroup">
         <InputText v-model="groupForm.name" placeholder="Nom du groupe" required class="w-full" />
         <div class="flex justify-end gap-2">
           <Button type="button" label="Annuler" severity="secondary" outlined @click="groupDialogVisible = false" />
-          <Button type="submit" label="Enregistrer" />
+          <Button type="submit" label="Créer" />
         </div>
       </form>
     </Dialog>
 
-    <Dialog v-model:visible="dayDialogVisible" header="Nouvelle journée" modal style="width: 24rem" class="mx-4">
+    <Dialog v-model:visible="dayDialogVisible" header="Nouvelle journée" modal style="width: 26rem" class="mx-4">
       <form class="grid gap-3" @submit.prevent="onAddDay">
         <Calendar v-model="newDayDate" date-format="dd/mm/yy" show-icon required class="w-full" input-class="w-full" />
+        <label class="flex items-start gap-2 text-sm text-slate-600 cursor-pointer">
+          <Checkbox v-model="withDefaultPeriods" :binary="true" />
+          Créer aussi les périodes standard (Matinée 09:00–12:00, Après-midi 13:00–16:00)
+        </label>
         <div class="flex justify-end gap-2">
           <Button type="button" label="Annuler" severity="secondary" outlined @click="dayDialogVisible = false" />
           <Button type="submit" label="Ajouter" />

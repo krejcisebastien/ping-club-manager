@@ -1,10 +1,10 @@
 <script setup>
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import Button from "primevue/button";
-import Dropdown from "primevue/dropdown";
 import AppLayout from "../../components/AppLayout.vue";
 import CoachAssignmentList from "../../components/CoachAssignmentList.vue";
+import PlayerEnrollmentList from "../../components/PlayerEnrollmentList.vue";
 import { api } from "../../lib/api.js";
 import { useNavLinks } from "../../composables/useNavLinks.js";
 
@@ -18,12 +18,6 @@ const periodGroup = ref(null);
 const allCoaches = ref([]);
 const allSparrings = ref([]);
 const allPlayers = ref([]);
-const playerToAdd = ref(null);
-
-const availablePlayers = computed(() => {
-  const ids = new Set((periodGroup.value?.players ?? []).map((p) => p.player.id));
-  return allPlayers.value.filter((p) => !ids.has(p.id)).map((p) => ({ label: `${p.firstName} ${p.lastName}`, value: p.id }));
-});
 
 async function load() {
   const { data } = await api.get(`/camp-period-groups/${id}`);
@@ -47,10 +41,8 @@ async function onRemoveCoach(assignmentId) {
   await load();
 }
 
-async function onAddPlayer() {
-  if (!playerToAdd.value) return;
-  await api.post(`/camp-period-groups/${id}/players`, { playerId: playerToAdd.value });
-  playerToAdd.value = null;
+async function onAddPlayer(playerId) {
+  await api.post(`/camp-period-groups/${id}/players`, { playerId });
   await load();
 }
 
@@ -75,23 +67,15 @@ async function onRemovePlayer(playerId) {
 
       <div class="grid gap-4 md:grid-cols-2">
         <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-          <p class="text-sm font-medium text-slate-600 mb-3">Encadrants</p>
+          <p class="text-sm font-medium text-slate-600 mb-1">Encadrants</p>
+          <p class="text-xs text-slate-400 mb-3">Repris par défaut du groupe, modifiable ici pour cette période uniquement.</p>
           <CoachAssignmentList :assignments="periodGroup.coaches" :coaches="allCoaches" :sparrings="allSparrings" @add="onAddCoach" @remove="onRemoveCoach" />
         </div>
 
         <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-          <p class="text-sm font-medium text-slate-600 mb-3">Joueurs inscrits</p>
-          <ul class="divide-y divide-slate-100 mb-3">
-            <li v-for="p in periodGroup.players" :key="p.id" class="py-2 flex items-center justify-between text-sm">
-              <span>{{ p.player.firstName }} {{ p.player.lastName }}</span>
-              <Button icon="pi pi-times" severity="danger" text rounded size="small" aria-label="Retirer" @click="onRemovePlayer(p.player.id)" />
-            </li>
-            <li v-if="!periodGroup.players.length" class="py-2 text-slate-400 text-sm">Aucun joueur inscrit.</li>
-          </ul>
-          <div class="flex gap-2">
-            <Dropdown v-model="playerToAdd" :options="availablePlayers" option-label="label" option-value="value" filter placeholder="Inscrire un joueur…" class="flex-1" />
-            <Button label="Ajouter" @click="onAddPlayer" />
-          </div>
+          <p class="text-sm font-medium text-slate-600 mb-1">Joueurs inscrits</p>
+          <p class="text-xs text-slate-400 mb-3">Repris par défaut du groupe, modifiable ici pour cette période uniquement.</p>
+          <PlayerEnrollmentList :assignments="periodGroup.players" :players="allPlayers" @add="onAddPlayer" @remove="onRemovePlayer" />
         </div>
       </div>
     </div>
