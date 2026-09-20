@@ -75,7 +75,7 @@ async function onChangePassword() {
 <template>
   <div class="min-h-screen bg-slate-50 md:flex">
     <!-- Sidebar desktop -->
-    <aside class="hidden md:flex md:w-64 md:flex-col md:shrink-0 bg-white border-r border-slate-200">
+    <aside class="hidden md:flex md:w-64 md:flex-col md:shrink-0 md:sticky md:top-0 md:h-screen md:self-start bg-white border-r border-slate-200">
       <div class="h-16 flex items-center gap-2 px-5 border-b border-slate-200">
         <i :class="CLUB_ICON" class="pi text-xl text-sky-600" aria-hidden="true"></i>
         <span class="font-semibold text-slate-800">{{ CLUB_NAME }}</span>
