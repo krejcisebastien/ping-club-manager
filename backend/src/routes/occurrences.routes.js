@@ -1,5 +1,4 @@
 import { Router } from "express";
-import { prisma } from "../lib/prisma.js";
 import { requireAuth, requireRole } from "../middleware/auth.js";
 
 const router = Router();
@@ -7,7 +6,7 @@ const router = Router();
 router.use(requireAuth);
 
 router.get("/:id", async (req, res) => {
-  const occurrence = await prisma.trainingOccurrence.findUnique({
+  const occurrence = await req.db.trainingOccurrence.findUnique({
     where: { id: req.params.id },
     include: {
       training: { include: { group: true } },
@@ -21,7 +20,7 @@ router.get("/:id", async (req, res) => {
 router.put("/:id", requireRole("ADMIN", "COACH"), async (req, res) => {
   const { date, startTime, endTime, status } = req.body ?? {};
   try {
-    const occurrence = await prisma.trainingOccurrence.update({
+    const occurrence = await req.db.trainingOccurrence.update({
       where: { id: req.params.id },
       data: {
         ...(date !== undefined && { date: new Date(date) }),
@@ -38,7 +37,7 @@ router.put("/:id", requireRole("ADMIN", "COACH"), async (req, res) => {
 
 router.delete("/:id", requireRole("ADMIN"), async (req, res) => {
   try {
-    await prisma.trainingOccurrence.delete({ where: { id: req.params.id } });
+    await req.db.trainingOccurrence.delete({ where: { id: req.params.id } });
     res.status(204).end();
   } catch {
     res.status(404).json({ error: "Séance introuvable." });
@@ -52,7 +51,7 @@ router.post("/:id/coaches", requireRole("ADMIN"), async (req, res) => {
   if ((!coachId && !sparringId) || (coachId && sparringId)) {
     return res.status(400).json({ error: "Fournir soit coachId, soit sparringId." });
   }
-  const assignment = await prisma.trainingOccurrenceCoach.create({
+  const assignment = await req.db.trainingOccurrenceCoach.create({
     data: { occurrenceId: req.params.id, coachId: coachId ?? null, sparringId: sparringId ?? null },
     include: { coach: true, sparring: true },
   });
@@ -61,7 +60,7 @@ router.post("/:id/coaches", requireRole("ADMIN"), async (req, res) => {
 
 router.delete("/:id/coaches/:assignmentId", requireRole("ADMIN"), async (req, res) => {
   try {
-    await prisma.trainingOccurrenceCoach.delete({ where: { id: req.params.assignmentId } });
+    await req.db.trainingOccurrenceCoach.delete({ where: { id: req.params.assignmentId } });
     res.status(204).end();
   } catch {
     res.status(404).json({ error: "Affectation introuvable." });
@@ -73,19 +72,19 @@ router.delete("/:id/coaches/:assignmentId", requireRole("ADMIN"), async (req, re
 // Renvoie la liste des joueurs du groupe de l'entrainement (feuille de présence),
 // avec le statut de présence déjà enregistré le cas échéant.
 router.get("/:id/attendance", requireRole("ADMIN", "COACH"), async (req, res) => {
-  const occurrence = await prisma.trainingOccurrence.findUnique({
+  const occurrence = await req.db.trainingOccurrence.findUnique({
     where: { id: req.params.id },
     include: { training: true },
   });
   if (!occurrence) return res.status(404).json({ error: "Séance introuvable." });
 
   const [roster, records] = await Promise.all([
-    prisma.playerGroupAssignment.findMany({
+    req.db.playerGroupAssignment.findMany({
       where: { groupId: occurrence.training.groupId, endDate: null },
       include: { player: true },
       orderBy: { player: { lastName: "asc" } },
     }),
-    prisma.attendance.findMany({ where: { occurrenceId: req.params.id } }),
+    req.db.attendance.findMany({ where: { occurrenceId: req.params.id } }),
   ]);
 
   const byPlayerId = new Map(records.map((r) => [r.playerId, r]));
@@ -107,9 +106,9 @@ router.put("/:id/attendance", requireRole("ADMIN", "COACH"), async (req, res) =>
     return res.status(400).json({ error: "records doit être un tableau." });
   }
 
-  await prisma.$transaction(
+  await req.db.$transaction(
     records.map(({ playerId, present, note }) =>
-      prisma.attendance.upsert({
+      req.db.attendance.upsert({
         where: { occurrenceId_playerId: { occurrenceId: req.params.id, playerId } },
         create: { occurrenceId: req.params.id, playerId, present: !!present, note },
         update: { present: !!present, note },

@@ -1,5 +1,4 @@
 import { Router } from "express";
-import { prisma } from "../lib/prisma.js";
 import { requireAuth, requireRole } from "../middleware/auth.js";
 
 const router = Router();
@@ -7,12 +6,12 @@ const router = Router();
 router.use(requireAuth);
 
 router.get("/", async (req, res) => {
-  const coaches = await prisma.coach.findMany({ orderBy: { lastName: "asc" } });
+  const coaches = await req.db.coach.findMany({ orderBy: { lastName: "asc" } });
   res.json({ coaches });
 });
 
 router.get("/:id", async (req, res) => {
-  const coach = await prisma.coach.findUnique({ where: { id: req.params.id } });
+  const coach = await req.db.coach.findUnique({ where: { id: req.params.id } });
   if (!coach) return res.status(404).json({ error: "Entraineur introuvable." });
   res.json({ coach });
 });
@@ -25,7 +24,7 @@ router.post("/", requireRole("ADMIN"), async (req, res) => {
   try {
     // Chaîne vide -> null : Postgres n'applique la contrainte unique qu'entre valeurs
     // non nulles, donc plusieurs entraineurs sans email ne doivent pas être bloqués.
-    const coach = await prisma.coach.create({ data: { firstName, lastName, email: email || null, phone } });
+    const coach = await req.db.coach.create({ data: { firstName, lastName, email: email || null, phone } });
     res.status(201).json({ coach });
   } catch (err) {
     if (err.code === "P2002") {
@@ -38,7 +37,7 @@ router.post("/", requireRole("ADMIN"), async (req, res) => {
 router.put("/:id", requireRole("ADMIN"), async (req, res) => {
   const { firstName, lastName, email, phone } = req.body ?? {};
   try {
-    const coach = await prisma.coach.update({
+    const coach = await req.db.coach.update({
       where: { id: req.params.id },
       data: {
         ...(firstName !== undefined && { firstName }),
@@ -58,7 +57,7 @@ router.put("/:id", requireRole("ADMIN"), async (req, res) => {
 
 router.delete("/:id", requireRole("ADMIN"), async (req, res) => {
   try {
-    await prisma.coach.delete({ where: { id: req.params.id } });
+    await req.db.coach.delete({ where: { id: req.params.id } });
     res.status(204).end();
   } catch {
     res.status(404).json({ error: "Entraineur introuvable." });

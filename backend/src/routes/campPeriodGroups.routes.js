@@ -1,5 +1,4 @@
 import { Router } from "express";
-import { prisma } from "../lib/prisma.js";
 import { requireAuth, requireRole } from "../middleware/auth.js";
 
 const router = Router();
@@ -7,7 +6,7 @@ const router = Router();
 router.use(requireAuth);
 
 router.get("/:id", async (req, res) => {
-  const periodGroup = await prisma.campPeriodGroup.findUnique({
+  const periodGroup = await req.db.campPeriodGroup.findUnique({
     where: { id: req.params.id },
     include: {
       group: { include: { trainingPlan: true } },
@@ -27,7 +26,7 @@ router.post("/:id/coaches", requireRole("ADMIN"), async (req, res) => {
   if ((!coachId && !sparringId) || (coachId && sparringId)) {
     return res.status(400).json({ error: "Fournir soit coachId, soit sparringId." });
   }
-  const assignment = await prisma.campPeriodGroupCoach.create({
+  const assignment = await req.db.campPeriodGroupCoach.create({
     data: { campPeriodGroupId: req.params.id, coachId: coachId ?? null, sparringId: sparringId ?? null },
     include: { coach: true, sparring: true },
   });
@@ -36,7 +35,7 @@ router.post("/:id/coaches", requireRole("ADMIN"), async (req, res) => {
 
 router.delete("/:id/coaches/:assignmentId", requireRole("ADMIN"), async (req, res) => {
   try {
-    await prisma.campPeriodGroupCoach.delete({ where: { id: req.params.assignmentId } });
+    await req.db.campPeriodGroupCoach.delete({ where: { id: req.params.assignmentId } });
     res.status(204).end();
   } catch {
     res.status(404).json({ error: "Affectation introuvable." });
@@ -49,7 +48,7 @@ router.post("/:id/players", requireRole("ADMIN", "COACH"), async (req, res) => {
   const { playerId } = req.body ?? {};
   if (!playerId) return res.status(400).json({ error: "playerId est requis." });
   try {
-    const enrollment = await prisma.campPeriodGroupPlayer.create({
+    const enrollment = await req.db.campPeriodGroupPlayer.create({
       data: { campPeriodGroupId: req.params.id, playerId },
       include: { player: true },
     });
@@ -64,7 +63,7 @@ router.post("/:id/players", requireRole("ADMIN", "COACH"), async (req, res) => {
 
 router.delete("/:id/players/:playerId", requireRole("ADMIN", "COACH"), async (req, res) => {
   try {
-    await prisma.campPeriodGroupPlayer.delete({
+    await req.db.campPeriodGroupPlayer.delete({
       where: { campPeriodGroupId_playerId: { campPeriodGroupId: req.params.id, playerId: req.params.playerId } },
     });
     res.status(204).end();
@@ -77,12 +76,12 @@ router.delete("/:id/players/:playerId", requireRole("ADMIN", "COACH"), async (re
 
 router.get("/:id/attendance", requireRole("ADMIN", "COACH"), async (req, res) => {
   const [roster, records] = await Promise.all([
-    prisma.campPeriodGroupPlayer.findMany({
+    req.db.campPeriodGroupPlayer.findMany({
       where: { campPeriodGroupId: req.params.id },
       include: { player: true },
       orderBy: { player: { lastName: "asc" } },
     }),
-    prisma.campAttendance.findMany({ where: { campPeriodGroupId: req.params.id } }),
+    req.db.campAttendance.findMany({ where: { campPeriodGroupId: req.params.id } }),
   ]);
 
   const byPlayerId = new Map(records.map((r) => [r.playerId, r]));
@@ -102,9 +101,9 @@ router.put("/:id/attendance", requireRole("ADMIN", "COACH"), async (req, res) =>
     return res.status(400).json({ error: "records doit être un tableau." });
   }
 
-  await prisma.$transaction(
+  await req.db.$transaction(
     records.map(({ playerId, present }) =>
-      prisma.campAttendance.upsert({
+      req.db.campAttendance.upsert({
         where: { campPeriodGroupId_playerId: { campPeriodGroupId: req.params.id, playerId } },
         create: { campPeriodGroupId: req.params.id, playerId, present: !!present },
         update: { present: !!present },

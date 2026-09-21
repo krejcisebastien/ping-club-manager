@@ -1,5 +1,4 @@
 import { Router } from "express";
-import { prisma } from "../lib/prisma.js";
 import { requireAuth, requireRole } from "../middleware/auth.js";
 import { datesForWeekday } from "../utils/occurrences.js";
 
@@ -9,7 +8,7 @@ router.use(requireAuth);
 
 router.get("/", async (req, res) => {
   const { seasonId, groupId } = req.query;
-  const trainings = await prisma.training.findMany({
+  const trainings = await req.db.training.findMany({
     where: {
       ...(seasonId && { seasonId }),
       ...(groupId && { groupId }),
@@ -21,7 +20,7 @@ router.get("/", async (req, res) => {
 });
 
 router.get("/:id", async (req, res) => {
-  const training = await prisma.training.findUnique({
+  const training = await req.db.training.findUnique({
     where: { id: req.params.id },
     include: { group: true, coaches: { include: { coach: true, sparring: true } } },
   });
@@ -34,7 +33,7 @@ router.post("/", requireRole("ADMIN"), async (req, res) => {
   if (!seasonId || !groupId || !name) {
     return res.status(400).json({ error: "seasonId, groupId et name sont requis." });
   }
-  const training = await prisma.training.create({
+  const training = await req.db.training.create({
     data: { seasonId, groupId, name, location, weekday, startTime, endTime },
   });
   res.status(201).json({ training });
@@ -43,7 +42,7 @@ router.post("/", requireRole("ADMIN"), async (req, res) => {
 router.put("/:id", requireRole("ADMIN"), async (req, res) => {
   const { name, location, weekday, startTime, endTime, groupId } = req.body ?? {};
   try {
-    const training = await prisma.training.update({
+    const training = await req.db.training.update({
       where: { id: req.params.id },
       data: {
         ...(name !== undefined && { name }),
@@ -62,7 +61,7 @@ router.put("/:id", requireRole("ADMIN"), async (req, res) => {
 
 router.delete("/:id", requireRole("ADMIN"), async (req, res) => {
   try {
-    await prisma.training.delete({ where: { id: req.params.id } });
+    await req.db.training.delete({ where: { id: req.params.id } });
     res.status(204).end();
   } catch {
     res.status(404).json({ error: "Entrainement introuvable." });
@@ -76,7 +75,7 @@ router.post("/:id/coaches", requireRole("ADMIN"), async (req, res) => {
   if ((!coachId && !sparringId) || (coachId && sparringId)) {
     return res.status(400).json({ error: "Fournir soit coachId, soit sparringId." });
   }
-  const assignment = await prisma.trainingCoach.create({
+  const assignment = await req.db.trainingCoach.create({
     data: { trainingId: req.params.id, coachId: coachId ?? null, sparringId: sparringId ?? null },
     include: { coach: true, sparring: true },
   });
@@ -85,7 +84,7 @@ router.post("/:id/coaches", requireRole("ADMIN"), async (req, res) => {
 
 router.delete("/:id/coaches/:assignmentId", requireRole("ADMIN"), async (req, res) => {
   try {
-    await prisma.trainingCoach.delete({ where: { id: req.params.assignmentId } });
+    await req.db.trainingCoach.delete({ where: { id: req.params.assignmentId } });
     res.status(204).end();
   } catch {
     res.status(404).json({ error: "Affectation introuvable." });
@@ -95,11 +94,11 @@ router.delete("/:id/coaches/:assignmentId", requireRole("ADMIN"), async (req, re
 // ---------- Occurrences (séances datées) ----------
 
 // Copie les encadrants par défaut de l'entrainement sur les séances données.
-async function copyDefaultCoaches(trainingId, occurrenceIds) {
+async function copyDefaultCoaches(db, trainingId, occurrenceIds) {
   if (!occurrenceIds.length) return;
-  const defaults = await prisma.trainingCoach.findMany({ where: { trainingId } });
+  const defaults = await db.trainingCoach.findMany({ where: { trainingId } });
   if (!defaults.length) return;
-  await prisma.trainingOccurrenceCoach.createMany({
+  await db.trainingOccurrenceCoach.createMany({
     data: occurrenceIds.flatMap((occurrenceId) =>
       defaults.map((d) => ({ occurrenceId, coachId: d.coachId, sparringId: d.sparringId }))
     ),
@@ -107,7 +106,7 @@ async function copyDefaultCoaches(trainingId, occurrenceIds) {
 }
 
 router.get("/:id/occurrences", async (req, res) => {
-  const occurrences = await prisma.trainingOccurrence.findMany({
+  const occurrences = await req.db.trainingOccurrence.findMany({
     where: { trainingId: req.params.id },
     orderBy: { date: "asc" },
   });
@@ -120,10 +119,10 @@ router.post("/:id/occurrences", requireRole("ADMIN", "COACH"), async (req, res) 
   if (!date || !startTime || !endTime) {
     return res.status(400).json({ error: "date, startTime et endTime sont requis." });
   }
-  const occurrence = await prisma.trainingOccurrence.create({
+  const occurrence = await req.db.trainingOccurrence.create({
     data: { trainingId: req.params.id, date: new Date(date), startTime, endTime },
   });
-  await copyDefaultCoaches(req.params.id, [occurrence.id]);
+  await copyDefaultCoaches(req.db, req.params.id, [occurrence.id]);
   res.status(201).json({ occurrence });
 });
 
@@ -136,7 +135,7 @@ router.post("/:id/generate-occurrences", requireRole("ADMIN"), async (req, res) 
     return res.status(400).json({ error: "startDate et endDate sont requis." });
   }
 
-  const training = await prisma.training.findUnique({ where: { id: req.params.id } });
+  const training = await req.db.training.findUnique({ where: { id: req.params.id } });
   if (!training) return res.status(404).json({ error: "Entrainement introuvable." });
   if (training.weekday == null || !training.startTime || !training.endTime) {
     return res.status(400).json({
@@ -145,7 +144,7 @@ router.post("/:id/generate-occurrences", requireRole("ADMIN"), async (req, res) 
   }
 
   const dates = datesForWeekday(new Date(startDate), new Date(endDate), training.weekday);
-  const existing = await prisma.trainingOccurrence.findMany({
+  const existing = await req.db.trainingOccurrence.findMany({
     where: { trainingId: training.id, date: { in: dates } },
     select: { date: true },
   });
@@ -153,7 +152,7 @@ router.post("/:id/generate-occurrences", requireRole("ADMIN"), async (req, res) 
   const toCreate = dates.filter((d) => !existingTimes.has(d.getTime()));
 
   if (toCreate.length > 0) {
-    await prisma.trainingOccurrence.createMany({
+    await req.db.trainingOccurrence.createMany({
       data: toCreate.map((date) => ({
         trainingId: training.id,
         date,
@@ -161,11 +160,12 @@ router.post("/:id/generate-occurrences", requireRole("ADMIN"), async (req, res) 
         endTime: training.endTime,
       })),
     });
-    const created = await prisma.trainingOccurrence.findMany({
+    const created = await req.db.trainingOccurrence.findMany({
       where: { trainingId: training.id, date: { in: toCreate } },
       select: { id: true },
     });
     await copyDefaultCoaches(
+      req.db,
       training.id,
       created.map((o) => o.id)
     );

@@ -1,5 +1,4 @@
 import { Router } from "express";
-import { prisma } from "../lib/prisma.js";
 import { requireAuth, requireRole } from "../middleware/auth.js";
 import { datesInRange } from "../utils/occurrences.js";
 
@@ -11,7 +10,7 @@ router.use(requireAuth);
 
 router.get("/", async (req, res) => {
   const { seasonId } = req.query;
-  const camps = await prisma.camp.findMany({
+  const camps = await req.db.camp.findMany({
     where: seasonId ? { seasonId } : undefined,
     orderBy: { startDate: "desc" },
   });
@@ -19,7 +18,7 @@ router.get("/", async (req, res) => {
 });
 
 router.get("/:campId", async (req, res) => {
-  const camp = await prisma.camp.findUnique({
+  const camp = await req.db.camp.findUnique({
     where: { id: req.params.campId },
     include: {
       groups: { include: { trainingPlan: true } },
@@ -43,7 +42,7 @@ router.post("/", requireRole("ADMIN"), async (req, res) => {
   if (!seasonId || !name || !startDate || !endDate) {
     return res.status(400).json({ error: "seasonId, name, startDate et endDate sont requis." });
   }
-  const camp = await prisma.camp.create({
+  const camp = await req.db.camp.create({
     data: { seasonId, name, location, startDate: new Date(startDate), endDate: new Date(endDate) },
   });
   res.status(201).json({ camp });
@@ -52,7 +51,7 @@ router.post("/", requireRole("ADMIN"), async (req, res) => {
 router.put("/:campId", requireRole("ADMIN"), async (req, res) => {
   const { name, location, startDate, endDate } = req.body ?? {};
   try {
-    const camp = await prisma.camp.update({
+    const camp = await req.db.camp.update({
       where: { id: req.params.campId },
       data: {
         ...(name !== undefined && { name }),
@@ -69,7 +68,7 @@ router.put("/:campId", requireRole("ADMIN"), async (req, res) => {
 
 router.delete("/:campId", requireRole("ADMIN"), async (req, res) => {
   try {
-    await prisma.camp.delete({ where: { id: req.params.campId } });
+    await req.db.camp.delete({ where: { id: req.params.campId } });
     res.status(204).end();
   } catch {
     res.status(404).json({ error: "Stage introuvable." });
@@ -81,14 +80,14 @@ router.delete("/:campId", requireRole("ADMIN"), async (req, res) => {
 router.post("/:campId/groups", requireRole("ADMIN"), async (req, res) => {
   const { name } = req.body ?? {};
   if (!name) return res.status(400).json({ error: "name est requis." });
-  const group = await prisma.campGroup.create({ data: { campId: req.params.campId, name } });
+  const group = await req.db.campGroup.create({ data: { campId: req.params.campId, name } });
   res.status(201).json({ group });
 });
 
 router.put("/groups/:groupId", requireRole("ADMIN"), async (req, res) => {
   const { name, trainingPlanId } = req.body ?? {};
   try {
-    const group = await prisma.campGroup.update({
+    const group = await req.db.campGroup.update({
       where: { id: req.params.groupId },
       data: {
         ...(name !== undefined && { name }),
@@ -104,7 +103,7 @@ router.put("/groups/:groupId", requireRole("ADMIN"), async (req, res) => {
 
 router.delete("/groups/:groupId", requireRole("ADMIN"), async (req, res) => {
   try {
-    await prisma.campGroup.delete({ where: { id: req.params.groupId } });
+    await req.db.campGroup.delete({ where: { id: req.params.groupId } });
     res.status(204).end();
   } catch {
     res.status(404).json({ error: "Groupe de stage introuvable." });
@@ -112,7 +111,7 @@ router.delete("/groups/:groupId", requireRole("ADMIN"), async (req, res) => {
 });
 
 router.get("/groups/:groupId", async (req, res) => {
-  const group = await prisma.campGroup.findUnique({
+  const group = await req.db.campGroup.findUnique({
     where: { id: req.params.groupId },
     include: {
       camp: true,
@@ -132,7 +131,7 @@ router.post("/groups/:groupId/coaches", requireRole("ADMIN"), async (req, res) =
   if ((!coachId && !sparringId) || (coachId && sparringId)) {
     return res.status(400).json({ error: "Fournir soit coachId, soit sparringId." });
   }
-  const assignment = await prisma.campGroupCoach.create({
+  const assignment = await req.db.campGroupCoach.create({
     data: { campGroupId: req.params.groupId, coachId: coachId ?? null, sparringId: sparringId ?? null },
     include: { coach: true, sparring: true },
   });
@@ -141,7 +140,7 @@ router.post("/groups/:groupId/coaches", requireRole("ADMIN"), async (req, res) =
 
 router.delete("/groups/:groupId/coaches/:assignmentId", requireRole("ADMIN"), async (req, res) => {
   try {
-    await prisma.campGroupCoach.delete({ where: { id: req.params.assignmentId } });
+    await req.db.campGroupCoach.delete({ where: { id: req.params.assignmentId } });
     res.status(204).end();
   } catch {
     res.status(404).json({ error: "Affectation introuvable." });
@@ -154,7 +153,7 @@ router.post("/groups/:groupId/players", requireRole("ADMIN", "COACH"), async (re
   const { playerId } = req.body ?? {};
   if (!playerId) return res.status(400).json({ error: "playerId est requis." });
   try {
-    const enrollment = await prisma.campGroupPlayer.create({
+    const enrollment = await req.db.campGroupPlayer.create({
       data: { campGroupId: req.params.groupId, playerId },
       include: { player: true },
     });
@@ -169,7 +168,7 @@ router.post("/groups/:groupId/players", requireRole("ADMIN", "COACH"), async (re
 
 router.delete("/groups/:groupId/players/:playerId", requireRole("ADMIN", "COACH"), async (req, res) => {
   try {
-    await prisma.campGroupPlayer.delete({
+    await req.db.campGroupPlayer.delete({
       where: { campGroupId_playerId: { campGroupId: req.params.groupId, playerId: req.params.playerId } },
     });
     res.status(204).end();
@@ -181,18 +180,18 @@ router.delete("/groups/:groupId/players/:playerId", requireRole("ADMIN", "COACH"
 // ---------- Jours du stage ----------
 
 // Copie les encadrants et joueurs par défaut du groupe sur la période-groupe donnée.
-async function copyGroupDefaults(campGroupId, campPeriodGroupId) {
+async function copyGroupDefaults(db, campGroupId, campPeriodGroupId) {
   const [defaultCoaches, defaultPlayers] = await Promise.all([
-    prisma.campGroupCoach.findMany({ where: { campGroupId } }),
-    prisma.campGroupPlayer.findMany({ where: { campGroupId } }),
+    db.campGroupCoach.findMany({ where: { campGroupId } }),
+    db.campGroupPlayer.findMany({ where: { campGroupId } }),
   ]);
   await Promise.all([
     defaultCoaches.length &&
-      prisma.campPeriodGroupCoach.createMany({
+      db.campPeriodGroupCoach.createMany({
         data: defaultCoaches.map((d) => ({ campPeriodGroupId, coachId: d.coachId, sparringId: d.sparringId })),
       }),
     defaultPlayers.length &&
-      prisma.campPeriodGroupPlayer.createMany({
+      db.campPeriodGroupPlayer.createMany({
         data: defaultPlayers.map((d) => ({ campPeriodGroupId, playerId: d.playerId })),
       }),
   ]);
@@ -208,7 +207,7 @@ router.post("/:campId/days", requireRole("ADMIN"), async (req, res) => {
   }
 
   const dates = datesInRange(new Date(startDate), new Date(endDate));
-  const existing = await prisma.campDay.findMany({
+  const existing = await req.db.campDay.findMany({
     where: { campId: req.params.campId, date: { in: dates } },
     select: { date: true },
   });
@@ -216,9 +215,9 @@ router.post("/:campId/days", requireRole("ADMIN"), async (req, res) => {
   const toCreate = dates.filter((d) => !existingTimes.has(d.getTime()));
 
   if (toCreate.length > 0) {
-    await prisma.$transaction(
+    await req.db.$transaction(
       toCreate.map((date) =>
-        prisma.campDay.create({
+        req.db.campDay.create({
           data: {
             campId: req.params.campId,
             date,
@@ -241,7 +240,7 @@ router.post("/:campId/days", requireRole("ADMIN"), async (req, res) => {
 
 router.delete("/days/:dayId", requireRole("ADMIN"), async (req, res) => {
   try {
-    await prisma.campDay.delete({ where: { id: req.params.dayId } });
+    await req.db.campDay.delete({ where: { id: req.params.dayId } });
     res.status(204).end();
   } catch {
     res.status(404).json({ error: "Journée introuvable." });
@@ -255,7 +254,7 @@ router.post("/days/:dayId/periods", requireRole("ADMIN"), async (req, res) => {
   if (!label || !startTime || !endTime) {
     return res.status(400).json({ error: "label, startTime et endTime sont requis." });
   }
-  const period = await prisma.campPeriod.create({
+  const period = await req.db.campPeriod.create({
     data: { campDayId: req.params.dayId, label, startTime, endTime },
   });
   res.status(201).json({ period });
@@ -272,7 +271,7 @@ router.post("/:campId/periods/generate", requireRole("ADMIN"), async (req, res) 
   }
 
   const dates = datesInRange(new Date(startDate), new Date(endDate));
-  const existingDays = await prisma.campDay.findMany({
+  const existingDays = await req.db.campDay.findMany({
     where: { campId: req.params.campId, date: { in: dates } },
     include: { periods: true },
   });
@@ -283,13 +282,13 @@ router.post("/:campId/periods/generate", requireRole("ADMIN"), async (req, res) 
   for (const date of dates) {
     let day = dayByTime.get(date.getTime());
     if (!day) {
-      day = await prisma.campDay.create({ data: { campId: req.params.campId, date }, include: { periods: true } });
+      day = await req.db.campDay.create({ data: { campId: req.params.campId, date }, include: { periods: true } });
     }
     if (day.periods.some((p) => p.label === label)) {
       skipped += 1;
       continue;
     }
-    await prisma.campPeriod.create({ data: { campDayId: day.id, label, startTime, endTime } });
+    await req.db.campPeriod.create({ data: { campDayId: day.id, label, startTime, endTime } });
     created += 1;
   }
 
@@ -299,7 +298,7 @@ router.post("/:campId/periods/generate", requireRole("ADMIN"), async (req, res) 
 router.put("/periods/:periodId", requireRole("ADMIN"), async (req, res) => {
   const { label, startTime, endTime } = req.body ?? {};
   try {
-    const period = await prisma.campPeriod.update({
+    const period = await req.db.campPeriod.update({
       where: { id: req.params.periodId },
       data: {
         ...(label !== undefined && { label }),
@@ -315,7 +314,7 @@ router.put("/periods/:periodId", requireRole("ADMIN"), async (req, res) => {
 
 router.delete("/periods/:periodId", requireRole("ADMIN"), async (req, res) => {
   try {
-    await prisma.campPeriod.delete({ where: { id: req.params.periodId } });
+    await req.db.campPeriod.delete({ where: { id: req.params.periodId } });
     res.status(204).end();
   } catch {
     res.status(404).json({ error: "Période introuvable." });
@@ -328,11 +327,11 @@ router.post("/periods/:periodId/groups", requireRole("ADMIN"), async (req, res) 
   const { campGroupId } = req.body ?? {};
   if (!campGroupId) return res.status(400).json({ error: "campGroupId est requis." });
   try {
-    const periodGroup = await prisma.campPeriodGroup.create({
+    const periodGroup = await req.db.campPeriodGroup.create({
       data: { campPeriodId: req.params.periodId, campGroupId },
       include: { group: true },
     });
-    await copyGroupDefaults(campGroupId, periodGroup.id);
+    await copyGroupDefaults(req.db, campGroupId, periodGroup.id);
     res.status(201).json({ periodGroup });
   } catch (err) {
     if (err.code === "P2002") {
@@ -344,7 +343,7 @@ router.post("/periods/:periodId/groups", requireRole("ADMIN"), async (req, res) 
 
 router.delete("/period-groups/:periodGroupId", requireRole("ADMIN"), async (req, res) => {
   try {
-    await prisma.campPeriodGroup.delete({ where: { id: req.params.periodGroupId } });
+    await req.db.campPeriodGroup.delete({ where: { id: req.params.periodGroupId } });
     res.status(204).end();
   } catch {
     res.status(404).json({ error: "Affectation introuvable." });

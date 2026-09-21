@@ -1,5 +1,4 @@
 import { Router } from "express";
-import { prisma } from "../lib/prisma.js";
 import { requireAuth, requireRole } from "../middleware/auth.js";
 
 const router = Router();
@@ -7,12 +6,12 @@ const router = Router();
 router.use(requireAuth);
 
 router.get("/", async (req, res) => {
-  const sparrings = await prisma.sparring.findMany({ orderBy: { lastName: "asc" } });
+  const sparrings = await req.db.sparring.findMany({ orderBy: { lastName: "asc" } });
   res.json({ sparrings });
 });
 
 router.get("/:id", async (req, res) => {
-  const sparring = await prisma.sparring.findUnique({ where: { id: req.params.id } });
+  const sparring = await req.db.sparring.findUnique({ where: { id: req.params.id } });
   if (!sparring) return res.status(404).json({ error: "Sparring introuvable." });
   res.json({ sparring });
 });
@@ -23,7 +22,7 @@ router.post("/", requireRole("ADMIN", "COACH"), async (req, res) => {
     return res.status(400).json({ error: "firstName et lastName sont requis." });
   }
   try {
-    const sparring = await prisma.sparring.create({
+    const sparring = await req.db.sparring.create({
       data: {
         firstName,
         lastName,
@@ -45,7 +44,7 @@ router.post("/", requireRole("ADMIN", "COACH"), async (req, res) => {
 router.put("/:id", requireRole("ADMIN", "COACH"), async (req, res) => {
   const { firstName, lastName, ranking, isClubMember, playerId, externalClub } = req.body ?? {};
   try {
-    const sparring = await prisma.sparring.update({
+    const sparring = await req.db.sparring.update({
       where: { id: req.params.id },
       data: {
         ...(firstName !== undefined && { firstName }),
@@ -69,7 +68,7 @@ router.put("/:id", requireRole("ADMIN", "COACH"), async (req, res) => {
 
 router.delete("/:id", requireRole("ADMIN"), async (req, res) => {
   try {
-    await prisma.sparring.delete({ where: { id: req.params.id } });
+    await req.db.sparring.delete({ where: { id: req.params.id } });
     res.status(204).end();
   } catch {
     res.status(404).json({ error: "Sparring introuvable." });

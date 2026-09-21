@@ -1,5 +1,4 @@
 import { Router } from "express";
-import { prisma } from "../lib/prisma.js";
 import { requireAuth, requireRole } from "../middleware/auth.js";
 
 const router = Router();
@@ -7,12 +6,12 @@ const router = Router();
 router.use(requireAuth);
 
 router.get("/", async (req, res) => {
-  const seasons = await prisma.season.findMany({ orderBy: { startDate: "desc" } });
+  const seasons = await req.db.season.findMany({ orderBy: { startDate: "desc" } });
   res.json({ seasons });
 });
 
 router.get("/:id", async (req, res) => {
-  const season = await prisma.season.findUnique({ where: { id: req.params.id } });
+  const season = await req.db.season.findUnique({ where: { id: req.params.id } });
   if (!season) return res.status(404).json({ error: "Saison introuvable." });
   res.json({ season });
 });
@@ -22,7 +21,7 @@ router.post("/", requireRole("ADMIN"), async (req, res) => {
   if (!name || !startDate || !endDate) {
     return res.status(400).json({ error: "name, startDate et endDate sont requis." });
   }
-  const season = await prisma.season.create({
+  const season = await req.db.season.create({
     data: { name, startDate: new Date(startDate), endDate: new Date(endDate), isActive: !!isActive, settings },
   });
   res.status(201).json({ season });
@@ -31,7 +30,7 @@ router.post("/", requireRole("ADMIN"), async (req, res) => {
 router.put("/:id", requireRole("ADMIN"), async (req, res) => {
   const { name, startDate, endDate, isActive, settings } = req.body ?? {};
   try {
-    const season = await prisma.season.update({
+    const season = await req.db.season.update({
       where: { id: req.params.id },
       data: {
         ...(name !== undefined && { name }),
@@ -49,7 +48,7 @@ router.put("/:id", requireRole("ADMIN"), async (req, res) => {
 
 router.delete("/:id", requireRole("ADMIN"), async (req, res) => {
   try {
-    await prisma.season.delete({ where: { id: req.params.id } });
+    await req.db.season.delete({ where: { id: req.params.id } });
     res.status(204).end();
   } catch {
     res.status(404).json({ error: "Saison introuvable." });

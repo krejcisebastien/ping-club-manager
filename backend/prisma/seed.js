@@ -14,11 +14,18 @@ async function main() {
     return;
   }
 
+  // La migration multi-tenant crée le club "default" ; on le recrée au besoin.
+  const club = await prisma.club.upsert({
+    where: { slug: "default" },
+    update: {},
+    create: { name: "Club Tennis de Table", slug: "default" },
+  });
+
   const passwordHash = await hashPassword(password);
   await prisma.user.create({
-    data: { email, passwordHash, roles: ["ADMIN"] },
+    data: { email, passwordHash, roles: ["ADMIN"], clubId: club.id },
   });
-  console.log(`Compte admin créé : ${email} / ${password}`);
+  console.log(`Compte admin créé pour le club "${club.name}" : ${email} / ${password}`);
 }
 
 main()

@@ -24,6 +24,9 @@ export function createApp() {
 
   // eslint-disable-next-line no-unused-vars
   app.use((err, req, res, next) => {
+    if (err.code === "TENANT_FORBIDDEN") {
+      return res.status(404).json({ error: err.message });
+    }
     console.error(err);
     res.status(500).json({ error: "Erreur serveur." });
   });

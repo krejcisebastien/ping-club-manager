@@ -43,7 +43,7 @@ L'application est accessible sur http://localhost:5173.
 
 ## Déploiement
 
-Voir [DEPLOYMENT.md](DEPLOYMENT.md) — déploiement Render (Blueprint), et comment déployer une nouvelle instance dédiée pour un autre club (un club = une instance + sa propre base de données, à partir du même code).
+Voir [DEPLOYMENT.md](DEPLOYMENT.md) — déploiement Render (Blueprint) et gestion des clubs : l'application est multi-tenant, un seul déploiement sert tous les clubs, chacun isolé (`npm run club -- create ...` pour en ajouter un).
 
 ## État actuel
 

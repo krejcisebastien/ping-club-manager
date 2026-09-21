@@ -1,5 +1,4 @@
 import { Router } from "express";
-import { prisma } from "../lib/prisma.js";
 import { requireAuth, requireRole } from "../middleware/auth.js";
 
 const router = Router();
@@ -8,7 +7,7 @@ router.use(requireAuth);
 
 router.get("/", async (req, res) => {
   const { seasonId } = req.query;
-  const plans = await prisma.trainingPlan.findMany({
+  const plans = await req.db.trainingPlan.findMany({
     where: seasonId ? { seasonId } : undefined,
     include: { coach: true },
     orderBy: { createdAt: "desc" },
@@ -17,7 +16,7 @@ router.get("/", async (req, res) => {
 });
 
 router.get("/:id", async (req, res) => {
-  const plan = await prisma.trainingPlan.findUnique({
+  const plan = await req.db.trainingPlan.findUnique({
     where: { id: req.params.id },
     include: { coach: true, exercises: { include: { exercise: true } } },
   });
@@ -30,7 +29,7 @@ router.post("/", requireRole("ADMIN", "COACH"), async (req, res) => {
   if (!seasonId || !title) {
     return res.status(400).json({ error: "seasonId et title sont requis." });
   }
-  const plan = await prisma.trainingPlan.create({
+  const plan = await req.db.trainingPlan.create({
     data: {
       seasonId,
       title,
@@ -46,7 +45,7 @@ router.post("/", requireRole("ADMIN", "COACH"), async (req, res) => {
 router.put("/:id", requireRole("ADMIN", "COACH"), async (req, res) => {
   const { title, description, periodStart, periodEnd } = req.body ?? {};
   try {
-    const plan = await prisma.trainingPlan.update({
+    const plan = await req.db.trainingPlan.update({
       where: { id: req.params.id },
       data: {
         ...(title !== undefined && { title }),
@@ -63,7 +62,7 @@ router.put("/:id", requireRole("ADMIN", "COACH"), async (req, res) => {
 
 router.delete("/:id", requireRole("ADMIN", "COACH"), async (req, res) => {
   try {
-    await prisma.trainingPlan.delete({ where: { id: req.params.id } });
+    await req.db.trainingPlan.delete({ where: { id: req.params.id } });
     res.status(204).end();
   } catch {
     res.status(404).json({ error: "Plan d'entrainement introuvable." });
@@ -76,7 +75,7 @@ router.post("/:id/exercises", requireRole("ADMIN", "COACH"), async (req, res) =>
   const { exerciseId } = req.body ?? {};
   if (!exerciseId) return res.status(400).json({ error: "exerciseId est requis." });
   try {
-    const link = await prisma.trainingPlanExercise.create({
+    const link = await req.db.trainingPlanExercise.create({
       data: { trainingPlanId: req.params.id, exerciseId },
       include: { exercise: true },
     });
@@ -91,7 +90,7 @@ router.post("/:id/exercises", requireRole("ADMIN", "COACH"), async (req, res) =>
 
 router.delete("/:id/exercises/:exerciseId", requireRole("ADMIN", "COACH"), async (req, res) => {
   try {
-    await prisma.trainingPlanExercise.delete({
+    await req.db.trainingPlanExercise.delete({
       where: { trainingPlanId_exerciseId: { trainingPlanId: req.params.id, exerciseId: req.params.exerciseId } },
     });
     res.status(204).end();

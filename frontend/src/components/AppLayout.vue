@@ -78,7 +78,7 @@ async function onChangePassword() {
     <aside class="hidden md:flex md:w-64 md:flex-col md:shrink-0 md:sticky md:top-0 md:h-screen md:self-start bg-white border-r border-slate-200">
       <div class="h-16 flex items-center gap-2 px-5 border-b border-slate-200">
         <i :class="CLUB_ICON" class="pi text-xl text-sky-600" aria-hidden="true"></i>
-        <span class="font-semibold text-slate-800">{{ CLUB_NAME }}</span>
+        <span class="font-semibold text-slate-800 truncate">{{ auth.user?.clubName || CLUB_NAME }}</span>
       </div>
       <nav class="flex-1 overflow-y-auto py-3 px-2 space-y-0.5">
         <RouterLink

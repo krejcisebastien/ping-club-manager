@@ -23,7 +23,7 @@ router.post("/login", async (req, res) => {
 
   const user = await prisma.user.findUnique({
     where: { email },
-    include: { players: { select: { playerId: true } } },
+    include: { players: { select: { playerId: true } }, club: { select: { name: true } } },
   });
   if (!user || !user.isActive) {
     return res.status(401).json({ error: "Identifiants invalides." });
@@ -40,6 +40,8 @@ router.post("/login", async (req, res) => {
     roles: user.roles,
     playerIds: user.players.map((p) => p.playerId),
     coachId: user.coachId,
+    clubId: user.clubId,
+    clubName: user.club.name,
   };
   const token = signToken(payload);
   res.json({ user: payload, token });
@@ -110,19 +112,19 @@ router.put("/change-password", requireAuth, async (req, res) => {
     return res.status(400).json({ error: "Le nouveau mot de passe doit contenir au moins 8 caractères." });
   }
 
-  const user = await prisma.user.findUnique({ where: { id: req.user.sub } });
+  const user = await req.db.user.findUnique({ where: { id: req.user.sub } });
   if (!user || !(await verifyPassword(currentPassword, user.passwordHash))) {
     return res.status(401).json({ error: "Mot de passe actuel incorrect." });
   }
 
-  await prisma.user.update({ where: { id: user.id }, data: { passwordHash: await hashPassword(newPassword) } });
+  await req.db.user.update({ where: { id: user.id }, data: { passwordHash: await hashPassword(newPassword) } });
   res.json({ message: "Mot de passe mis à jour." });
 });
 
 // ---------- Gestion des comptes utilisateurs (admin uniquement) ----------
 
 router.get("/users", requireAuth, requireRole("ADMIN"), async (req, res) => {
-  const users = await prisma.user.findMany({
+  const users = await req.db.user.findMany({
     select: {
       id: true,
       email: true,
@@ -158,7 +160,7 @@ router.post("/users", requireAuth, requireRole("ADMIN"), async (req, res) => {
 
   const passwordHash = await hashPassword(password);
   try {
-    const user = await prisma.user.create({
+    const user = await req.db.user.create({
       data: {
         email,
         passwordHash,
@@ -211,11 +213,11 @@ router.put("/users/:id", requireAuth, requireRole("ADMIN"), async (req, res) => 
     }
 
     if (Array.isArray(playerIds)) {
-      await prisma.userPlayer.deleteMany({ where: { userId: req.params.id } });
+      await req.db.userPlayer.deleteMany({ where: { userId: req.params.id } });
       data.players = { create: playerIds.map((playerId) => ({ playerId })) };
     }
 
-    const user = await prisma.user.update({
+    const user = await req.db.user.update({
       where: { id: req.params.id },
       data,
       select: { id: true, email: true, roles: true, coachId: true, isActive: true, players: { select: { playerId: true } } },
@@ -231,7 +233,7 @@ router.put("/users/:id", requireAuth, requireRole("ADMIN"), async (req, res) => 
 
 router.delete("/users/:id", requireAuth, requireRole("ADMIN"), async (req, res) => {
   try {
-    await prisma.user.delete({ where: { id: req.params.id } });
+    await req.db.user.delete({ where: { id: req.params.id } });
     res.status(204).end();
   } catch {
     res.status(404).json({ error: "Compte introuvable." });

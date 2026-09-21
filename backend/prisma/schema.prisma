@@ -39,10 +39,32 @@ enum MediaType {
   VIDEO
 }
 
+// ---------- Clubs (multi-tenant) ----------
+
+// Chaque club est un "tenant" : toutes ses données (saisons, comptes, joueurs,
+// entraineurs, sparrings, exercices, et tout ce qui en découle) lui sont
+// rattachées via clubId sur les entités racines. L'isolation est appliquée
+// automatiquement par le client Prisma scopé (src/lib/tenant.js).
+model Club {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+
+  seasons   Season[]
+  users     User[]
+  players   Player[]
+  coaches   Coach[]
+  sparrings Sparring[]
+  exercises Exercise[]
+}
+
 // ---------- Saisons & utilisateurs ----------
 
 model Season {
   id        String   @id @default(cuid())
+  clubId String
+  club   Club   @relation(fields: [clubId], references: [id], onDelete: Cascade)
   name      String
   startDate DateTime
   endDate   DateTime
@@ -57,10 +79,14 @@ model Season {
   trainings        Training[]
   trainingPlans    TrainingPlan[]
   camps            Camp[]
+
+  @@index([clubId])
 }
 
 model User {
   id           String   @id @default(cuid())
+  clubId String
+  club   Club   @relation(fields: [clubId], references: [id], onDelete: Cascade)
   email        String   @unique
   passwordHash String
   roles        Role[]
@@ -75,6 +101,8 @@ model User {
 
   coachId String? @unique
   coach   Coach?  @relation(fields: [coachId], references: [id])
+
+  @@index([clubId])
 }
 
 // Association many-to-many : un compte (ex. parent) peut voir la fiche de
@@ -95,6 +123,8 @@ model UserPlayer {
 
 model Player {
   id            String   @id @default(cuid())
+  clubId String
+  club   Club   @relation(fields: [clubId], references: [id], onDelete: Cascade)
   firstName     String
   lastName      String
   birthDate     DateTime
@@ -116,6 +146,8 @@ model Player {
   campAttendances  CampAttendance[]
   sparringProfile  Sparring?
   campGroups       CampGroupPlayer[]
+
+  @@index([clubId])
 }
 
 model PlayerSeason {
@@ -242,9 +274,11 @@ model PlayerGroupAssignment {
 
 model Coach {
   id        String   @id @default(cuid())
+  clubId String
+  club   Club   @relation(fields: [clubId], references: [id], onDelete: Cascade)
   firstName String
   lastName  String
-  email     String?  @unique
+  email     String?
   phone     String?
   createdAt DateTime @default(now())
 
@@ -257,10 +291,15 @@ model Coach {
   campPeriodGroups    CampPeriodGroupCoach[]
   trainings           TrainingCoach[]
   campGroups          CampGroupCoach[]
+
+  @@index([clubId])
+  @@unique([clubId, email])
 }
 
 model Sparring {
   id           String   @id @default(cuid())
+  clubId String
+  club   Club   @relation(fields: [clubId], references: [id], onDelete: Cascade)
   firstName    String
   lastName     String
   ranking      String?
@@ -274,6 +313,8 @@ model Sparring {
   campPeriodGroups    CampPeriodGroupCoach[]
   trainings           TrainingCoach[]
   campGroups          CampGroupCoach[]
+
+  @@index([clubId])
 }
 
 model Training {
@@ -364,6 +405,8 @@ model TrainingPlan {
 
 model Exercise {
   id               String   @id @default(cuid())
+  clubId String
+  club   Club   @relation(fields: [clubId], references: [id], onDelete: Cascade)
   title            String
   description      String?
   category         String?
@@ -375,6 +418,8 @@ model Exercise {
 
   createdBy Coach?                  @relation(fields: [createdById], references: [id])
   plans     TrainingPlanExercise[]
+
+  @@index([clubId])
 }
 
 model TrainingPlanExercise {
