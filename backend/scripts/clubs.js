@@ -2,13 +2,21 @@ import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
 import { hashPassword } from "../src/utils/password.js";
 import { slugify } from "../src/utils/slug.js";
+import { licenseState } from "../src/lib/license.js";
 
 const prisma = new PrismaClient();
 
 const USAGE = `Usage :
   npm run club -- list
-  npm run club -- create --name "Nom du club" --admin-email a@b.c --admin-password "mot de passe" [--slug nom-du-club]
-  npm run club -- rename --slug nom-du-club --name "Nouveau nom"`;
+  npm run club -- create --name "Nom du club" --admin-email a@b.c --admin-password "mot de passe" [--slug nom-du-club] [--until AAAA-MM-JJ | --years N]
+  npm run club -- rename --slug nom-du-club --name "Nouveau nom"
+  npm run club -- license --slug nom-du-club (--until AAAA-MM-JJ | --years N)
+
+Licence (club payé sur facture) :
+  --until AAAA-MM-JJ   fixe la fin de licence à cette date
+  --years N            prolonge de N an(s) à partir de la fin actuelle (ou d'aujourd'hui si échue/absente)
+  Sans option à la création, le club n'a pas de licence : son administrateur
+  peut la régler en ligne (Stripe) depuis l'application.`;
 
 function parseArgs(argv) {
   const out = {};
@@ -17,6 +25,27 @@ function parseArgs(argv) {
     out[argv[i].slice(2)] = argv[i + 1];
   }
   return out;
+}
+
+const fmt = (d) => (d ? d.toISOString().slice(0, 10) : "—");
+
+// Calcule la nouvelle fin de licence à partir de --until / --years.
+function licenseEnd(args, current) {
+  if (args.until && args.years) throw new Error("Utiliser --until ou --years, pas les deux.");
+  if (args.until) {
+    const date = new Date(`${args.until}T00:00:00.000Z`);
+    if (Number.isNaN(date.getTime())) throw new Error("Date invalide : utiliser le format AAAA-MM-JJ.");
+    return date;
+  }
+  if (args.years) {
+    const years = Number(args.years);
+    if (!Number.isInteger(years) || years < 1) throw new Error("--years doit être un entier positif.");
+    const start = current && current.getTime() > Date.now() ? current : new Date();
+    const end = new Date(start);
+    end.setUTCFullYear(end.getUTCFullYear() + years);
+    return end;
+  }
+  return undefined;
 }
 
 async function main() {
@@ -29,25 +58,36 @@ async function main() {
       include: { _count: { select: { users: true, players: true } } },
     });
     for (const c of clubs) {
-      console.log(`${c.slug.padEnd(24)} ${c.name}  (${c._count.users} comptes, ${c._count.players} joueurs)`);
+      const license = licenseState(c);
+      console.log(
+        `${c.slug.padEnd(24)} ${c.name}  (${c._count.users} comptes, ${c._count.players} joueurs)  licence : ${license.status} ${fmt(c.licenseEndsAt)}${c.stripeCustomerId ? "  [Stripe]" : ""}`
+      );
     }
   } else if (command === "create") {
     const { name, "admin-email": email, "admin-password": password } = args;
     if (!name || !email || !password) throw new Error(USAGE);
     if (password.length < 8) throw new Error("Le mot de passe doit contenir au moins 8 caractères.");
-    const slug = args.slug || slugify(name);
+    const licenseEndsAt = licenseEnd(args, null);
     const club = await prisma.club.create({
       data: {
         name,
-        slug,
+        slug: args.slug || slugify(name),
+        licenseEndsAt,
         users: { create: { email, passwordHash: await hashPassword(password), roles: ["ADMIN"] } },
       },
     });
-    console.log(`Club "${club.name}" créé (slug : ${club.slug}). Admin : ${email}`);
+    console.log(`Club "${club.name}" créé (slug : ${club.slug}). Admin : ${email}. Licence : ${licenseEndsAt ? `jusqu'au ${fmt(licenseEndsAt)}` : "aucune"}`);
   } else if (command === "rename") {
     if (!args.slug || !args.name) throw new Error(USAGE);
     const club = await prisma.club.update({ where: { slug: args.slug }, data: { name: args.name } });
     console.log(`Club renommé : "${club.name}" (slug : ${club.slug})`);
+  } else if (command === "license") {
+    if (!args.slug || (!args.until && !args.years)) throw new Error(USAGE);
+    const current = await prisma.club.findUnique({ where: { slug: args.slug } });
+    if (!current) throw new Error(`Club introuvable : ${args.slug}`);
+    const licenseEndsAt = licenseEnd(args, current.licenseEndsAt);
+    await prisma.club.update({ where: { id: current.id }, data: { licenseEndsAt } });
+    console.log(`Licence de "${current.name}" : ${fmt(current.licenseEndsAt)} → ${fmt(licenseEndsAt)} (effectif sous 30 s sur un serveur en marche)`);
   } else {
     throw new Error(USAGE);
   }

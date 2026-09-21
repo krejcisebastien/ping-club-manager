@@ -12,6 +12,7 @@ const ADMIN_LINKS = [
   { to: "/admin/camps", label: "Stages", icon: "pi pi-calendar" },
   { to: "/coach/exercises", label: "Exercices", icon: "pi pi-book" },
   { to: "/coach/training-plans", label: "Plans d'entrainement", icon: "pi pi-clipboard" },
+  { to: "/license", label: "Licence", icon: "pi pi-credit-card" },
 ];
 
 const COACH_LINKS = [

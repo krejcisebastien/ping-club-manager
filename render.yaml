@@ -46,6 +46,14 @@ services:
       # tu ne veux pas accepter d'inscriptions publiques (voir DEPLOYMENT.md).
       - key: ALLOW_CLUB_SIGNUP
         value: "false"
+      # Licences : paiement en ligne Stripe (optionnel, voir DEPLOYMENT.md). Clés
+      # secrètes : à renseigner dans le dashboard Render, jamais ici.
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_PRICE_ID
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
 
   - type: web
     name: ping-club-manager-web
@@ -64,6 +72,9 @@ services:
       # connexion.
       - key: VITE_CLUB_NAME
         value: Club Tennis de Table
+      # Adresse affichée sur la page Licence pour régler par facture (optionnel).
+      # - key: VITE_SUPPORT_EMAIL
+      #   value: contact@exemple.be
       # Icône PrimeIcons affichée à côté du nom (optionnel, défaut : pi-star-fill).
       # - key: VITE_CLUB_ICON
       #   value: pi-star-fill

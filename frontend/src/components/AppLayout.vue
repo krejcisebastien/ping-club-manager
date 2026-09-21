@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { useRouter, RouterLink } from "vue-router";
 import Avatar from "primevue/avatar";
 import Button from "primevue/button";
@@ -21,6 +21,11 @@ const auth = useAuthStore();
 const router = useRouter();
 const toast = useToast();
 const drawerOpen = ref(false);
+
+const expiringSoon = computed(() => {
+  const license = auth.license;
+  return !!license?.active && (license.status === "GRACE" || license.daysLeft <= 30);
+});
 
 function initials(email) {
   return (email || "?").slice(0, 2).toUpperCase();
@@ -172,6 +177,15 @@ async function onChangePassword() {
       </header>
 
       <main class="p-4 md:p-6 max-w-5xl mx-auto">
+        <RouterLink
+          v-if="auth.isAdmin && expiringSoon"
+          to="/license"
+          class="block mb-4 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900 hover:bg-amber-100"
+        >
+          <i class="pi pi-exclamation-triangle mr-2"></i>
+          <span v-if="auth.license.status === 'GRACE'">La licence du club est échue : accès maintenu quelques jours, pensez à la renouveler.</span>
+          <span v-else>La licence du club expire dans {{ auth.license.daysLeft }} jour(s). Renouveler</span>
+        </RouterLink>
         <slot />
       </main>
     </div>

@@ -51,6 +51,13 @@ model Club {
   slug      String   @unique
   createdAt DateTime @default(now())
 
+  // Licence annuelle : le club a accès jusqu'à licenseEndsAt (+ délai de grâce,
+  // voir src/lib/license.js). Vide = aucune licence (accès refusé). Renseignée
+  // par le paiement Stripe (webhook) ou manuellement (npm run club -- license).
+  licenseEndsAt        DateTime?
+  stripeCustomerId     String?   @unique
+  stripeSubscriptionId String?
+
   seasons   Season[]
   users     User[]
   players   Player[]

@@ -11,3 +11,15 @@ api.interceptors.request.use((config) => {
   }
   return config;
 });
+
+// Licence du club expirée ou absente (402) en cours de session : on renvoie
+// vers la page Licence, qui recharge le statut.
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 402 && error.response.data?.code === "LICENSE_REQUIRED" && window.location.pathname !== "/license") {
+      window.location.assign("/license");
+    }
+    return Promise.reject(error);
+  }
+);

@@ -13,7 +13,8 @@
     "club": "node scripts/clubs.js",
     "test:isolation": "node tests/tenant-isolation.mjs",
     "test:signup": "node tests/club-signup.mjs",
-    "test": "node tests/tenant-isolation.mjs && node tests/club-signup.mjs"
+    "test:licensing": "node tests/licensing.mjs",
+    "test": "node tests/tenant-isolation.mjs && node tests/club-signup.mjs && node tests/licensing.mjs"
   },
   "dependencies": {
     "@prisma/client": "^5.20.0",
@@ -22,7 +23,8 @@
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "express-async-errors": "^3.1.1",
-    "jsonwebtoken": "^9.0.2"
+    "jsonwebtoken": "^9.0.2",
+    "stripe": "^22.6.2"
   },
   "devDependencies": {
     "prisma": "^5.20.0"

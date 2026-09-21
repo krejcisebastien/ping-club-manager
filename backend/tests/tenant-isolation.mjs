@@ -46,6 +46,7 @@ async function createClub(name, email) {
     data: {
       name,
       slug: `${name.toLowerCase().replace(/\W+/g, "-")}-${run}`,
+      licenseEndsAt: new Date("2099-12-31"),
       users: { create: { email, passwordHash: await hashPassword(PASSWORD), roles: ["ADMIN"] } },
     },
   });

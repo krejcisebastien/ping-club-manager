@@ -4,7 +4,7 @@ import { prisma } from "../lib/prisma.js";
 import { hashPassword, verifyPassword } from "../utils/password.js";
 import { createSession } from "../utils/session.js";
 import { sendEmail } from "../utils/email.js";
-import { requireAuth, requireRole } from "../middleware/auth.js";
+import { requireAuth, requireAuthAnyLicense, requireRole } from "../middleware/auth.js";
 
 const router = Router();
 
@@ -37,7 +37,7 @@ router.post("/login", async (req, res) => {
   res.json(createSession(user));
 });
 
-router.get("/me", requireAuth, (req, res) => {
+router.get("/me", requireAuthAnyLicense, (req, res) => {
   res.json({ user: req.user });
 });
 
@@ -93,7 +93,7 @@ router.post("/reset-password", async (req, res) => {
   res.json({ message: "Mot de passe mis à jour." });
 });
 
-router.put("/change-password", requireAuth, async (req, res) => {
+router.put("/change-password", requireAuthAnyLicense, async (req, res) => {
   const { currentPassword, newPassword } = req.body ?? {};
   if (!currentPassword || !newPassword) {
     return res.status(400).json({ error: "Mot de passe actuel et nouveau mot de passe requis." });

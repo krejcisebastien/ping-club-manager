@@ -5,6 +5,7 @@ import { roleHome } from "../lib/roles.js";
 const routes = [
   { path: "/", redirect: "/login" },
   { path: "/login", name: "login", component: () => import("../views/LoginView.vue") },
+  { path: "/license", name: "license", component: () => import("../views/LicenseView.vue") },
   { path: "/signup", name: "signup", component: () => import("../views/SignupView.vue") },
   { path: "/forgot-password", name: "forgot-password", component: () => import("../views/ForgotPasswordView.vue") },
   { path: "/reset-password", name: "reset-password", component: () => import("../views/ResetPasswordView.vue") },
@@ -174,6 +175,9 @@ router.beforeEach(async (to) => {
   if (to.name === "forgot-password" || to.name === "reset-password") return true;
 
   if (!auth.isAuthenticated) return "/login";
+
+  // Sans licence valide, seule la page Licence est accessible.
+  if (!auth.licenseActive) return to.name === "license" ? true : "/license";
 
   const allowedRoles = to.meta.roles;
   if (allowedRoles && !allowedRoles.some((r) => auth.roles.includes(r))) {

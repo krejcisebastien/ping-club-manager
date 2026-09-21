@@ -2,6 +2,7 @@ import "express-async-errors";
 import express from "express";
 import cors from "cors";
 import apiRouter from "./routes/index.js";
+import { stripeWebhook } from "./routes/billing.routes.js";
 
 export function createApp() {
   const app = express();
@@ -13,6 +14,10 @@ export function createApp() {
       origin: process.env.CORS_ORIGIN || "http://localhost:5173",
     })
   );
+  // Webhook Stripe : corps brut requis pour vérifier la signature, donc monté
+  // avant express.json.
+  app.post("/api/billing/webhook", express.raw({ type: "application/json" }), stripeWebhook);
+
   // Limite relevée par rapport au défaut (100kb) : les illustrations
   // d'exercice sont envoyées en data URL (base64) dans le JSON.
   app.use(express.json({ limit: "6mb" }));

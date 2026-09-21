@@ -3,6 +3,7 @@
 import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
 import { createApp } from "../src/app.js";
+import { invalidateLicense } from "../src/lib/license.js";
 
 const prisma = new PrismaClient();
 const server = createApp().listen(0);
@@ -60,8 +61,16 @@ try {
 
   const me = await call(ok.json.token, "GET", "/auth/me");
   expect("la session renvoyée est utilisable", me.status === 200 && me.json.user.clubId === club.id);
+  const blocked = await call(ok.json.token, "GET", "/players");
+  expect("le nouveau club n'a pas de licence : accès aux données refusé (402)", blocked.status === 402 && blocked.json.code === "LICENSE_REQUIRED", `status ${blocked.status}`);
+  expect("club sans licence : licenseEndsAt vide", club.licenseEndsAt === null);
+  const activate = async (id) => {
+    await prisma.club.update({ where: { id }, data: { licenseEndsAt: new Date("2099-12-31") } });
+    invalidateLicense(id);
+  };
+  await activate(club.id);
   const empty = await call(ok.json.token, "GET", "/players");
-  expect("le nouveau club démarre vide", empty.status === 200 && empty.json.players.length === 0);
+  expect("une fois la licence activée, le club démarre vide", empty.status === 200 && empty.json.players.length === 0);
   const login = await call(null, "POST", "/auth/login", { email: emails[0], password: "MotDePasse123!" });
   expect("le créateur peut se reconnecter", login.status === 200 && login.json.user.clubId === club.id);
 
@@ -70,6 +79,7 @@ try {
   expect("deux clubs peuvent avoir le même nom", same.status === 201, `status ${same.status}`);
   const club2 = await prisma.club.findUnique({ where: { id: same.json.user.clubId } });
   created.push(club2.id);
+  await activate(club2.id);
   expect("le second club reçoit un slug distinct", club2.slug === `${club.slug}-2`, club2.slug);
   const isolated = await call(same.json.token, "GET", "/auth/users");
   expect("les deux clubs sont isolés", isolated.json.users.length === 1 && isolated.json.users[0].email === emails[1]);
