@@ -26,12 +26,19 @@ export const useAuthStore = defineStore("auth", {
         this.setActiveRole(defaultRole(this.user?.roles));
       }
     },
-    async login(email, password) {
-      const { data } = await api.post("/auth/login", { email, password });
+    startSession(data) {
       localStorage.setItem("token", data.token);
       this.user = data.user;
       this.syncActiveRole();
       return data.user;
+    },
+    async login(email, password) {
+      const { data } = await api.post("/auth/login", { email, password });
+      return this.startSession(data);
+    },
+    async signup(clubName, email, password) {
+      const { data } = await api.post("/clubs/signup", { clubName, email, password });
+      return this.startSession(data);
     },
     logout() {
       localStorage.removeItem("token");

@@ -5,6 +5,7 @@ import { roleHome } from "../lib/roles.js";
 const routes = [
   { path: "/", redirect: "/login" },
   { path: "/login", name: "login", component: () => import("../views/LoginView.vue") },
+  { path: "/signup", name: "signup", component: () => import("../views/SignupView.vue") },
   { path: "/forgot-password", name: "forgot-password", component: () => import("../views/ForgotPasswordView.vue") },
   { path: "/reset-password", name: "reset-password", component: () => import("../views/ResetPasswordView.vue") },
   {
@@ -165,7 +166,7 @@ router.beforeEach(async (to) => {
     await auth.fetchMe();
   }
 
-  if (to.name === "login") {
+  if (to.name === "login" || to.name === "signup") {
     if (auth.isAuthenticated) return roleHome(auth.activeRole);
     return true;
   }

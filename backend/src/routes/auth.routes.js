@@ -2,7 +2,7 @@ import { Router } from "express";
 import { randomBytes, createHash } from "node:crypto";
 import { prisma } from "../lib/prisma.js";
 import { hashPassword, verifyPassword } from "../utils/password.js";
-import { signToken } from "../utils/jwt.js";
+import { createSession } from "../utils/session.js";
 import { sendEmail } from "../utils/email.js";
 import { requireAuth, requireRole } from "../middleware/auth.js";
 
@@ -34,17 +34,7 @@ router.post("/login", async (req, res) => {
     return res.status(401).json({ error: "Identifiants invalides." });
   }
 
-  const payload = {
-    sub: user.id,
-    email: user.email,
-    roles: user.roles,
-    playerIds: user.players.map((p) => p.playerId),
-    coachId: user.coachId,
-    clubId: user.clubId,
-    clubName: user.club.name,
-  };
-  const token = signToken(payload);
-  res.json({ user: payload, token });
+  res.json(createSession(user));
 });
 
 router.get("/me", requireAuth, (req, res) => {

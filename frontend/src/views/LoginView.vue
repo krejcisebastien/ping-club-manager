@@ -1,17 +1,27 @@
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import { useRouter, RouterLink } from "vue-router";
 import { useAuthStore } from "../stores/auth.js";
 import { CLUB_NAME } from "../lib/config.js";
 import { roleHome } from "../lib/roles.js";
+import { api } from "../lib/api.js";
 
 const email = ref("");
 const password = ref("");
 const error = ref("");
 const loading = ref(false);
+const signupEnabled = ref(false);
 
 const auth = useAuthStore();
 const router = useRouter();
+
+onMounted(async () => {
+  try {
+    signupEnabled.value = (await api.get("/clubs/signup")).data.enabled;
+  } catch {
+    // lien masqué si le serveur ne répond pas
+  }
+});
 
 async function onSubmit() {
   error.value = "";
@@ -70,6 +80,11 @@ async function onSubmit() {
       <RouterLink to="/forgot-password" class="block text-center text-sm text-sky-600 hover:text-sky-700">
         Mot de passe oublié ?
       </RouterLink>
+
+      <div v-if="signupEnabled" class="border-t border-slate-200 pt-4 text-center text-sm text-slate-600">
+        Nouveau club ?
+        <RouterLink to="/signup" class="text-sky-600 hover:text-sky-700 font-medium">Créer mon club</RouterLink>
+      </div>
     </form>
   </div>
 </template>

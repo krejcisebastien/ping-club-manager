@@ -1,6 +1,7 @@
 import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
 import { hashPassword } from "../src/utils/password.js";
+import { slugify } from "../src/utils/slug.js";
 
 const prisma = new PrismaClient();
 
@@ -17,14 +18,6 @@ function parseArgs(argv) {
   }
   return out;
 }
-
-const slugify = (s) =>
-  s
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
 
 async function main() {
   const [command, ...rest] = process.argv.slice(2);

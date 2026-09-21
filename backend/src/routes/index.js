@@ -1,5 +1,6 @@
 import { Router } from "express";
 import authRoutes from "./auth.routes.js";
+import clubsRoutes from "./clubs.routes.js";
 import seasonsRoutes from "./seasons.routes.js";
 import playersRoutes from "./players.routes.js";
 import coachesRoutes from "./coaches.routes.js";
@@ -15,6 +16,7 @@ import trainingPlansRoutes from "./trainingPlans.routes.js";
 const router = Router();
 
 router.use("/auth", authRoutes);
+router.use("/clubs", clubsRoutes);
 router.use("/seasons", seasonsRoutes);
 router.use("/players", playersRoutes);
 router.use("/coaches", coachesRoutes);

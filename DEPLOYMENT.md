@@ -30,6 +30,14 @@ L'administrateur du nouveau club se connecte ensuite avec son email : l'applicat
 
 Un email de compte est **unique sur toute la plateforme** (un compte = un club).
 
+### Création de club en libre-service
+
+Une page publique `/signup` (« Créer mon club », lien sur l'écran de connexion) permet à n'importe qui de créer son club et de devenir son premier administrateur : il est connecté directement et démarre avec un club vide.
+
+- **Désactivée par défaut.** Pour l'ouvrir, définir `ALLOW_CLUB_SIGNUP=true` dans l'onglet **Environment** du service API. Tant que ce n'est pas fait, la page affiche « La création de club n'est pas ouverte » et l'API répond 404. Ne l'active que le jour où tu veux vraiment accepter des inscriptions.
+- Limite de 5 tentatives par heure et par adresse IP (en mémoire : à remplacer par un stockage partagé si l'API tourne sur plusieurs instances).
+- Les tests : `npm test` (isolation + inscription).
+
 ## Isolation des données
 
 - Les entités racines (saisons, comptes, joueurs, entraineurs, sparrings, exercices) portent un `clubId` ; tout le reste s'en déduit par les relations.
@@ -41,6 +49,8 @@ Supprimer un club supprime en cascade toutes ses données.
 
 ## Ce qui n'est pas encore là
 
-- Pas de création de club en libre-service ni d'interface d'administration de la plateforme (création via la commande ci-dessus).
+- Pas de vérification de l'email à l'inscription : n'importe qui peut créer un club avec l'adresse de quelqu'un d'autre (ce qui bloque ensuite l'inscription de la vraie personne). À traiter avant d'ouvrir l'inscription au public.
+- Pas de conditions d'utilisation ni de politique de confidentialité à accepter à l'inscription (à rédiger, avec un avis juridique vu les données de mineurs).
+- Pas d'interface d'administration de la plateforme (liste/suspension des clubs) : gestion via `npm run club`.
 - Pas de facturation/abonnement.
 - Le thème (couleur d'accent) est le même pour tous les clubs.

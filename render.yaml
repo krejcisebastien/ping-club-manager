@@ -42,6 +42,10 @@ services:
         sync: false
       - key: RESEND_FROM
         value: onboarding@resend.dev
+      # Création de club en libre-service (/signup). Laisser "false" tant que
+      # tu ne veux pas accepter d'inscriptions publiques (voir DEPLOYMENT.md).
+      - key: ALLOW_CLUB_SIGNUP
+        value: "false"
 
   - type: web
     name: ping-club-manager-web

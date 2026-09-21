@@ -5,6 +5,8 @@ import apiRouter from "./routes/index.js";
 
 export function createApp() {
   const app = express();
+  // Derrière le proxy Render : sans ça, req.ip serait toujours celle du proxy.
+  app.set("trust proxy", 1);
 
   app.use(
     cors({
