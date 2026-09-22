@@ -14,7 +14,8 @@
     "test:isolation": "node tests/tenant-isolation.mjs",
     "test:signup": "node tests/club-signup.mjs",
     "test:licensing": "node tests/licensing.mjs",
-    "test": "node tests/tenant-isolation.mjs && node tests/club-signup.mjs && node tests/licensing.mjs"
+    "test:platform": "node tests/platform.mjs",
+    "test": "node tests/tenant-isolation.mjs && node tests/club-signup.mjs && node tests/licensing.mjs && node tests/platform.mjs"
   },
   "dependencies": {
     "@prisma/client": "^5.20.0",

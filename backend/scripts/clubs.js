@@ -1,8 +1,8 @@
 import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
-import { hashPassword } from "../src/utils/password.js";
 import { slugify } from "../src/utils/slug.js";
 import { licenseState } from "../src/lib/license.js";
+import { extendLicense, createClubWithAdmin } from "../src/lib/clubs.js";
 
 const prisma = new PrismaClient();
 
@@ -40,10 +40,7 @@ function licenseEnd(args, current) {
   if (args.years) {
     const years = Number(args.years);
     if (!Number.isInteger(years) || years < 1) throw new Error("--years doit être un entier positif.");
-    const start = current && current.getTime() > Date.now() ? current : new Date();
-    const end = new Date(start);
-    end.setUTCFullYear(end.getUTCFullYear() + years);
-    return end;
+    return extendLicense(current, years);
   }
   return undefined;
 }
@@ -68,14 +65,7 @@ async function main() {
     if (!name || !email || !password) throw new Error(USAGE);
     if (password.length < 8) throw new Error("Le mot de passe doit contenir au moins 8 caractères.");
     const licenseEndsAt = licenseEnd(args, null);
-    const club = await prisma.club.create({
-      data: {
-        name,
-        slug: args.slug || slugify(name),
-        licenseEndsAt,
-        users: { create: { email, passwordHash: await hashPassword(password), roles: ["ADMIN"] } },
-      },
-    });
+    const club = await createClubWithAdmin(prisma, { name, slug: args.slug || slugify(name), email, password, licenseEndsAt });
     console.log(`Club "${club.name}" créé (slug : ${club.slug}). Admin : ${email}. Licence : ${licenseEndsAt ? `jusqu'au ${fmt(licenseEndsAt)}` : "aucune"}`);
   } else if (command === "rename") {
     if (!args.slug || !args.name) throw new Error(USAGE);

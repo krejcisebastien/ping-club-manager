@@ -1,4 +1,5 @@
 import { signToken } from "./jwt.js";
+import { isPlatformAdmin } from "../lib/platform.js";
 
 // Contenu du jeton de connexion et de la session renvoyée au frontend.
 // `user` doit inclure ses `players` (playerId) et son `club` (name).
@@ -12,5 +13,5 @@ export function createSession(user) {
     clubId: user.clubId,
     clubName: user.club.name,
   };
-  return { user: payload, token: signToken(payload) };
+  return { user: { ...payload, isPlatformAdmin: isPlatformAdmin(user.email) }, token: signToken(payload) };
 }

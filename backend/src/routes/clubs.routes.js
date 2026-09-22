@@ -4,6 +4,7 @@ import { hashPassword } from "../utils/password.js";
 import { createSession } from "../utils/session.js";
 import { uniqueSlug } from "../utils/slug.js";
 import { rateLimit } from "../middleware/rateLimit.js";
+import { isPlatformAdmin } from "../lib/platform.js";
 
 const router = Router();
 
@@ -30,7 +31,7 @@ router.post(
     if (password.length < 8) {
       return res.status(400).json({ error: "Le mot de passe doit contenir au moins 8 caractères." });
     }
-    if (await prisma.user.findUnique({ where: { email } })) {
+    if (isPlatformAdmin(email) || (await prisma.user.findUnique({ where: { email } }))) {
       return res.status(409).json({ error: "Un compte existe déjà avec cet email." });
     }
 

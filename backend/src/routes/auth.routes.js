@@ -3,6 +3,7 @@ import { randomBytes, createHash } from "node:crypto";
 import { prisma } from "../lib/prisma.js";
 import { hashPassword, verifyPassword } from "../utils/password.js";
 import { createSession } from "../utils/session.js";
+import { isPlatformAdmin } from "../lib/platform.js";
 import { sendEmail } from "../utils/email.js";
 import { requireAuth, requireAuthAnyLicense, requireRole } from "../middleware/auth.js";
 
@@ -38,7 +39,7 @@ router.post("/login", async (req, res) => {
 });
 
 router.get("/me", requireAuthAnyLicense, (req, res) => {
-  res.json({ user: req.user });
+  res.json({ user: { ...req.user, isPlatformAdmin: isPlatformAdmin(req.user.email) } });
 });
 
 // Toujours une réponse générique : on ne révèle pas si l'email existe.
@@ -146,6 +147,11 @@ router.post("/users", requireAuth, requireRole("ADMIN"), async (req, res) => {
   }
   if (roles.includes("COACH") && !coachId) {
     return res.status(400).json({ error: "coachId requis pour un compte entraineur." });
+  }
+
+  // Adresses réservées à la plateforme : même réponse qu'un email déjà pris.
+  if (isPlatformAdmin(email)) {
+    return res.status(409).json({ error: "Un compte existe déjà avec cet email, ou un joueur est déjà rattaché à ce compte." });
   }
 
   const passwordHash = await hashPassword(password);

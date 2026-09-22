@@ -6,6 +6,12 @@ const routes = [
   { path: "/", redirect: "/login" },
   { path: "/login", name: "login", component: () => import("../views/LoginView.vue") },
   { path: "/license", name: "license", component: () => import("../views/LicenseView.vue") },
+  {
+    path: "/platform",
+    name: "platform",
+    component: () => import("../views/admin/PlatformView.vue"),
+    meta: { roles: ["ADMIN"], platform: true },
+  },
   { path: "/signup", name: "signup", component: () => import("../views/SignupView.vue") },
   { path: "/forgot-password", name: "forgot-password", component: () => import("../views/ForgotPasswordView.vue") },
   { path: "/reset-password", name: "reset-password", component: () => import("../views/ResetPasswordView.vue") },
@@ -178,6 +184,8 @@ router.beforeEach(async (to) => {
 
   // Sans licence valide, seule la page Licence est accessible.
   if (!auth.licenseActive) return to.name === "license" ? true : "/license";
+
+  if (to.meta.platform && !auth.user?.isPlatformAdmin) return roleHome(auth.activeRole);
 
   const allowedRoles = to.meta.roles;
   if (allowedRoles && !allowedRoles.some((r) => auth.roles.includes(r))) {

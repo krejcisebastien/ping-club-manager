@@ -27,6 +27,8 @@ const COACH_LINKS = [
 
 const PLAYER_LINKS = [{ to: "/player", label: "Mon espace joueur", icon: "pi pi-user" }];
 
+const PLATFORM_LINK = { to: "/platform", label: "Plateforme", icon: "pi pi-globe" };
+
 const LINKS_BY_ROLE = { ADMIN: ADMIN_LINKS, COACH: COACH_LINKS, PLAYER: PLAYER_LINKS };
 
 // Un compte peut cumuler plusieurs rôles (ADMIN + COACH + PLAYER), mais la
@@ -35,5 +37,9 @@ const LINKS_BY_ROLE = { ADMIN: ADMIN_LINKS, COACH: COACH_LINKS, PLAYER: PLAYER_L
 // permet de basculer d'un rôle à l'autre.
 export function useNavLinks() {
   const auth = useAuthStore();
-  return computed(() => LINKS_BY_ROLE[auth.activeRole] ?? []);
+  return computed(() => {
+    const links = LINKS_BY_ROLE[auth.activeRole] ?? [];
+    // Gestion de la plateforme : réservée au propriétaire (PLATFORM_ADMIN_EMAILS).
+    return auth.activeRole === "ADMIN" && auth.user?.isPlatformAdmin ? [...links, PLATFORM_LINK] : links;
+  });
 }

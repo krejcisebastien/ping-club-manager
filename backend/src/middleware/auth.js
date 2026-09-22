@@ -1,6 +1,7 @@
 import { verifyToken } from "../utils/jwt.js";
 import { tenantClient } from "../lib/tenant.js";
 import { getLicense } from "../lib/license.js";
+import { isPlatformAdmin } from "../lib/platform.js";
 
 // Authentifie la requête et lui attache req.db : un client Prisma restreint au
 // club de l'utilisateur (à utiliser dans toutes les routes à la place du client
@@ -44,6 +45,13 @@ export async function requireAuth(req, res, next) {
 // se connaître (/auth/me), changer son mot de passe, et obtenir une licence.
 export async function requireAuthAnyLicense(req, res, next) {
   if (!(await authenticate(req, res))) return;
+  next();
+}
+
+// Propriétaire de la plateforme (PLATFORM_ADMIN_EMAILS) : vérifié à chaque
+// requête, donc retirer une adresse de la liste révoque l'accès immédiatement.
+export function requirePlatformAdmin(req, res, next) {
+  if (!isPlatformAdmin(req.user?.email)) return res.status(403).json({ error: "Accès refusé." });
   next();
 }
 
