@@ -155,6 +155,7 @@ model Player {
   users            UserPlayer[]
   playerSeasons    PlayerSeason[]
   rankingHistories RankingHistory[]
+  evaluations      Evaluation[]
   equipment        Equipment[]
   traits           PlayerTrait[]
   pointsToWork     PointToWork[]
@@ -194,6 +195,31 @@ model RankingHistory {
   season Season @relation(fields: [seasonId], references: [id], onDelete: Cascade)
 
   @@index([playerId, seasonId])
+}
+
+// Évaluation sportive périodique (0-10 par critère) : chaque entrée est un
+// instantané daté, jamais modifié après coup, pour constituer un historique
+// exploitable (radar de la dernière évaluation, courbes d'évolution).
+model Evaluation {
+  id           String   @id @default(cuid())
+  playerId     String
+  coachId      String?
+  date         DateTime @default(now())
+  service      Int
+  remise       Int
+  coupDroit    Int
+  revers       Int
+  deplacements Int
+  tactique     Int
+  mental       Int
+  physique     Int
+  note         String?
+  createdAt    DateTime @default(now())
+
+  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  coach  Coach? @relation(fields: [coachId], references: [id])
+
+  @@index([playerId])
 }
 
 model Equipment {
@@ -308,6 +334,7 @@ model Coach {
   exercisesCreated    Exercise[]
   pointsToWork        PointToWork[]
   evolutionNotes      EvolutionNote[]
+  evaluations         Evaluation[]
   campPeriodGroups    CampPeriodGroupCoach[]
   trainings           TrainingCoach[]
   campGroups          CampGroupCoach[]

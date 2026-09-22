@@ -111,6 +111,34 @@ router.post("/:id/rankings", requireRole("ADMIN", "COACH"), async (req, res) => 
   res.status(201).json({ ranking });
 });
 
+// ---------- Évaluation sportive (score /10 par critère) ----------
+
+const EVALUATION_CRITERIA = ["service", "remise", "coupDroit", "revers", "deplacements", "tactique", "mental", "physique"];
+
+router.get("/:id/evaluations", requireSelfPlayerOrRole("id", "ADMIN", "COACH"), async (req, res) => {
+  const evaluations = await req.db.evaluation.findMany({
+    where: { playerId: req.params.id },
+    orderBy: { date: "desc" },
+  });
+  res.json({ evaluations });
+});
+
+router.post("/:id/evaluations", requireRole("ADMIN", "COACH"), async (req, res) => {
+  const { note } = req.body ?? {};
+  const scores = {};
+  for (const key of EVALUATION_CRITERIA) {
+    const value = req.body?.[key];
+    if (!Number.isInteger(value) || value < 0 || value > 10) {
+      return res.status(400).json({ error: `${key} doit être un entier entre 0 et 10.` });
+    }
+    scores[key] = value;
+  }
+  const evaluation = await req.db.evaluation.create({
+    data: { playerId: req.params.id, coachId: req.user.coachId ?? null, note, ...scores },
+  });
+  res.status(201).json({ evaluation });
+});
+
 // ---------- Matériel ----------
 
 router.get("/:id/equipment", requireSelfPlayerOrRole("id", "ADMIN", "COACH"), async (req, res) => {

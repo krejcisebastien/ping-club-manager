@@ -15,6 +15,7 @@ const PATHS = {
   Exercise: [],
   PlayerSeason: ["player"],
   RankingHistory: ["player"],
+  Evaluation: ["player"],
   Equipment: ["player"],
   PlayerTrait: ["player"],
   PointToWork: ["player"],

@@ -1,11 +1,13 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import Button from "primevue/button";
 import InputText from "primevue/inputtext";
 import Calendar from "primevue/calendar";
 import Dropdown from "primevue/dropdown";
 import Tag from "primevue/tag";
+import InputNumber from "primevue/inputnumber";
+import Chart from "primevue/chart";
 import { useToast } from "primevue/usetoast";
 import AppLayout from "../../components/AppLayout.vue";
 import ImageUpload from "../../components/ImageUpload.vue";
@@ -32,6 +34,27 @@ const dominantHandOptions = [
   { label: "Droitier", value: "RIGHT" },
   { label: "Gaucher", value: "LEFT" },
 ];
+const EVALUATION_CRITERIA = [
+  { key: "service", label: "Service", color: "#0ea5e9" },
+  { key: "remise", label: "Remise", color: "#8b5cf6" },
+  { key: "coupDroit", label: "Coup droit", color: "#f97316" },
+  { key: "revers", label: "Revers", color: "#22c55e" },
+  { key: "deplacements", label: "Déplacements", color: "#ef4444" },
+  { key: "tactique", label: "Tactique", color: "#eab308" },
+  { key: "mental", label: "Mental", color: "#14b8a6" },
+  { key: "physique", label: "Physique", color: "#6366f1" },
+];
+const emptyEvaluation = () => ({
+  service: 5,
+  remise: 5,
+  coupDroit: 5,
+  revers: 5,
+  deplacements: 5,
+  tactique: 5,
+  mental: 5,
+  physique: 5,
+  note: "",
+});
 
 const player = ref(null);
 const editForm = ref({
@@ -52,6 +75,53 @@ const seasons = ref([]);
 const rankings = ref([]);
 const newRanking = ref({ seasonId: null, rankingValue: "" });
 
+const evaluations = ref([]);
+const newEvaluation = ref(emptyEvaluation());
+const savingEvaluation = ref(false);
+
+const latestEvaluation = computed(() => evaluations.value[0] ?? null);
+
+const radarChartData = computed(() => {
+  if (!latestEvaluation.value) return null;
+  return {
+    labels: EVALUATION_CRITERIA.map((c) => c.label),
+    datasets: [
+      {
+        label: new Date(latestEvaluation.value.date).toLocaleDateString("fr-FR"),
+        data: EVALUATION_CRITERIA.map((c) => latestEvaluation.value[c.key]),
+        backgroundColor: "rgba(14, 165, 233, 0.2)",
+        borderColor: "#0ea5e9",
+        pointBackgroundColor: "#0ea5e9",
+      },
+    ],
+  };
+});
+const radarChartOptions = {
+  maintainAspectRatio: false,
+  scales: { r: { min: 0, max: 10, ticks: { stepSize: 2 } } },
+  plugins: { legend: { display: false } },
+};
+
+const evolutionChartData = computed(() => {
+  if (evaluations.value.length < 2) return null;
+  const chronological = [...evaluations.value].reverse();
+  return {
+    labels: chronological.map((e) => new Date(e.date).toLocaleDateString("fr-FR")),
+    datasets: EVALUATION_CRITERIA.map((c) => ({
+      label: c.label,
+      data: chronological.map((e) => e[c.key]),
+      borderColor: c.color,
+      backgroundColor: c.color,
+      tension: 0.3,
+    })),
+  };
+});
+const evolutionChartOptions = {
+  maintainAspectRatio: false,
+  scales: { y: { min: 0, max: 10, ticks: { stepSize: 2 } } },
+  plugins: { legend: { position: "bottom", labels: { boxWidth: 12 } } },
+};
+
 const equipment = ref([]);
 const newEquipment = ref({ type: "", brand: "", model: "" });
 
@@ -65,10 +135,11 @@ const evolutionNotes = ref([]);
 const newNote = ref({ note: "" });
 
 async function loadAll() {
-  const [p, s, r, eq, tr, pts, notes] = await Promise.all([
+  const [p, s, r, ev, eq, tr, pts, notes] = await Promise.all([
     api.get(`/players/${playerId}`),
     api.get("/seasons"),
     api.get(`/players/${playerId}/rankings`),
+    api.get(`/players/${playerId}/evaluations`),
     api.get(`/players/${playerId}/equipment`),
     api.get(`/players/${playerId}/traits`),
     api.get(`/players/${playerId}/points-to-work`),
@@ -89,6 +160,7 @@ async function loadAll() {
   };
   seasons.value = s.data.seasons;
   rankings.value = r.data.rankings;
+  evaluations.value = ev.data.evaluations;
   equipment.value = eq.data.equipment;
   traits.value = tr.data.traits;
   pointsToWork.value = pts.data.pointsToWork;
@@ -116,6 +188,20 @@ async function onAddRanking() {
   await api.post(`/players/${playerId}/rankings`, newRanking.value);
   newRanking.value = { seasonId: null, rankingValue: "" };
   await loadAll();
+}
+
+async function onAddEvaluation() {
+  savingEvaluation.value = true;
+  try {
+    await api.post(`/players/${playerId}/evaluations`, newEvaluation.value);
+    newEvaluation.value = emptyEvaluation();
+    toast.add({ severity: "success", summary: "Évaluation enregistrée", life: 3000 });
+    await loadAll();
+  } catch (err) {
+    toast.add({ severity: "error", summary: "Erreur", detail: err.response?.data?.error ?? "Une erreur est survenue.", life: 4000 });
+  } finally {
+    savingEvaluation.value = false;
+  }
 }
 
 async function onAddEquipment() {
@@ -235,6 +321,55 @@ function pointStatusSeverity(status) {
           <InputText v-model="newRanking.rankingValue" placeholder="Classement (ex. 1500)" class="flex-1 min-w-[10rem]" />
           <Button label="Ajouter" @click="onAddRanking" />
         </div>
+      </div>
+
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+        <p class="text-sm font-medium text-slate-600 mb-3">Évaluation sportive</p>
+
+        <div v-if="latestEvaluation" class="grid gap-4 sm:grid-cols-2 mb-4">
+          <div>
+            <p class="text-xs text-slate-400 mb-1">
+              Radar — dernière évaluation ({{ new Date(latestEvaluation.date).toLocaleDateString("fr-FR") }})
+            </p>
+            <div style="height: 260px">
+              <Chart type="radar" :data="radarChartData" :options="radarChartOptions" class="h-full" />
+            </div>
+          </div>
+          <div v-if="evolutionChartData">
+            <p class="text-xs text-slate-400 mb-1">Évolution</p>
+            <div style="height: 260px">
+              <Chart type="line" :data="evolutionChartData" :options="evolutionChartOptions" class="h-full" />
+            </div>
+          </div>
+          <div v-else class="flex items-center justify-center text-sm text-slate-400 border border-dashed border-slate-200 rounded-lg">
+            Une 2<sup>e</sup> évaluation fera apparaître la courbe d'évolution.
+          </div>
+        </div>
+        <p v-else class="text-slate-400 text-sm mb-4">Aucune évaluation enregistrée.</p>
+
+        <ul v-if="evaluations.length" class="divide-y divide-slate-100 mb-3 text-sm">
+          <li v-for="e in evaluations" :key="e.id" class="py-1.5 flex items-center justify-between gap-2">
+            <span>
+              {{ new Date(e.date).toLocaleDateString("fr-FR") }}
+              <span v-if="e.note" class="text-slate-400">— {{ e.note }}</span>
+            </span>
+            <Tag
+              severity="info"
+              :value="`moy. ${(EVALUATION_CRITERIA.reduce((sum, c) => sum + e[c.key], 0) / EVALUATION_CRITERIA.length).toFixed(1)}/10`"
+            />
+          </li>
+        </ul>
+
+        <form class="grid gap-3" @submit.prevent="onAddEvaluation">
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div v-for="c in EVALUATION_CRITERIA" :key="c.key">
+              <label class="text-xs text-slate-500 block mb-1">{{ c.label }}</label>
+              <InputNumber v-model="newEvaluation[c.key]" :min="0" :max="10" show-buttons button-layout="horizontal" class="w-full" input-class="w-full text-center" />
+            </div>
+          </div>
+          <InputText v-model="newEvaluation.note" placeholder="Commentaire (optionnel)" class="w-full" />
+          <Button type="submit" label="Enregistrer l'évaluation" :loading="savingEvaluation" class="w-fit" />
+        </form>
       </div>
 
       <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">

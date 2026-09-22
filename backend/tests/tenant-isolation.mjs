@@ -106,6 +106,7 @@ try {
   const reads = [
     `/seasons/${season.id}`, `/players/${player.id}`, `/players/${player.id}/rankings`, `/players/${player.id}/equipment`,
     `/players/${player.id}/traits`, `/players/${player.id}/points-to-work`, `/players/${player.id}/evolution-notes`,
+    `/players/${player.id}/evaluations`,
     `/players/${player.id}/attendance`, `/players/${player.id}/camp-attendance`, `/coaches/${coach.id}`,
     `/sparrings/${sparring.id}`, `/groups/${group.id}`, `/groups/${group.id}/players`, `/trainings/${training.id}`,
     `/trainings/${training.id}/occurrences`, `/occurrences/${occurrence.id}`, `/occurrences/${occurrence.id}/attendance`,
@@ -165,6 +166,11 @@ try {
     ["POST", `/players/${player.id}/equipment`, { type: "x" }],
     ["POST", `/players/${player.id}/points-to-work`, { description: "x" }],
     ["POST", `/players/${player.id}/evolution-notes`, { note: "x" }],
+    [
+      "POST",
+      `/players/${player.id}/evaluations`,
+      { service: 5, remise: 5, coupDroit: 5, revers: 5, deplacements: 5, tactique: 5, mental: 5, physique: 5 },
+    ],
     ["POST", `/groups/${bGroup.id}/players`, { playerId: player.id }],
     ["POST", `/groups/${group.id}/players`, { playerId: bPlayer.id }],
     ["POST", `/trainings/${bTraining.id}/coaches`, { coachId: coach.id }],
@@ -230,6 +236,28 @@ try {
   expect("B génère des séances (copie des encadrants par défaut)", bGen.status === 201 && bGen.json.created > 0, `status ${bGen.status}`);
   const bAccount = await call(B.token, "POST", "/auth/users", { email: `joueur-b-${run}@test.local`, password: PASSWORD, roles: ["PLAYER"], playerIds: [bPlayer.id] });
   expect("B crée un compte joueur rattaché à son joueur", bAccount.status === 201, `status ${bAccount.status}`);
+  const evalA = await call(A.token, "POST", `/players/${player.id}/evaluations`, {
+    service: 8,
+    remise: 6,
+    coupDroit: 8,
+    revers: 5,
+    deplacements: 4,
+    tactique: 7,
+    mental: 7,
+    physique: 6,
+  });
+  expect("A note une évaluation sportive", evalA.status === 201, `status ${evalA.status}`);
+  const evalBadScore = await call(A.token, "POST", `/players/${player.id}/evaluations`, {
+    service: 11,
+    remise: 6,
+    coupDroit: 8,
+    revers: 5,
+    deplacements: 4,
+    tactique: 7,
+    mental: 7,
+    physique: 6,
+  });
+  expect("un score hors 0-10 est refusé", evalBadScore.status === 400, `status ${evalBadScore.status}`);
 
   // ---------- 7. Sessions et comptes ----------
   const legacy = jwt.sign({ sub: "x", roles: ["ADMIN"] }, process.env.JWT_SECRET);
