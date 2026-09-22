@@ -1,3 +1,10 @@
+// Durée entre deux horaires "HH:MM", en heures (ex. "18:00"->"19:30" = 1.5).
+export function hoursBetween(startTime, endTime) {
+  const [startH, startM] = startTime.split(":").map(Number);
+  const [endH, endM] = endTime.split(":").map(Number);
+  return Math.max(0, endH * 60 + endM - (startH * 60 + startM)) / 60;
+}
+
 // Convertit un jour JS (0=dimanche..6=samedi) vers notre convention (0=lundi..6=dimanche).
 function toOurWeekday(jsDay) {
   return (jsDay + 6) % 7;

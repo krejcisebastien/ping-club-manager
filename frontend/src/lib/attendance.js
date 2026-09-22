@@ -1,0 +1,24 @@
+// Statuts de présence partagés entre les écrans de pointage (entrainements et
+// stages) et les vues de consultation (fiche joueur, espace joueur).
+export const ATTENDANCE_STATUS_OPTIONS = [
+  { label: "Présent", value: "PRESENT" },
+  { label: "Retard", value: "LATE" },
+  { label: "Excusé", value: "EXCUSED" },
+  { label: "Absent", value: "ABSENT" },
+];
+
+export const ATTENDANCE_STATUS_LABELS = Object.fromEntries(ATTENDANCE_STATUS_OPTIONS.map((o) => [o.value, o.label]));
+
+export const ATTENDANCE_STATUS_COLORS = {
+  PRESENT: { bg: "#dcfce7", fg: "#166534" },
+  LATE: { bg: "#fef3c7", fg: "#92400e" },
+  EXCUSED: { bg: "#e0f2fe", fg: "#075985" },
+  ABSENT: { bg: "#fee2e2", fg: "#991b1b" },
+};
+
+export const ATTENDANCE_STATUS_SEVERITY = {
+  PRESENT: "success",
+  LATE: "warn",
+  EXCUSED: "info",
+  ABSENT: "danger",
+};

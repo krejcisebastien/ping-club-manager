@@ -77,7 +77,8 @@ try {
   await post(A.token, `/groups/${group.id}/players`, { playerId: player.id });
   const training = (await post(A.token, "/trainings", { seasonId: season.id, groupId: group.id, name: "Entrainement A", weekday: 1, startTime: "18:00", endTime: "19:30" })).training;
   await post(A.token, `/trainings/${training.id}/generate-occurrences`, { startDate: "2026-10-01", endDate: "2026-10-31" });
-  const occurrence = (await call(A.token, "GET", `/trainings/${training.id}/occurrences`)).json.occurrences[0];
+  const trainingOccurrences = (await call(A.token, "GET", `/trainings/${training.id}/occurrences`)).json.occurrences;
+  const occurrence = trainingOccurrences[0];
   const exercise = (await post(A.token, "/exercises", { title: "Exercice A" })).exercise;
   const plan = (await post(A.token, "/training-plans", { seasonId: season.id, title: "Plan A" })).plan;
   await post(A.token, `/training-plans/${plan.id}/exercises`, { exerciseId: exercise.id });
@@ -200,12 +201,46 @@ try {
     expect(`B ${method} ${path} ${JSON.stringify(body).slice(0, 55)} refusé`, r.status >= 400 && r.status < 500, `status ${r.status} ${JSON.stringify(r.json).slice(0, 80)}`);
   }
   // présences : B ne peut pas écrire sur la séance / la période de A, ni y mettre un de ses joueurs
-  const bAtt = await call(B.token, "PUT", `/occurrences/${occurrence.id}/attendance`, { records: [{ playerId: bPlayer.id, present: true }] });
+  const bAtt = await call(B.token, "PUT", `/occurrences/${occurrence.id}/attendance`, { records: [{ playerId: bPlayer.id, status: "PRESENT" }] });
   expect("B écrit une présence sur une séance de A : refusé", bAtt.status >= 400 && bAtt.status < 500, `status ${bAtt.status}`);
-  const bCampAtt = await call(B.token, "PUT", `/camp-period-groups/${periodGroup.id}/attendance`, { records: [{ playerId: bPlayer.id, present: true }] });
+  const bCampAtt = await call(B.token, "PUT", `/camp-period-groups/${periodGroup.id}/attendance`, { records: [{ playerId: bPlayer.id, status: "PRESENT" }] });
   expect("B écrit une présence de stage chez A : refusé", bCampAtt.status >= 400 && bCampAtt.status < 500, `status ${bCampAtt.status}`);
-  const aAttWithB = await call(A.token, "PUT", `/occurrences/${occurrence.id}/attendance`, { records: [{ playerId: bPlayer.id, present: true }] });
+  const aAttWithB = await call(A.token, "PUT", `/occurrences/${occurrence.id}/attendance`, { records: [{ playerId: bPlayer.id, status: "PRESENT" }] });
   expect("A ne peut pas pointer un joueur de B", aAttWithB.status >= 400 && aAttWithB.status < 500, `status ${aAttWithB.status}`);
+  const badStatus = await call(A.token, "PUT", `/occurrences/${occurrence.id}/attendance`, { records: [{ playerId: player.id, status: "SICK" }] });
+  expect("un statut de présence invalide est refusé", badStatus.status === 400, `status ${badStatus.status}`);
+
+  // ---------- 4bis. Statistiques : taux de présence et heures (les excusés ne comptent pas) ----------
+  expect("assez de séances générées pour le scénario", trainingOccurrences.length >= 4, `${trainingOccurrences.length} séance(s)`);
+  await call(A.token, "PUT", `/occurrences/${trainingOccurrences[0].id}/attendance`, { records: [{ playerId: player.id, status: "PRESENT" }] });
+  await call(A.token, "PUT", `/occurrences/${trainingOccurrences[1].id}/attendance`, { records: [{ playerId: player.id, status: "ABSENT" }] });
+  await call(A.token, "PUT", `/occurrences/${trainingOccurrences[2].id}/attendance`, { records: [{ playerId: player.id, status: "EXCUSED" }] });
+  await call(A.token, "PUT", `/occurrences/${trainingOccurrences[3].id}/attendance`, { records: [{ playerId: player.id, status: "LATE" }] });
+  await call(A.token, "PUT", `/camp-period-groups/${periodGroup.id}/attendance`, { records: [{ playerId: player.id, status: "PRESENT" }] });
+
+  expect("stats : seasonId requis", (await call(A.token, "GET", `/players/${player.id}/stats`)).status === 400);
+  const stats = (await call(A.token, "GET", `/players/${player.id}/stats?seasonId=${season.id}`)).json.stats;
+  expect(
+    "taux de présence entrainements : excusé exclu du dénominateur (2/3)",
+    Math.abs(stats.training.attendanceRate - 2 / 3) < 0.001,
+    JSON.stringify(stats.training)
+  );
+  expect("heures d'entrainement : présent + retard comptés (2 x 1h30)", stats.training.hours === 3, JSON.stringify(stats.training));
+  expect(
+    "compteurs par statut corrects",
+    stats.training.counts.PRESENT === 1 && stats.training.counts.ABSENT === 1 && stats.training.counts.EXCUSED === 1 && stats.training.counts.LATE === 1,
+    JSON.stringify(stats.training.counts)
+  );
+  expect("taux de présence stage : 100%", stats.camp.attendanceRate === 1, JSON.stringify(stats.camp));
+  expect("heures de stage comptées (Matinée = 3h)", stats.camp.hours === 3, JSON.stringify(stats.camp));
+  // Comme les autres sous-ressources du joueur (rankings, traits...), pas de 404 explicite :
+  // le scope tenant vide simplement la collection sous-jacente, donc des stats à zéro.
+  const statsB = (await call(B.token, "GET", `/players/${player.id}/stats?seasonId=${season.id}`)).json.stats;
+  expect(
+    "B ne voit aucune statistique réelle du joueur de A",
+    statsB.training.attendanceRate === null && statsB.training.hours === 0 && statsB.camp.attendanceRate === null,
+    JSON.stringify(statsB)
+  );
 
   // ---------- 5. A n'a rien perdu ni gagné ----------
   const count = async (tok, path, key) => (await call(tok, "GET", path)).json[key].length;
@@ -224,7 +259,7 @@ try {
   expect("feuille de présence A intacte (1 joueur)", roster.length === 1 && roster[0].playerId === player.id);
 
   // ---------- 6. Contrôles positifs : un club fonctionne normalement ----------
-  const put = await call(A.token, "PUT", `/occurrences/${occurrence.id}/attendance`, { records: [{ playerId: player.id, present: true }] });
+  const put = await call(A.token, "PUT", `/occurrences/${occurrence.id}/attendance`, { records: [{ playerId: player.id, status: "PRESENT" }] });
   expect("A enregistre une présence (upsert)", put.status === 204, `status ${put.status}`);
   const campPut = await call(A.token, "PUT", `/camp-period-groups/${periodGroup.id}/attendance`, { records: [] });
   expect("A enregistre une présence de stage", campPut.status === 204, `status ${campPut.status}`);

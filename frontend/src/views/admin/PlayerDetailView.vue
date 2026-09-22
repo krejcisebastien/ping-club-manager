@@ -75,6 +75,19 @@ const seasons = ref([]);
 const rankings = ref([]);
 const newRanking = ref({ seasonId: null, rankingValue: "" });
 
+const statsSeasonId = ref(null);
+const stats = ref(null);
+async function loadStats() {
+  if (!statsSeasonId.value) {
+    stats.value = null;
+    return;
+  }
+  stats.value = (await api.get(`/players/${playerId}/stats`, { params: { seasonId: statsSeasonId.value } })).data.stats;
+}
+function formatRate(rate) {
+  return rate == null ? "—" : `${Math.round(rate * 100)}%`;
+}
+
 const evaluations = ref([]);
 const newEvaluation = ref(emptyEvaluation());
 const savingEvaluation = ref(false);
@@ -165,6 +178,11 @@ async function loadAll() {
   traits.value = tr.data.traits;
   pointsToWork.value = pts.data.pointsToWork;
   evolutionNotes.value = notes.data.evolutionNotes;
+
+  if (!statsSeasonId.value) {
+    statsSeasonId.value = (seasons.value.find((season) => season.isActive) ?? seasons.value[0])?.id ?? null;
+  }
+  await loadStats();
 }
 
 onMounted(loadAll);
@@ -305,6 +323,42 @@ function pointStatusSeverity(status) {
           </div>
           <Button type="submit" label="Enregistrer" :loading="savingInfo" class="sm:col-span-2 w-fit" />
         </form>
+      </div>
+
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+        <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
+          <p class="text-sm font-medium text-slate-600">Statistiques</p>
+          <Dropdown
+            v-model="statsSeasonId"
+            :options="seasons"
+            option-label="name"
+            option-value="id"
+            placeholder="Saison…"
+            class="w-48"
+            @change="loadStats"
+          />
+        </div>
+        <div v-if="stats" class="grid grid-cols-2 gap-3">
+          <div>
+            <p class="text-xs text-slate-500 mb-1">Présence entrainements</p>
+            <p class="text-2xl font-semibold text-slate-800">{{ formatRate(stats.training.attendanceRate) }}</p>
+            <p class="text-xs text-slate-400">{{ stats.training.hours }} h cumulées</p>
+            <p class="text-xs text-slate-400">
+              {{ stats.training.counts.PRESENT }} présent(s) · {{ stats.training.counts.LATE }} retard(s) · {{ stats.training.counts.EXCUSED }}
+              excusé(s) · {{ stats.training.counts.ABSENT }} absent(s)
+            </p>
+          </div>
+          <div>
+            <p class="text-xs text-slate-500 mb-1">Présence stages</p>
+            <p class="text-2xl font-semibold text-slate-800">{{ formatRate(stats.camp.attendanceRate) }}</p>
+            <p class="text-xs text-slate-400">{{ stats.camp.hours }} h cumulées</p>
+            <p class="text-xs text-slate-400">
+              {{ stats.camp.counts.PRESENT }} présent(s) · {{ stats.camp.counts.LATE }} retard(s) · {{ stats.camp.counts.EXCUSED }} excusé(s) ·
+              {{ stats.camp.counts.ABSENT }} absent(s)
+            </p>
+          </div>
+        </div>
+        <p v-else class="text-slate-400 text-sm">Aucune saison disponible.</p>
       </div>
 
       <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">

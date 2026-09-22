@@ -89,24 +89,29 @@ router.get("/:id/attendance", requireRole("ADMIN", "COACH"), async (req, res) =>
     playerId: player.id,
     firstName: player.firstName,
     lastName: player.lastName,
-    present: byPlayerId.get(player.id)?.present ?? false,
+    status: byPlayerId.get(player.id)?.status ?? "ABSENT",
   }));
 
   res.json({ attendance });
 });
+
+const ATTENDANCE_STATUSES = ["PRESENT", "ABSENT", "EXCUSED", "LATE"];
 
 router.put("/:id/attendance", requireRole("ADMIN", "COACH"), async (req, res) => {
   const { records } = req.body ?? {};
   if (!Array.isArray(records)) {
     return res.status(400).json({ error: "records doit être un tableau." });
   }
+  if (records.some(({ status }) => status !== undefined && !ATTENDANCE_STATUSES.includes(status))) {
+    return res.status(400).json({ error: `status doit être l'un de : ${ATTENDANCE_STATUSES.join(", ")}.` });
+  }
 
   await req.db.$transaction(
-    records.map(({ playerId, present }) =>
+    records.map(({ playerId, status }) =>
       req.db.campAttendance.upsert({
         where: { campPeriodGroupId_playerId: { campPeriodGroupId: req.params.id, playerId } },
-        create: { campPeriodGroupId: req.params.id, playerId, present: !!present },
-        update: { present: !!present },
+        create: { campPeriodGroupId: req.params.id, playerId, status: status ?? "ABSENT" },
+        update: { status: status ?? "ABSENT" },
       })
     )
   );

@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { requireAuth, requireRole, requireSelfPlayerOrRole } from "../middleware/auth.js";
+import { hoursBetween } from "../utils/occurrences.js";
 
 const router = Router();
 
@@ -275,6 +276,58 @@ router.get("/:id/camp-attendance", requireSelfPlayerOrRole("id", "ADMIN", "COACH
     orderBy: { campPeriodGroup: { period: { campDay: { date: "desc" } } } },
   });
   res.json({ attendances });
+});
+
+// ---------- Statistiques (taux de présence, heures) ----------
+
+// Un absent excusé n'est compté ni comme présent ni comme absent : il ne
+// pèse pas dans le taux de présence. Présent et retard comptent comme
+// "a participé" pour le taux et pour les heures cumulées.
+router.get("/:id/stats", requireSelfPlayerOrRole("id", "ADMIN", "COACH"), async (req, res) => {
+  const { seasonId } = req.query;
+  if (!seasonId) return res.status(400).json({ error: "seasonId est requis." });
+
+  const [trainingAttendances, campAttendances] = await Promise.all([
+    req.db.attendance.findMany({
+      where: { playerId: req.params.id, occurrence: { status: "PLANNED", training: { seasonId } } },
+      include: { occurrence: true },
+    }),
+    req.db.campAttendance.findMany({
+      where: { playerId: req.params.id, campPeriodGroup: { group: { camp: { seasonId } } } },
+      include: { campPeriodGroup: { include: { period: true } } },
+    }),
+  ]);
+
+  const attended = (status) => status === "PRESENT" || status === "LATE";
+  const countBy = (records) =>
+    records.reduce((acc, r) => ({ ...acc, [r.status]: (acc[r.status] ?? 0) + 1 }), { PRESENT: 0, ABSENT: 0, EXCUSED: 0, LATE: 0 });
+
+  const trainingCounts = countBy(trainingAttendances);
+  const trainingCounted = trainingCounts.PRESENT + trainingCounts.ABSENT + trainingCounts.LATE;
+  const trainingHours = trainingAttendances
+    .filter((r) => attended(r.status))
+    .reduce((sum, r) => sum + hoursBetween(r.occurrence.startTime, r.occurrence.endTime), 0);
+
+  const campCounts = countBy(campAttendances);
+  const campCounted = campCounts.PRESENT + campCounts.ABSENT + campCounts.LATE;
+  const campHours = campAttendances
+    .filter((r) => attended(r.status))
+    .reduce((sum, r) => sum + hoursBetween(r.campPeriodGroup.period.startTime, r.campPeriodGroup.period.endTime), 0);
+
+  res.json({
+    stats: {
+      training: {
+        attendanceRate: trainingCounted ? (trainingCounts.PRESENT + trainingCounts.LATE) / trainingCounted : null,
+        hours: Math.round(trainingHours * 10) / 10,
+        counts: trainingCounts,
+      },
+      camp: {
+        attendanceRate: campCounted ? (campCounts.PRESENT + campCounts.LATE) / campCounted : null,
+        hours: Math.round(campHours * 10) / 10,
+        counts: campCounts,
+      },
+    },
+  });
 });
 
 export default router;

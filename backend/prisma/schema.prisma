@@ -44,6 +44,13 @@ enum MediaType {
   VIDEO
 }
 
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  EXCUSED
+  LATE
+}
+
 // ---------- Clubs (multi-tenant) ----------
 
 // Chaque club est un "tenant" : toutes ses données (saisons, comptes, joueurs,
@@ -420,10 +427,10 @@ model TrainingOccurrenceCoach {
 }
 
 model Attendance {
-  id           String  @id @default(cuid())
+  id           String           @id @default(cuid())
   occurrenceId String
   playerId     String
-  present      Boolean @default(false)
+  status       AttendanceStatus @default(ABSENT)
   note         String?
 
   occurrence TrainingOccurrence @relation(fields: [occurrenceId], references: [id], onDelete: Cascade)
@@ -591,10 +598,10 @@ model CampPeriodGroupPlayer {
 }
 
 model CampAttendance {
-  id                String  @id @default(cuid())
+  id                String           @id @default(cuid())
   campPeriodGroupId String
   playerId          String
-  present           Boolean @default(false)
+  status            AttendanceStatus @default(ABSENT)
 
   campPeriodGroup CampPeriodGroup @relation(fields: [campPeriodGroupId], references: [id], onDelete: Cascade)
   player          Player          @relation(fields: [playerId], references: [id], onDelete: Cascade)

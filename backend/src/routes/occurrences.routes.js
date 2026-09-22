@@ -92,26 +92,31 @@ router.get("/:id/attendance", requireRole("ADMIN", "COACH"), async (req, res) =>
     playerId: player.id,
     firstName: player.firstName,
     lastName: player.lastName,
-    present: byPlayerId.get(player.id)?.present ?? false,
+    status: byPlayerId.get(player.id)?.status ?? "ABSENT",
     note: byPlayerId.get(player.id)?.note ?? null,
   }));
 
   res.json({ attendance });
 });
 
-// Enregistre les présences en une fois : { records: [{ playerId, present, note }] }
+const ATTENDANCE_STATUSES = ["PRESENT", "ABSENT", "EXCUSED", "LATE"];
+
+// Enregistre les présences en une fois : { records: [{ playerId, status, note }] }
 router.put("/:id/attendance", requireRole("ADMIN", "COACH"), async (req, res) => {
   const { records } = req.body ?? {};
   if (!Array.isArray(records)) {
     return res.status(400).json({ error: "records doit être un tableau." });
   }
+  if (records.some(({ status }) => status !== undefined && !ATTENDANCE_STATUSES.includes(status))) {
+    return res.status(400).json({ error: `status doit être l'un de : ${ATTENDANCE_STATUSES.join(", ")}.` });
+  }
 
   await req.db.$transaction(
-    records.map(({ playerId, present, note }) =>
+    records.map(({ playerId, status, note }) =>
       req.db.attendance.upsert({
         where: { occurrenceId_playerId: { occurrenceId: req.params.id, playerId } },
-        create: { occurrenceId: req.params.id, playerId, present: !!present, note },
-        update: { present: !!present, note },
+        create: { occurrenceId: req.params.id, playerId, status: status ?? "ABSENT", note },
+        update: { status: status ?? "ABSENT", note },
       })
     )
   );
