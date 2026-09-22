@@ -5,6 +5,7 @@ import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import Dialog from "primevue/dialog";
 import Button from "primevue/button";
+import Avatar from "primevue/avatar";
 import InputText from "primevue/inputtext";
 import Calendar from "primevue/calendar";
 import { useToast } from "primevue/usetoast";
@@ -92,7 +93,17 @@ function formatDate(d) {
         <p class="text-slate-400 text-sm py-4">Aucun joueur.</p>
       </template>
       <Column field="lastName" header="Nom" sortable>
-        <template #body="{ data }"><span class="cursor-pointer">{{ data.firstName }} {{ data.lastName }}</span></template>
+        <template #body="{ data }">
+          <div class="flex items-center gap-2 cursor-pointer">
+            <Avatar
+              :image="data.photoUrl || undefined"
+              :label="!data.photoUrl ? `${data.firstName[0]}${data.lastName[0]}`.toUpperCase() : undefined"
+              shape="circle"
+              class="bg-sky-100 text-sky-700 shrink-0"
+            />
+            <span>{{ data.firstName }} {{ data.lastName }}</span>
+          </div>
+        </template>
       </Column>
       <Column field="birthDate" header="Date de naissance" sortable>
         <template #body="{ data }">{{ formatDate(data.birthDate) }}</template>

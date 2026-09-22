@@ -8,6 +8,7 @@ import Dropdown from "primevue/dropdown";
 import Tag from "primevue/tag";
 import { useToast } from "primevue/usetoast";
 import AppLayout from "../../components/AppLayout.vue";
+import ImageUpload from "../../components/ImageUpload.vue";
 import { api } from "../../lib/api.js";
 import { toDateOnly } from "../../lib/date.js";
 import { useNavLinks } from "../../composables/useNavLinks.js";
@@ -27,9 +28,24 @@ const statusOptions = [
   { label: "en cours", value: "IN_PROGRESS" },
   { label: "acquis", value: "DONE" },
 ];
+const dominantHandOptions = [
+  { label: "Droitier", value: "RIGHT" },
+  { label: "Gaucher", value: "LEFT" },
+];
 
 const player = ref(null);
-const editForm = ref({ firstName: "", lastName: "", birthDate: null, licenseNumber: "" });
+const editForm = ref({
+  firstName: "",
+  lastName: "",
+  birthDate: null,
+  licenseNumber: "",
+  phone: "",
+  emergencyContactName: "",
+  emergencyContactPhone: "",
+  photoUrl: null,
+  playStyle: "",
+  dominantHand: null,
+});
 const savingInfo = ref(false);
 
 const seasons = ref([]);
@@ -64,6 +80,12 @@ async function loadAll() {
     lastName: p.data.player.lastName,
     birthDate: new Date(p.data.player.birthDate),
     licenseNumber: p.data.player.licenseNumber ?? "",
+    phone: p.data.player.phone ?? "",
+    emergencyContactName: p.data.player.emergencyContactName ?? "",
+    emergencyContactPhone: p.data.player.emergencyContactPhone ?? "",
+    photoUrl: p.data.player.photoUrl ?? null,
+    playStyle: p.data.player.playStyle ?? "",
+    dominantHand: p.data.player.dominantHand ?? null,
   };
   seasons.value = s.data.seasons;
   rankings.value = r.data.rankings;
@@ -147,6 +169,10 @@ function pointStatusSeverity(status) {
       <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
         <p class="text-sm font-medium text-slate-600 mb-3">Signalétique</p>
         <form class="grid gap-3 sm:grid-cols-2" @submit.prevent="onSaveInfo">
+          <div class="sm:col-span-2">
+            <label class="text-xs text-slate-500 block mb-1">Photo</label>
+            <ImageUpload v-model="editForm.photoUrl" :max-size-mb="1" />
+          </div>
           <div>
             <label class="text-xs text-slate-500 block mb-1">Prénom</label>
             <InputText v-model="editForm.firstName" required class="w-full" />
@@ -162,6 +188,34 @@ function pointStatusSeverity(status) {
           <div>
             <label class="text-xs text-slate-500 block mb-1">N° de licence</label>
             <InputText v-model="editForm.licenseNumber" class="w-full" />
+          </div>
+          <div>
+            <label class="text-xs text-slate-500 block mb-1">Téléphone du joueur</label>
+            <InputText v-model="editForm.phone" class="w-full" />
+          </div>
+          <div>
+            <label class="text-xs text-slate-500 block mb-1">Main dominante</label>
+            <Dropdown
+              v-model="editForm.dominantHand"
+              :options="dominantHandOptions"
+              option-label="label"
+              option-value="value"
+              show-clear
+              placeholder="Non renseigné"
+              class="w-full"
+            />
+          </div>
+          <div class="sm:col-span-2">
+            <label class="text-xs text-slate-500 block mb-1">Style de jeu</label>
+            <InputText v-model="editForm.playStyle" placeholder="ex. offensif, pivot appuyé..." class="w-full" />
+          </div>
+          <div>
+            <label class="text-xs text-slate-500 block mb-1">Contact d'urgence — nom</label>
+            <InputText v-model="editForm.emergencyContactName" class="w-full" />
+          </div>
+          <div>
+            <label class="text-xs text-slate-500 block mb-1">Contact d'urgence — téléphone</label>
+            <InputText v-model="editForm.emergencyContactPhone" class="w-full" />
           </div>
           <Button type="submit" label="Enregistrer" :loading="savingInfo" class="sm:col-span-2 w-fit" />
         </form>

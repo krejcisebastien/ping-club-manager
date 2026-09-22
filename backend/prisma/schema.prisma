@@ -23,6 +23,11 @@ enum TraitCategory {
   WEAKNESS
 }
 
+enum DominantHand {
+  LEFT
+  RIGHT
+}
+
 enum PointStatus {
   OPEN
   IN_PROGRESS
@@ -138,6 +143,14 @@ model Player {
   licenseNumber String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+
+  // Coordonnées et signalétique complémentaires.
+  phone                String?
+  emergencyContactName  String?
+  emergencyContactPhone String?
+  photoUrl              String? // data URL (base64), même approche que Exercise.illustrationUrl
+  playStyle             String?
+  dominantHand          DominantHand?
 
   users            UserPlayer[]
   playerSeasons    PlayerSeason[]

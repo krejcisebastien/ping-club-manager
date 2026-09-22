@@ -43,7 +43,8 @@ watch(() => route.params.id, load);
     </button>
 
     <div v-if="player" class="space-y-4">
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex items-center gap-3">
+        <img v-if="player.photoUrl" :src="player.photoUrl" alt="" class="w-12 h-12 rounded-full object-cover shrink-0" />
         <p class="text-lg font-medium">{{ player.firstName }} {{ player.lastName }}</p>
       </div>
       <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">

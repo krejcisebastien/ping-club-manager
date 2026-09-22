@@ -18,19 +18,42 @@ router.get("/:id", requireSelfPlayerOrRole("id", "ADMIN", "COACH"), async (req, 
   res.json({ player });
 });
 
+function invalidDominantHand(dominantHand) {
+  return dominantHand !== undefined && dominantHand !== null && !["LEFT", "RIGHT"].includes(dominantHand);
+}
+
 router.post("/", requireRole("ADMIN", "COACH"), async (req, res) => {
-  const { firstName, lastName, birthDate, licenseNumber } = req.body ?? {};
+  const { firstName, lastName, birthDate, licenseNumber, phone, emergencyContactName, emergencyContactPhone, photoUrl, playStyle, dominantHand } =
+    req.body ?? {};
   if (!firstName || !lastName || !birthDate) {
     return res.status(400).json({ error: "firstName, lastName et birthDate sont requis." });
   }
+  if (invalidDominantHand(dominantHand)) {
+    return res.status(400).json({ error: "dominantHand doit être LEFT ou RIGHT." });
+  }
   const player = await req.db.player.create({
-    data: { firstName, lastName, birthDate: new Date(birthDate), licenseNumber },
+    data: {
+      firstName,
+      lastName,
+      birthDate: new Date(birthDate),
+      licenseNumber,
+      phone,
+      emergencyContactName,
+      emergencyContactPhone,
+      photoUrl,
+      playStyle,
+      dominantHand,
+    },
   });
   res.status(201).json({ player });
 });
 
 router.put("/:id", requireRole("ADMIN", "COACH"), async (req, res) => {
-  const { firstName, lastName, birthDate, licenseNumber } = req.body ?? {};
+  const { firstName, lastName, birthDate, licenseNumber, phone, emergencyContactName, emergencyContactPhone, photoUrl, playStyle, dominantHand } =
+    req.body ?? {};
+  if (invalidDominantHand(dominantHand)) {
+    return res.status(400).json({ error: "dominantHand doit être LEFT ou RIGHT." });
+  }
   try {
     const player = await req.db.player.update({
       where: { id: req.params.id },
@@ -39,6 +62,12 @@ router.put("/:id", requireRole("ADMIN", "COACH"), async (req, res) => {
         ...(lastName !== undefined && { lastName }),
         ...(birthDate !== undefined && { birthDate: new Date(birthDate) }),
         ...(licenseNumber !== undefined && { licenseNumber }),
+        ...(phone !== undefined && { phone }),
+        ...(emergencyContactName !== undefined && { emergencyContactName }),
+        ...(emergencyContactPhone !== undefined && { emergencyContactPhone }),
+        ...(photoUrl !== undefined && { photoUrl }),
+        ...(playStyle !== undefined && { playStyle }),
+        ...(dominantHand !== undefined && { dominantHand }),
       },
     });
     res.json({ player });
