@@ -2,9 +2,9 @@
 // stages) et les vues de consultation (fiche joueur, espace joueur).
 export const ATTENDANCE_STATUS_OPTIONS = [
   { label: "Présent", value: "PRESENT" },
+  { label: "Absent", value: "ABSENT" },
   { label: "Retard", value: "LATE" },
   { label: "Excusé", value: "EXCUSED" },
-  { label: "Absent", value: "ABSENT" },
 ];
 
 export const ATTENDANCE_STATUS_LABELS = Object.fromEntries(ATTENDANCE_STATUS_OPTIONS.map((o) => [o.value, o.label]));

@@ -3,13 +3,14 @@ import { ref, onMounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import Button from "primevue/button";
 import InputText from "primevue/inputtext";
-import SelectButton from "primevue/selectbutton";
+import Dropdown from "primevue/dropdown";
+import Tag from "primevue/tag";
 import Avatar from "primevue/avatar";
 import { useToast } from "primevue/usetoast";
 import AppLayout from "../../components/AppLayout.vue";
 import { api } from "../../lib/api.js";
 import { useNavLinks } from "../../composables/useNavLinks.js";
-import { ATTENDANCE_STATUS_OPTIONS, ATTENDANCE_STATUS_COLORS } from "../../lib/attendance.js";
+import { ATTENDANCE_STATUS_OPTIONS, ATTENDANCE_STATUS_COLORS, ATTENDANCE_STATUS_LABELS, ATTENDANCE_STATUS_SEVERITY } from "../../lib/attendance.js";
 import { fullName, initials as personInitials } from "../../lib/name.js";
 
 const navLinks = useNavLinks();
@@ -58,7 +59,7 @@ async function onSave() {
     <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
       <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
         <p class="text-sm font-medium text-slate-600">
-          {{ counts.PRESENT }} présent(s) · {{ counts.LATE }} retard(s) · {{ counts.EXCUSED }} excusé(s) · {{ counts.ABSENT }} absent(s)
+          {{ counts.PRESENT }} présent(s) · {{ counts.ABSENT }} absent(s) · {{ counts.LATE }} retard(s) · {{ counts.EXCUSED }} excusé(s)
         </p>
         <div class="flex gap-1">
           <Button label="Tous présents" size="small" text @click="markAll('PRESENT')" />
@@ -74,7 +75,9 @@ async function onSave() {
           </div>
           <div class="flex flex-wrap items-center gap-2 sm:ml-auto">
             <InputText v-model="row.note" placeholder="Note (optionnel)" class="w-40" />
-            <SelectButton v-model="row.status" :options="ATTENDANCE_STATUS_OPTIONS" option-label="label" option-value="value" :allow-empty="false" />
+            <Dropdown v-model="row.status" :options="ATTENDANCE_STATUS_OPTIONS" option-label="label" option-value="value" class="w-36">
+              <template #value="{ value }"><Tag :severity="ATTENDANCE_STATUS_SEVERITY[value]" :value="ATTENDANCE_STATUS_LABELS[value]" /></template>
+            </Dropdown>
           </div>
         </li>
         <li v-if="!attendance.length" class="py-2 text-slate-400 text-sm">Aucun joueur dans le groupe de cet entrainement.</li>

@@ -345,8 +345,8 @@ function pointStatusSeverity(status) {
             <p class="text-2xl font-semibold text-slate-800">{{ formatRate(stats.training.attendanceRate) }}</p>
             <p class="text-xs text-slate-400">{{ stats.training.hours }} h cumulées</p>
             <p class="text-xs text-slate-400">
-              {{ stats.training.counts.PRESENT }} présent(s) · {{ stats.training.counts.LATE }} retard(s) · {{ stats.training.counts.EXCUSED }}
-              excusé(s) · {{ stats.training.counts.ABSENT }} absent(s)
+              {{ stats.training.counts.PRESENT }} présent(s) · {{ stats.training.counts.ABSENT }} absent(s) · {{ stats.training.counts.LATE }}
+              retard(s) · {{ stats.training.counts.EXCUSED }} excusé(s)
             </p>
           </div>
           <div>
@@ -354,8 +354,8 @@ function pointStatusSeverity(status) {
             <p class="text-2xl font-semibold text-slate-800">{{ formatRate(stats.camp.attendanceRate) }}</p>
             <p class="text-xs text-slate-400">{{ stats.camp.hours }} h cumulées</p>
             <p class="text-xs text-slate-400">
-              {{ stats.camp.counts.PRESENT }} présent(s) · {{ stats.camp.counts.LATE }} retard(s) · {{ stats.camp.counts.EXCUSED }} excusé(s) ·
-              {{ stats.camp.counts.ABSENT }} absent(s)
+              {{ stats.camp.counts.PRESENT }} présent(s) · {{ stats.camp.counts.ABSENT }} absent(s) · {{ stats.camp.counts.LATE }} retard(s) ·
+              {{ stats.camp.counts.EXCUSED }} excusé(s)
             </p>
           </div>
         </div>
