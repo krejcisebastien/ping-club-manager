@@ -107,7 +107,16 @@ function weekdayLabel(w) {
       <Button label="Nouvel entrainement" icon="pi pi-plus" @click="openCreate" />
     </div>
 
-    <DataTable :value="trainings" :loading="loading" class="bg-white rounded-xl shadow border border-slate-200 overflow-hidden" striped-rows @row-click="router.push(`/admin/trainings/${$event.data.id}`)">
+    <DataTable
+      :value="trainings"
+      :loading="loading"
+      paginator
+      :rows="10"
+      :rows-per-page-options="[10, 25, 50]"
+      class="bg-white rounded-xl shadow border border-slate-200 overflow-hidden"
+      striped-rows
+      @row-click="router.push(`/admin/trainings/${$event.data.id}`)"
+    >
       <template #empty>
         <p class="text-slate-400 text-sm py-4">Aucun entrainement pour cette saison.</p>
       </template>

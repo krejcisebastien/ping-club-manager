@@ -95,7 +95,16 @@ function coachName(p) {
       <Button label="Nouveau plan" icon="pi pi-plus" @click="openCreate" />
     </div>
 
-    <DataTable :value="plans" :loading="loading" class="bg-white rounded-xl shadow border border-slate-200 overflow-hidden" striped-rows @row-click="router.push(`/coach/training-plans/${$event.data.id}`)">
+    <DataTable
+      :value="plans"
+      :loading="loading"
+      paginator
+      :rows="10"
+      :rows-per-page-options="[10, 25, 50]"
+      class="bg-white rounded-xl shadow border border-slate-200 overflow-hidden"
+      striped-rows
+      @row-click="router.push(`/coach/training-plans/${$event.data.id}`)"
+    >
       <template #empty>
         <p class="text-slate-400 text-sm py-4">Aucun plan pour cette saison.</p>
       </template>

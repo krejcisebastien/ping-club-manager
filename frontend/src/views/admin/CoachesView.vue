@@ -88,7 +88,15 @@ function onDelete(coach) {
       <Button label="Nouvel entraineur" icon="pi pi-plus" @click="openCreate" />
     </div>
 
-    <DataTable :value="coaches" :loading="loading" class="bg-white rounded-xl shadow border border-slate-200 overflow-hidden" striped-rows>
+    <DataTable
+      :value="coaches"
+      :loading="loading"
+      paginator
+      :rows="10"
+      :rows-per-page-options="[10, 25, 50]"
+      class="bg-white rounded-xl shadow border border-slate-200 overflow-hidden"
+      striped-rows
+    >
       <template #empty>
         <p class="text-slate-400 text-sm py-4">Aucun entraineur.</p>
       </template>

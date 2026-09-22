@@ -217,7 +217,7 @@ const calendarOptions = computed(() => ({
         <p class="text-sm font-medium text-slate-600 mb-3">Séances ({{ occurrences.length }})</p>
         <TabView lazy>
           <TabPanel header="Liste">
-            <DataTable :value="occurrences" class="border border-slate-200 rounded-lg overflow-hidden">
+            <DataTable :value="occurrences" paginator :rows="10" :rows-per-page-options="[10, 25, 50]" class="border border-slate-200 rounded-lg overflow-hidden">
               <template #empty>
                 <p class="text-slate-400 text-sm py-4">Aucune séance générée.</p>
               </template>

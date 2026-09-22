@@ -134,6 +134,9 @@ async function onRemovePlayer(playerId) {
           v-model:selection="selectedGroup"
           selection-mode="single"
           data-key="id"
+          paginator
+          :rows="10"
+          :rows-per-page-options="[10, 25, 50]"
           class="bg-white rounded-xl shadow border border-slate-200 overflow-hidden"
           striped-rows
           @row-select="onRowSelect"
