@@ -4,6 +4,7 @@ import Button from "primevue/button";
 import Dropdown from "primevue/dropdown";
 import Avatar from "primevue/avatar";
 import Tag from "primevue/tag";
+import { fullName, initials as personInitials } from "../lib/name.js";
 
 const props = defineProps({
   assignments: { type: Array, default: () => [] },
@@ -21,16 +22,14 @@ const typeOptions = [
 ];
 
 const personOptions = computed(() =>
-  (form.value.type === "coach" ? props.coaches : props.sparrings).map((p) => ({ label: `${p.firstName} ${p.lastName}`, value: p.id }))
+  (form.value.type === "coach" ? props.coaches : props.sparrings).map((p) => ({ label: fullName(p), value: p.id }))
 );
 
 function personName(a) {
-  const p = a.coach ?? a.sparring;
-  return `${p.firstName} ${p.lastName}`;
+  return fullName(a.coach ?? a.sparring);
 }
 function initials(a) {
-  const p = a.coach ?? a.sparring;
-  return `${p.firstName?.[0] ?? ""}${p.lastName?.[0] ?? ""}`.toUpperCase();
+  return personInitials(a.coach ?? a.sparring);
 }
 
 function onAdd() {

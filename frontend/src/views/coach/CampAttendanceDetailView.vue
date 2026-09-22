@@ -9,6 +9,7 @@ import AppLayout from "../../components/AppLayout.vue";
 import { api } from "../../lib/api.js";
 import { useNavLinks } from "../../composables/useNavLinks.js";
 import { ATTENDANCE_STATUS_OPTIONS, ATTENDANCE_STATUS_COLORS } from "../../lib/attendance.js";
+import { fullName, initials as personInitials } from "../../lib/name.js";
 
 const navLinks = useNavLinks();
 const route = useRoute();
@@ -24,7 +25,7 @@ const counts = computed(() =>
 );
 
 function initials(row) {
-  return `${row.firstName?.[0] ?? ""}${row.lastName?.[0] ?? ""}`.toUpperCase();
+  return personInitials(row);
 }
 
 onMounted(async () => {
@@ -68,7 +69,7 @@ async function onSave() {
         <li v-for="row in attendance" :key="row.playerId" class="py-3 flex flex-col sm:flex-row sm:items-center gap-2">
           <div class="flex items-center gap-3">
             <Avatar :label="initials(row)" shape="circle" class="shrink-0" :style="{ backgroundColor: ATTENDANCE_STATUS_COLORS[row.status].bg, color: ATTENDANCE_STATUS_COLORS[row.status].fg }" />
-            <span class="font-medium text-slate-700">{{ row.firstName }} {{ row.lastName }}</span>
+            <span class="font-medium text-slate-700">{{ fullName(row) }}</span>
           </div>
           <SelectButton v-model="row.status" :options="ATTENDANCE_STATUS_OPTIONS" option-label="label" option-value="value" :allow-empty="false" class="sm:ml-auto" />
         </li>

@@ -14,6 +14,7 @@ import AppLayout from "../../components/AppLayout.vue";
 import { api } from "../../lib/api.js";
 import { toDateOnly } from "../../lib/date.js";
 import { useNavLinks } from "../../composables/useNavLinks.js";
+import { fullName, initials } from "../../lib/name.js";
 
 const navLinks = useNavLinks();
 const router = useRouter();
@@ -61,7 +62,7 @@ async function onCreate() {
 
 function onDelete(player) {
   confirm.require({
-    message: `Supprimer ${player.firstName} ${player.lastName} ? Toutes ses données seront perdues.`,
+    message: `Supprimer ${fullName(player)} ? Toutes ses données seront perdues.`,
     header: "Confirmation",
     icon: "pi pi-exclamation-triangle",
     acceptLabel: "Supprimer",
@@ -106,11 +107,11 @@ function formatDate(d) {
           <div class="flex items-center gap-2 cursor-pointer">
             <Avatar
               :image="data.photoUrl || undefined"
-              :label="!data.photoUrl ? `${data.firstName[0]}${data.lastName[0]}`.toUpperCase() : undefined"
+              :label="!data.photoUrl ? initials(data) : undefined"
               shape="circle"
               class="bg-sky-100 text-sky-700 shrink-0"
             />
-            <span>{{ data.firstName }} {{ data.lastName }}</span>
+            <span>{{ fullName(data) }}</span>
           </div>
         </template>
       </Column>

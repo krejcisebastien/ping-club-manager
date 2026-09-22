@@ -6,6 +6,7 @@ import AppLayout from "../../components/AppLayout.vue";
 import { api } from "../../lib/api.js";
 import { useAuthStore } from "../../stores/auth.js";
 import { ATTENDANCE_STATUS_LABELS, ATTENDANCE_STATUS_SEVERITY } from "../../lib/attendance.js";
+import { fullName } from "../../lib/name.js";
 
 const route = useRoute();
 const router = useRouter();
@@ -56,7 +57,7 @@ watch(() => route.params.id, load);
     <div v-if="player" class="space-y-4">
       <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex items-center gap-3">
         <img v-if="player.photoUrl" :src="player.photoUrl" alt="" class="w-12 h-12 rounded-full object-cover shrink-0" />
-        <p class="text-lg font-medium">{{ player.firstName }} {{ player.lastName }}</p>
+        <p class="text-lg font-medium">{{ fullName(player) }}</p>
       </div>
       <div v-if="stats" class="grid grid-cols-2 gap-3">
         <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">

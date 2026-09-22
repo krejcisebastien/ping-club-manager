@@ -3,6 +3,7 @@ import { ref, onMounted } from "vue";
 import AppLayout from "../../components/AppLayout.vue";
 import { api } from "../../lib/api.js";
 import { useNavLinks } from "../../composables/useNavLinks.js";
+import { fullName } from "../../lib/name.js";
 
 const navLinks = useNavLinks();
 
@@ -20,7 +21,7 @@ onMounted(async () => {
       <p class="text-sm text-slate-500 mb-2">Joueurs du club</p>
       <ul class="divide-y divide-slate-100">
         <li v-for="p in players" :key="p.id" class="py-2 text-slate-700">
-          {{ p.firstName }} {{ p.lastName }}
+          {{ fullName(p) }}
         </li>
       </ul>
     </div>

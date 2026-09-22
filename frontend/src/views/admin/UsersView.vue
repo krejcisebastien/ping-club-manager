@@ -14,6 +14,7 @@ import { useConfirm } from "primevue/useconfirm";
 import AppLayout from "../../components/AppLayout.vue";
 import { api } from "../../lib/api.js";
 import { useNavLinks } from "../../composables/useNavLinks.js";
+import { fullName } from "../../lib/name.js";
 
 const navLinks = useNavLinks();
 const toast = useToast();
@@ -54,10 +55,10 @@ onMounted(async () => {
 });
 
 function playerOptions() {
-  return players.value.map((p) => ({ label: `${p.firstName} ${p.lastName}`, value: p.id }));
+  return players.value.map((p) => ({ label: fullName(p), value: p.id }));
 }
 function coachOptions() {
-  return coaches.value.map((c) => ({ label: `${c.firstName} ${c.lastName}`, value: c.id }));
+  return coaches.value.map((c) => ({ label: fullName(c), value: c.id }));
 }
 
 function openCreate() {
@@ -133,8 +134,8 @@ async function onSaveEdit() {
 }
 
 function linkedName(user) {
-  if (user.players?.length) return user.players.map((p) => `${p.firstName} ${p.lastName}`).join(", ");
-  if (user.coach) return `${user.coach.firstName} ${user.coach.lastName}`;
+  if (user.players?.length) return user.players.map(fullName).join(", ");
+  if (user.coach) return fullName(user.coach);
   return "—";
 }
 

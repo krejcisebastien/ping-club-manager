@@ -10,6 +10,7 @@ import { useToast } from "primevue/usetoast";
 import AppLayout from "../../components/AppLayout.vue";
 import { api } from "../../lib/api.js";
 import { useNavLinks } from "../../composables/useNavLinks.js";
+import { fullName } from "../../lib/name.js";
 
 const navLinks = useNavLinks();
 const toast = useToast();
@@ -31,7 +32,7 @@ const saving = ref(false);
 
 const availablePlayers = computed(() => {
   const rosterIds = new Set(roster.value.map((a) => a.player.id));
-  return allPlayers.value.filter((p) => !rosterIds.has(p.id)).map((p) => ({ label: `${p.firstName} ${p.lastName}`, value: p.id }));
+  return allPlayers.value.filter((p) => !rosterIds.has(p.id)).map((p) => ({ label: fullName(p), value: p.id }));
 });
 
 async function loadSeasons() {
@@ -161,7 +162,7 @@ async function onRemovePlayer(playerId) {
             <p class="text-sm font-medium text-slate-700 mb-3">{{ selectedGroup.name }}</p>
             <ul class="divide-y divide-slate-100 mb-4">
               <li v-for="a in roster" :key="a.id" class="py-2 flex items-center justify-between text-sm">
-                <span>{{ a.player.firstName }} {{ a.player.lastName }}</span>
+                <span>{{ fullName(a.player) }}</span>
                 <Button icon="pi pi-times" severity="danger" text rounded size="small" aria-label="Retirer" @click="onRemovePlayer(a.player.id)" />
               </li>
               <li v-if="!roster.length" class="py-2 text-slate-400 text-sm">Aucun joueur dans ce groupe.</li>

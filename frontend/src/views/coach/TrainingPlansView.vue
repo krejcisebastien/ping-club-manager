@@ -14,6 +14,7 @@ import RichTextEditor from "../../components/RichTextEditor.vue";
 import { api } from "../../lib/api.js";
 import { toDateOnly } from "../../lib/date.js";
 import { useNavLinks } from "../../composables/useNavLinks.js";
+import { fullName } from "../../lib/name.js";
 
 const navLinks = useNavLinks();
 const router = useRouter();
@@ -79,7 +80,7 @@ async function onCreate() {
 }
 
 function coachName(p) {
-  return p.coach ? `${p.coach.firstName} ${p.coach.lastName}` : "";
+  return p.coach ? fullName(p.coach) : "";
 }
 </script>
 

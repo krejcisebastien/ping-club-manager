@@ -10,6 +10,7 @@ import { useConfirm } from "primevue/useconfirm";
 import AppLayout from "../../components/AppLayout.vue";
 import { api } from "../../lib/api.js";
 import { useNavLinks } from "../../composables/useNavLinks.js";
+import { fullName } from "../../lib/name.js";
 
 const navLinks = useNavLinks();
 const toast = useToast();
@@ -65,7 +66,7 @@ async function onSave() {
 
 function onDelete(coach) {
   confirm.require({
-    message: `Supprimer ${coach.firstName} ${coach.lastName} ?`,
+    message: `Supprimer ${fullName(coach)} ?`,
     header: "Confirmation",
     icon: "pi pi-exclamation-triangle",
     acceptLabel: "Supprimer",
@@ -101,7 +102,7 @@ function onDelete(coach) {
         <p class="text-slate-400 text-sm py-4">Aucun entraineur.</p>
       </template>
       <Column field="lastName" header="Nom" sortable>
-        <template #body="{ data }">{{ data.firstName }} {{ data.lastName }}</template>
+        <template #body="{ data }">{{ fullName(data) }}</template>
       </Column>
       <Column field="email" header="Email" />
       <Column field="phone" header="Téléphone" />

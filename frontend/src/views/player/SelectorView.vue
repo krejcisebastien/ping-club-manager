@@ -4,6 +4,7 @@ import { useRouter } from "vue-router";
 import AppLayout from "../../components/AppLayout.vue";
 import { api } from "../../lib/api.js";
 import { useAuthStore } from "../../stores/auth.js";
+import { fullName } from "../../lib/name.js";
 
 const auth = useAuthStore();
 const router = useRouter();
@@ -32,7 +33,7 @@ onMounted(async () => {
           class="py-3 cursor-pointer hover:text-sky-600"
           @click="router.push(`/player/${p.id}`)"
         >
-          {{ p.firstName }} {{ p.lastName }}
+          {{ fullName(p) }}
         </li>
         <li v-if="!players.length" class="py-2 text-slate-400 text-sm">Aucun joueur rattaché à ce compte.</li>
       </ul>

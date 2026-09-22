@@ -3,6 +3,7 @@ import { ref, computed } from "vue";
 import Button from "primevue/button";
 import Dropdown from "primevue/dropdown";
 import Avatar from "primevue/avatar";
+import { fullName, initials as personInitials } from "../lib/name.js";
 
 const props = defineProps({
   assignments: { type: Array, default: () => [] },
@@ -16,11 +17,11 @@ const playerToAdd = ref(null);
 
 const availablePlayers = computed(() => {
   const ids = new Set(props.assignments.map((a) => a.player.id));
-  return props.players.filter((p) => !ids.has(p.id)).map((p) => ({ label: `${p.firstName} ${p.lastName}`, value: p.id }));
+  return props.players.filter((p) => !ids.has(p.id)).map((p) => ({ label: fullName(p), value: p.id }));
 });
 
 function initials(p) {
-  return `${p.firstName?.[0] ?? ""}${p.lastName?.[0] ?? ""}`.toUpperCase();
+  return personInitials(p);
 }
 
 function onAdd() {
@@ -36,7 +37,7 @@ function onAdd() {
       <li v-for="a in assignments" :key="a.id" class="py-2 flex items-center justify-between gap-2">
         <div class="flex items-center gap-2 min-w-0">
           <Avatar :label="initials(a.player)" shape="circle" class="shrink-0" style="background-color: #f1f5f9; color: #475569" />
-          <span class="font-medium text-slate-700 truncate">{{ a.player.firstName }} {{ a.player.lastName }}</span>
+          <span class="font-medium text-slate-700 truncate">{{ fullName(a.player) }}</span>
         </div>
         <Button icon="pi pi-times" severity="danger" text rounded size="small" aria-label="Retirer" class="shrink-0" @click="emit('remove', a.player.id)" />
       </li>

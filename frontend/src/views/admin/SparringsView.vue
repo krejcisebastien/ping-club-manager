@@ -13,6 +13,7 @@ import { useConfirm } from "primevue/useconfirm";
 import AppLayout from "../../components/AppLayout.vue";
 import { api } from "../../lib/api.js";
 import { useNavLinks } from "../../composables/useNavLinks.js";
+import { fullName } from "../../lib/name.js";
 
 const navLinks = useNavLinks();
 const toast = useToast();
@@ -39,12 +40,11 @@ async function load() {
 onMounted(load);
 
 function playerOptions() {
-  return players.value.map((p) => ({ label: `${p.firstName} ${p.lastName}`, value: p.id }));
+  return players.value.map((p) => ({ label: fullName(p), value: p.id }));
 }
 
 function playerName(playerId) {
-  const p = players.value.find((pl) => pl.id === playerId);
-  return p ? `${p.firstName} ${p.lastName}` : "";
+  return fullName(players.value.find((pl) => pl.id === playerId));
 }
 
 function openCreate() {
@@ -86,7 +86,7 @@ async function onSave() {
 
 function onDelete(sparring) {
   confirm.require({
-    message: `Supprimer ${sparring.firstName} ${sparring.lastName} ?`,
+    message: `Supprimer ${fullName(sparring)} ?`,
     header: "Confirmation",
     icon: "pi pi-exclamation-triangle",
     acceptLabel: "Supprimer",
@@ -122,7 +122,7 @@ function onDelete(sparring) {
         <p class="text-slate-400 text-sm py-4">Aucun sparring.</p>
       </template>
       <Column field="lastName" header="Nom" sortable>
-        <template #body="{ data }">{{ data.firstName }} {{ data.lastName }}</template>
+        <template #body="{ data }">{{ fullName(data) }}</template>
       </Column>
       <Column field="ranking" header="Classement" />
       <Column header="Origine">

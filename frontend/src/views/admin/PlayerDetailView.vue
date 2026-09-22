@@ -14,6 +14,7 @@ import ImageUpload from "../../components/ImageUpload.vue";
 import { api } from "../../lib/api.js";
 import { toDateOnly } from "../../lib/date.js";
 import { useNavLinks } from "../../composables/useNavLinks.js";
+import { fullName } from "../../lib/name.js";
 
 const navLinks = useNavLinks();
 const route = useRoute();
@@ -266,7 +267,7 @@ function pointStatusSeverity(status) {
 </script>
 
 <template>
-  <AppLayout :title="player ? `${player.firstName} ${player.lastName}` : 'Joueur'" :nav-links="navLinks">
+  <AppLayout :title="player ? fullName(player) : 'Joueur'" :nav-links="navLinks">
     <Button label="Retour" icon="pi pi-arrow-left" text class="mb-3 -ml-2" @click="router.push('/admin/players')" />
 
     <div v-if="player" class="space-y-4">
