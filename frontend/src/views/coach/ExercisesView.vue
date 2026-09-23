@@ -6,6 +6,7 @@ import Column from "primevue/column";
 import Dialog from "primevue/dialog";
 import Button from "primevue/button";
 import InputText from "primevue/inputtext";
+import InputNumber from "primevue/inputnumber";
 import Tag from "primevue/tag";
 import { useToast } from "primevue/usetoast";
 import { useConfirm } from "primevue/useconfirm";
@@ -22,7 +23,7 @@ const toast = useToast();
 const { filters } = useTableFilter();
 const confirm = useConfirm();
 
-const emptyForm = () => ({ title: "", description: "", category: "", difficulty: "" });
+const emptyForm = () => ({ title: "", description: "", category: "", difficulty: null });
 
 const exercises = ref([]);
 const loading = ref(true);
@@ -58,6 +59,24 @@ async function onCreate() {
   }
 }
 
+const importing = ref(false);
+
+async function onImportLibrary() {
+  importing.value = true;
+  try {
+    const { data } = await api.post("/exercises/import-library");
+    const summary = data.imported > 0
+      ? `${data.imported} exercice(s) importé(s)${data.skipped ? `, ${data.skipped} déjà présent(s)` : ""}.`
+      : "Tous les exercices de la bibliothèque sont déjà présents.";
+    toast.add({ severity: "success", summary: "Import terminé", detail: summary, life: 5000 });
+    await load();
+  } catch (err) {
+    toast.add({ severity: "error", summary: "Erreur", detail: err.response?.data?.error ?? "Une erreur est survenue.", life: 4000 });
+  } finally {
+    importing.value = false;
+  }
+}
+
 function onDelete(ex) {
   confirm.require({
     message: `Supprimer l'exercice « ${ex.title} » ?`,
@@ -89,6 +108,7 @@ function onRowClick(event) {
           <i class="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
           <InputText v-model="filters.global.value" placeholder="Rechercher…" class="w-full pl-9" />
         </div>
+        <Button label="Importer la bibliothèque" icon="pi pi-download" severity="secondary" outlined :loading="importing" @click="onImportLibrary" />
         <Button label="Nouvel exercice" icon="pi pi-plus" @click="openCreate" />
       </div>
     </div>
@@ -114,9 +134,13 @@ function onRowClick(event) {
       <Column header="Catégorie">
         <template #body="{ data }"><Tag v-if="data.category" severity="secondary" :value="data.category" /></template>
       </Column>
-      <Column field="difficulty" header="Difficulté" />
+      <Column field="difficulty" header="Difficulté" sortable style="width: 7rem">
+        <template #body="{ data }"><Tag v-if="data.difficulty" severity="warn" :value="`${data.difficulty}/5`" /></template>
+      </Column>
       <Column header="Description">
-        <template #body="{ data }"><span class="text-slate-500 text-sm line-clamp-1">{{ stripHtml(data.description) }}</span></template>
+        <template #body="{ data }">
+          <span class="text-slate-500 text-sm line-clamp-1">{{ stripHtml(data.description) || data.objective || "" }}</span>
+        </template>
       </Column>
       <Column header="" style="width: 4rem">
         <template #body="{ data }">
@@ -139,8 +163,8 @@ function onRowClick(event) {
             <InputText v-model="form.category" class="w-full" />
           </div>
           <div>
-            <label class="text-xs text-slate-500 block mb-1">Difficulté</label>
-            <InputText v-model="form.difficulty" class="w-full" />
+            <label class="text-xs text-slate-500 block mb-1">Difficulté (1-5)</label>
+            <InputNumber v-model="form.difficulty" :min="1" :max="5" show-buttons class="w-full" input-class="w-full" />
           </div>
         </div>
         <div>

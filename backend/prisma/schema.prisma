@@ -464,15 +464,29 @@ model Exercise {
   title            String
   description      String?
   category         String?
-  difficulty       String?
+  difficulty       Int? // 1 à 5
   illustrationUrl  String? // data URL (base64) de l'illustration uploadée
   diagram          Json? // schéma table de ping-pong : { points: [{ id, x, y }] }
   createdById      String?
   createdAt        DateTime @default(now())
 
+  // Fiche pédagogique enrichie (bibliothèque d'exercices standard).
+  intensity           Int? // 1 à 5
+  levelMin            String? // ex. "Debutant"
+  levelMax            String? // ex. "Expert"
+  skills              Json? // string[] — qualités travaillées (ex. "Regularite", "Pivot")
+  objective           String?
+  instructions        Json? // string[] — consignes
+  successCriteria     Json? // string[] — critères de réussite
+  easierVariant       Json? // string[]
+  harderVariant       Json? // string[]
+  competitionVariant  Json? // string[]
+  sourceCode          String? // référence dans la bibliothèque source (ex. "REG-001"), pour import idempotent
+
   createdBy Coach?                  @relation(fields: [createdById], references: [id])
   plans     TrainingPlanExercise[]
 
+  @@unique([clubId, sourceCode])
   @@index([clubId])
 }
 

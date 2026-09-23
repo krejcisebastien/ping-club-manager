@@ -306,6 +306,16 @@ try {
   });
   expect("un score hors 0-10 est refusé", evalBadScore.status === 400, `status ${evalBadScore.status}`);
 
+  // ---------- Import de la bibliothèque d'exercices : isolation et idempotence ----------
+  const importA1 = (await call(A.token, "POST", "/exercises/import-library")).json;
+  expect("A importe les 55 exercices de la bibliothèque", importA1.imported === 55, JSON.stringify(importA1));
+  const importA2 = (await call(A.token, "POST", "/exercises/import-library")).json;
+  expect("un second import ne recrée rien (idempotent)", importA2.imported === 0 && importA2.skipped === 55, JSON.stringify(importA2));
+  const importB1 = (await call(B.token, "POST", "/exercises/import-library")).json;
+  expect("B importe aussi ses propres 55 exercices", importB1.imported === 55, JSON.stringify(importB1));
+  const exercisesB = (await call(B.token, "GET", "/exercises")).json.exercises;
+  expect("B ne voit que ses exercices (pas ceux de A)", exercisesB.length === 55);
+
   // ---------- 7. Sessions et comptes ----------
   const legacy = jwt.sign({ sub: "x", roles: ["ADMIN"] }, process.env.JWT_SECRET);
   expect("jeton sans club refusé", (await call(legacy, "GET", "/seasons")).status === 401);
