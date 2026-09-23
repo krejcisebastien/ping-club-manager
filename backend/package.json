@@ -10,6 +10,7 @@
     "migrate:dev": "prisma migrate dev",
     "migrate:deploy": "prisma migrate deploy",
     "seed": "node prisma/seed.js",
+    "seed:exercises": "node scripts/seed-exercises.js",
     "club": "node scripts/clubs.js",
     "test:isolation": "node tests/tenant-isolation.mjs",
     "test:signup": "node tests/club-signup.mjs",
