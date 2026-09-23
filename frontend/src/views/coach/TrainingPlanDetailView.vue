@@ -134,7 +134,16 @@ async function onRemoveExercise(exerciseId) {
           <li v-if="!plan.exercises.length" class="py-2 text-slate-400 text-sm">Aucun exercice rattaché.</li>
         </ul>
         <div class="flex gap-2">
-          <Dropdown v-model="exerciseToAdd" :options="availableExercises" option-label="label" option-value="value" filter placeholder="Ajouter un exercice…" class="flex-1" />
+          <Dropdown
+            v-model="exerciseToAdd"
+            :options="availableExercises"
+            option-label="label"
+            option-value="value"
+            filter
+            reset-filter-on-hide
+            placeholder="Ajouter un exercice…"
+            class="flex-1"
+          />
           <Button label="Ajouter" @click="onAddExercise" />
         </div>
       </div>

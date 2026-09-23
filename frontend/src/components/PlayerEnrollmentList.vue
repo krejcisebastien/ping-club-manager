@@ -44,7 +44,16 @@ function onAdd() {
       <li v-if="!assignments.length" class="py-2 text-slate-400 text-sm">{{ emptyLabel }}</li>
     </ul>
     <div class="flex gap-2">
-      <Dropdown v-model="playerToAdd" :options="availablePlayers" option-label="label" option-value="value" filter :placeholder="placeholder" class="flex-1 min-w-0" />
+      <Dropdown
+        v-model="playerToAdd"
+        :options="availablePlayers"
+        option-label="label"
+        option-value="value"
+        filter
+        reset-filter-on-hide
+        :placeholder="placeholder"
+        class="flex-1 min-w-0"
+      />
       <Button label="Ajouter" @click="onAdd" />
     </div>
   </div>

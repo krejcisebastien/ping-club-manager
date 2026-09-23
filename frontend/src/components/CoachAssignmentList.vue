@@ -60,7 +60,16 @@ function onAdd() {
     <div class="flex flex-col gap-2">
       <div class="flex gap-2">
         <Dropdown v-model="form.type" :options="typeOptions" option-label="label" option-value="value" class="w-40 shrink-0" />
-        <Dropdown v-model="form.id" :options="personOptions" option-label="label" option-value="value" filter placeholder="Choisir…" class="flex-1 min-w-0" />
+        <Dropdown
+          v-model="form.id"
+          :options="personOptions"
+          option-label="label"
+          option-value="value"
+          filter
+          reset-filter-on-hide
+          placeholder="Choisir…"
+          class="flex-1 min-w-0"
+        />
       </div>
       <Button label="Affecter" @click="onAdd" />
     </div>
