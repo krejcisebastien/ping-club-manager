@@ -282,6 +282,18 @@ try {
     physique: 6,
   });
   expect("A note une évaluation sportive", evalA.status === 201, `status ${evalA.status}`);
+
+  // ---------- Tableau de bord entraineur : isolation ----------
+  const todayISO = new Date().toISOString().slice(0, 10);
+  await post(A.token, `/trainings/${training.id}/occurrences`, { date: todayISO, startTime: "18:00", endTime: "19:30" });
+  await post(B.token, `/trainings/${bTraining.id}/occurrences`, { date: todayISO, startTime: "20:00", endTime: "21:00" });
+  const dashA = (await call(A.token, "GET", "/dashboard/coach")).json;
+  const dashB = (await call(B.token, "GET", "/dashboard/coach")).json;
+  expect("A voit sa séance du jour au tableau de bord", dashA.upcomingTrainings.some((o) => o.trainingName === "Entrainement A"));
+  expect("A ne voit pas la séance de B", !dashA.upcomingTrainings.some((o) => o.trainingName === "Entrainement B"));
+  expect("B voit sa séance du jour au tableau de bord", dashB.upcomingTrainings.some((o) => o.trainingName === "Entrainement B"));
+  expect("B ne voit pas la séance de A", !dashB.upcomingTrainings.some((o) => o.trainingName === "Entrainement A"));
+  expect("le compteur de joueurs de A est scopé", dashA.stats.players === 1, JSON.stringify(dashA.stats));
   const evalBadScore = await call(A.token, "POST", `/players/${player.id}/evaluations`, {
     service: 11,
     remise: 6,
