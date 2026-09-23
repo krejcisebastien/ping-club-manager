@@ -9,9 +9,10 @@ router.get("/", async (req, res) => {
   const { seasonId } = req.query;
   const groups = await req.db.trainingGroup.findMany({
     where: seasonId ? { seasonId } : undefined,
+    include: { _count: { select: { playerAssignments: { where: { endDate: null } } } } },
     orderBy: { name: "asc" },
   });
-  res.json({ groups });
+  res.json({ groups: groups.map((g) => ({ ...g, playerCount: g._count.playerAssignments, _count: undefined })) });
 });
 
 router.get("/:id", async (req, res) => {

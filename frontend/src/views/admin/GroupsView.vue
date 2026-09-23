@@ -6,6 +6,7 @@ import Dialog from "primevue/dialog";
 import Button from "primevue/button";
 import InputText from "primevue/inputtext";
 import Dropdown from "primevue/dropdown";
+import Tag from "primevue/tag";
 import { useToast } from "primevue/usetoast";
 import AppLayout from "../../components/AppLayout.vue";
 import { api } from "../../lib/api.js";
@@ -104,17 +105,24 @@ async function onSaveGroup() {
   }
 }
 
+function bumpGroupCount(groupId, delta) {
+  const g = groups.value.find((g) => g.id === groupId);
+  if (g) g.playerCount = (g.playerCount ?? 0) + delta;
+}
+
 async function onAddPlayer() {
   if (!playerToAdd.value) return;
   await api.post(`/groups/${selectedGroup.value.id}/players`, { playerId: playerToAdd.value });
   playerToAdd.value = null;
   await loadRoster(selectedGroup.value.id);
+  bumpGroupCount(selectedGroup.value.id, 1);
   toast.add({ severity: "success", summary: "Joueur ajouté au groupe", life: 3000 });
 }
 
 async function onRemovePlayer(playerId) {
   await api.delete(`/groups/${selectedGroup.value.id}/players/${playerId}`);
   await loadRoster(selectedGroup.value.id);
+  bumpGroupCount(selectedGroup.value.id, -1);
 }
 </script>
 
@@ -125,12 +133,12 @@ async function onRemovePlayer(playerId) {
       <Dropdown v-model="selectedSeasonId" :options="seasons" option-label="name" option-value="id" class="w-full" />
     </div>
 
-    <div class="grid gap-4 lg:grid-cols-[minmax(0,1fr)_22rem]">
-      <div>
+    <div class="grid gap-4 lg:grid-cols-[3fr_2fr]">
+      <div class="min-w-0">
         <div class="flex items-center justify-between mb-3 gap-2 flex-wrap">
           <h2 class="text-sm font-medium text-slate-600">{{ groups.length }} groupe(s)</h2>
-          <div class="flex items-center gap-2">
-            <div class="relative w-40">
+          <div class="flex items-center gap-2 flex-wrap">
+            <div class="relative w-40 min-w-[8rem]">
               <i class="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
               <InputText v-model="filters.global.value" placeholder="Rechercher…" class="w-full pl-9" size="small" />
             </div>
@@ -157,6 +165,11 @@ async function onRemovePlayer(playerId) {
           </template>
           <Column field="name" header="Nom" sortable />
           <Column field="rankingCriteria" header="Critère de classement" />
+          <Column field="playerCount" header="Joueurs" sortable style="width: 6rem">
+            <template #body="{ data }">
+              <Tag severity="secondary" :value="String(data.playerCount)" />
+            </template>
+          </Column>
           <Column header="" style="width: 4rem">
             <template #body="{ data }">
               <Button icon="pi pi-pencil" severity="secondary" text rounded aria-label="Modifier" @click.stop="openEdit(data)" />
@@ -165,11 +178,14 @@ async function onRemovePlayer(playerId) {
         </DataTable>
       </div>
 
-      <div>
+      <div class="min-w-0">
         <h2 class="text-sm font-medium text-slate-600 mb-3">Composition</h2>
         <div class="bg-white rounded-xl shadow border border-slate-200 p-4">
           <template v-if="selectedGroup">
-            <p class="text-sm font-medium text-slate-700 mb-3">{{ selectedGroup.name }}</p>
+            <div class="flex items-center justify-between mb-3">
+              <p class="text-sm font-medium text-slate-700">{{ selectedGroup.name }}</p>
+              <span class="text-xs text-slate-400">{{ roster.length }} joueur(s)</span>
+            </div>
             <ul class="divide-y divide-slate-100 mb-4">
               <li v-for="a in roster" :key="a.id" class="py-2 flex items-center justify-between text-sm">
                 <span>{{ fullName(a.player) }}</span>
