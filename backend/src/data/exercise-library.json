@@ -223,10 +223,13 @@
     ],
     "objectif": "Développer la mobilité côté revers.",
     "consignes": [
-      "Le joueur couvre deux zones revers."
+      "Le distributeur alterne une balle revers mi-table et une balle revers plus écartée.",
+      "Le joueur couvre les deux zones en jouant exclusivement en revers.",
+      "Revenir au centre entre chaque frappe."
     ],
     "criteresReussite": [
-      "15 échanges minimum."
+      "15 échanges minimum.",
+      "Retour systématique en position centrale entre les balles."
     ],
     "varianteFacile": [
       "Zones rapprochées."
@@ -281,10 +284,13 @@
     ],
     "objectif": "Développer les schémas inhabituels.",
     "consignes": [
-      "Effectuer la séquence Falkenberg dans le sens opposé."
+      "Effectuer la séquence Falkenberg dans le sens opposé (CD plein champ, pivot CD diagonale, RV diagonale).",
+      "Conserver la même vitesse d'exécution que la version classique.",
+      "Se concentrer sur le repositionnement après chaque coup."
     ],
     "criteresReussite": [
-      "8 séquences correctes."
+      "8 séquences correctes sur 10 tentatives.",
+      "Ordre des trois coups respecté à chaque fois."
     ],
     "varianteFacile": [
       "Rythme réduit."
@@ -309,10 +315,13 @@
     ],
     "objectif": "Réagir à une distribution imprévisible.",
     "consignes": [
-      "Le distributeur conserve le schéma mais peut modifier une balle."
+      "Le distributeur conserve la structure Falkenberg mais remplace une balle du schéma de façon imprévue.",
+      "Le joueur doit s'adapter sans interrompre le déplacement.",
+      "Revenir au schéma initial dès que possible après l'imprévu."
     ],
     "criteresReussite": [
-      "Maintien de la qualité technique malgré l'aléatoire."
+      "Au moins 6 séquences sur 10 menées à leur terme.",
+      "Pas de perte d'équilibre lors de l'adaptation."
     ],
     "varianteFacile": [
       "Une seule variation possible."
@@ -322,33 +331,6 @@
     ],
     "varianteCompetition": [
       "Comptage des séquences réussies."
-    ]
-  },
-  {
-    "id": "REG-012",
-    "nom": "Papillon",
-    "categorie": "Regularite",
-    "difficulte": 3,
-    "intensite": 3,
-    "fonctionnalites": [
-      "Coordination",
-      "Deplacement"
-    ],
-    "objectif": "Enchaîner plusieurs angles de jeu.",
-    "consignes": [
-      "Alternance diagonale et ligne droite selon un schéma fixe."
-    ],
-    "criteresReussite": [
-      "Respect intégral du schéma."
-    ],
-    "varianteFacile": [
-      "Vitesse réduite."
-    ],
-    "varianteDifficile": [
-      "Accélération progressive."
-    ],
-    "varianteCompetition": [
-      "Point libre après la séquence."
     ]
   },
   {
@@ -364,10 +346,13 @@
     ],
     "objectif": "Développer l'utilisation du pivot.",
     "consignes": [
-      "Une balle revers, une balle pivot coup droit."
+      "Le distributeur envoie une balle revers puis une balle sur laquelle le joueur pivote en coup droit.",
+      "Revenir en position neutre après chaque pivot.",
+      "Garder le buste orienté vers la balle pendant le pivot."
     ],
     "criteresReussite": [
-      "Pivot exécuté sans perte d'équilibre."
+      "10 pivots consécutifs réussis.",
+      "Appuis stables à la réception du pivot."
     ],
     "varianteFacile": [
       "Pivot toutes les deux balles."
@@ -391,10 +376,13 @@
     ],
     "objectif": "Améliorer la vitesse de replacement.",
     "consignes": [
-      "Alterner pivot et revers actif."
+      "Alterner un coup en pivot coup droit et un coup en revers actif.",
+      "Maintenir la même intensité sur les deux coups.",
+      "Se replacer immédiatement après chaque frappe."
     ],
     "criteresReussite": [
-      "Position correcte après chaque coup."
+      "10 alternances réussies sans temps d'arrêt.",
+      "Retour en position neutre en moins d'une seconde."
     ],
     "varianteFacile": [
       "Cadence réduite."
@@ -418,10 +406,13 @@
     ],
     "objectif": "Améliorer la précision des trajectoires.",
     "consignes": [
-      "Viser une zone matérialisée sur la table."
+      "Placer une cible matérialisée dans une zone précise de la table.",
+      "Viser cette cible à chaque balle tout en gardant un échange régulier.",
+      "Ajuster la trajectoire sans changer de rythme."
     ],
     "criteresReussite": [
-      "70% des balles dans la cible."
+      "70% des balles touchent la cible.",
+      "Régularité de l'échange maintenue malgré la contrainte de précision."
     ],
     "varianteFacile": [
       "Grande cible."
@@ -445,10 +436,13 @@
     ],
     "objectif": "Développer le toucher de balle.",
     "consignes": [
-      "Imposer un rythme très lent."
+      "Imposer un rythme très lent sur l'ensemble de l'échange.",
+      "Rechercher une trajectoire haute et sécurisée.",
+      "Contrôler la balle avec un minimum de force."
     ],
     "criteresReussite": [
-      "Aucune accélération intempestive."
+      "20 échanges sans accélération involontaire.",
+      "Trajectoire stable balle après balle."
     ],
     "varianteFacile": [
       "Balles hautes autorisées."
@@ -472,10 +466,13 @@
     ],
     "objectif": "Maintenir la régularité sous cadence élevée.",
     "consignes": [
-      "Accélérer progressivement l'échange."
+      "Démarrer à rythme modéré puis accélérer progressivement.",
+      "Maintenir la précision malgré la vitesse croissante.",
+      "Ne pas sacrifier le placement pour la vitesse."
     ],
     "criteresReussite": [
-      "15 échanges rapides sans faute."
+      "15 échanges rapides sans faute.",
+      "Vitesse maintenue jusqu'à la fin de la série."
     ],
     "varianteFacile": [
       "Vitesse intermédiaire."
@@ -499,10 +496,13 @@
     ],
     "objectif": "S'adapter aux variations de vitesse.",
     "consignes": [
-      "Alterner 5 balles lentes et 5 rapides."
+      "Alterner 5 balles lentes et 5 balles rapides sans interrompre l'échange.",
+      "Anticiper le changement de rythme suivant.",
+      "Garder la même trajectoire malgré le changement de vitesse."
     ],
     "criteresReussite": [
-      "Aucune perte de contrôle."
+      "Les deux blocs de 5 balles sont complétés sans faute.",
+      "Transition de rythme sans rupture de l'échange."
     ],
     "varianteFacile": [
       "Changement annoncé."
@@ -526,10 +526,13 @@
     ],
     "objectif": "Développer la continuité de jeu.",
     "consignes": [
-      "Atteindre 20 échanges sans erreur."
+      "Jouer un échange libre coup droit ou revers.",
+      "Viser 20 échanges consécutifs sans faute.",
+      "Recommencer à zéro à chaque erreur."
     ],
     "criteresReussite": [
-      "20 échanges validés."
+      "20 échanges validés dans la séance.",
+      "Moins de 3 tentatives nécessaires pour y parvenir."
     ],
     "varianteFacile": [
       "10 échanges."
@@ -568,6 +571,37 @@
     ],
     "varianteCompetition": [
       "Challenge par équipes."
+    ]
+  },
+  {
+    "id": "REG-021",
+    "nom": "Régularité en profondeur constante",
+    "categorie": "Regularite",
+    "difficulte": 2,
+    "intensite": 2,
+    "fonctionnalites": [
+      "Regularite",
+      "Controle",
+      "Profondeur"
+    ],
+    "objectif": "Maintenir une profondeur constante tout au long de l'échange.",
+    "consignes": [
+      "Jouer un échange libre coup droit ou revers.",
+      "Chercher à toucher systématiquement le dernier tiers de la table.",
+      "Éviter les balles courtes qui donneraient l'initiative à l'adversaire."
+    ],
+    "criteresReussite": [
+      "80% des balles dans le dernier tiers de table.",
+      "20 échanges consécutifs sans balle courte."
+    ],
+    "varianteFacile": [
+      "Zone de profondeur élargie."
+    ],
+    "varianteDifficile": [
+      "Zone de profondeur réduite au dernier quart de table."
+    ],
+    "varianteCompetition": [
+      "Point perdu si une balle tombe dans la moitié proche du filet."
     ]
   },
   {
@@ -699,11 +733,13 @@
     ],
     "objectif": "Travailler la construction offensive.",
     "consignes": [
-      "Premier top rotation.",
-      "Deuxième top frappé."
+      "Réaliser un premier top en rotation sur bloc passif.",
+      "Enchaîner avec un second top plus frappé sur le bloc suivant.",
+      "Conserver l'équilibre entre les deux frappes."
     ],
     "criteresReussite": [
-      "Enchaînement maîtrisé sans perte d'équilibre."
+      "8 enchaînements sur 10 réussis.",
+      "Nette augmentation de vitesse entre le premier et le second top."
     ],
     "varianteFacile": [
       "Bloc passif."
@@ -755,11 +791,13 @@
     ],
     "objectif": "Passer rapidement de la défense à l'attaque.",
     "consignes": [
-      "Un bloc.",
-      "Puis démarrage immédiat."
+      "Réaliser un bloc sur la première balle reçue.",
+      "Démarrer immédiatement en topspin sur la balle suivante.",
+      "Ne pas marquer de temps d'arrêt entre les deux actions."
     ],
     "criteresReussite": [
-      "Transition fluide."
+      "7 transitions sur 10 réalisées sans temps mort.",
+      "Démarrage réalisé dans le temps de préparation habituel."
     ],
     "varianteFacile": [
       "Top annoncé."
@@ -828,34 +866,6 @@
     ]
   },
   {
-    "id": "TOP-010",
-    "nom": "Contre-top à la table",
-    "categorie": "Topspin",
-    "difficulte": 5,
-    "intensite": 5,
-    "fonctionnalites": [
-      "Reaction",
-      "PriseBallePrecoce"
-    ],
-    "objectif": "Développer le contre-top offensif.",
-    "consignes": [
-      "Prendre la balle tôt après le rebond.",
-      "Rester proche de la table."
-    ],
-    "criteresReussite": [
-      "Précision malgré la vitesse."
-    ],
-    "varianteFacile": [
-      "Vitesse réduite."
-    ],
-    "varianteDifficile": [
-      "Contre-top des deux côtés."
-    ],
-    "varianteCompetition": [
-      "Points directs recherchés."
-    ]
-  },
-  {
     "id": "TOP-011",
     "nom": "Contre-top mi-distance",
     "categorie": "Topspin",
@@ -867,11 +877,13 @@
     ],
     "objectif": "Développer le contre-top à distance.",
     "consignes": [
-      "Contre-top après recul.",
-      "Conserver une trajectoire agressive."
+      "Reculer à 2-3 mètres de la table après un premier échange.",
+      "Contre-topper la balle adverse dès sa remontée.",
+      "Conserver une trajectoire agressive malgré la distance."
     ],
     "criteresReussite": [
-      "Qualité offensive conservée."
+      "6 contre-tops sur 10 renvoyés avec vitesse.",
+      "Trajectoire qui reste offensive, sans balle défensive."
     ],
     "varianteFacile": [
       "Top plus lent."
@@ -895,10 +907,13 @@
     ],
     "objectif": "Maîtriser l'attaque long de ligne.",
     "consignes": [
-      "Tous les tops sont joués en parallèle."
+      "Jouer tous les tops en ligne droite (parallèle) sur bloc adverse.",
+      "Rechercher la ligne latérale à chaque frappe.",
+      "Maintenir la rotation malgré la contrainte de placement."
     ],
     "criteresReussite": [
-      "70% de réussite."
+      "70% des tops touchent la zone parallèle visée.",
+      "Rotation visible sur l'ensemble de la série."
     ],
     "varianteFacile": [
       "Vitesse réduite."
@@ -922,10 +937,13 @@
     ],
     "objectif": "Stabiliser le topspin diagonal.",
     "consignes": [
-      "Top rotation en diagonale."
+      "Jouer un top rotation en diagonale sur bloc partenaire.",
+      "Rechercher un arc de balle sécurisé.",
+      "Conserver la même trajectoire à chaque répétition."
     ],
     "criteresReussite": [
-      "20 tops consécutifs."
+      "20 tops consécutifs sur la table.",
+      "Rotation stable d'un top à l'autre."
     ],
     "varianteFacile": [
       "Bloc passif."
@@ -949,10 +967,13 @@
     ],
     "objectif": "Attaquer quelle que soit la zone.",
     "consignes": [
-      "Distribution aléatoire sur toute la table."
+      "Le distributeur place les balles aléatoirement sur toute la largeur de la table.",
+      "Le joueur doit topper chaque balle quelle que soit sa position.",
+      "Se replacer au centre après chaque frappe."
     ],
     "criteresReussite": [
-      "Maintenir au moins 60% de réussite."
+      "Au moins 60% des tops réussis sur la table.",
+      "Replacement effectué avant la balle suivante."
     ],
     "varianteFacile": [
       "Deux zones seulement."
@@ -976,11 +997,13 @@
     ],
     "objectif": "Préparer la balle de finition.",
     "consignes": [
-      "Réaliser deux tops rotations.",
-      "Finir sur un top frappé."
+      "Réaliser deux tops en rotation successifs sur bloc passif.",
+      "Terminer la séquence par un top frappé pour conclure le point.",
+      "Augmenter progressivement la vitesse à chaque coup."
     ],
     "criteresReussite": [
-      "Bonne progression de vitesse."
+      "Vitesse du 3e top nettement supérieure aux deux premiers.",
+      "8 séquences sur 10 menées jusqu'à la frappe finale."
     ],
     "varianteFacile": [
       "Bloc prévisible."
@@ -1004,10 +1027,13 @@
     ],
     "objectif": "Utiliser le pivot comme arme offensive.",
     "consignes": [
-      "Chaque balle revers doit être pivotée."
+      "Chaque balle envoyée dans le revers doit être jouée en pivot coup droit.",
+      "Revenir immédiatement en position neutre après le pivot.",
+      "Conserver la même puissance de frappe qu'un top classique."
     ],
     "criteresReussite": [
-      "Pivot rapide et équilibré."
+      "8 pivots sur 10 réussis sans perte d'équilibre.",
+      "Retour en position en moins d'une seconde."
     ],
     "varianteFacile": [
       "Une balle sur deux."
@@ -1059,10 +1085,13 @@
     ],
     "objectif": "Optimiser la troisième balle.",
     "consignes": [
-      "Construire le démarrage après le service."
+      "Servir puis attendre la remise du partenaire.",
+      "Démarrer en topspin dès que la remise le permet.",
+      "Adapter le placement du top à la qualité de la remise reçue."
     ],
     "criteresReussite": [
-      "70% d'attaques réussies."
+      "70% des démarrages réussis sur la table.",
+      "Prise d'initiative dans les deux premiers coups après le service."
     ],
     "varianteFacile": [
       "Service unique."
@@ -1091,7 +1120,8 @@
       "Réattaque sur la balle suivante."
     ],
     "criteresReussite": [
-      "Enchaînement cohérent."
+      "7 séquences sur 10 menées jusqu'à la réattaque.",
+      "Vitesse croissante entre le premier top et la réattaque."
     ],
     "varianteFacile": [
       "Bloc prévisible."
@@ -1117,10 +1147,12 @@
     "objectif": "Rester performant sous contrainte.",
     "consignes": [
       "Commencer chaque exercice à 9-9.",
-      "Le premier démarrage est obligatoire."
+      "Le premier démarrage est obligatoire.",
+      "Appliquer une routine de concentration avant chaque point."
     ],
     "criteresReussite": [
-      "Qualité technique maintenue sous pression."
+      "Taux de réussite du démarrage proche d'une situation normale (écart de moins de 15%).",
+      "Pas de dégradation visible du geste sous pression."
     ],
     "varianteFacile": [
       "Départ à 8-8."
@@ -1130,6 +1162,37 @@
     ],
     "varianteCompetition": [
       "Mini-matchs à élimination."
+    ]
+  },
+  {
+    "id": "TOP-021",
+    "nom": "Fermeture sur balle haute",
+    "categorie": "Topspin",
+    "difficulte": 3,
+    "intensite": 4,
+    "fonctionnalites": [
+      "Puissance",
+      "Finition",
+      "PriseDeDecision"
+    ],
+    "objectif": "Conclure le point sur une balle haute et lente.",
+    "consignes": [
+      "Le partenaire envoie une balle haute et lente (lob ou remontée défensive).",
+      "Se replacer rapidement derrière la balle.",
+      "Frapper fort et vers le bas pour conclure le point."
+    ],
+    "criteresReussite": [
+      "80% des balles hautes conclues sur la table.",
+      "Frappe descendante sans longueur excessive."
+    ],
+    "varianteFacile": [
+      "Balle plus haute et plus lente."
+    ],
+    "varianteDifficile": [
+      "Balle plus rapide, placement varié."
+    ],
+    "varianteCompetition": [
+      "Point gagné uniquement si la fermeture est réussie du premier coup."
     ]
   },
   {
@@ -1778,10 +1841,13 @@
     ],
     "objectif": "Exploiter la zone d'incertitude adverse.",
     "consignes": [
-      "Viser systématiquement le coude adverse."
+      "Viser systématiquement la zone du coude adverse (jonction revers/coup droit).",
+      "Prendre la balle tôt pour réduire le temps de réaction adverse.",
+      "Conserver une trajectoire basse et tendue."
     ],
     "criteresReussite": [
-      "Difficulté visible chez le serveur."
+      "7 remises sur 10 atteignent la zone du coude.",
+      "Le partenaire hésite ou improvise sur la majorité des balles."
     ],
     "varianteFacile": [
       "Placement annoncé."
@@ -1805,10 +1871,13 @@
     ],
     "objectif": "Stabiliser la remise diagonale.",
     "consignes": [
-      "Toutes les remises sont jouées en diagonale."
+      "Jouer systématiquement la remise en diagonale, quel que soit le service reçu.",
+      "Conserver une trajectoire basse et régulière.",
+      "Adapter la puissance à la longueur du service."
     ],
     "criteresReussite": [
-      "80% des remises sur la table."
+      "80% des remises restent sur la table.",
+      "Placement diagonal respecté sur l'ensemble de la série."
     ],
     "varianteFacile": [
       "Effet identique."
@@ -1916,11 +1985,13 @@
     ],
     "objectif": "Préparer la défense après la remise.",
     "consignes": [
-      "Remettre.",
-      "Se préparer immédiatement au bloc."
+      "Effectuer la remise du service.",
+      "Se replacer immédiatement en position d'attente du bloc.",
+      "Rester sur l'avant du pied pour réagir vite."
     ],
     "criteresReussite": [
-      "Position prête après la remise."
+      "Position de bloc atteinte avant le retour de la balle dans 8 cas sur 10.",
+      "Aucun retard de replacement observé."
     ],
     "varianteFacile": [
       "Attaque prévisible."
@@ -1944,11 +2015,13 @@
     ],
     "objectif": "Préparer une attaque après la remise.",
     "consignes": [
-      "Remise active.",
-      "Contre-attaque sur la balle suivante."
+      "Effectuer une remise active et tendue.",
+      "Rechercher la contre-attaque dès la balle suivante si l'occasion se présente.",
+      "Ne pas forcer l'attaque si la balle n'est pas favorable."
     ],
     "criteresReussite": [
-      "Enchaînement cohérent."
+      "6 contre-attaques sur 10 déclenchées à bon escient.",
+      "Pas de précipitation sur une balle défavorable."
     ],
     "varianteFacile": [
       "Schéma imposé."
@@ -2120,10 +2193,13 @@
     ],
     "objectif": "Utiliser le bloc comme arme tactique.",
     "consignes": [
-      "Bloquer systématiquement au coude adverse."
+      "Bloquer systématiquement en direction du coude adverse.",
+      "Garder un bloc court et tendu.",
+      "Ne pas anticiper le retour pour rester réactif."
     ],
     "criteresReussite": [
-      "Le partenaire est mis en difficulté."
+      "7 blocs sur 10 atteignent la zone du coude.",
+      "Le partenaire doit ajuster ses appuis pour répondre."
     ],
     "varianteFacile": [
       "Vitesse réduite."
@@ -2176,10 +2252,13 @@
     ],
     "objectif": "Réagir rapidement aux changements de direction.",
     "consignes": [
-      "Le partenaire toppe librement sur toute la table."
+      "Le partenaire toppe librement sur toute la largeur de la table.",
+      "Bloquer chaque balle quel que soit son placement.",
+      "Revenir au centre entre chaque bloc."
     ],
     "criteresReussite": [
-      "Maintenir une position équilibrée."
+      "8 blocs sur 10 renvoyés sur la table.",
+      "Appuis équilibrés maintenus tout au long de la série."
     ],
     "varianteFacile": [
       "Deux zones seulement."
@@ -3107,7 +3186,8 @@
       "Le joueur applique ses choix tactiques."
     ],
     "criteresReussite": [
-      "Décisions cohérentes."
+      "Choix tactique adapté sur au moins 7 situations sur 10.",
+      "Le joueur peut justifier chacune de ses décisions."
     ],
     "varianteFacile": [
       "Schémas connus."
@@ -3218,10 +3298,13 @@
     ],
     "objectif": "Maîtriser la profondeur des trajectoires.",
     "consignes": [
-      "Chercher systématiquement le fond de table."
+      "Chercher systématiquement à toucher le dernier tiers de la table.",
+      "Adapter la puissance pour ne pas sortir de la table.",
+      "Varier légèrement le placement tout en restant long."
     ],
     "criteresReussite": [
-      "80 % des balles longues."
+      "80% des balles atteignent le dernier tiers.",
+      "Aucune balle courte n'est jouée involontairement."
     ],
     "varianteFacile": [
       "Placement libre."
@@ -3634,10 +3717,13 @@
     ],
     "objectif": "Développer la confiance en revers.",
     "consignes": [
-      "Toutes les balles doivent être jouées en revers."
+      "Toutes les balles doivent être jouées en revers, y compris sur le côté coup droit.",
+      "Se déplacer pour ramener chaque balle en revers.",
+      "Ne pas prendre de raccourci en coup droit même si la balle est facile."
     ],
     "criteresReussite": [
-      "Respect des consignes."
+      "Consigne respectée sur au moins 90% des points.",
+      "Le joueur maintient sa position malgré la contrainte."
     ],
     "varianteFacile": [
       "Terrain réduit."
@@ -3689,10 +3775,13 @@
     ],
     "objectif": "Préparer l'attaque suivante après le premier top.",
     "consignes": [
-      "Après le premier topspin, une nouvelle attaque doit suivre."
+      "Après un premier topspin, chercher une nouvelle attaque sur la balle suivante.",
+      "Ne pas se contenter d'un bloc de transition.",
+      "Adapter le placement de la deuxième attaque à la réponse adverse."
     ],
     "criteresReussite": [
-      "Enchaînement cohérent."
+      "Deuxième attaque déclenchée sur au moins 7 points sur 10.",
+      "Pas de retour à une balle passive entre les deux attaques."
     ],
     "varianteFacile": [
       "Bloc passif adverse."
@@ -3744,10 +3833,13 @@
     ],
     "objectif": "Éviter la précipitation.",
     "consignes": [
-      "Les points valent double après 5 échanges."
+      "Les points valent double dès que l'échange dépasse 5 balles.",
+      "Ne pas précipiter une attaque risquée avant ce seuil.",
+      "Adapter sa prise de risque en fonction du seuil atteint."
     ],
     "criteresReussite": [
-      "Bonne gestion du risque."
+      "Le joueur prolonge volontairement l'échange avant le seuil sur la majorité des points.",
+      "Moins de fautes directes avant le 5e échange qu'après."
     ],
     "varianteFacile": [
       "Point double après 3 échanges."
@@ -3776,7 +3868,8 @@
       "Bloc puis finition."
     ],
     "criteresReussite": [
-      "Respect intégral du schéma."
+      "Schéma respecté sur au moins 7 points sur 10.",
+      "Chaque étape (service, top, finition) identifiable dans l'échange."
     ],
     "varianteFacile": [
       "Remise connue."
@@ -3800,11 +3893,13 @@
     ],
     "objectif": "Choisir le meilleur schéma selon la situation.",
     "consignes": [
-      "Définir un plan avant le point.",
-      "L'adapter selon la remise adverse."
+      "Définir un plan de point avant chaque service ou remise.",
+      "L'adapter en fonction de la réaction de l'adversaire.",
+      "Verbaliser le plan choisi avant de jouer le point."
     ],
     "criteresReussite": [
-      "Décisions pertinentes."
+      "Le plan annoncé est appliqué ou justifié comme modifié sur au moins 8 points sur 10.",
+      "Les ajustements en cours de point sont pertinents."
     ],
     "varianteFacile": [
       "Choix parmi 2 schémas."
@@ -3885,11 +3980,13 @@
     ],
     "objectif": "Apprendre à gérer des situations défavorables.",
     "consignes": [
-      "Départ à 0-4 ou 0-6.",
-      "Adapter la prise de risque."
+      "Démarrer le match avec un déficit fixé à l'avance (0-4 ou 0-6).",
+      "Adapter sa prise de risque en fonction du score.",
+      "Conserver un discours intérieur positif malgré le retard."
     ],
     "criteresReussite": [
-      "Choix tactiques adaptés."
+      "Le joueur revient à moins de 3 points d'écart dans au moins la moitié des matchs.",
+      "Aucune baisse d'engagement observée malgré le déficit."
     ],
     "varianteFacile": [
       "Départ à 0-2."
@@ -3917,7 +4014,8 @@
       "Exemple : jouer au coude ou démarrer en premier."
     ],
     "criteresReussite": [
-      "Respect de l'objectif."
+      "Objectif atteint ou clairement recherché sur au moins 70% des points.",
+      "Le joueur peut expliquer les points où l'objectif n'a pas été respecté."
     ],
     "varianteFacile": [
       "Objectif simple."
@@ -3946,7 +4044,8 @@
       "Analyser chaque prise de risque."
     ],
     "criteresReussite": [
-      "Décisions cohérentes."
+      "Pourcentage de réussite similaire entre le début et la fin du set (écart de moins de 15%).",
+      "Choix tactiques justifiables sur chaque point clé."
     ],
     "varianteFacile": [
       "Départ à 7-7."
@@ -4268,7 +4367,8 @@
       "Conserver la qualité de balle."
     ],
     "criteresReussite": [
-      "Bonne adaptation à chaque distance."
+      "Taux de balles renvoyées similaire aux deux distances (écart de moins de 15%).",
+      "Transition entre les deux distances réalisée sans retard."
     ],
     "varianteFacile": [
       "Deux distances fixes."
@@ -4443,11 +4543,13 @@
     ],
     "objectif": "Prendre la balle tôt pour reprendre l'avantage.",
     "consignes": [
-      "Contre-topper juste après le rebond.",
-      "Rester proche de la table."
+      "Contre-topper la balle juste après son rebond, sans reculer.",
+      "Rester proche de la table pour réduire le temps de réaction disponible pour l'adversaire.",
+      "Privilégier un geste court et rapide plutôt qu'ample."
     ],
     "criteresReussite": [
-      "Précision malgré la vitesse."
+      "6 contre-tops sur 10 renvoyés avec précision.",
+      "Position proche de la table maintenue sur l'ensemble de la série."
     ],
     "varianteFacile": [
       "Top rotation modéré."
@@ -4565,7 +4667,8 @@
       "Choisir entre top, frappe, pivot ou contre-top."
     ],
     "criteresReussite": [
-      "Choix tactiques efficaces."
+      "Le choix offensif est payant (point gagné ou construit) sur au moins 6 occasions sur 10.",
+      "Le joueur peut justifier chaque choix effectué."
     ],
     "varianteFacile": [
       "Deux solutions autorisées."
