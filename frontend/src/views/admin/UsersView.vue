@@ -14,10 +14,12 @@ import { useConfirm } from "primevue/useconfirm";
 import AppLayout from "../../components/AppLayout.vue";
 import { api } from "../../lib/api.js";
 import { useNavLinks } from "../../composables/useNavLinks.js";
+import { useTableFilter } from "../../composables/useTableFilter.js";
 import { fullName } from "../../lib/name.js";
 
 const navLinks = useNavLinks();
 const toast = useToast();
+const { filters } = useTableFilter();
 const confirm = useConfirm();
 
 const emptyForm = () => ({ email: "", password: "", roles: [], playerIds: [], coachId: null });
@@ -146,14 +148,22 @@ function roleSeverity(role) {
 
 <template>
   <AppLayout title="Comptes utilisateurs" :nav-links="navLinks">
-    <div class="flex items-center justify-between mb-4">
+    <div class="flex items-center justify-between mb-4 gap-3 flex-wrap">
       <h2 class="text-sm font-medium text-slate-600">{{ users.length }} compte(s)</h2>
-      <Button label="Nouveau compte" icon="pi pi-plus" @click="openCreate" />
+      <div class="flex items-center gap-2 flex-1 sm:flex-none flex-wrap">
+        <div class="relative flex-1 sm:w-64 min-w-[10rem]">
+          <i class="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+          <InputText v-model="filters.global.value" placeholder="Rechercher…" class="w-full pl-9" />
+        </div>
+        <Button label="Nouveau compte" icon="pi pi-plus" @click="openCreate" />
+      </div>
     </div>
 
     <DataTable
       :value="users"
       :loading="loading"
+      v-model:filters="filters"
+      :global-filter-fields="['email', linkedName]"
       paginator
       :rows="10"
       :rows-per-page-options="[10, 25, 50]"
@@ -161,7 +171,7 @@ function roleSeverity(role) {
       striped-rows
     >
       <template #empty>
-        <p class="text-slate-400 text-sm py-4">Aucun compte.</p>
+        <p class="text-slate-400 text-sm py-4">{{ filters.global.value ? "Aucun résultat." : "Aucun compte." }}</p>
       </template>
       <Column field="email" header="Email" sortable />
       <Column header="Rôle(s)">

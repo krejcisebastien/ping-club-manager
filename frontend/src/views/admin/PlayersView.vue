@@ -14,12 +14,14 @@ import AppLayout from "../../components/AppLayout.vue";
 import { api } from "../../lib/api.js";
 import { toDateOnly } from "../../lib/date.js";
 import { useNavLinks } from "../../composables/useNavLinks.js";
+import { useTableFilter } from "../../composables/useTableFilter.js";
 import { fullName, initials } from "../../lib/name.js";
 
 const navLinks = useNavLinks();
 const router = useRouter();
 const toast = useToast();
 const confirm = useConfirm();
+const { filters } = useTableFilter();
 
 const emptyForm = () => ({ firstName: "", lastName: "", birthDate: null, licenseNumber: "" });
 
@@ -84,14 +86,22 @@ function formatDate(d) {
 
 <template>
   <AppLayout title="Joueurs" :nav-links="navLinks">
-    <div class="flex items-center justify-between mb-4">
+    <div class="flex items-center justify-between mb-4 gap-3 flex-wrap">
       <h2 class="text-sm font-medium text-slate-600">{{ players.length }} joueur(s)</h2>
-      <Button label="Nouveau joueur" icon="pi pi-plus" @click="openCreate" />
+      <div class="flex items-center gap-2 flex-1 sm:flex-none flex-wrap">
+        <div class="relative flex-1 sm:w-64 min-w-[10rem]">
+          <i class="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+          <InputText v-model="filters.global.value" placeholder="Rechercher…" class="w-full pl-9" />
+        </div>
+        <Button label="Nouveau joueur" icon="pi pi-plus" @click="openCreate" />
+      </div>
     </div>
 
     <DataTable
       :value="players"
       :loading="loading"
+      v-model:filters="filters"
+      :global-filter-fields="['firstName', 'lastName', 'licenseNumber']"
       paginator
       :rows="10"
       :rows-per-page-options="[10, 25, 50]"
@@ -100,7 +110,7 @@ function formatDate(d) {
       @row-click="router.push(`/admin/players/${$event.data.id}`)"
     >
       <template #empty>
-        <p class="text-slate-400 text-sm py-4">Aucun joueur.</p>
+        <p class="text-slate-400 text-sm py-4">{{ filters.global.value ? "Aucun résultat." : "Aucun joueur." }}</p>
       </template>
       <Column field="lastName" header="Nom" sortable>
         <template #body="{ data }">

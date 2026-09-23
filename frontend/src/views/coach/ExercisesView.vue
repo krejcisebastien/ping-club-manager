@@ -14,10 +14,12 @@ import RichTextEditor from "../../components/RichTextEditor.vue";
 import { api } from "../../lib/api.js";
 import { stripHtml } from "../../lib/richtext.js";
 import { useNavLinks } from "../../composables/useNavLinks.js";
+import { useTableFilter } from "../../composables/useTableFilter.js";
 
 const navLinks = useNavLinks();
 const router = useRouter();
 const toast = useToast();
+const { filters } = useTableFilter();
 const confirm = useConfirm();
 
 const emptyForm = () => ({ title: "", description: "", category: "", difficulty: "" });
@@ -80,14 +82,22 @@ function onRowClick(event) {
 
 <template>
   <AppLayout title="Bibliothèque d'exercices" :nav-links="navLinks">
-    <div class="flex items-center justify-between mb-4">
+    <div class="flex items-center justify-between mb-4 gap-3 flex-wrap">
       <h2 class="text-sm font-medium text-slate-600">{{ exercises.length }} exercice(s)</h2>
-      <Button label="Nouvel exercice" icon="pi pi-plus" @click="openCreate" />
+      <div class="flex items-center gap-2 flex-1 sm:flex-none flex-wrap">
+        <div class="relative flex-1 sm:w-64 min-w-[10rem]">
+          <i class="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+          <InputText v-model="filters.global.value" placeholder="Rechercher…" class="w-full pl-9" />
+        </div>
+        <Button label="Nouvel exercice" icon="pi pi-plus" @click="openCreate" />
+      </div>
     </div>
 
     <DataTable
       :value="exercises"
       :loading="loading"
+      v-model:filters="filters"
+      :global-filter-fields="['title', 'category', 'difficulty']"
       paginator
       :rows="10"
       :rows-per-page-options="[10, 25, 50]"
@@ -96,7 +106,7 @@ function onRowClick(event) {
       @row-click="onRowClick"
     >
       <template #empty>
-        <p class="text-slate-400 text-sm py-4">Aucun exercice.</p>
+        <p class="text-slate-400 text-sm py-4">{{ filters.global.value ? "Aucun résultat." : "Aucun exercice." }}</p>
       </template>
       <Column field="title" header="Titre" sortable>
         <template #body="{ data }"><span class="cursor-pointer">{{ data.title }}</span></template>

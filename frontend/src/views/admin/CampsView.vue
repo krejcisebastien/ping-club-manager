@@ -13,10 +13,12 @@ import AppLayout from "../../components/AppLayout.vue";
 import { api } from "../../lib/api.js";
 import { toDateOnly } from "../../lib/date.js";
 import { useNavLinks } from "../../composables/useNavLinks.js";
+import { useTableFilter } from "../../composables/useTableFilter.js";
 
 const navLinks = useNavLinks();
 const toast = useToast();
 const router = useRouter();
+const { filters } = useTableFilter();
 
 const seasons = ref([]);
 const selectedSeasonId = ref("");
@@ -85,14 +87,22 @@ async function onCreate() {
       <Dropdown v-model="selectedSeasonId" :options="seasons" option-label="name" option-value="id" class="w-full" />
     </div>
 
-    <div class="flex items-center justify-between mb-4">
+    <div class="flex items-center justify-between mb-4 gap-3 flex-wrap">
       <h2 class="text-sm font-medium text-slate-600">{{ camps.length }} stage(s)</h2>
-      <Button label="Nouveau stage" icon="pi pi-plus" @click="openCreate" />
+      <div class="flex items-center gap-2 flex-1 sm:flex-none flex-wrap">
+        <div class="relative flex-1 sm:w-64 min-w-[10rem]">
+          <i class="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+          <InputText v-model="filters.global.value" placeholder="Rechercher…" class="w-full pl-9" />
+        </div>
+        <Button label="Nouveau stage" icon="pi pi-plus" @click="openCreate" />
+      </div>
     </div>
 
     <DataTable
       :value="camps"
       :loading="loading"
+      v-model:filters="filters"
+      :global-filter-fields="['name', 'location']"
       paginator
       :rows="10"
       :rows-per-page-options="[10, 25, 50]"
@@ -101,7 +111,7 @@ async function onCreate() {
       @row-click="router.push(`/admin/camps/${$event.data.id}`)"
     >
       <template #empty>
-        <p class="text-slate-400 text-sm py-4">Aucun stage pour cette saison.</p>
+        <p class="text-slate-400 text-sm py-4">{{ filters.global.value ? "Aucun résultat." : "Aucun stage pour cette saison." }}</p>
       </template>
       <Column field="name" header="Nom" sortable>
         <template #body="{ data }"><span class="cursor-pointer">{{ data.name }}</span></template>
