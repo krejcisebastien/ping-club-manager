@@ -4603,6 +4603,9 @@
     ],
     "varianteDifficile": [
       "Cadence élevée."
+    ],
+    "varianteCompetition": [
+      "Défi du plus grand nombre de balles gagnées avec prise de balle précoce."
     ]
   },
   {
@@ -4628,6 +4631,9 @@
     ],
     "varianteDifficile": [
       "Cadence élevée."
+    ],
+    "varianteCompetition": [
+      "Défi entre partenaires sur la fluidité du geste répété."
     ]
   },
   {
@@ -4640,7 +4646,25 @@
       "Puissance",
       "Gainage"
     ],
-    "objectif": "Renforcer les chaînes musculaires spécifiques."
+    "objectif": "Renforcer les chaînes musculaires spécifiques.",
+    "consignes": [
+      "Fixer l'élastique à hauteur de hanche.",
+      "Réaliser le geste de topspin en résistance.",
+      "Contrôler la vitesse d'exécution."
+    ],
+    "criteresReussite": [
+      "Amplitude complète du geste.",
+      "Pas de compensation du dos."
+    ],
+    "varianteFacile": [
+      "Résistance plus faible."
+    ],
+    "varianteDifficile": [
+      "Résistance plus forte, plus de répétitions."
+    ],
+    "varianteCompetition": [
+      "Nombre maximal de répétitions propres en 30 secondes."
+    ]
   },
   {
     "id": "PHY-003",
@@ -4652,7 +4676,25 @@
       "Explosivite",
       "Appuis"
     ],
-    "objectif": "Améliorer les déplacements latéraux."
+    "objectif": "Améliorer les déplacements latéraux.",
+    "consignes": [
+      "Effectuer des sprints latéraux entre deux plots espacés de la largeur de table.",
+      "Toucher chaque plot avec la raquette.",
+      "Revenir au centre entre chaque aller-retour."
+    ],
+    "criteresReussite": [
+      "Vitesse maximale maintenue.",
+      "Appuis stables à chaque changement de direction."
+    ],
+    "varianteFacile": [
+      "Distance réduite."
+    ],
+    "varianteDifficile": [
+      "Distance augmentée ou plots plus nombreux."
+    ],
+    "varianteCompetition": [
+      "Chrono comparé entre joueurs."
+    ]
   },
   {
     "id": "PHY-004",
@@ -4664,7 +4706,25 @@
       "Vitesse",
       "Coordination"
     ],
-    "objectif": "Travailler les variations de distance."
+    "objectif": "Travailler les variations de distance.",
+    "consignes": [
+      "Sprinter de la table vers un plot placé 3 mètres en arrière.",
+      "Revenir aussitôt en position de jeu.",
+      "Répéter à cadence soutenue."
+    ],
+    "criteresReussite": [
+      "Temps de transition court.",
+      "Position de jeu retrouvée rapidement."
+    ],
+    "varianteFacile": [
+      "Distance réduite."
+    ],
+    "varianteDifficile": [
+      "Distance augmentée, séries plus longues."
+    ],
+    "varianteCompetition": [
+      "Défi chronométré par équipes."
+    ]
   },
   {
     "id": "PHY-005",
@@ -4676,7 +4736,25 @@
       "Resistance",
       "Cardio"
     ],
-    "objectif": "Développer la capacité de répétition."
+    "objectif": "Développer la capacité de répétition.",
+    "consignes": [
+      "Alterner 15 secondes d'effort intense et 15 secondes de récupération.",
+      "Utiliser des déplacements spécifiques pendant l'effort.",
+      "Répéter sur plusieurs séries."
+    ],
+    "criteresReussite": [
+      "Intensité maintenue sur toute la série.",
+      "Récupération respectée."
+    ],
+    "varianteFacile": [
+      "Séries plus courtes."
+    ],
+    "varianteDifficile": [
+      "Plus de séries ou effort prolongé."
+    ],
+    "varianteCompetition": [
+      "Challenge du nombre de séries complétées."
+    ]
   },
   {
     "id": "PHY-006",
@@ -4687,6 +4765,25 @@
     "fonctionnalites": [
       "Endurance",
       "Cardio"
+    ],
+    "objectif": "Développer l'endurance intermittente spécifique au tennis de table.",
+    "consignes": [
+      "Alterner 30 secondes d'effort intense et 30 secondes de récupération active.",
+      "Effectuer des déplacements ou du shadow pendant l'effort.",
+      "Maintenir la qualité technique malgré la fatigue."
+    ],
+    "criteresReussite": [
+      "Rythme constant sur l'ensemble des séries.",
+      "Technique préservée en fin de séance."
+    ],
+    "varianteFacile": [
+      "Ratio effort/récupération réduit (20/40)."
+    ],
+    "varianteDifficile": [
+      "Ratio effort/récupération inversé (40/20)."
+    ],
+    "varianteCompetition": [
+      "Comparaison du nombre de séries tenues par joueur."
     ]
   },
   {
@@ -4698,6 +4795,25 @@
     "fonctionnalites": [
       "Explosivite",
       "Resistance"
+    ],
+    "objectif": "Développer l'explosivité et la résistance sur multiballes.",
+    "consignes": [
+      "L'entraîneur distribue les balles à cadence élevée.",
+      "Le joueur enchaîne les frappes sans interruption.",
+      "Maintenir la qualité technique jusqu'à la fin de la série."
+    ],
+    "criteresReussite": [
+      "Intensité maximale maintenue.",
+      "Peu de fautes malgré la fatigue."
+    ],
+    "varianteFacile": [
+      "Cadence réduite, série plus courte."
+    ],
+    "varianteDifficile": [
+      "Cadence maximale, série prolongée."
+    ],
+    "varianteCompetition": [
+      "Défi du plus grand nombre de balles touchées."
     ]
   },
   {
@@ -4709,6 +4825,25 @@
     "fonctionnalites": [
       "Gainage",
       "Stabilite"
+    ],
+    "objectif": "Renforcer la sangle abdominale et lombaire pour stabiliser le geste.",
+    "consignes": [
+      "Réaliser une série d'exercices de gainage statique et dynamique.",
+      "Adapter les postures aux appuis du tennis de table.",
+      "Respirer normalement pendant l'effort."
+    ],
+    "criteresReussite": [
+      "Position maintenue sans affaissement.",
+      "Respiration contrôlée."
+    ],
+    "varianteFacile": [
+      "Temps de maintien réduit."
+    ],
+    "varianteDifficile": [
+      "Temps de maintien augmenté ou charge ajoutée."
+    ],
+    "varianteCompetition": [
+      "Défi du temps de maintien maximal."
     ]
   },
   {
@@ -4720,6 +4855,25 @@
     "fonctionnalites": [
       "Coordination",
       "Appuis"
+    ],
+    "objectif": "Développer la coordination et la vitesse des appuis.",
+    "consignes": [
+      "Réaliser différents pas dans l'échelle de rythme.",
+      "Enchaîner les séquences sans ralentir.",
+      "Terminer chaque passage par un geste de raquette."
+    ],
+    "criteresReussite": [
+      "Rythme régulier.",
+      "Pas propres sans accrocher les barreaux."
+    ],
+    "varianteFacile": [
+      "Séquences simples."
+    ],
+    "varianteDifficile": [
+      "Séquences complexes, cadence accrue."
+    ],
+    "varianteCompetition": [
+      "Chrono comparé entre joueurs."
     ]
   },
   {
@@ -4731,6 +4885,25 @@
     "fonctionnalites": [
       "Reaction",
       "PriseDecision"
+    ],
+    "objectif": "Améliorer le temps de réaction et la prise de décision.",
+    "consignes": [
+      "Réagir à un signal lumineux ou visuel en se déplaçant vers la zone indiquée.",
+      "Revenir en position neutre entre chaque signal.",
+      "Garder les appuis actifs en attente du signal."
+    ],
+    "criteresReussite": [
+      "Temps de réaction court.",
+      "Bon choix de déplacement."
+    ],
+    "varianteFacile": [
+      "Signaux plus espacés."
+    ],
+    "varianteDifficile": [
+      "Signaux rapprochés et imprévisibles."
+    ],
+    "varianteCompetition": [
+      "Classement sur le temps de réaction moyen."
     ]
   },
   {
@@ -4742,6 +4915,25 @@
     "fonctionnalites": [
       "Vitesse",
       "Appuis"
+    ],
+    "objectif": "Développer la fréquence et la vitesse des appuis.",
+    "consignes": [
+      "Réaliser des appuis rapides sur place ou sur petits déplacements.",
+      "Rester sur l'avant du pied.",
+      "Maintenir une fréquence élevée sur toute la durée."
+    ],
+    "criteresReussite": [
+      "Fréquence d'appuis élevée.",
+      "Posture basse conservée."
+    ],
+    "varianteFacile": [
+      "Durée réduite."
+    ],
+    "varianteDifficile": [
+      "Durée augmentée, appuis plus amples."
+    ],
+    "varianteCompetition": [
+      "Défi du plus grand nombre d'appuis en 20 secondes."
     ]
   },
   {
@@ -4753,6 +4945,25 @@
     "fonctionnalites": [
       "Explosivite",
       "Puissance"
+    ],
+    "objectif": "Développer la puissance et l'explosivité des membres inférieurs.",
+    "consignes": [
+      "Réaliser des exercices pliométriques (sauts, bondissements).",
+      "Enchaîner avec un déplacement spécifique.",
+      "Privilégier la qualité d'exécution à la quantité."
+    ],
+    "criteresReussite": [
+      "Réception stable et contrôlée.",
+      "Explosivité visible sur chaque répétition."
+    ],
+    "varianteFacile": [
+      "Moins de répétitions, amplitude réduite."
+    ],
+    "varianteDifficile": [
+      "Plus de répétitions ou charge additionnelle."
+    ],
+    "varianteCompetition": [
+      "Défi de la meilleure performance individuelle."
     ]
   },
   {
@@ -4764,6 +4975,25 @@
     "fonctionnalites": [
       "Endurance",
       "Resistance"
+    ],
+    "objectif": "Développer l'endurance nécessaire à un match long.",
+    "consignes": [
+      "Enchaîner plusieurs exercices techniques sans interruption prolongée.",
+      "Maintenir un volume de jeu élevé sur la durée.",
+      "Gérer sa respiration et son énergie."
+    ],
+    "criteresReussite": [
+      "Qualité technique maintenue jusqu'à la fin.",
+      "Pas de baisse d'intensité notable."
+    ],
+    "varianteFacile": [
+      "Durée réduite."
+    ],
+    "varianteDifficile": [
+      "Durée augmentée."
+    ],
+    "varianteCompetition": [
+      "Challenge d'endurance par équipes."
     ]
   },
   {
@@ -4775,6 +5005,25 @@
     "fonctionnalites": [
       "Resistance",
       "Mental"
+    ],
+    "objectif": "Développer la tolérance à l'effort intense prolongé.",
+    "consignes": [
+      "Enchaîner des efforts très intenses avec récupération courte.",
+      "Maintenir la qualité technique malgré l'accumulation de fatigue.",
+      "Respecter le temps de récupération imposé."
+    ],
+    "criteresReussite": [
+      "Intensité maintenue sur chaque répétition.",
+      "Récupération utilisée efficacement."
+    ],
+    "varianteFacile": [
+      "Récupération plus longue."
+    ],
+    "varianteDifficile": [
+      "Récupération plus courte, efforts plus nombreux."
+    ],
+    "varianteCompetition": [
+      "Comparaison du nombre de répétitions réussies."
     ]
   },
   {
@@ -4786,6 +5035,25 @@
     "fonctionnalites": [
       "Complet",
       "ConditionPhysique"
+    ],
+    "objectif": "Développer l'ensemble des qualités physiques du pongiste dans une séance complète.",
+    "consignes": [
+      "Enchaîner plusieurs ateliers (vitesse, gainage, explosivité, endurance).",
+      "Respecter le temps imparti à chaque atelier.",
+      "Maintenir une intensité élevée sur l'ensemble du circuit."
+    ],
+    "criteresReussite": [
+      "Tous les ateliers complétés.",
+      "Intensité maintenue jusqu'à la fin."
+    ],
+    "varianteFacile": [
+      "Moins d'ateliers ou temps réduit."
+    ],
+    "varianteDifficile": [
+      "Plus d'ateliers ou temps de repos réduit."
+    ],
+    "varianteCompetition": [
+      "Circuit chronométré, classement par équipes."
     ]
   },
   {
@@ -4797,7 +5065,25 @@
     "fonctionnalites": [
       "Concentration"
     ],
-    "objectif": "Rester focalisé sur une mission simple."
+    "objectif": "Rester focalisé sur une mission simple.",
+    "consignes": [
+      "Définir une seule consigne technique ou tactique avant chaque point.",
+      "Jouer le point normalement en gardant cette mission en tête.",
+      "Faire un retour rapide après chaque point."
+    ],
+    "criteresReussite": [
+      "Mission respectée sur la majorité des points.",
+      "Concentration maintenue malgré l'enjeu du point."
+    ],
+    "varianteFacile": [
+      "Mission rappelée avant chaque point."
+    ],
+    "varianteDifficile": [
+      "Plusieurs missions à retenir simultanément."
+    ],
+    "varianteCompetition": [
+      "Point perdu si la mission n'est pas respectée."
+    ]
   },
   {
     "id": "MEN-002",
@@ -4808,6 +5094,25 @@
     "fonctionnalites": [
       "Resilience",
       "Adaptation"
+    ],
+    "objectif": "Développer la résilience face à une situation défavorable.",
+    "consignes": [
+      "Démarrer le match avec un déficit de points fixé à l'avance.",
+      "Chercher à revenir progressivement dans le match.",
+      "Garder une attitude positive malgré le retard."
+    ],
+    "criteresReussite": [
+      "Attitude combative maintenue.",
+      "Pas de renoncement mental."
+    ],
+    "varianteFacile": [
+      "Déficit réduit."
+    ],
+    "varianteDifficile": [
+      "Déficit plus important."
+    ],
+    "varianteCompetition": [
+      "Classement sur le nombre de points repris."
     ]
   },
   {
@@ -4817,6 +5122,26 @@
     "difficulte": 4,
     "fonctionnalites": [
       "GestionStress"
+    ],
+    "objectif": "Habituer le joueur à gérer la pression des fins de set.",
+    "intensite": 3,
+    "consignes": [
+      "Démarrer chaque set fictif au score de 8-8.",
+      "Jouer chaque point comme une balle de set.",
+      "Appliquer sa routine habituelle avant chaque point."
+    ],
+    "criteresReussite": [
+      "Gestion du stress visible et maîtrisée.",
+      "Qualité technique maintenue sous pression."
+    ],
+    "varianteFacile": [
+      "Départ à 6-6."
+    ],
+    "varianteDifficile": [
+      "Départ à 9-9 ou 10-10."
+    ],
+    "varianteCompetition": [
+      "Tournoi de fins de set uniquement."
     ]
   },
   {
@@ -4827,6 +5152,26 @@
     "fonctionnalites": [
       "GestionStress",
       "Confiance"
+    ],
+    "objectif": "Renforcer la gestion du stress dans les moments décisifs.",
+    "intensite": 4,
+    "consignes": [
+      "Démarrer chaque set fictif au score de 9-9.",
+      "Appliquer une routine de concentration avant chaque point.",
+      "Analyser ses choix après chaque point important."
+    ],
+    "criteresReussite": [
+      "Décisions tactiques cohérentes sous pression.",
+      "Confiance maintenue malgré l'enjeu."
+    ],
+    "varianteFacile": [
+      "Départ à 8-8."
+    ],
+    "varianteDifficile": [
+      "Enchaînement de plusieurs fins de set consécutives."
+    ],
+    "varianteCompetition": [
+      "Classement sur le pourcentage de points gagnés à partir de 9-9."
     ]
   },
   {
@@ -4837,6 +5182,26 @@
     "fonctionnalites": [
       "Pression",
       "Concentration"
+    ],
+    "objectif": "Préparer le joueur à gérer une balle de match réelle.",
+    "intensite": 4,
+    "consignes": [
+      "Simuler une balle de match à chaque point joué.",
+      "Respecter une routine complète avant l'exécution.",
+      "Accepter le résultat du point sans dramatiser."
+    ],
+    "criteresReussite": [
+      "Routine appliquée systématiquement.",
+      "Qualité technique conservée sous pression simulée."
+    ],
+    "varianteFacile": [
+      "Une balle de match sur deux points."
+    ],
+    "varianteDifficile": [
+      "Chaque point est une balle de match."
+    ],
+    "varianteCompetition": [
+      "Classement du taux de réussite sur balle de match."
     ]
   },
   {
@@ -4846,6 +5211,26 @@
     "difficulte": 4,
     "fonctionnalites": [
       "Engagement"
+    ],
+    "objectif": "Développer l'engagement et la concentration sur un enjeu court.",
+    "intensite": 4,
+    "consignes": [
+      "Jouer un seul set décisif, sans round d'observation.",
+      "Se concentrer dès le premier point.",
+      "Maintenir l'intensité jusqu'au dernier point."
+    ],
+    "criteresReussite": [
+      "Engagement constant dès le début.",
+      "Pas de relâchement en cours de set."
+    ],
+    "varianteFacile": [
+      "Set plus court (7 points)."
+    ],
+    "varianteDifficile": [
+      "Set classique en 11 points avec deux points d'écart obligatoires."
+    ],
+    "varianteCompetition": [
+      "Tournoi en sets uniques à élimination directe."
     ]
   },
   {
@@ -4855,6 +5240,26 @@
     "difficulte": 3,
     "fonctionnalites": [
       "DecisionRapide"
+    ],
+    "objectif": "Développer la prise de décision rapide sous contrainte de temps.",
+    "intensite": 3,
+    "consignes": [
+      "Limiter le temps de récupération entre les points.",
+      "Se replacer et se reconcentrer rapidement.",
+      "Ne pas laisser le temps limité perturber la qualité technique."
+    ],
+    "criteresReussite": [
+      "Temps de récupération respecté.",
+      "Qualité technique maintenue malgré la contrainte."
+    ],
+    "varianteFacile": [
+      "Temps de récupération plus long."
+    ],
+    "varianteDifficile": [
+      "Temps de récupération très court."
+    ],
+    "varianteCompetition": [
+      "Match chronométré avec pénalité en cas de dépassement."
     ]
   },
   {
@@ -4864,6 +5269,26 @@
     "difficulte": 3,
     "fonctionnalites": [
       "Autonomie"
+    ],
+    "objectif": "Développer l'autonomie et la prise de décision du joueur.",
+    "intensite": 3,
+    "consignes": [
+      "Jouer un match complet sans intervention de l'entraîneur.",
+      "Analyser seul les points perdus.",
+      "Adapter sa tactique de manière autonome entre les sets."
+    ],
+    "criteresReussite": [
+      "Décisions tactiques pertinentes prises seul.",
+      "Capacité à s'auto-corriger."
+    ],
+    "varianteFacile": [
+      "Un temps mort autorisé avec l'entraîneur."
+    ],
+    "varianteDifficile": [
+      "Aucune aide extérieure sur l'ensemble du match."
+    ],
+    "varianteCompetition": [
+      "Débriefing écrit après le match comparé à l'analyse de l'entraîneur."
     ]
   },
   {
@@ -4873,6 +5298,26 @@
     "difficulte": 4,
     "fonctionnalites": [
       "MaitriseEmotionnelle"
+    ],
+    "objectif": "Apprendre à gérer les émotions négatives en cours de jeu.",
+    "intensite": 4,
+    "consignes": [
+      "Provoquer volontairement des situations défavorables (décision discutable, balle litigieuse).",
+      "Observer la réaction du joueur.",
+      "Revenir au calme avant le point suivant grâce à une routine."
+    ],
+    "criteresReussite": [
+      "Pas de dérèglement du comportement.",
+      "Retour rapide à la concentration."
+    ],
+    "varianteFacile": [
+      "Situations frustrantes rares et annoncées."
+    ],
+    "varianteDifficile": [
+      "Situations frustrantes fréquentes et non annoncées."
+    ],
+    "varianteCompetition": [
+      "Évaluation de la gestion émotionnelle par l'entraîneur."
     ]
   },
   {
@@ -4883,6 +5328,26 @@
     "fonctionnalites": [
       "Routine",
       "Concentration"
+    ],
+    "objectif": "Automatiser une routine avant chaque service.",
+    "intensite": 2,
+    "consignes": [
+      "Définir une routine courte et répétable avant le service.",
+      "Appliquer systématiquement cette routine.",
+      "Conserver la même routine quel que soit le score."
+    ],
+    "criteresReussite": [
+      "Routine identique à chaque service.",
+      "Concentration visible avant l'exécution."
+    ],
+    "varianteFacile": [
+      "Routine simplifiée."
+    ],
+    "varianteDifficile": [
+      "Routine complète même sous pression."
+    ],
+    "varianteCompetition": [
+      "Évaluation de la régularité de la routine sur un match complet."
     ]
   },
   {
@@ -4892,6 +5357,26 @@
     "difficulte": 2,
     "fonctionnalites": [
       "Recentrage"
+    ],
+    "objectif": "Développer une routine de recentrage après chaque point.",
+    "intensite": 2,
+    "consignes": [
+      "Définir une routine courte entre deux points (respiration, regard sur la raquette…).",
+      "Appliquer cette routine après chaque point, gagné ou perdu.",
+      "Ne pas prolonger le temps de récupération au-delà du raisonnable."
+    ],
+    "criteresReussite": [
+      "Routine appliquée systématiquement.",
+      "Retour rapide à un état de concentration neutre."
+    ],
+    "varianteFacile": [
+      "Routine plus longue autorisée."
+    ],
+    "varianteDifficile": [
+      "Temps de récupération réduit."
+    ],
+    "varianteCompetition": [
+      "Observation de la régularité de la routine sur un match."
     ]
   },
   {
@@ -4901,6 +5386,26 @@
     "difficulte": 3,
     "fonctionnalites": [
       "Responsabilisation"
+    ],
+    "objectif": "Développer la responsabilisation du joueur sur sa propre progression.",
+    "intensite": 3,
+    "consignes": [
+      "Définir un objectif personnel précis avant la séance ou le match.",
+      "Évaluer soi-même l'atteinte de cet objectif à la fin.",
+      "Ajuster l'objectif si nécessaire pour la séance suivante."
+    ],
+    "criteresReussite": [
+      "Objectif clair et mesurable.",
+      "Auto-évaluation honnête et pertinente."
+    ],
+    "varianteFacile": [
+      "Objectif proposé par l'entraîneur."
+    ],
+    "varianteDifficile": [
+      "Objectif totalement défini par le joueur."
+    ],
+    "varianteCompetition": [
+      "Partage des objectifs et résultats en groupe."
     ]
   },
   {
@@ -4910,6 +5415,26 @@
     "difficulte": 4,
     "fonctionnalites": [
       "Attention"
+    ],
+    "objectif": "Développer la capacité d'attention sur une durée prolongée.",
+    "intensite": 4,
+    "consignes": [
+      "Enchaîner plusieurs exercices techniques nécessitant une attention soutenue.",
+      "Introduire des distractions extérieures pendant l'exercice.",
+      "Maintenir la concentration jusqu'au bout de la séquence."
+    ],
+    "criteresReussite": [
+      "Peu d'erreurs liées à un manque d'attention.",
+      "Concentration maintenue malgré les distractions."
+    ],
+    "varianteFacile": [
+      "Distractions limitées."
+    ],
+    "varianteDifficile": [
+      "Distractions nombreuses et variées."
+    ],
+    "varianteCompetition": [
+      "Classement du nombre d'erreurs d'attention sur la séquence."
     ]
   },
   {
@@ -4919,6 +5444,26 @@
     "difficulte": 1,
     "fonctionnalites": [
       "GestionStress"
+    ],
+    "objectif": "Utiliser la respiration pour gérer le stress et la récupération.",
+    "intensite": 1,
+    "consignes": [
+      "Pratiquer une respiration profonde et contrôlée entre les points.",
+      "Synchroniser la respiration avec la routine de service ou de replacement.",
+      "Utiliser cette respiration en situation de stress simulée."
+    ],
+    "criteresReussite": [
+      "Respiration régulière et consciente.",
+      "Effet perceptible sur le calme du joueur."
+    ],
+    "varianteFacile": [
+      "Respiration guidée par l'entraîneur."
+    ],
+    "varianteDifficile": [
+      "Respiration autonome en situation de match."
+    ],
+    "varianteCompetition": [
+      "Observation de l'usage de la respiration en match réel."
     ]
   },
   {
@@ -4929,6 +5474,26 @@
     "fonctionnalites": [
       "PreparationCompetition",
       "Confiance"
+    ],
+    "objectif": "Développer la préparation mentale par la visualisation.",
+    "intensite": 2,
+    "consignes": [
+      "Visualiser mentalement un geste technique ou un point avant de l'exécuter.",
+      "Se représenter une réussite claire et précise.",
+      "Passer à l'exécution juste après la visualisation."
+    ],
+    "criteresReussite": [
+      "Visualisation claire et détaillée.",
+      "Transfert positif observable dans l'exécution."
+    ],
+    "varianteFacile": [
+      "Visualisation guidée par l'entraîneur."
+    ],
+    "varianteDifficile": [
+      "Visualisation autonome avant un match réel."
+    ],
+    "varianteCompetition": [
+      "Comparaison des performances avec et sans visualisation préalable."
     ]
   },
   {
@@ -4940,6 +5505,25 @@
     "fonctionnalites": [
       "Coordination",
       "Plaisir"
+    ],
+    "objectif": "Découvrir le jeu en s'amusant et développer la coordination de base.",
+    "consignes": [
+      "Les joueurs se relaient autour de la table à chaque échange.",
+      "Chaque joueur joue un coup puis va se replacer au bout de la file.",
+      "Maintenir l'échange le plus longtemps possible collectivement."
+    ],
+    "criteresReussite": [
+      "Participation active de tous les joueurs.",
+      "Échange collectif prolongé."
+    ],
+    "varianteFacile": [
+      "Rythme plus lent, balle plus haute."
+    ],
+    "varianteDifficile": [
+      "Rythme plus rapide, moins de temps pour se replacer."
+    ],
+    "varianteCompetition": [
+      "Comptage du nombre d'échanges collectifs réussis."
     ]
   },
   {
@@ -4951,6 +5535,25 @@
     "fonctionnalites": [
       "Competition",
       "Motivation"
+    ],
+    "objectif": "Développer l'esprit de compétition dans un format ludique.",
+    "consignes": [
+      "Chaque point gagné permet de rester à la table face à un nouvel adversaire.",
+      "Le joueur qui perd un point cède sa place.",
+      "Enchaîner les duels courts."
+    ],
+    "criteresReussite": [
+      "Enchaînement rapide entre les duels.",
+      "Motivation et engagement visibles."
+    ],
+    "varianteFacile": [
+      "Points joués en plusieurs manches avant élimination."
+    ],
+    "varianteDifficile": [
+      "Élimination dès la première balle perdue."
+    ],
+    "varianteCompetition": [
+      "Classement du joueur restant le plus longtemps à la table."
     ]
   },
   {
@@ -4961,6 +5564,25 @@
     "intensite": 3,
     "fonctionnalites": [
       "Competition"
+    ],
+    "objectif": "Motiver la progression par un classement dynamique entre les tables.",
+    "consignes": [
+      "Organiser plusieurs tables classées du niveau le plus faible au plus fort.",
+      "Le gagnant de chaque table monte, le perdant descend.",
+      "Jouer des points courts pour enchaîner rapidement."
+    ],
+    "criteresReussite": [
+      "Circulation fluide entre les tables.",
+      "Engagement sur chaque petit match."
+    ],
+    "varianteFacile": [
+      "Matchs plus longs, moins de rotations."
+    ],
+    "varianteDifficile": [
+      "Matchs très courts, rotations fréquentes."
+    ],
+    "varianteCompetition": [
+      "Classement final après un temps donné."
     ]
   },
   {
@@ -4971,6 +5593,25 @@
     "intensite": 2,
     "fonctionnalites": [
       "Precision"
+    ],
+    "objectif": "Développer la précision de manière ludique.",
+    "consignes": [
+      "Placer des cibles ou zones marquées sur la table.",
+      "Le joueur doit toucher une cible précise à chaque coup.",
+      "Attribuer des points selon la zone touchée."
+    ],
+    "criteresReussite": [
+      "Nombre de cibles touchées.",
+      "Contrôle de la trajectoire."
+    ],
+    "varianteFacile": [
+      "Cibles plus grandes."
+    ],
+    "varianteDifficile": [
+      "Cibles plus petites ou plus nombreuses."
+    ],
+    "varianteCompetition": [
+      "Classement par le score total de précision."
     ]
   },
   {
@@ -4981,6 +5622,25 @@
     "intensite": 2,
     "fonctionnalites": [
       "Adresse"
+    ],
+    "objectif": "Développer l'adresse dans un contexte ludique.",
+    "consignes": [
+      "Disposer des objets (cônes, gobelets) sur la table adverse.",
+      "Chercher à les faire tomber en jouant la balle.",
+      "Compter le nombre d'objets renversés."
+    ],
+    "criteresReussite": [
+      "Précision du placement.",
+      "Contrôle de la puissance du coup."
+    ],
+    "varianteFacile": [
+      "Objets plus gros, plus proches."
+    ],
+    "varianteDifficile": [
+      "Objets plus petits, plus éloignés."
+    ],
+    "varianteCompetition": [
+      "Classement du nombre d'objets renversés."
     ]
   },
   {
@@ -4992,6 +5652,25 @@
     "fonctionnalites": [
       "Service",
       "Precision"
+    ],
+    "objectif": "Améliorer la précision du service de façon ludique.",
+    "consignes": [
+      "Placer une cible dans une zone du service.",
+      "Servir en cherchant à atteindre la cible.",
+      "Attribuer un point par cible touchée."
+    ],
+    "criteresReussite": [
+      "Nombre de cibles touchées sur une série de services.",
+      "Trajectoire basse conservée."
+    ],
+    "varianteFacile": [
+      "Cible plus grande."
+    ],
+    "varianteDifficile": [
+      "Cible plus petite ou plus éloignée."
+    ],
+    "varianteCompetition": [
+      "Concours de précision au service entre joueurs."
     ]
   },
   {
@@ -5003,6 +5682,25 @@
     "fonctionnalites": [
       "Vitesse",
       "EspritEquipe"
+    ],
+    "objectif": "Développer la vitesse et l'esprit d'équipe.",
+    "consignes": [
+      "Former des équipes qui doivent réaliser une série d'échanges chacune leur tour.",
+      "Passer le relais rapidement au coéquipier suivant.",
+      "Encourager l'équipe pendant l'exercice."
+    ],
+    "criteresReussite": [
+      "Transitions rapides entre les joueurs.",
+      "Cohésion d'équipe visible."
+    ],
+    "varianteFacile": [
+      "Moins de joueurs par équipe, relais plus longs."
+    ],
+    "varianteDifficile": [
+      "Plus de joueurs, relais très courts."
+    ],
+    "varianteCompetition": [
+      "Course chronométrée entre équipes."
     ]
   },
   {
@@ -5013,6 +5711,25 @@
     "intensite": 3,
     "fonctionnalites": [
       "Collectif"
+    ],
+    "objectif": "Développer l'esprit collectif autour d'un format par équipes.",
+    "consignes": [
+      "Former des équipes de plusieurs joueurs.",
+      "Chaque joueur dispute un petit match individuel.",
+      "Additionner les points de chaque équipe."
+    ],
+    "criteresReussite": [
+      "Soutien entre coéquipiers.",
+      "Engagement individuel au service du collectif."
+    ],
+    "varianteFacile": [
+      "Matchs individuels plus courts."
+    ],
+    "varianteDifficile": [
+      "Format complet avec plusieurs matchs par équipe."
+    ],
+    "varianteCompetition": [
+      "Tournoi par équipes avec classement final."
     ]
   },
   {
@@ -5023,6 +5740,25 @@
     "intensite": 2,
     "fonctionnalites": [
       "Regularite"
+    ],
+    "objectif": "Rendre la régularité ludique et motivante.",
+    "consignes": [
+      "Fixer un défi de nombre d'échanges à atteindre en équipe ou individuellement.",
+      "Chronométrer ou compter les échanges réussis.",
+      "Recommencer à zéro après chaque faute."
+    ],
+    "criteresReussite": [
+      "Objectif d'échanges atteint.",
+      "Engagement maintenu jusqu'au bout du défi."
+    ],
+    "varianteFacile": [
+      "Objectif réduit."
+    ],
+    "varianteDifficile": [
+      "Objectif augmenté."
+    ],
+    "varianteCompetition": [
+      "Classement des meilleures séries entre joueurs ou équipes."
     ]
   },
   {
@@ -5033,6 +5769,25 @@
     "intensite": 3,
     "fonctionnalites": [
       "Topspin"
+    ],
+    "objectif": "Rendre l'apprentissage du topspin motivant.",
+    "consignes": [
+      "Fixer un nombre de topspins réussis à atteindre.",
+      "Compter chaque top réussi sur la table.",
+      "Encourager la prise de risque contrôlée."
+    ],
+    "criteresReussite": [
+      "Nombre de tops réussis atteint.",
+      "Rotation visible sur la majorité des balles."
+    ],
+    "varianteFacile": [
+      "Objectif réduit, bloc très passif."
+    ],
+    "varianteDifficile": [
+      "Objectif augmenté, bloc plus actif."
+    ],
+    "varianteCompetition": [
+      "Classement du nombre de tops réussis par joueur."
     ]
   },
   {
@@ -5043,6 +5798,25 @@
     "intensite": 2,
     "fonctionnalites": [
       "Service"
+    ],
+    "objectif": "Rendre l'entraînement du service ludique et motivant.",
+    "consignes": [
+      "Fixer un défi de précision ou de variété de services à réaliser.",
+      "Compter les services réussis selon les critères fixés.",
+      "Varier les défis d'une séance à l'autre."
+    ],
+    "criteresReussite": [
+      "Défi complété dans le temps imparti.",
+      "Diversité ou précision des services démontrée."
+    ],
+    "varianteFacile": [
+      "Défi simplifié."
+    ],
+    "varianteDifficile": [
+      "Défi combiné (précision et effet)."
+    ],
+    "varianteCompetition": [
+      "Classement des meilleurs résultats entre joueurs."
     ]
   },
   {
@@ -5053,6 +5827,25 @@
     "intensite": 4,
     "fonctionnalites": [
       "Deplacement"
+    ],
+    "objectif": "Rendre le travail des déplacements ludique.",
+    "consignes": [
+      "Fixer un parcours ou un nombre de déplacements à réaliser correctement.",
+      "Chronométrer ou compter les réussites.",
+      "Varier les zones de déplacement à chaque défi."
+    ],
+    "criteresReussite": [
+      "Parcours complété avec une technique correcte.",
+      "Vitesse d'exécution satisfaisante."
+    ],
+    "varianteFacile": [
+      "Parcours réduit."
+    ],
+    "varianteDifficile": [
+      "Parcours plus long ou plus complexe."
+    ],
+    "varianteCompetition": [
+      "Chrono comparé entre les joueurs."
     ]
   },
   {
@@ -5063,6 +5856,25 @@
     "intensite": 3,
     "fonctionnalites": [
       "Reflexion"
+    ],
+    "objectif": "Initier la réflexion tactique de manière ludique.",
+    "consignes": [
+      "Proposer une situation de jeu avec plusieurs choix tactiques possibles.",
+      "Demander au joueur d'expliquer son choix avant de jouer le point.",
+      "Jouer le point selon la décision annoncée."
+    ],
+    "criteresReussite": [
+      "Choix tactique cohérent avec la situation.",
+      "Capacité à expliquer sa décision."
+    ],
+    "varianteFacile": [
+      "Choix limité à deux options."
+    ],
+    "varianteDifficile": [
+      "Choix totalement libre parmi plusieurs options."
+    ],
+    "varianteCompetition": [
+      "Points bonus pour les choix tactiques les plus pertinents."
     ]
   },
   {
@@ -5074,6 +5886,25 @@
     "fonctionnalites": [
       "Observation",
       "Memoire"
+    ],
+    "objectif": "Développer l'observation et la mémoire du jeu.",
+    "consignes": [
+      "Faire observer une série de trajectoires ou de placements par le joueur.",
+      "Demander au joueur de reproduire ou de décrire la séquence observée.",
+      "Vérifier la précision de la restitution."
+    ],
+    "criteresReussite": [
+      "Séquence correctement mémorisée.",
+      "Reproduction fidèle des trajectoires observées."
+    ],
+    "varianteFacile": [
+      "Séquences courtes et simples."
+    ],
+    "varianteDifficile": [
+      "Séquences longues et complexes."
+    ],
+    "varianteCompetition": [
+      "Classement du nombre de séquences correctement restituées."
     ]
   },
   {
@@ -5085,6 +5916,25 @@
     "fonctionnalites": [
       "Coordination",
       "Agilite"
+    ],
+    "objectif": "Développer la coordination et l'agilité générale de façon ludique.",
+    "consignes": [
+      "Organiser un parcours combinant déplacements, gestes techniques et obstacles.",
+      "Réaliser le parcours dans l'ordre indiqué.",
+      "Chronométrer chaque passage."
+    ],
+    "criteresReussite": [
+      "Parcours réalisé sans erreur majeure.",
+      "Temps de réalisation satisfaisant."
+    ],
+    "varianteFacile": [
+      "Parcours simplifié, moins d'obstacles."
+    ],
+    "varianteDifficile": [
+      "Parcours complexifié, plus d'obstacles."
+    ],
+    "varianteCompetition": [
+      "Classement chronométré entre les joueurs."
     ]
   }
 ]
