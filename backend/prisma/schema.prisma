@@ -155,7 +155,7 @@ model Player {
   phone                String?
   emergencyContactName  String?
   emergencyContactPhone String?
-  photoUrl              String? // data URL (base64), même approche que Exercise.illustrationUrl
+  photoUrl              String? // data URL (base64)
   playStyle             String?
   dominantHand          DominantHand?
 
@@ -457,23 +457,45 @@ model TrainingPlan {
   campGroups CampGroup[]
 }
 
+enum ExerciseCategory {
+  Regularite
+  Topspin
+  Service
+  Remise
+  Bloc
+  Deplacements
+  PanierDeBalles
+  Poussette
+  Tactique
+  Defense
+  ContreInitiative
+  Physique
+  Mental
+  Jeunes
+}
+
+enum ExerciseDifficulty {
+  NIVEAU_1
+  NIVEAU_2
+  NIVEAU_3
+  NIVEAU_4
+  NIVEAU_5
+}
+
 model Exercise {
-  id               String   @id @default(cuid())
+  id               String              @id @default(cuid())
   clubId String
   club   Club   @relation(fields: [clubId], references: [id], onDelete: Cascade)
   title            String
   description      String?
-  category         String?
-  difficulty       Int? // 1 à 5
-  illustrationUrl  String? // data URL (base64) de l'illustration uploadée
+  category         ExerciseCategory?
+  difficulty       ExerciseDifficulty?
   diagram          Json? // schéma table de ping-pong : { points: [{ id, x, y }] }
   createdById      String?
   createdAt        DateTime @default(now())
 
   // Fiche pédagogique enrichie (bibliothèque d'exercices standard).
   intensity           Int? // 1 à 5
-  levelMin            String? // ex. "Debutant"
-  levelMax            String? // ex. "Expert"
   skills              Json? // string[] — qualités travaillées (ex. "Regularite", "Pivot")
   objective           String?
   instructions        Json? // string[] — consignes

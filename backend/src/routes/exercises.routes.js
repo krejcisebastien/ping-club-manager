@@ -6,15 +6,15 @@ const router = Router();
 router.use(requireAuth);
 
 const EXERCISE_FIELDS = [
-  "title", "description", "category", "difficulty", "illustrationUrl", "diagram",
-  "intensity", "levelMin", "levelMax", "skills", "objective", "instructions",
+  "title", "description", "category", "difficulty", "diagram",
+  "intensity", "skills", "objective", "instructions",
   "successCriteria", "easierVariant", "harderVariant", "competitionVariant",
 ];
 
 router.get("/", async (req, res) => {
-  const { category } = req.query;
+  const { category, difficulty } = req.query;
   const exercises = await req.db.exercise.findMany({
-    where: category ? { category } : undefined,
+    where: { ...(category && { category }), ...(difficulty && { difficulty }) },
     orderBy: { title: "asc" },
   });
   res.json({ exercises });

@@ -4,17 +4,18 @@ import { useRoute, useRouter } from "vue-router";
 import Button from "primevue/button";
 import InputText from "primevue/inputtext";
 import InputNumber from "primevue/inputnumber";
+import Dropdown from "primevue/dropdown";
 import Textarea from "primevue/textarea";
 import Tag from "primevue/tag";
 import { useToast } from "primevue/usetoast";
 import { useConfirm } from "primevue/useconfirm";
 import AppLayout from "../../components/AppLayout.vue";
 import RichTextEditor from "../../components/RichTextEditor.vue";
-import ImageUpload from "../../components/ImageUpload.vue";
 import TableDiagramEditor from "../../components/TableDiagramEditor.vue";
 import { api } from "../../lib/api.js";
 import { sanitizeHtml } from "../../lib/richtext.js";
 import { useNavLinks } from "../../composables/useNavLinks.js";
+import { EXERCISE_CATEGORY_OPTIONS, EXERCISE_CATEGORY_LABELS, EXERCISE_DIFFICULTY_OPTIONS, EXERCISE_DIFFICULTY_LABELS } from "../../lib/exercise.js";
 
 const navLinks = useNavLinks();
 const route = useRoute();
@@ -30,6 +31,8 @@ const saving = ref(false);
 
 const linesToArray = (text) => text.split("\n").map((l) => l.trim()).filter(Boolean);
 const arrayToLines = (arr) => (Array.isArray(arr) ? arr.join("\n") : "");
+const categoryLabel = (ex) => EXERCISE_CATEGORY_LABELS[ex.category] ?? "";
+const difficultyLabel = (ex) => EXERCISE_DIFFICULTY_LABELS[ex.difficulty] ?? "";
 
 async function load() {
   const { data } = await api.get(`/exercises/${exerciseId}`);
@@ -43,11 +46,9 @@ function openEdit() {
   form.value = {
     title: ex.title,
     description: ex.description ?? "",
-    category: ex.category ?? "",
+    category: ex.category ?? null,
     difficulty: ex.difficulty ?? null,
     intensity: ex.intensity ?? null,
-    levelMin: ex.levelMin ?? "",
-    levelMax: ex.levelMax ?? "",
     objective: ex.objective ?? "",
     skills: arrayToLines(ex.skills),
     instructions: arrayToLines(ex.instructions),
@@ -55,7 +56,6 @@ function openEdit() {
     easierVariant: arrayToLines(ex.easierVariant),
     harderVariant: arrayToLines(ex.harderVariant),
     competitionVariant: arrayToLines(ex.competitionVariant),
-    illustrationUrl: ex.illustrationUrl ?? null,
     diagram: ex.diagram ?? { points: [] },
   };
   editing.value = true;
@@ -114,25 +114,31 @@ function onDelete() {
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <div class="col-span-2 sm:col-span-1">
             <label class="text-xs text-slate-500 block mb-1">Catégorie</label>
-            <InputText v-model="form.category" class="w-full" />
+            <Dropdown
+              v-model="form.category"
+              :options="EXERCISE_CATEGORY_OPTIONS"
+              option-label="label"
+              option-value="value"
+              placeholder="Choisir…"
+              show-clear
+              class="w-full"
+            />
           </div>
           <div>
-            <label class="text-xs text-slate-500 block mb-1">Difficulté (1-5)</label>
-            <InputNumber v-model="form.difficulty" :min="1" :max="5" show-buttons class="w-full" input-class="w-full" />
+            <label class="text-xs text-slate-500 block mb-1">Difficulté</label>
+            <Dropdown
+              v-model="form.difficulty"
+              :options="EXERCISE_DIFFICULTY_OPTIONS"
+              option-label="label"
+              option-value="value"
+              placeholder="Choisir…"
+              show-clear
+              class="w-full"
+            />
           </div>
           <div>
             <label class="text-xs text-slate-500 block mb-1">Intensité (1-5)</label>
             <InputNumber v-model="form.intensity" :min="1" :max="5" show-buttons class="w-full" input-class="w-full" />
-          </div>
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="text-xs text-slate-500 block mb-1">Niveau minimum (optionnel)</label>
-            <InputText v-model="form.levelMin" class="w-full" placeholder="ex. Débutant" />
-          </div>
-          <div>
-            <label class="text-xs text-slate-500 block mb-1">Niveau maximum (optionnel)</label>
-            <InputText v-model="form.levelMax" class="w-full" placeholder="ex. Expert" />
           </div>
         </div>
         <div>
@@ -172,10 +178,6 @@ function onDelete() {
           <RichTextEditor v-model="form.description" placeholder="Notes complémentaires…" />
         </div>
         <div>
-          <label class="text-xs text-slate-500 block mb-1">Illustration</label>
-          <ImageUpload v-model="form.illustrationUrl" />
-        </div>
-        <div>
           <label class="text-xs text-slate-500 block mb-1">Schéma de la table (échanges, points à jouer)</label>
           <TableDiagramEditor v-model="form.diagram" />
         </div>
@@ -188,10 +190,9 @@ function onDelete() {
       <div v-else>
         <div class="flex items-start justify-between mb-3">
           <div class="flex flex-wrap gap-2">
-            <Tag v-if="exercise.category" severity="secondary" :value="exercise.category" />
-            <Tag v-if="exercise.difficulty" severity="warn" :value="`Difficulté ${exercise.difficulty}/5`" />
+            <Tag v-if="exercise.category" severity="secondary" :value="categoryLabel(exercise)" />
+            <Tag v-if="exercise.difficulty" severity="warn" :value="`Difficulté ${difficultyLabel(exercise)}`" />
             <Tag v-if="exercise.intensity" severity="danger" :value="`Intensité ${exercise.intensity}/5`" />
-            <Tag v-if="exercise.levelMin || exercise.levelMax" severity="info" :value="[exercise.levelMin, exercise.levelMax].filter(Boolean).join(' → ')" />
           </div>
           <div class="flex gap-1 shrink-0">
             <Button icon="pi pi-pencil" text rounded aria-label="Modifier" @click="openEdit" />
@@ -249,8 +250,6 @@ function onDelete() {
         </div>
 
         <div v-if="exercise.description" class="rich-text-content mb-3" v-html="sanitizeHtml(exercise.description)"></div>
-
-        <img v-if="exercise.illustrationUrl" :src="exercise.illustrationUrl" alt="Illustration de l'exercice" class="max-h-64 rounded-lg border border-slate-200 mb-3" />
 
         <div v-if="exercise.diagram?.points?.length">
           <p class="text-xs text-slate-500 mb-1">Schéma de la table</p>

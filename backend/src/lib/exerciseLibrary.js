@@ -1,5 +1,7 @@
 import exerciseLibrary from "../data/exercise-library.json" with { type: "json" };
 
+const DIFFICULTY_ENUM = { 1: "NIVEAU_1", 2: "NIVEAU_2", 3: "NIVEAU_3", 4: "NIVEAU_4", 5: "NIVEAU_5" };
+
 // Peuple la bibliothèque d'exercices de base d'un club (idempotent : les
 // exercices déjà présents, identifiés par leur sourceCode, ne sont pas
 // recréés). Appelé à la création de chaque club.
@@ -17,11 +19,9 @@ export async function seedExerciseLibrary(prisma, clubId) {
     data: toCreate.map((item) => ({
       clubId,
       title: item.nom,
-      category: item.categorie,
-      difficulty: item.difficulte ?? null,
+      category: item.categorie ?? null,
+      difficulty: DIFFICULTY_ENUM[item.difficulte] ?? null,
       intensity: item.intensite ?? null,
-      levelMin: item.niveauMin ?? null,
-      levelMax: item.niveauMax ?? null,
       skills: item.fonctionnalites ?? null,
       objective: item.objectif ?? null,
       instructions: item.consignes ?? null,
