@@ -5,6 +5,7 @@ import { createSession } from "../utils/session.js";
 import { uniqueSlug } from "../utils/slug.js";
 import { rateLimit } from "../middleware/rateLimit.js";
 import { isPlatformAdmin } from "../lib/platform.js";
+import { seedExerciseLibrary } from "../lib/exerciseLibrary.js";
 
 const router = Router();
 
@@ -43,6 +44,7 @@ router.post(
       },
       include: { users: { include: { players: { select: { playerId: true } }, club: { select: { name: true } } } } },
     });
+    await seedExerciseLibrary(prisma, club.id);
     res.status(201).json(createSession(club.users[0]));
   }
 );

@@ -59,24 +59,6 @@ async function onCreate() {
   }
 }
 
-const importing = ref(false);
-
-async function onImportLibrary() {
-  importing.value = true;
-  try {
-    const { data } = await api.post("/exercises/import-library");
-    const summary = data.imported > 0
-      ? `${data.imported} exercice(s) importé(s)${data.skipped ? `, ${data.skipped} déjà présent(s)` : ""}.`
-      : "Tous les exercices de la bibliothèque sont déjà présents.";
-    toast.add({ severity: "success", summary: "Import terminé", detail: summary, life: 5000 });
-    await load();
-  } catch (err) {
-    toast.add({ severity: "error", summary: "Erreur", detail: err.response?.data?.error ?? "Une erreur est survenue.", life: 4000 });
-  } finally {
-    importing.value = false;
-  }
-}
-
 function onDelete(ex) {
   confirm.require({
     message: `Supprimer l'exercice « ${ex.title} » ?`,
@@ -108,7 +90,6 @@ function onRowClick(event) {
           <i class="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
           <InputText v-model="filters.global.value" placeholder="Rechercher…" class="w-full pl-9" />
         </div>
-        <Button label="Importer la bibliothèque" icon="pi pi-download" severity="secondary" outlined :loading="importing" @click="onImportLibrary" />
         <Button label="Nouvel exercice" icon="pi pi-plus" @click="openCreate" />
       </div>
     </div>

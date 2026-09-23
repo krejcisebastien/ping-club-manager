@@ -7,7 +7,11 @@
     "niveauMin": "Debutant",
     "niveauMax": "Expert",
     "intensite": 1,
-    "fonctionnalites": ["Regularite", "Coordination", "Placement"],
+    "fonctionnalites": [
+      "Regularite",
+      "Coordination",
+      "Placement"
+    ],
     "objectif": "Maintenir un échange stable en coup droit.",
     "consignes": [
       "Les deux joueurs jouent uniquement en diagonale coup droit.",
@@ -19,9 +23,15 @@
       "Peu de variation de hauteur.",
       "Position équilibrée."
     ],
-    "varianteFacile": ["Autoriser un rebond plus haut."],
-    "varianteDifficile": ["Imposer 50 échanges sans faute."],
-    "varianteCompetition": ["Compter les séries réussies sur 2 minutes."]
+    "varianteFacile": [
+      "Autoriser un rebond plus haut."
+    ],
+    "varianteDifficile": [
+      "Imposer 50 échanges sans faute."
+    ],
+    "varianteCompetition": [
+      "Compter les séries réussies sur 2 minutes."
+    ]
   },
   {
     "id": "REG-002",
@@ -31,7 +41,11 @@
     "niveauMin": "Debutant",
     "niveauMax": "Expert",
     "intensite": 1,
-    "fonctionnalites": ["Regularite", "Controle", "Toucher"],
+    "fonctionnalites": [
+      "Regularite",
+      "Controle",
+      "Toucher"
+    ],
     "objectif": "Stabiliser le revers de base.",
     "consignes": [
       "Jouer exclusivement en diagonale revers.",
@@ -41,9 +55,15 @@
       "20 échanges consécutifs.",
       "Peu de fautes directes."
     ],
-    "varianteFacile": ["Réduire la vitesse."],
-    "varianteDifficile": ["Accélération progressive toutes les 5 balles."],
-    "varianteCompetition": ["Défi du plus long échange."]
+    "varianteFacile": [
+      "Réduire la vitesse."
+    ],
+    "varianteDifficile": [
+      "Accélération progressive toutes les 5 balles."
+    ],
+    "varianteCompetition": [
+      "Défi du plus long échange."
+    ]
   },
   {
     "id": "REG-003",
@@ -51,7 +71,11 @@
     "categorie": "Regularite",
     "difficulte": 2,
     "intensite": 2,
-    "fonctionnalites": ["Precision", "Placement", "Regularite"],
+    "fonctionnalites": [
+      "Precision",
+      "Placement",
+      "Regularite"
+    ],
     "objectif": "Développer la précision en ligne droite.",
     "consignes": [
       "Jouer exclusivement long de ligne.",
@@ -61,9 +85,15 @@
       "15 échanges sans faute.",
       "Balles placées dans le dernier tiers de table."
     ],
-    "varianteFacile": ["Rythme réduit."],
-    "varianteDifficile": ["Accélération de la cadence."],
-    "varianteCompetition": ["1 point uniquement si la balle touche la zone cible."]
+    "varianteFacile": [
+      "Rythme réduit."
+    ],
+    "varianteDifficile": [
+      "Accélération de la cadence."
+    ],
+    "varianteCompetition": [
+      "1 point uniquement si la balle touche la zone cible."
+    ]
   },
   {
     "id": "REG-004",
@@ -71,7 +101,11 @@
     "categorie": "Regularite",
     "difficulte": 2,
     "intensite": 2,
-    "fonctionnalites": ["Precision", "Controle", "Regularite"],
+    "fonctionnalites": [
+      "Precision",
+      "Controle",
+      "Regularite"
+    ],
     "objectif": "Stabiliser la trajectoire revers ligne droite.",
     "consignes": [
       "Jouer uniquement en ligne droite revers.",
@@ -80,9 +114,15 @@
     "criteresReussite": [
       "15 échanges minimum."
     ],
-    "varianteFacile": ["Distance réduite."],
-    "varianteDifficile": ["Ajout d'une cible."],
-    "varianteCompetition": ["Série chronométrée de 1 minute."]
+    "varianteFacile": [
+      "Distance réduite."
+    ],
+    "varianteDifficile": [
+      "Ajout d'une cible."
+    ],
+    "varianteCompetition": [
+      "Série chronométrée de 1 minute."
+    ]
   },
   {
     "id": "REG-005",
@@ -90,7 +130,11 @@
     "categorie": "Regularite",
     "difficulte": 2,
     "intensite": 2,
-    "fonctionnalites": ["Coordination", "Placement", "Replacement"],
+    "fonctionnalites": [
+      "Coordination",
+      "Placement",
+      "Replacement"
+    ],
     "objectif": "Améliorer la transition entre les deux côtés.",
     "consignes": [
       "Alterner une balle coup droit puis une balle revers.",
@@ -99,9 +143,15 @@
     "criteresReussite": [
       "15 alternances réussies."
     ],
-    "varianteFacile": ["Rythme lent."],
-    "varianteDifficile": ["Rythme imposé rapide."],
-    "varianteCompetition": ["Match avec obligation d'alternance."]
+    "varianteFacile": [
+      "Rythme lent."
+    ],
+    "varianteDifficile": [
+      "Rythme imposé rapide."
+    ],
+    "varianteCompetition": [
+      "Match avec obligation d'alternance."
+    ]
   },
   {
     "id": "REG-006",
@@ -109,7 +159,10 @@
     "categorie": "Regularite",
     "difficulte": 2,
     "intensite": 2,
-    "fonctionnalites": ["Coordination", "MemoireMotrice"],
+    "fonctionnalites": [
+      "Coordination",
+      "MemoireMotrice"
+    ],
     "objectif": "Automatiser les changements de côté.",
     "consignes": [
       "Jouer 2 coup droits puis 2 revers.",
@@ -118,9 +171,15 @@
     "criteresReussite": [
       "10 séquences complètes."
     ],
-    "varianteFacile": ["3 CD / 3 RV."],
-    "varianteDifficile": ["1 CD / 1 RV très rapide."],
-    "varianteCompetition": ["Point perdu si le schéma est oublié."]
+    "varianteFacile": [
+      "3 CD / 3 RV."
+    ],
+    "varianteDifficile": [
+      "1 CD / 1 RV très rapide."
+    ],
+    "varianteCompetition": [
+      "Point perdu si le schéma est oublié."
+    ]
   },
   {
     "id": "REG-007",
@@ -128,7 +187,11 @@
     "categorie": "Regularite",
     "difficulte": 3,
     "intensite": 3,
-    "fonctionnalites": ["Deplacement", "VitesseAppuis", "Coordination"],
+    "fonctionnalites": [
+      "Deplacement",
+      "VitesseAppuis",
+      "Coordination"
+    ],
     "objectif": "Travailler le déplacement latéral.",
     "consignes": [
       "Le distributeur joue alternativement milieu et large CD.",
@@ -138,9 +201,15 @@
       "Position basse conservée.",
       "15 balles consécutives."
     ],
-    "varianteFacile": ["Déplacement annoncé."],
-    "varianteDifficile": ["Distribution plus rapide."],
-    "varianteCompetition": ["Point libre après 10 échanges."]
+    "varianteFacile": [
+      "Déplacement annoncé."
+    ],
+    "varianteDifficile": [
+      "Distribution plus rapide."
+    ],
+    "varianteCompetition": [
+      "Point libre après 10 échanges."
+    ]
   },
   {
     "id": "REG-008",
@@ -148,7 +217,10 @@
     "categorie": "Regularite",
     "difficulte": 3,
     "intensite": 3,
-    "fonctionnalites": ["Deplacement", "Controle"],
+    "fonctionnalites": [
+      "Deplacement",
+      "Controle"
+    ],
     "objectif": "Développer la mobilité côté revers.",
     "consignes": [
       "Le joueur couvre deux zones revers."
@@ -156,9 +228,15 @@
     "criteresReussite": [
       "15 échanges minimum."
     ],
-    "varianteFacile": ["Zones rapprochées."],
-    "varianteDifficile": ["Zones élargies."],
-    "varianteCompetition": ["Comptage des séries."]
+    "varianteFacile": [
+      "Zones rapprochées."
+    ],
+    "varianteDifficile": [
+      "Zones élargies."
+    ],
+    "varianteCompetition": [
+      "Comptage des séries."
+    ]
   },
   {
     "id": "REG-009",
@@ -166,7 +244,11 @@
     "categorie": "Regularite",
     "difficulte": 4,
     "intensite": 4,
-    "fonctionnalites": ["Explosivite", "Endurance", "Deplacement"],
+    "fonctionnalites": [
+      "Explosivite",
+      "Endurance",
+      "Deplacement"
+    ],
     "objectif": "Développer les déplacements spécifiques du pongiste.",
     "consignes": [
       "RV diagonale.",
@@ -177,9 +259,15 @@
     "criteresReussite": [
       "10 séquences complètes sans faute."
     ],
-    "varianteFacile": ["Distribution annoncée."],
-    "varianteDifficile": ["Troisième balle aléatoire."],
-    "varianteCompetition": ["Point libre après la séquence."]
+    "varianteFacile": [
+      "Distribution annoncée."
+    ],
+    "varianteDifficile": [
+      "Troisième balle aléatoire."
+    ],
+    "varianteCompetition": [
+      "Point libre après la séquence."
+    ]
   },
   {
     "id": "REG-010",
@@ -187,7 +275,10 @@
     "categorie": "Regularite",
     "difficulte": 4,
     "intensite": 4,
-    "fonctionnalites": ["Coordination", "Deplacement"],
+    "fonctionnalites": [
+      "Coordination",
+      "Deplacement"
+    ],
     "objectif": "Développer les schémas inhabituels.",
     "consignes": [
       "Effectuer la séquence Falkenberg dans le sens opposé."
@@ -195,9 +286,15 @@
     "criteresReussite": [
       "8 séquences correctes."
     ],
-    "varianteFacile": ["Rythme réduit."],
-    "varianteDifficile": ["Cadence élevée."],
-    "varianteCompetition": ["Défi sur 90 secondes."]
+    "varianteFacile": [
+      "Rythme réduit."
+    ],
+    "varianteDifficile": [
+      "Cadence élevée."
+    ],
+    "varianteCompetition": [
+      "Défi sur 90 secondes."
+    ]
   },
   {
     "id": "REG-011",
@@ -205,7 +302,11 @@
     "categorie": "Regularite",
     "difficulte": 5,
     "intensite": 5,
-    "fonctionnalites": ["Anticipation", "Reaction", "Explosivite"],
+    "fonctionnalites": [
+      "Anticipation",
+      "Reaction",
+      "Explosivite"
+    ],
     "objectif": "Réagir à une distribution imprévisible.",
     "consignes": [
       "Le distributeur conserve le schéma mais peut modifier une balle."
@@ -213,9 +314,15 @@
     "criteresReussite": [
       "Maintien de la qualité technique malgré l'aléatoire."
     ],
-    "varianteFacile": ["Une seule variation possible."],
-    "varianteDifficile": ["Variations illimitées."],
-    "varianteCompetition": ["Comptage des séquences réussies."]
+    "varianteFacile": [
+      "Une seule variation possible."
+    ],
+    "varianteDifficile": [
+      "Variations illimitées."
+    ],
+    "varianteCompetition": [
+      "Comptage des séquences réussies."
+    ]
   },
   {
     "id": "REG-012",
@@ -223,7 +330,10 @@
     "categorie": "Regularite",
     "difficulte": 3,
     "intensite": 3,
-    "fonctionnalites": ["Coordination", "Deplacement"],
+    "fonctionnalites": [
+      "Coordination",
+      "Deplacement"
+    ],
     "objectif": "Enchaîner plusieurs angles de jeu.",
     "consignes": [
       "Alternance diagonale et ligne droite selon un schéma fixe."
@@ -231,9 +341,15 @@
     "criteresReussite": [
       "Respect intégral du schéma."
     ],
-    "varianteFacile": ["Vitesse réduite."],
-    "varianteDifficile": ["Accélération progressive."],
-    "varianteCompetition": ["Point libre après la séquence."]
+    "varianteFacile": [
+      "Vitesse réduite."
+    ],
+    "varianteDifficile": [
+      "Accélération progressive."
+    ],
+    "varianteCompetition": [
+      "Point libre après la séquence."
+    ]
   },
   {
     "id": "REG-013",
@@ -241,7 +357,11 @@
     "categorie": "Regularite",
     "difficulte": 3,
     "intensite": 3,
-    "fonctionnalites": ["Pivot", "Explosivite", "Placement"],
+    "fonctionnalites": [
+      "Pivot",
+      "Explosivite",
+      "Placement"
+    ],
     "objectif": "Développer l'utilisation du pivot.",
     "consignes": [
       "Une balle revers, une balle pivot coup droit."
@@ -249,9 +369,15 @@
     "criteresReussite": [
       "Pivot exécuté sans perte d'équilibre."
     ],
-    "varianteFacile": ["Pivot toutes les deux balles."],
-    "varianteDifficile": ["Pivot à chaque balle revers."],
-    "varianteCompetition": ["Match avec pivot obligatoire."]
+    "varianteFacile": [
+      "Pivot toutes les deux balles."
+    ],
+    "varianteDifficile": [
+      "Pivot à chaque balle revers."
+    ],
+    "varianteCompetition": [
+      "Match avec pivot obligatoire."
+    ]
   },
   {
     "id": "REG-014",
@@ -259,7 +385,10 @@
     "categorie": "Regularite",
     "difficulte": 4,
     "intensite": 4,
-    "fonctionnalites": ["Pivot", "Replacement"],
+    "fonctionnalites": [
+      "Pivot",
+      "Replacement"
+    ],
     "objectif": "Améliorer la vitesse de replacement.",
     "consignes": [
       "Alterner pivot et revers actif."
@@ -267,9 +396,15 @@
     "criteresReussite": [
       "Position correcte après chaque coup."
     ],
-    "varianteFacile": ["Cadence réduite."],
-    "varianteDifficile": ["Distribution aléatoire."],
-    "varianteCompetition": ["Score sur nombre de séquences."]
+    "varianteFacile": [
+      "Cadence réduite."
+    ],
+    "varianteDifficile": [
+      "Distribution aléatoire."
+    ],
+    "varianteCompetition": [
+      "Score sur nombre de séquences."
+    ]
   },
   {
     "id": "REG-015",
@@ -277,7 +412,10 @@
     "categorie": "Regularite",
     "difficulte": 3,
     "intensite": 2,
-    "fonctionnalites": ["Precision", "Placement"],
+    "fonctionnalites": [
+      "Precision",
+      "Placement"
+    ],
     "objectif": "Améliorer la précision des trajectoires.",
     "consignes": [
       "Viser une zone matérialisée sur la table."
@@ -285,9 +423,15 @@
     "criteresReussite": [
       "70% des balles dans la cible."
     ],
-    "varianteFacile": ["Grande cible."],
-    "varianteDifficile": ["Petite cible."],
-    "varianteCompetition": ["Barème de points par cible."]
+    "varianteFacile": [
+      "Grande cible."
+    ],
+    "varianteDifficile": [
+      "Petite cible."
+    ],
+    "varianteCompetition": [
+      "Barème de points par cible."
+    ]
   },
   {
     "id": "REG-016",
@@ -295,7 +439,10 @@
     "categorie": "Regularite",
     "difficulte": 1,
     "intensite": 1,
-    "fonctionnalites": ["Controle", "Toucher"],
+    "fonctionnalites": [
+      "Controle",
+      "Toucher"
+    ],
     "objectif": "Développer le toucher de balle.",
     "consignes": [
       "Imposer un rythme très lent."
@@ -303,9 +450,15 @@
     "criteresReussite": [
       "Aucune accélération intempestive."
     ],
-    "varianteFacile": ["Balles hautes autorisées."],
-    "varianteDifficile": ["Balles basses uniquement."],
-    "varianteCompetition": ["Plus longue série."]
+    "varianteFacile": [
+      "Balles hautes autorisées."
+    ],
+    "varianteDifficile": [
+      "Balles basses uniquement."
+    ],
+    "varianteCompetition": [
+      "Plus longue série."
+    ]
   },
   {
     "id": "REG-017",
@@ -313,7 +466,10 @@
     "categorie": "Regularite",
     "difficulte": 3,
     "intensite": 4,
-    "fonctionnalites": ["Vitesse", "Coordination"],
+    "fonctionnalites": [
+      "Vitesse",
+      "Coordination"
+    ],
     "objectif": "Maintenir la régularité sous cadence élevée.",
     "consignes": [
       "Accélérer progressivement l'échange."
@@ -321,9 +477,15 @@
     "criteresReussite": [
       "15 échanges rapides sans faute."
     ],
-    "varianteFacile": ["Vitesse intermédiaire."],
-    "varianteDifficile": ["Rythme maximal."],
-    "varianteCompetition": ["Défi de cadence."]
+    "varianteFacile": [
+      "Vitesse intermédiaire."
+    ],
+    "varianteDifficile": [
+      "Rythme maximal."
+    ],
+    "varianteCompetition": [
+      "Défi de cadence."
+    ]
   },
   {
     "id": "REG-018",
@@ -331,7 +493,10 @@
     "categorie": "Regularite",
     "difficulte": 4,
     "intensite": 3,
-    "fonctionnalites": ["Adaptation", "LectureJeu"],
+    "fonctionnalites": [
+      "Adaptation",
+      "LectureJeu"
+    ],
     "objectif": "S'adapter aux variations de vitesse.",
     "consignes": [
       "Alterner 5 balles lentes et 5 rapides."
@@ -339,9 +504,15 @@
     "criteresReussite": [
       "Aucune perte de contrôle."
     ],
-    "varianteFacile": ["Changement annoncé."],
-    "varianteDifficile": ["Changement non annoncé."],
-    "varianteCompetition": ["Point joué après chaque séquence."]
+    "varianteFacile": [
+      "Changement annoncé."
+    ],
+    "varianteDifficile": [
+      "Changement non annoncé."
+    ],
+    "varianteCompetition": [
+      "Point joué après chaque séquence."
+    ]
   },
   {
     "id": "REG-019",
@@ -349,7 +520,10 @@
     "categorie": "Regularite",
     "difficulte": 2,
     "intensite": 2,
-    "fonctionnalites": ["Concentration", "Regularite"],
+    "fonctionnalites": [
+      "Concentration",
+      "Regularite"
+    ],
     "objectif": "Développer la continuité de jeu.",
     "consignes": [
       "Atteindre 20 échanges sans erreur."
@@ -357,9 +531,15 @@
     "criteresReussite": [
       "20 échanges validés."
     ],
-    "varianteFacile": ["10 échanges."],
-    "varianteDifficile": ["40 échanges."],
-    "varianteCompetition": ["Classement des meilleures séries."]
+    "varianteFacile": [
+      "10 échanges."
+    ],
+    "varianteDifficile": [
+      "40 échanges."
+    ],
+    "varianteCompetition": [
+      "Classement des meilleures séries."
+    ]
   },
   {
     "id": "REG-020",
@@ -367,7 +547,11 @@
     "categorie": "Regularite",
     "difficulte": 4,
     "intensite": 3,
-    "fonctionnalites": ["Concentration", "EnduranceMentale", "Regularite"],
+    "fonctionnalites": [
+      "Concentration",
+      "EnduranceMentale",
+      "Regularite"
+    ],
     "objectif": "Maintenir une qualité de jeu élevée sur la durée.",
     "consignes": [
       "Réaliser 50 échanges sans faute.",
@@ -376,9 +560,15 @@
     "criteresReussite": [
       "50 échanges validés."
     ],
-    "varianteFacile": ["30 échanges."],
-    "varianteDifficile": ["80 échanges."],
-    "varianteCompetition": ["Challenge par équipes."]
+    "varianteFacile": [
+      "30 échanges."
+    ],
+    "varianteDifficile": [
+      "80 échanges."
+    ],
+    "varianteCompetition": [
+      "Challenge par équipes."
+    ]
   },
   {
     "id": "TOP-001",
@@ -386,7 +576,11 @@
     "categorie": "Topspin",
     "difficulte": 2,
     "intensite": 2,
-    "fonctionnalites": ["Topspin", "Timing", "Initiative"],
+    "fonctionnalites": [
+      "Topspin",
+      "Timing",
+      "Initiative"
+    ],
     "objectif": "Développer le démarrage coup droit sur balle coupée.",
     "consignes": [
       "Le joueur A pousse coupé dans le coup droit.",
@@ -398,9 +592,15 @@
       "Rotation visible.",
       "Position équilibrée."
     ],
-    "varianteFacile": ["Poussette toujours au même endroit."],
-    "varianteDifficile": ["Poussette aléatoire."],
-    "varianteCompetition": ["Point libre après le démarrage."]
+    "varianteFacile": [
+      "Poussette toujours au même endroit."
+    ],
+    "varianteDifficile": [
+      "Poussette aléatoire."
+    ],
+    "varianteCompetition": [
+      "Point libre après le démarrage."
+    ]
   },
   {
     "id": "TOP-002",
@@ -408,7 +608,11 @@
     "categorie": "Topspin",
     "difficulte": 3,
     "intensite": 2,
-    "fonctionnalites": ["TopspinRV", "Timing", "Coordination"],
+    "fonctionnalites": [
+      "TopspinRV",
+      "Timing",
+      "Coordination"
+    ],
     "objectif": "Développer le démarrage revers.",
     "consignes": [
       "Le joueur A pousse dans le revers.",
@@ -417,9 +621,15 @@
     "criteresReussite": [
       "Minimum 15 démarrages réussis."
     ],
-    "varianteFacile": ["Balle toujours au même placement."],
-    "varianteDifficile": ["Poussette courte ou longue aléatoire."],
-    "varianteCompetition": ["1 point seulement si top réussi."]
+    "varianteFacile": [
+      "Balle toujours au même placement."
+    ],
+    "varianteDifficile": [
+      "Poussette courte ou longue aléatoire."
+    ],
+    "varianteCompetition": [
+      "1 point seulement si top réussi."
+    ]
   },
   {
     "id": "TOP-003",
@@ -427,7 +637,10 @@
     "categorie": "Topspin",
     "difficulte": 2,
     "intensite": 3,
-    "fonctionnalites": ["Rotation", "Regularite"],
+    "fonctionnalites": [
+      "Rotation",
+      "Regularite"
+    ],
     "objectif": "Créer une forte rotation avec régularité.",
     "consignes": [
       "Top rotation sur bloc passif.",
@@ -436,9 +649,15 @@
     "criteresReussite": [
       "20 tops consécutifs."
     ],
-    "varianteFacile": ["Bloc lent."],
-    "varianteDifficile": ["Bloc actif."],
-    "varianteCompetition": ["Défi de régularité."]
+    "varianteFacile": [
+      "Bloc lent."
+    ],
+    "varianteDifficile": [
+      "Bloc actif."
+    ],
+    "varianteCompetition": [
+      "Défi de régularité."
+    ]
   },
   {
     "id": "TOP-004",
@@ -446,7 +665,10 @@
     "categorie": "Topspin",
     "difficulte": 3,
     "intensite": 4,
-    "fonctionnalites": ["Puissance", "Acceleration"],
+    "fonctionnalites": [
+      "Puissance",
+      "Acceleration"
+    ],
     "objectif": "Développer la vitesse de finition.",
     "consignes": [
       "Attaquer sur balle légèrement haute.",
@@ -455,9 +677,15 @@
     "criteresReussite": [
       "80% de balles sur la table."
     ],
-    "varianteFacile": ["Balles plus hautes."],
-    "varianteDifficile": ["Placement variable."],
-    "varianteCompetition": ["Point gagnant direct."]
+    "varianteFacile": [
+      "Balles plus hautes."
+    ],
+    "varianteDifficile": [
+      "Placement variable."
+    ],
+    "varianteCompetition": [
+      "Point gagnant direct."
+    ]
   },
   {
     "id": "TOP-005",
@@ -465,7 +693,10 @@
     "categorie": "Topspin",
     "difficulte": 4,
     "intensite": 4,
-    "fonctionnalites": ["Enchainement", "Puissance"],
+    "fonctionnalites": [
+      "Enchainement",
+      "Puissance"
+    ],
     "objectif": "Travailler la construction offensive.",
     "consignes": [
       "Premier top rotation.",
@@ -474,9 +705,15 @@
     "criteresReussite": [
       "Enchaînement maîtrisé sans perte d'équilibre."
     ],
-    "varianteFacile": ["Bloc passif."],
-    "varianteDifficile": ["Bloc actif."],
-    "varianteCompetition": ["Point libre après le deuxième top."]
+    "varianteFacile": [
+      "Bloc passif."
+    ],
+    "varianteDifficile": [
+      "Bloc actif."
+    ],
+    "varianteCompetition": [
+      "Point libre après le deuxième top."
+    ]
   },
   {
     "id": "TOP-006",
@@ -484,7 +721,10 @@
     "categorie": "Topspin",
     "difficulte": 3,
     "intensite": 3,
-    "fonctionnalites": ["Regularite", "Placement"],
+    "fonctionnalites": [
+      "Regularite",
+      "Placement"
+    ],
     "objectif": "Maintenir l'offensive face au bloc.",
     "consignes": [
       "Top continu sur bloc.",
@@ -493,9 +733,15 @@
     "criteresReussite": [
       "15 tops consécutifs."
     ],
-    "varianteFacile": ["Bloc fixe."],
-    "varianteDifficile": ["Bloc aléatoire."],
-    "varianteCompetition": ["Classement au nombre de tops."]
+    "varianteFacile": [
+      "Bloc fixe."
+    ],
+    "varianteDifficile": [
+      "Bloc aléatoire."
+    ],
+    "varianteCompetition": [
+      "Classement au nombre de tops."
+    ]
   },
   {
     "id": "TOP-007",
@@ -503,7 +749,10 @@
     "categorie": "Topspin",
     "difficulte": 3,
     "intensite": 3,
-    "fonctionnalites": ["Transition", "Reaction"],
+    "fonctionnalites": [
+      "Transition",
+      "Reaction"
+    ],
     "objectif": "Passer rapidement de la défense à l'attaque.",
     "consignes": [
       "Un bloc.",
@@ -512,9 +761,15 @@
     "criteresReussite": [
       "Transition fluide."
     ],
-    "varianteFacile": ["Top annoncé."],
-    "varianteDifficile": ["Moment du top imprévisible."],
-    "varianteCompetition": ["Point libre après transition."]
+    "varianteFacile": [
+      "Top annoncé."
+    ],
+    "varianteDifficile": [
+      "Moment du top imprévisible."
+    ],
+    "varianteCompetition": [
+      "Point libre après transition."
+    ]
   },
   {
     "id": "TOP-008",
@@ -522,7 +777,10 @@
     "categorie": "Topspin",
     "difficulte": 4,
     "intensite": 4,
-    "fonctionnalites": ["Endurance", "Puissance"],
+    "fonctionnalites": [
+      "Endurance",
+      "Puissance"
+    ],
     "objectif": "Maintenir une attaque efficace à distance.",
     "consignes": [
       "Reculer à 2-3 mètres.",
@@ -531,9 +789,15 @@
     "criteresReussite": [
       "10 échanges minimum."
     ],
-    "varianteFacile": ["Distance réduite."],
-    "varianteDifficile": ["Distance augmentée."],
-    "varianteCompetition": ["Défi de durée."]
+    "varianteFacile": [
+      "Distance réduite."
+    ],
+    "varianteDifficile": [
+      "Distance augmentée."
+    ],
+    "varianteCompetition": [
+      "Défi de durée."
+    ]
   },
   {
     "id": "TOP-009",
@@ -541,7 +805,10 @@
     "categorie": "Topspin",
     "difficulte": 5,
     "intensite": 5,
-    "fonctionnalites": ["LectureEffets", "Resistance"],
+    "fonctionnalites": [
+      "LectureEffets",
+      "Resistance"
+    ],
     "objectif": "Maîtriser les échanges offensifs.",
     "consignes": [
       "Chaque joueur joue en topspin.",
@@ -550,9 +817,15 @@
     "criteresReussite": [
       "10 échanges réussis."
     ],
-    "varianteFacile": ["Distance réduite."],
-    "varianteDifficile": ["Vitesse accrue."],
-    "varianteCompetition": ["Point uniquement sur attaque."]
+    "varianteFacile": [
+      "Distance réduite."
+    ],
+    "varianteDifficile": [
+      "Vitesse accrue."
+    ],
+    "varianteCompetition": [
+      "Point uniquement sur attaque."
+    ]
   },
   {
     "id": "TOP-010",
@@ -560,7 +833,10 @@
     "categorie": "Topspin",
     "difficulte": 5,
     "intensite": 5,
-    "fonctionnalites": ["Reaction", "PriseBallePrecoce"],
+    "fonctionnalites": [
+      "Reaction",
+      "PriseBallePrecoce"
+    ],
     "objectif": "Développer le contre-top offensif.",
     "consignes": [
       "Prendre la balle tôt après le rebond.",
@@ -569,9 +845,15 @@
     "criteresReussite": [
       "Précision malgré la vitesse."
     ],
-    "varianteFacile": ["Vitesse réduite."],
-    "varianteDifficile": ["Contre-top des deux côtés."],
-    "varianteCompetition": ["Points directs recherchés."]
+    "varianteFacile": [
+      "Vitesse réduite."
+    ],
+    "varianteDifficile": [
+      "Contre-top des deux côtés."
+    ],
+    "varianteCompetition": [
+      "Points directs recherchés."
+    ]
   },
   {
     "id": "TOP-011",
@@ -579,7 +861,10 @@
     "categorie": "Topspin",
     "difficulte": 5,
     "intensite": 5,
-    "fonctionnalites": ["Explosivite", "Timing"],
+    "fonctionnalites": [
+      "Explosivite",
+      "Timing"
+    ],
     "objectif": "Développer le contre-top à distance.",
     "consignes": [
       "Contre-top après recul.",
@@ -588,9 +873,15 @@
     "criteresReussite": [
       "Qualité offensive conservée."
     ],
-    "varianteFacile": ["Top plus lent."],
-    "varianteDifficile": ["Placements variés."],
-    "varianteCompetition": ["Match à thème."]
+    "varianteFacile": [
+      "Top plus lent."
+    ],
+    "varianteDifficile": [
+      "Placements variés."
+    ],
+    "varianteCompetition": [
+      "Match à thème."
+    ]
   },
   {
     "id": "TOP-012",
@@ -598,7 +889,10 @@
     "categorie": "Topspin",
     "difficulte": 3,
     "intensite": 3,
-    "fonctionnalites": ["Placement", "Precision"],
+    "fonctionnalites": [
+      "Placement",
+      "Precision"
+    ],
     "objectif": "Maîtriser l'attaque long de ligne.",
     "consignes": [
       "Tous les tops sont joués en parallèle."
@@ -606,9 +900,15 @@
     "criteresReussite": [
       "70% de réussite."
     ],
-    "varianteFacile": ["Vitesse réduite."],
-    "varianteDifficile": ["Cible imposée."],
-    "varianteCompetition": ["Points bonus si la cible est touchée."]
+    "varianteFacile": [
+      "Vitesse réduite."
+    ],
+    "varianteDifficile": [
+      "Cible imposée."
+    ],
+    "varianteCompetition": [
+      "Points bonus si la cible est touchée."
+    ]
   },
   {
     "id": "TOP-013",
@@ -616,7 +916,10 @@
     "categorie": "Topspin",
     "difficulte": 2,
     "intensite": 3,
-    "fonctionnalites": ["Regularite", "Placement"],
+    "fonctionnalites": [
+      "Regularite",
+      "Placement"
+    ],
     "objectif": "Stabiliser le topspin diagonal.",
     "consignes": [
       "Top rotation en diagonale."
@@ -624,9 +927,15 @@
     "criteresReussite": [
       "20 tops consécutifs."
     ],
-    "varianteFacile": ["Bloc passif."],
-    "varianteDifficile": ["Bloc actif."],
-    "varianteCompetition": ["Défi du plus long échange."]
+    "varianteFacile": [
+      "Bloc passif."
+    ],
+    "varianteDifficile": [
+      "Bloc actif."
+    ],
+    "varianteCompetition": [
+      "Défi du plus long échange."
+    ]
   },
   {
     "id": "TOP-014",
@@ -634,7 +943,10 @@
     "categorie": "Topspin",
     "difficulte": 4,
     "intensite": 4,
-    "fonctionnalites": ["Adaptation", "LectureJeu"],
+    "fonctionnalites": [
+      "Adaptation",
+      "LectureJeu"
+    ],
     "objectif": "Attaquer quelle que soit la zone.",
     "consignes": [
       "Distribution aléatoire sur toute la table."
@@ -642,9 +954,15 @@
     "criteresReussite": [
       "Maintenir au moins 60% de réussite."
     ],
-    "varianteFacile": ["Deux zones seulement."],
-    "varianteDifficile": ["Table complète."],
-    "varianteCompetition": ["Série chronométrée."]
+    "varianteFacile": [
+      "Deux zones seulement."
+    ],
+    "varianteDifficile": [
+      "Table complète."
+    ],
+    "varianteCompetition": [
+      "Série chronométrée."
+    ]
   },
   {
     "id": "TOP-015",
@@ -652,7 +970,10 @@
     "categorie": "Topspin",
     "difficulte": 4,
     "intensite": 4,
-    "fonctionnalites": ["ConstructionPoint", "Puissance"],
+    "fonctionnalites": [
+      "ConstructionPoint",
+      "Puissance"
+    ],
     "objectif": "Préparer la balle de finition.",
     "consignes": [
       "Réaliser deux tops rotations.",
@@ -661,9 +982,15 @@
     "criteresReussite": [
       "Bonne progression de vitesse."
     ],
-    "varianteFacile": ["Bloc prévisible."],
-    "varianteDifficile": ["Bloc aléatoire."],
-    "varianteCompetition": ["Point gagné uniquement après la frappe finale."]
+    "varianteFacile": [
+      "Bloc prévisible."
+    ],
+    "varianteDifficile": [
+      "Bloc aléatoire."
+    ],
+    "varianteCompetition": [
+      "Point gagné uniquement après la frappe finale."
+    ]
   },
   {
     "id": "TOP-016",
@@ -671,7 +998,10 @@
     "categorie": "Topspin",
     "difficulte": 4,
     "intensite": 4,
-    "fonctionnalites": ["Pivot", "Explosivite"],
+    "fonctionnalites": [
+      "Pivot",
+      "Explosivite"
+    ],
     "objectif": "Utiliser le pivot comme arme offensive.",
     "consignes": [
       "Chaque balle revers doit être pivotée."
@@ -679,9 +1009,15 @@
     "criteresReussite": [
       "Pivot rapide et équilibré."
     ],
-    "varianteFacile": ["Une balle sur deux."],
-    "varianteDifficile": ["Placement aléatoire."],
-    "varianteCompetition": ["Match avec pivot obligatoire."]
+    "varianteFacile": [
+      "Une balle sur deux."
+    ],
+    "varianteDifficile": [
+      "Placement aléatoire."
+    ],
+    "varianteCompetition": [
+      "Match avec pivot obligatoire."
+    ]
   },
   {
     "id": "TOP-017",
@@ -689,7 +1025,10 @@
     "categorie": "Topspin",
     "difficulte": 3,
     "intensite": 3,
-    "fonctionnalites": ["Service", "TroisiemeBalle"],
+    "fonctionnalites": [
+      "Service",
+      "TroisiemeBalle"
+    ],
     "objectif": "Mettre en place le schéma service-attaque.",
     "consignes": [
       "Servir.",
@@ -698,9 +1037,15 @@
     "criteresReussite": [
       "Prise d'initiative rapide."
     ],
-    "varianteFacile": ["Remise imposée."],
-    "varianteDifficile": ["Remise libre."],
-    "varianteCompetition": ["Match à thème 3e balle."]
+    "varianteFacile": [
+      "Remise imposée."
+    ],
+    "varianteDifficile": [
+      "Remise libre."
+    ],
+    "varianteCompetition": [
+      "Match à thème 3e balle."
+    ]
   },
   {
     "id": "TOP-018",
@@ -708,7 +1053,10 @@
     "categorie": "Topspin",
     "difficulte": 4,
     "intensite": 3,
-    "fonctionnalites": ["Tactique", "Initiative"],
+    "fonctionnalites": [
+      "Tactique",
+      "Initiative"
+    ],
     "objectif": "Optimiser la troisième balle.",
     "consignes": [
       "Construire le démarrage après le service."
@@ -716,9 +1064,15 @@
     "criteresReussite": [
       "70% d'attaques réussies."
     ],
-    "varianteFacile": ["Service unique."],
-    "varianteDifficile": ["Services variés."],
-    "varianteCompetition": ["Points uniquement après attaque."]
+    "varianteFacile": [
+      "Service unique."
+    ],
+    "varianteDifficile": [
+      "Services variés."
+    ],
+    "varianteCompetition": [
+      "Points uniquement après attaque."
+    ]
   },
   {
     "id": "TOP-019",
@@ -726,7 +1080,10 @@
     "categorie": "Topspin",
     "difficulte": 4,
     "intensite": 4,
-    "fonctionnalites": ["ConstructionPoint", "Anticipation"],
+    "fonctionnalites": [
+      "ConstructionPoint",
+      "Anticipation"
+    ],
     "objectif": "Préparer l'attaque suivante.",
     "consignes": [
       "Service.",
@@ -736,9 +1093,15 @@
     "criteresReussite": [
       "Enchaînement cohérent."
     ],
-    "varianteFacile": ["Bloc prévisible."],
-    "varianteDifficile": ["Bloc actif."],
-    "varianteCompetition": ["Comptabiliser les séquences réussies."]
+    "varianteFacile": [
+      "Bloc prévisible."
+    ],
+    "varianteDifficile": [
+      "Bloc actif."
+    ],
+    "varianteCompetition": [
+      "Comptabiliser les séquences réussies."
+    ]
   },
   {
     "id": "TOP-020",
@@ -746,7 +1109,11 @@
     "categorie": "Topspin",
     "difficulte": 5,
     "intensite": 5,
-    "fonctionnalites": ["Mental", "Concentration", "Offensive"],
+    "fonctionnalites": [
+      "Mental",
+      "Concentration",
+      "Offensive"
+    ],
     "objectif": "Rester performant sous contrainte.",
     "consignes": [
       "Commencer chaque exercice à 9-9.",
@@ -755,9 +1122,15 @@
     "criteresReussite": [
       "Qualité technique maintenue sous pression."
     ],
-    "varianteFacile": ["Départ à 8-8."],
-    "varianteDifficile": ["Une seule attaque autorisée."],
-    "varianteCompetition": ["Mini-matchs à élimination."]
+    "varianteFacile": [
+      "Départ à 8-8."
+    ],
+    "varianteDifficile": [
+      "Une seule attaque autorisée."
+    ],
+    "varianteCompetition": [
+      "Mini-matchs à élimination."
+    ]
   },
   {
     "id": "SERV-001",
@@ -765,7 +1138,11 @@
     "categorie": "Service",
     "difficulte": 1,
     "intensite": 1,
-    "fonctionnalites": ["Service", "EffetCoupe", "Precision"],
+    "fonctionnalites": [
+      "Service",
+      "EffetCoupe",
+      "Precision"
+    ],
     "objectif": "Maîtriser le service court coupé.",
     "consignes": [
       "Effectuer un service rebondissant deux fois sur la table adverse.",
@@ -776,9 +1153,15 @@
       "8 services sur 10 avec double rebond.",
       "Trajectoire basse."
     ],
-    "varianteFacile": ["Zone libre sur la table."],
-    "varianteDifficile": ["Zone cible imposée."],
-    "varianteCompetition": ["Concours de précision sur 20 services."]
+    "varianteFacile": [
+      "Zone libre sur la table."
+    ],
+    "varianteDifficile": [
+      "Zone cible imposée."
+    ],
+    "varianteCompetition": [
+      "Concours de précision sur 20 services."
+    ]
   },
   {
     "id": "SERV-002",
@@ -786,7 +1169,11 @@
     "categorie": "Service",
     "difficulte": 2,
     "intensite": 1,
-    "fonctionnalites": ["Variation", "Toucher", "Service"],
+    "fonctionnalites": [
+      "Variation",
+      "Toucher",
+      "Service"
+    ],
     "objectif": "Développer les variations d'effet.",
     "consignes": [
       "Effectuer un service identique visuellement à un service coupé.",
@@ -795,9 +1182,15 @@
     "criteresReussite": [
       "L'adversaire identifie mal l'effet."
     ],
-    "varianteFacile": ["Service sans cible."],
-    "varianteDifficile": ["Alternance coupé/mou aléatoire."],
-    "varianteCompetition": ["Point gagné si mauvaise lecture adverse."]
+    "varianteFacile": [
+      "Service sans cible."
+    ],
+    "varianteDifficile": [
+      "Alternance coupé/mou aléatoire."
+    ],
+    "varianteCompetition": [
+      "Point gagné si mauvaise lecture adverse."
+    ]
   },
   {
     "id": "SERV-003",
@@ -805,7 +1198,10 @@
     "categorie": "Service",
     "difficulte": 2,
     "intensite": 1,
-    "fonctionnalites": ["EffetLateral", "Variation"],
+    "fonctionnalites": [
+      "EffetLateral",
+      "Variation"
+    ],
     "objectif": "Créer de la gêne avec l'effet latéral.",
     "consignes": [
       "Privilégier le contact latéral sur la balle.",
@@ -814,9 +1210,15 @@
     "criteresReussite": [
       "Rotation latérale visible."
     ],
-    "varianteFacile": ["Effet unique."],
-    "varianteDifficile": ["Variation latéral coupé/lifté."],
-    "varianteCompetition": ["5 services consécutifs en cible."]
+    "varianteFacile": [
+      "Effet unique."
+    ],
+    "varianteDifficile": [
+      "Variation latéral coupé/lifté."
+    ],
+    "varianteCompetition": [
+      "5 services consécutifs en cible."
+    ]
   },
   {
     "id": "SERV-004",
@@ -824,7 +1226,10 @@
     "categorie": "Service",
     "difficulte": 2,
     "intensite": 2,
-    "fonctionnalites": ["Vitesse", "Surprise"],
+    "fonctionnalites": [
+      "Vitesse",
+      "Surprise"
+    ],
     "objectif": "Surprendre l'adversaire avec un service long.",
     "consignes": [
       "Servir rapide et profond.",
@@ -833,9 +1238,15 @@
     "criteresReussite": [
       "Le receveur ne prend pas l'initiative."
     ],
-    "varianteFacile": ["Long au centre."],
-    "varianteDifficile": ["Placement aléatoire."],
-    "varianteCompetition": ["Service suivi d'une 3e balle."]
+    "varianteFacile": [
+      "Long au centre."
+    ],
+    "varianteDifficile": [
+      "Placement aléatoire."
+    ],
+    "varianteCompetition": [
+      "Service suivi d'une 3e balle."
+    ]
   },
   {
     "id": "SERV-005",
@@ -843,7 +1254,10 @@
     "categorie": "Service",
     "difficulte": 3,
     "intensite": 1,
-    "fonctionnalites": ["Technique", "Variation"],
+    "fonctionnalites": [
+      "Technique",
+      "Variation"
+    ],
     "objectif": "Maîtriser la gestuelle marteau.",
     "consignes": [
       "Utiliser un mouvement de type marteau.",
@@ -853,9 +1267,15 @@
       "Gestuelle fluide.",
       "Effet reproductible."
     ],
-    "varianteFacile": ["Placement fixe."],
-    "varianteDifficile": ["Variation longueur et effet."],
-    "varianteCompetition": ["Série de 10 services différents."]
+    "varianteFacile": [
+      "Placement fixe."
+    ],
+    "varianteDifficile": [
+      "Variation longueur et effet."
+    ],
+    "varianteCompetition": [
+      "Série de 10 services différents."
+    ]
   },
   {
     "id": "SERV-006",
@@ -863,7 +1283,10 @@
     "categorie": "Service",
     "difficulte": 3,
     "intensite": 1,
-    "fonctionnalites": ["EffetLateral", "Placement"],
+    "fonctionnalites": [
+      "EffetLateral",
+      "Placement"
+    ],
     "objectif": "Développer un service difficile à remettre.",
     "consignes": [
       "Produire une trajectoire rentrante.",
@@ -872,9 +1295,15 @@
     "criteresReussite": [
       "Remises adverses de faible qualité."
     ],
-    "varianteFacile": ["Effet faible."],
-    "varianteDifficile": ["Effet très prononcé."],
-    "varianteCompetition": ["Jeu uniquement sur service rentrant."]
+    "varianteFacile": [
+      "Effet faible."
+    ],
+    "varianteDifficile": [
+      "Effet très prononcé."
+    ],
+    "varianteCompetition": [
+      "Jeu uniquement sur service rentrant."
+    ]
   },
   {
     "id": "SERV-007",
@@ -882,7 +1311,10 @@
     "categorie": "Service",
     "difficulte": 3,
     "intensite": 1,
-    "fonctionnalites": ["Variation", "Placement"],
+    "fonctionnalites": [
+      "Variation",
+      "Placement"
+    ],
     "objectif": "Ouvrir la table grâce à l'effet sortant.",
     "consignes": [
       "Chercher à écarter le receveur.",
@@ -891,9 +1323,15 @@
     "criteresReussite": [
       "Remise éloignée du centre."
     ],
-    "varianteFacile": ["Effet constant."],
-    "varianteDifficile": ["Variation longueur/effet."],
-    "varianteCompetition": ["Point libre après remise."]
+    "varianteFacile": [
+      "Effet constant."
+    ],
+    "varianteDifficile": [
+      "Variation longueur/effet."
+    ],
+    "varianteCompetition": [
+      "Point libre après remise."
+    ]
   },
   {
     "id": "SERV-008",
@@ -901,7 +1339,10 @@
     "categorie": "Service",
     "difficulte": 2,
     "intensite": 1,
-    "fonctionnalites": ["Precision", "Toucher"],
+    "fonctionnalites": [
+      "Precision",
+      "Toucher"
+    ],
     "objectif": "Maîtriser les services très courts.",
     "consignes": [
       "Le deuxième rebond doit être proche du filet.",
@@ -910,9 +1351,15 @@
     "criteresReussite": [
       "8 services sur 10 validés."
     ],
-    "varianteFacile": ["Zone large."],
-    "varianteDifficile": ["Zone réduite."],
-    "varianteCompetition": ["Défi par équipes."]
+    "varianteFacile": [
+      "Zone large."
+    ],
+    "varianteDifficile": [
+      "Zone réduite."
+    ],
+    "varianteCompetition": [
+      "Défi par équipes."
+    ]
   },
   {
     "id": "SERV-009",
@@ -920,7 +1367,10 @@
     "categorie": "Service",
     "difficulte": 2,
     "intensite": 1,
-    "fonctionnalites": ["Precision", "Placement"],
+    "fonctionnalites": [
+      "Precision",
+      "Placement"
+    ],
     "objectif": "Améliorer le placement des services.",
     "consignes": [
       "Viser une zone matérialisée.",
@@ -929,9 +1379,15 @@
     "criteresReussite": [
       "70 % des services dans la cible."
     ],
-    "varianteFacile": ["Grande cible."],
-    "varianteDifficile": ["Petite cible."],
-    "varianteCompetition": ["Barème de points."]
+    "varianteFacile": [
+      "Grande cible."
+    ],
+    "varianteDifficile": [
+      "Petite cible."
+    ],
+    "varianteCompetition": [
+      "Barème de points."
+    ]
   },
   {
     "id": "SERV-010",
@@ -939,7 +1395,10 @@
     "categorie": "Service",
     "difficulte": 2,
     "intensite": 1,
-    "fonctionnalites": ["Concentration", "Precision"],
+    "fonctionnalites": [
+      "Concentration",
+      "Precision"
+    ],
     "objectif": "Répéter un service identique.",
     "consignes": [
       "Exécuter 20 services consécutifs.",
@@ -948,9 +1407,15 @@
     "criteresReussite": [
       "Régularité élevée."
     ],
-    "varianteFacile": ["10 services."],
-    "varianteDifficile": ["30 services."],
-    "varianteCompetition": ["Classement des résultats."]
+    "varianteFacile": [
+      "10 services."
+    ],
+    "varianteDifficile": [
+      "30 services."
+    ],
+    "varianteCompetition": [
+      "Classement des résultats."
+    ]
   },
   {
     "id": "SERV-011",
@@ -958,7 +1423,10 @@
     "categorie": "Service",
     "difficulte": 4,
     "intensite": 1,
-    "fonctionnalites": ["Tactique", "Variation"],
+    "fonctionnalites": [
+      "Tactique",
+      "Variation"
+    ],
     "objectif": "Masquer les différences d'effet.",
     "consignes": [
       "Alterner coupé, mou et lifté.",
@@ -967,9 +1435,15 @@
     "criteresReussite": [
       "Lecture adverse difficile."
     ],
-    "varianteFacile": ["Deux effets seulement."],
-    "varianteDifficile": ["Trois effets aléatoires."],
-    "varianteCompetition": ["Le partenaire doit annoncer l'effet."]
+    "varianteFacile": [
+      "Deux effets seulement."
+    ],
+    "varianteDifficile": [
+      "Trois effets aléatoires."
+    ],
+    "varianteCompetition": [
+      "Le partenaire doit annoncer l'effet."
+    ]
   },
   {
     "id": "SERV-012",
@@ -977,7 +1451,10 @@
     "categorie": "Service",
     "difficulte": 3,
     "intensite": 1,
-    "fonctionnalites": ["Placement", "Variation"],
+    "fonctionnalites": [
+      "Placement",
+      "Variation"
+    ],
     "objectif": "Alterner court et long efficacement.",
     "consignes": [
       "Alterner service court et service long.",
@@ -986,9 +1463,15 @@
     "criteresReussite": [
       "Longueur difficilement détectable."
     ],
-    "varianteFacile": ["Schéma annoncé."],
-    "varianteDifficile": ["Schéma aléatoire."],
-    "varianteCompetition": ["Point libre après remise."]
+    "varianteFacile": [
+      "Schéma annoncé."
+    ],
+    "varianteDifficile": [
+      "Schéma aléatoire."
+    ],
+    "varianteCompetition": [
+      "Point libre après remise."
+    ]
   },
   {
     "id": "SERV-013",
@@ -996,7 +1479,10 @@
     "categorie": "Service",
     "difficulte": 3,
     "intensite": 1,
-    "fonctionnalites": ["Placement", "Strategie"],
+    "fonctionnalites": [
+      "Placement",
+      "Strategie"
+    ],
     "objectif": "Servir dans toutes les zones tactiques.",
     "consignes": [
       "Servir tour à tour revers, coude et coup droit.",
@@ -1005,9 +1491,15 @@
     "criteresReussite": [
       "Zone atteinte dans 80 % des cas."
     ],
-    "varianteFacile": ["Deux zones seulement."],
-    "varianteDifficile": ["Choix aléatoire complet."],
-    "varianteCompetition": ["Défi de précision."]
+    "varianteFacile": [
+      "Deux zones seulement."
+    ],
+    "varianteDifficile": [
+      "Choix aléatoire complet."
+    ],
+    "varianteCompetition": [
+      "Défi de précision."
+    ]
   },
   {
     "id": "SERV-014",
@@ -1015,7 +1507,11 @@
     "categorie": "Service",
     "difficulte": 4,
     "intensite": 3,
-    "fonctionnalites": ["TroisiemeBalle", "Initiative", "Tactique"],
+    "fonctionnalites": [
+      "TroisiemeBalle",
+      "Initiative",
+      "Tactique"
+    ],
     "objectif": "Construire un schéma de point après le service.",
     "consignes": [
       "Servir avec un objectif précis.",
@@ -1026,9 +1522,15 @@
       "Schéma respecté.",
       "Prise d'initiative rapide."
     ],
-    "varianteFacile": ["Remise imposée."],
-    "varianteDifficile": ["Remise libre."],
-    "varianteCompetition": ["Match à thème 3e balle."]
+    "varianteFacile": [
+      "Remise imposée."
+    ],
+    "varianteDifficile": [
+      "Remise libre."
+    ],
+    "varianteCompetition": [
+      "Match à thème 3e balle."
+    ]
   },
   {
     "id": "SERV-015",
@@ -1036,7 +1538,11 @@
     "categorie": "Service",
     "difficulte": 5,
     "intensite": 3,
-    "fonctionnalites": ["Tactique", "LectureAdverse", "Adaptation"],
+    "fonctionnalites": [
+      "Tactique",
+      "LectureAdverse",
+      "Adaptation"
+    ],
     "objectif": "Choisir le meilleur service selon l'adversaire.",
     "consignes": [
       "Analyser la qualité des remises.",
@@ -1047,8 +1553,3538 @@
       "Création d'opportunités offensives.",
       "Adaptation pertinente."
     ],
-    "varianteFacile": ["Nombre limité de services."],
-    "varianteDifficile": ["Changement de stratégie imposé."],
-    "varianteCompetition": ["Match complet avec analyse statistique des services."]
+    "varianteFacile": [
+      "Nombre limité de services."
+    ],
+    "varianteDifficile": [
+      "Changement de stratégie imposé."
+    ],
+    "varianteCompetition": [
+      "Match complet avec analyse statistique des services."
+    ]
+  },
+  {
+    "id": "REM-001",
+    "nom": "Remise courte coupée",
+    "categorie": "Remise",
+    "difficulte": 2,
+    "intensite": 1,
+    "fonctionnalites": [
+      "Remise",
+      "Toucher",
+      "JeuCourt"
+    ],
+    "objectif": "Maintenir la balle courte après un service court.",
+    "consignes": [
+      "Le partenaire sert court coupé.",
+      "Remettre court avec un rebond proche du filet.",
+      "Éviter toute balle attaquable."
+    ],
+    "criteresReussite": [
+      "8 remises sur 10 restent courtes.",
+      "Trajectoire basse."
+    ],
+    "varianteFacile": [
+      "Service toujours identique."
+    ],
+    "varianteDifficile": [
+      "Variation d'effet."
+    ],
+    "varianteCompetition": [
+      "Point perdu si la remise sort de la zone courte."
+    ]
+  },
+  {
+    "id": "REM-002",
+    "nom": "Remise longue coupée",
+    "categorie": "Remise",
+    "difficulte": 2,
+    "intensite": 1,
+    "fonctionnalites": [
+      "Remise",
+      "Placement",
+      "Variation"
+    ],
+    "objectif": "Empêcher le serveur d'attaquer facilement.",
+    "consignes": [
+      "Remettre long et tendu.",
+      "Chercher les lignes ou le coude."
+    ],
+    "criteresReussite": [
+      "70% des remises atteignent le fond de table."
+    ],
+    "varianteFacile": [
+      "Placement libre."
+    ],
+    "varianteDifficile": [
+      "Placement imposé."
+    ],
+    "varianteCompetition": [
+      "Bonus si le serveur ne démarre pas."
+    ]
+  },
+  {
+    "id": "REM-003",
+    "nom": "Remise tendue active",
+    "categorie": "Remise",
+    "difficulte": 3,
+    "intensite": 2,
+    "fonctionnalites": [
+      "Initiative",
+      "Agressivite"
+    ],
+    "objectif": "Prendre l'initiative sans attaquer.",
+    "consignes": [
+      "Prendre la balle tôt.",
+      "Jouer une balle rapide et tendue."
+    ],
+    "criteresReussite": [
+      "Remise basse et rapide."
+    ],
+    "varianteFacile": [
+      "Service prévisible."
+    ],
+    "varianteDifficile": [
+      "Service varié."
+    ],
+    "varianteCompetition": [
+      "Point libre immédiatement."
+    ]
+  },
+  {
+    "id": "REM-004",
+    "nom": "Flip coup droit",
+    "categorie": "Remise",
+    "difficulte": 3,
+    "intensite": 3,
+    "fonctionnalites": [
+      "Flip",
+      "Initiative",
+      "Explosivite"
+    ],
+    "objectif": "Attaquer une balle courte avec le coup droit.",
+    "consignes": [
+      "Entrer sous la balle.",
+      "Accélérer vers l'avant."
+    ],
+    "criteresReussite": [
+      "Balle offensive avec peu de fautes."
+    ],
+    "varianteFacile": [
+      "Service sans effet."
+    ],
+    "varianteDifficile": [
+      "Service coupé fort."
+    ],
+    "varianteCompetition": [
+      "Point gagné uniquement après flip."
+    ]
+  },
+  {
+    "id": "REM-005",
+    "nom": "Flip revers",
+    "categorie": "Remise",
+    "difficulte": 4,
+    "intensite": 3,
+    "fonctionnalites": [
+      "FlipRV",
+      "Timing",
+      "Offensive"
+    ],
+    "objectif": "Développer la prise d'initiative revers.",
+    "consignes": [
+      "Prendre la balle au sommet du rebond.",
+      "Chercher la vitesse."
+    ],
+    "criteresReussite": [
+      "70% de flips réussis."
+    ],
+    "varianteFacile": [
+      "Balle légèrement plus longue."
+    ],
+    "varianteDifficile": [
+      "Service très court."
+    ],
+    "varianteCompetition": [
+      "Match à thème flip."
+    ]
+  },
+  {
+    "id": "REM-006",
+    "nom": "Banana Flip",
+    "categorie": "Remise",
+    "difficulte": 5,
+    "intensite": 3,
+    "fonctionnalites": [
+      "Banana",
+      "TechniqueAvancee"
+    ],
+    "objectif": "Développer le banana flip moderne.",
+    "consignes": [
+      "Contourner la balle avec la tête de raquette.",
+      "Générer rotation et vitesse."
+    ],
+    "criteresReussite": [
+      "Trajectoire courbe et agressive."
+    ],
+    "varianteFacile": [
+      "Service peu coupé."
+    ],
+    "varianteDifficile": [
+      "Service très coupé."
+    ],
+    "varianteCompetition": [
+      "Point bonus sur banana gagnant."
+    ]
+  },
+  {
+    "id": "REM-007",
+    "nom": "Chiquita enchaînée",
+    "categorie": "Remise",
+    "difficulte": 5,
+    "intensite": 4,
+    "fonctionnalites": [
+      "Chiquita",
+      "Initiative",
+      "Enchainement"
+    ],
+    "objectif": "Préparer la première attaque après la remise.",
+    "consignes": [
+      "Effectuer une chiquita.",
+      "Enchaîner directement avec une attaque."
+    ],
+    "criteresReussite": [
+      "Transition rapide."
+    ],
+    "varianteFacile": [
+      "Bloc passif en face."
+    ],
+    "varianteDifficile": [
+      "Bloc actif."
+    ],
+    "varianteCompetition": [
+      "Point libre après la chiquita."
+    ]
+  },
+  {
+    "id": "REM-008",
+    "nom": "Remise agressive au coude",
+    "categorie": "Remise",
+    "difficulte": 3,
+    "intensite": 2,
+    "fonctionnalites": [
+      "Placement",
+      "Tactique"
+    ],
+    "objectif": "Exploiter la zone d'incertitude adverse.",
+    "consignes": [
+      "Viser systématiquement le coude adverse."
+    ],
+    "criteresReussite": [
+      "Difficulté visible chez le serveur."
+    ],
+    "varianteFacile": [
+      "Placement annoncé."
+    ],
+    "varianteDifficile": [
+      "Alternance coude/revers."
+    ],
+    "varianteCompetition": [
+      "Statistiques de réussite."
+    ]
+  },
+  {
+    "id": "REM-009",
+    "nom": "Remise croisée",
+    "categorie": "Remise",
+    "difficulte": 2,
+    "intensite": 1,
+    "fonctionnalites": [
+      "Placement",
+      "Controle"
+    ],
+    "objectif": "Stabiliser la remise diagonale.",
+    "consignes": [
+      "Toutes les remises sont jouées en diagonale."
+    ],
+    "criteresReussite": [
+      "80% des remises sur la table."
+    ],
+    "varianteFacile": [
+      "Effet identique."
+    ],
+    "varianteDifficile": [
+      "Effets variés."
+    ],
+    "varianteCompetition": [
+      "Défi de régularité."
+    ]
+  },
+  {
+    "id": "REM-010",
+    "nom": "Remise parallèle",
+    "categorie": "Remise",
+    "difficulte": 3,
+    "intensite": 1,
+    "fonctionnalites": [
+      "Placement",
+      "Precision"
+    ],
+    "objectif": "Jouer long de ligne dès la remise.",
+    "consignes": [
+      "Chercher la ligne latérale.",
+      "Conserver une trajectoire tendue."
+    ],
+    "criteresReussite": [
+      "60% de réussite minimum."
+    ],
+    "varianteFacile": [
+      "Zone élargie."
+    ],
+    "varianteDifficile": [
+      "Petite cible."
+    ],
+    "varianteCompetition": [
+      "Points bonus en cible."
+    ]
+  },
+  {
+    "id": "REM-011",
+    "nom": "Lecture d'effet",
+    "categorie": "Remise",
+    "difficulte": 3,
+    "intensite": 1,
+    "fonctionnalites": [
+      "LectureEffet",
+      "Observation"
+    ],
+    "objectif": "Identifier correctement les effets de service.",
+    "consignes": [
+      "Le serveur varie les effets.",
+      "Le relanceur annonce l'effet avant la remise."
+    ],
+    "criteresReussite": [
+      "80% de bonnes lectures."
+    ],
+    "varianteFacile": [
+      "Deux effets seulement."
+    ],
+    "varianteDifficile": [
+      "Trois ou quatre effets."
+    ],
+    "varianteCompetition": [
+      "Classement sur score de lecture."
+    ]
+  },
+  {
+    "id": "REM-012",
+    "nom": "Remise surprise",
+    "categorie": "Remise",
+    "difficulte": 4,
+    "intensite": 2,
+    "fonctionnalites": [
+      "Variation",
+      "Tactique"
+    ],
+    "objectif": "Casser les habitudes du serveur.",
+    "consignes": [
+      "Alterner court, long, flip et poussette.",
+      "Éviter toute logique répétitive."
+    ],
+    "criteresReussite": [
+      "Le serveur anticipe difficilement."
+    ],
+    "varianteFacile": [
+      "Deux choix seulement."
+    ],
+    "varianteDifficile": [
+      "Choix totalement libre."
+    ],
+    "varianteCompetition": [
+      "Analyse des choix tactiques."
+    ]
+  },
+  {
+    "id": "REM-013",
+    "nom": "Remise puis bloc",
+    "categorie": "Remise",
+    "difficulte": 3,
+    "intensite": 3,
+    "fonctionnalites": [
+      "Transition",
+      "Bloc"
+    ],
+    "objectif": "Préparer la défense après la remise.",
+    "consignes": [
+      "Remettre.",
+      "Se préparer immédiatement au bloc."
+    ],
+    "criteresReussite": [
+      "Position prête après la remise."
+    ],
+    "varianteFacile": [
+      "Attaque prévisible."
+    ],
+    "varianteDifficile": [
+      "Attaque libre."
+    ],
+    "varianteCompetition": [
+      "Point libre."
+    ]
+  },
+  {
+    "id": "REM-014",
+    "nom": "Remise puis contre-initiative",
+    "categorie": "Remise",
+    "difficulte": 4,
+    "intensite": 4,
+    "fonctionnalites": [
+      "Initiative",
+      "Anticipation"
+    ],
+    "objectif": "Préparer une attaque après la remise.",
+    "consignes": [
+      "Remise active.",
+      "Contre-attaque sur la balle suivante."
+    ],
+    "criteresReussite": [
+      "Enchaînement cohérent."
+    ],
+    "varianteFacile": [
+      "Schéma imposé."
+    ],
+    "varianteDifficile": [
+      "Point totalement libre."
+    ],
+    "varianteCompetition": [
+      "Compter les points gagnés après contre-initiative."
+    ]
+  },
+  {
+    "id": "REM-015",
+    "nom": "Remise tactique libre",
+    "categorie": "Remise",
+    "difficulte": 5,
+    "intensite": 3,
+    "fonctionnalites": [
+      "LectureAdverse",
+      "Tactique",
+      "Adaptation"
+    ],
+    "objectif": "Choisir la meilleure remise selon le contexte.",
+    "consignes": [
+      "Analyser le service.",
+      "Choisir la remise la plus efficace.",
+      "Adapter la stratégie au score et à l'adversaire."
+    ],
+    "criteresReussite": [
+      "Prise d'avantage dans l'échange."
+    ],
+    "varianteFacile": [
+      "Types de services limités."
+    ],
+    "varianteDifficile": [
+      "Services totalement libres."
+    ],
+    "varianteCompetition": [
+      "Match avec analyse statistique des remises."
+    ]
+  },
+  {
+    "id": "BLOC-001",
+    "nom": "Bloc passif coup droit",
+    "categorie": "Bloc",
+    "difficulte": 1,
+    "intensite": 1,
+    "fonctionnalites": [
+      "Bloc",
+      "Controle",
+      "Placement"
+    ],
+    "objectif": "Apprendre les bases du bloc passif en coup droit.",
+    "consignes": [
+      "Le partenaire enchaîne les tops rotations.",
+      "Bloquer sans accélérer la balle.",
+      "Fermer légèrement la raquette."
+    ],
+    "criteresReussite": [
+      "8 blocs sur 10 sur la table.",
+      "Trajectoire basse et contrôlée."
+    ],
+    "varianteFacile": [
+      "Top lent et régulier."
+    ],
+    "varianteDifficile": [
+      "Top plus rapide."
+    ],
+    "varianteCompetition": [
+      "Défi de régularité sur 1 minute."
+    ]
+  },
+  {
+    "id": "BLOC-002",
+    "nom": "Bloc passif revers",
+    "categorie": "Bloc",
+    "difficulte": 1,
+    "intensite": 1,
+    "fonctionnalites": [
+      "Bloc",
+      "Controle",
+      "Revers"
+    ],
+    "objectif": "Maîtriser le bloc passif revers.",
+    "consignes": [
+      "Rester proche de la table.",
+      "Absorber la vitesse adverse."
+    ],
+    "criteresReussite": [
+      "15 blocs consécutifs."
+    ],
+    "varianteFacile": [
+      "Top rotation lent."
+    ],
+    "varianteDifficile": [
+      "Top rotation rapide."
+    ],
+    "varianteCompetition": [
+      "Record de blocs sans faute."
+    ]
+  },
+  {
+    "id": "BLOC-003",
+    "nom": "Bloc actif coup droit",
+    "categorie": "Bloc",
+    "difficulte": 2,
+    "intensite": 2,
+    "fonctionnalites": [
+      "BlocActif",
+      "Initiative",
+      "Precision"
+    ],
+    "objectif": "Rendre le bloc offensif.",
+    "consignes": [
+      "Accompagner légèrement vers l'avant.",
+      "Chercher une zone précise."
+    ],
+    "criteresReussite": [
+      "Bloc rapide et placé."
+    ],
+    "varianteFacile": [
+      "Placement libre."
+    ],
+    "varianteDifficile": [
+      "Cible imposée."
+    ],
+    "varianteCompetition": [
+      "Point libre après le bloc."
+    ]
+  },
+  {
+    "id": "BLOC-004",
+    "nom": "Bloc actif revers",
+    "categorie": "Bloc",
+    "difficulte": 2,
+    "intensite": 2,
+    "fonctionnalites": [
+      "BlocActif",
+      "Revers",
+      "Placement"
+    ],
+    "objectif": "Développer l'agressivité du bloc revers.",
+    "consignes": [
+      "Prendre la balle tôt.",
+      "Diriger le bloc vers les angles."
+    ],
+    "criteresReussite": [
+      "70% de blocs placés."
+    ],
+    "varianteFacile": [
+      "Top toujours dans la même zone."
+    ],
+    "varianteDifficile": [
+      "Top aléatoire."
+    ],
+    "varianteCompetition": [
+      "Bloc gagnant = 2 points."
+    ]
+  },
+  {
+    "id": "BLOC-005",
+    "nom": "Bloc placé au coude",
+    "categorie": "Bloc",
+    "difficulte": 3,
+    "intensite": 2,
+    "fonctionnalites": [
+      "Placement",
+      "Tactique"
+    ],
+    "objectif": "Utiliser le bloc comme arme tactique.",
+    "consignes": [
+      "Bloquer systématiquement au coude adverse."
+    ],
+    "criteresReussite": [
+      "Le partenaire est mis en difficulté."
+    ],
+    "varianteFacile": [
+      "Vitesse réduite."
+    ],
+    "varianteDifficile": [
+      "Changement de placement imposé."
+    ],
+    "varianteCompetition": [
+      "Comptage des blocs efficaces."
+    ]
+  },
+  {
+    "id": "BLOC-006",
+    "nom": "Bloc alterné CD/RV",
+    "categorie": "Bloc",
+    "difficulte": 3,
+    "intensite": 3,
+    "fonctionnalites": [
+      "Coordination",
+      "Replacement",
+      "Bloc"
+    ],
+    "objectif": "Enchaîner les blocs des deux côtés.",
+    "consignes": [
+      "Le partenaire alterne les zones.",
+      "Bloquer sans modifier la qualité."
+    ],
+    "criteresReussite": [
+      "10 séquences complètes."
+    ],
+    "varianteFacile": [
+      "Alternance connue."
+    ],
+    "varianteDifficile": [
+      "Alternance aléatoire."
+    ],
+    "varianteCompetition": [
+      "Défi chronométré."
+    ]
+  },
+  {
+    "id": "BLOC-007",
+    "nom": "Bloc aléatoire",
+    "categorie": "Bloc",
+    "difficulte": 4,
+    "intensite": 3,
+    "fonctionnalites": [
+      "Reaction",
+      "Anticipation"
+    ],
+    "objectif": "Réagir rapidement aux changements de direction.",
+    "consignes": [
+      "Le partenaire toppe librement sur toute la table."
+    ],
+    "criteresReussite": [
+      "Maintenir une position équilibrée."
+    ],
+    "varianteFacile": [
+      "Deux zones seulement."
+    ],
+    "varianteDifficile": [
+      "Table complète."
+    ],
+    "varianteCompetition": [
+      "Point libre."
+    ]
+  },
+  {
+    "id": "BLOC-008",
+    "nom": "Bloc amorti",
+    "categorie": "Bloc",
+    "difficulte": 4,
+    "intensite": 2,
+    "fonctionnalites": [
+      "Toucher",
+      "Variation"
+    ],
+    "objectif": "Casser le rythme de l'attaquant.",
+    "consignes": [
+      "Amortir la vitesse de la balle.",
+      "Chercher un rebond court."
+    ],
+    "criteresReussite": [
+      "Deuxième rebond proche du filet."
+    ],
+    "varianteFacile": [
+      "Top rotation lent."
+    ],
+    "varianteDifficile": [
+      "Top frappé."
+    ],
+    "varianteCompetition": [
+      "Point bonus si l'adversaire n'attaque pas."
+    ]
+  },
+  {
+    "id": "BLOC-009",
+    "nom": "Bloc latéral",
+    "categorie": "Bloc",
+    "difficulte": 4,
+    "intensite": 3,
+    "fonctionnalites": [
+      "Variation",
+      "Effet"
+    ],
+    "objectif": "Ajouter un effet perturbateur au bloc.",
+    "consignes": [
+      "Frotter légèrement la balle au bloc.",
+      "Créer une trajectoire inhabituelle."
+    ],
+    "criteresReussite": [
+      "Variation visible."
+    ],
+    "varianteFacile": [
+      "Effet faible."
+    ],
+    "varianteDifficile": [
+      "Effet prononcé."
+    ],
+    "varianteCompetition": [
+      "Évaluation par le partenaire."
+    ]
+  },
+  {
+    "id": "BLOC-010",
+    "nom": "Bloc agressif",
+    "categorie": "Bloc",
+    "difficulte": 4,
+    "intensite": 4,
+    "fonctionnalites": [
+      "PriseInitiative",
+      "Vitesse"
+    ],
+    "objectif": "Transformer le bloc en contre-attaque.",
+    "consignes": [
+      "Avancer fortement dans la balle.",
+      "Chercher une zone gagnante."
+    ],
+    "criteresReussite": [
+      "Bloc offensif maîtrisé."
+    ],
+    "varianteFacile": [
+      "Top modéré."
+    ],
+    "varianteDifficile": [
+      "Top puissant."
+    ],
+    "varianteCompetition": [
+      "Bloc gagnant recherché."
+    ]
+  },
+  {
+    "id": "BLOC-011",
+    "nom": "Bloc après déplacement",
+    "categorie": "Bloc",
+    "difficulte": 3,
+    "intensite": 4,
+    "fonctionnalites": [
+      "Deplacement",
+      "Bloc",
+      "Coordination"
+    ],
+    "objectif": "Conserver la qualité du bloc en mouvement.",
+    "consignes": [
+      "Déplacement latéral puis bloc.",
+      "Retour immédiat au centre."
+    ],
+    "criteresReussite": [
+      "Bloc stable malgré le déplacement."
+    ],
+    "varianteFacile": [
+      "Déplacement réduit."
+    ],
+    "varianteDifficile": [
+      "Déplacement plus large."
+    ],
+    "varianteCompetition": [
+      "Défi sur durée."
+    ]
+  },
+  {
+    "id": "BLOC-012",
+    "nom": "Bloc puis contre-attaque",
+    "categorie": "Bloc",
+    "difficulte": 4,
+    "intensite": 4,
+    "fonctionnalites": [
+      "Transition",
+      "ContreInitiative"
+    ],
+    "objectif": "Passer rapidement du bloc à l'attaque.",
+    "consignes": [
+      "Bloquer la première balle.",
+      "Attaquer la suivante."
+    ],
+    "criteresReussite": [
+      "Transition rapide et équilibrée."
+    ],
+    "varianteFacile": [
+      "Schéma connu."
+    ],
+    "varianteDifficile": [
+      "Transition aléatoire."
+    ],
+    "varianteCompetition": [
+      "Point libre après contre-attaque."
+    ]
+  },
+  {
+    "id": "BLOC-013",
+    "nom": "Deux blocs un top",
+    "categorie": "Bloc",
+    "difficulte": 4,
+    "intensite": 4,
+    "fonctionnalites": [
+      "LectureJeu",
+      "Transition"
+    ],
+    "objectif": "Identifier le moment favorable pour attaquer.",
+    "consignes": [
+      "Bloquer deux fois.",
+      "Topper la troisième balle."
+    ],
+    "criteresReussite": [
+      "Choix du bon timing."
+    ],
+    "varianteFacile": [
+      "Séquence annoncée."
+    ],
+    "varianteDifficile": [
+      "Moment libre."
+    ],
+    "varianteCompetition": [
+      "Points bonus sur attaque gagnante."
+    ]
+  },
+  {
+    "id": "BLOC-014",
+    "nom": "Bloc sur top frappé",
+    "categorie": "Bloc",
+    "difficulte": 5,
+    "intensite": 5,
+    "fonctionnalites": [
+      "Reflexe",
+      "Reaction",
+      "Mental"
+    ],
+    "objectif": "Résister à une attaque très rapide.",
+    "consignes": [
+      "Rester compact.",
+      "Prendre la balle devant soi."
+    ],
+    "criteresReussite": [
+      "Bloc maîtrisé malgré la puissance."
+    ],
+    "varianteFacile": [
+      "Top moins rapide."
+    ],
+    "varianteDifficile": [
+      "Placements variés."
+    ],
+    "varianteCompetition": [
+      "Décompte des blocs réussis."
+    ]
+  },
+  {
+    "id": "BLOC-015",
+    "nom": "Bloc tactique libre",
+    "categorie": "Bloc",
+    "difficulte": 5,
+    "intensite": 4,
+    "fonctionnalites": [
+      "Adaptation",
+      "Tactique",
+      "LectureAdverse",
+      "PriseDecision"
+    ],
+    "objectif": "Choisir le type de bloc le plus efficace selon la situation.",
+    "consignes": [
+      "Alterner bloc passif, actif, amorti et agressif.",
+      "Observer les réactions adverses.",
+      "Adapter les choix au score et au schéma de jeu."
+    ],
+    "criteresReussite": [
+      "Choix tactiques pertinents.",
+      "Création d'opportunités offensives."
+    ],
+    "varianteFacile": [
+      "Types de blocs limités à deux options."
+    ],
+    "varianteDifficile": [
+      "Choix totalement libre."
+    ],
+    "varianteCompetition": [
+      "Match avec analyse statistique des blocs."
+    ]
+  },
+  {
+    "id": "DEP-001",
+    "nom": "Deux points coup droit",
+    "categorie": "Deplacements",
+    "difficulte": 2,
+    "intensite": 3,
+    "fonctionnalites": [
+      "Appuis",
+      "Coordination",
+      "Deplacement"
+    ],
+    "objectif": "Développer les déplacements latéraux de base en coup droit.",
+    "consignes": [
+      "Le distributeur alterne une balle milieu CD et une balle large CD.",
+      "Jouer toutes les balles en coup droit.",
+      "Revenir en position neutre après chaque frappe."
+    ],
+    "criteresReussite": [
+      "Position basse maintenue.",
+      "15 échanges sans faute."
+    ],
+    "varianteFacile": [
+      "Déplacement annoncé."
+    ],
+    "varianteDifficile": [
+      "Cadence plus rapide."
+    ],
+    "varianteCompetition": [
+      "Défi de régularité sur 2 minutes."
+    ]
+  },
+  {
+    "id": "DEP-002",
+    "nom": "Deux points revers",
+    "categorie": "Deplacements",
+    "difficulte": 2,
+    "intensite": 3,
+    "fonctionnalites": [
+      "Revers",
+      "Coordination",
+      "Appuis"
+    ],
+    "objectif": "Développer la mobilité côté revers.",
+    "consignes": [
+      "Alterner revers milieu et revers large.",
+      "Conserver la qualité technique."
+    ],
+    "criteresReussite": [
+      "15 échanges réussis."
+    ],
+    "varianteFacile": [
+      "Déplacement réduit."
+    ],
+    "varianteDifficile": [
+      "Vitesse plus élevée."
+    ],
+    "varianteCompetition": [
+      "Classement par séries réussies."
+    ]
+  },
+  {
+    "id": "DEP-003",
+    "nom": "Trois points classiques",
+    "categorie": "Deplacements",
+    "difficulte": 3,
+    "intensite": 4,
+    "fonctionnalites": [
+      "Coordination",
+      "Endurance",
+      "Replacement"
+    ],
+    "objectif": "Travailler les déplacements sur trois zones.",
+    "consignes": [
+      "Jouer successivement revers, milieu puis coup droit large.",
+      "Revenir au centre après chaque coup."
+    ],
+    "criteresReussite": [
+      "10 séquences complètes."
+    ],
+    "varianteFacile": [
+      "Vitesse modérée."
+    ],
+    "varianteDifficile": [
+      "Distribution accélérée."
+    ],
+    "varianteCompetition": [
+      "Point libre après chaque séquence."
+    ]
+  },
+  {
+    "id": "DEP-004",
+    "nom": "Grand pivot",
+    "categorie": "Deplacements",
+    "difficulte": 4,
+    "intensite": 5,
+    "fonctionnalites": [
+      "Pivot",
+      "Explosivite",
+      "Appuis"
+    ],
+    "objectif": "Développer l'explosivité des jambes.",
+    "consignes": [
+      "Toutes les balles revers sont prises en pivot coup droit.",
+      "Retour rapide au centre."
+    ],
+    "criteresReussite": [
+      "Aucune perte d'équilibre.",
+      "Pivot rapide."
+    ],
+    "varianteFacile": [
+      "Une balle sur deux en pivot."
+    ],
+    "varianteDifficile": [
+      "Pivot sur toutes les balles."
+    ],
+    "varianteCompetition": [
+      "Défi sur 45 secondes."
+    ]
+  },
+  {
+    "id": "DEP-005",
+    "nom": "Pivot aléatoire",
+    "categorie": "Deplacements",
+    "difficulte": 5,
+    "intensite": 5,
+    "fonctionnalites": [
+      "Anticipation",
+      "Reaction",
+      "Pivot"
+    ],
+    "objectif": "Choisir le bon moment pour pivoter.",
+    "consignes": [
+      "Le distributeur varie les placements.",
+      "Décider instantanément si le pivot est possible."
+    ],
+    "criteresReussite": [
+      "Choix pertinents.",
+      "Qualité technique conservée."
+    ],
+    "varianteFacile": [
+      "Deux zones seulement."
+    ],
+    "varianteDifficile": [
+      "Distribution totalement libre."
+    ],
+    "varianteCompetition": [
+      "Match à thème pivot."
+    ]
+  },
+  {
+    "id": "DEP-006",
+    "nom": "Papillon",
+    "categorie": "Deplacements",
+    "difficulte": 3,
+    "intensite": 4,
+    "fonctionnalites": [
+      "Coordination",
+      "Vitesse",
+      "Deplacement"
+    ],
+    "objectif": "Multiplier les changements de direction.",
+    "consignes": [
+      "Alterner diagonale et ligne droite.",
+      "Conserver un rythme soutenu."
+    ],
+    "criteresReussite": [
+      "10 séquences complètes."
+    ],
+    "varianteFacile": [
+      "Rythme lent."
+    ],
+    "varianteDifficile": [
+      "Rythme élevé."
+    ],
+    "varianteCompetition": [
+      "Défi par équipes."
+    ]
+  },
+  {
+    "id": "DEP-007",
+    "nom": "CD milieu RV",
+    "categorie": "Deplacements",
+    "difficulte": 3,
+    "intensite": 3,
+    "fonctionnalites": [
+      "Transition",
+      "Coordination"
+    ],
+    "objectif": "Améliorer les transitions coup droit/revers.",
+    "consignes": [
+      "Une balle coup droit milieu.",
+      "Une balle revers."
+    ],
+    "criteresReussite": [
+      "Déplacements fluides."
+    ],
+    "varianteFacile": [
+      "Cadence lente."
+    ],
+    "varianteDifficile": [
+      "Cadence rapide."
+    ],
+    "varianteCompetition": [
+      "Séries chronométrées."
+    ]
+  },
+  {
+    "id": "DEP-008",
+    "nom": "CD large RV large",
+    "categorie": "Deplacements",
+    "difficulte": 4,
+    "intensite": 5,
+    "fonctionnalites": [
+      "Explosivite",
+      "Replacement",
+      "Endurance"
+    ],
+    "objectif": "Couvrir une grande largeur de table.",
+    "consignes": [
+      "Alterner les angles extrêmes.",
+      "Maintenir une qualité technique constante."
+    ],
+    "criteresReussite": [
+      "10 échanges sans faute."
+    ],
+    "varianteFacile": [
+      "Zones rapprochées."
+    ],
+    "varianteDifficile": [
+      "Cadence plus élevée."
+    ],
+    "varianteCompetition": [
+      "Défi en temps limité."
+    ]
+  },
+  {
+    "id": "DEP-009",
+    "nom": "Avant arrière",
+    "categorie": "Deplacements",
+    "difficulte": 3,
+    "intensite": 4,
+    "fonctionnalites": [
+      "JeuCourt",
+      "JeuLong",
+      "Coordination"
+    ],
+    "objectif": "Gérer les changements de profondeur.",
+    "consignes": [
+      "Alternance balle courte puis balle longue.",
+      "Rester dynamique sur les jambes."
+    ],
+    "criteresReussite": [
+      "Retour rapide après chaque balle courte."
+    ],
+    "varianteFacile": [
+      "Alternance connue."
+    ],
+    "varianteDifficile": [
+      "Alternance aléatoire."
+    ],
+    "varianteCompetition": [
+      "Point libre."
+    ]
+  },
+  {
+    "id": "DEP-010",
+    "nom": "Jeu court jeu long",
+    "categorie": "Deplacements",
+    "difficulte": 4,
+    "intensite": 4,
+    "fonctionnalites": [
+      "LectureJeu",
+      "Adaptation"
+    ],
+    "objectif": "Enchaîner efficacement les différentes distances.",
+    "consignes": [
+      "Une balle courte.",
+      "Une balle longue.",
+      "Répéter."
+    ],
+    "criteresReussite": [
+      "Aucune hésitation dans les déplacements."
+    ],
+    "varianteFacile": [
+      "Rythme modéré."
+    ],
+    "varianteDifficile": [
+      "Cadence rapide."
+    ],
+    "varianteCompetition": [
+      "Décompte des séquences."
+    ]
+  },
+  {
+    "id": "DEP-011",
+    "nom": "Déplacement latéral rapide",
+    "categorie": "Deplacements",
+    "difficulte": 4,
+    "intensite": 5,
+    "fonctionnalites": [
+      "Vitesse",
+      "Appuis",
+      "Explosivite"
+    ],
+    "objectif": "Développer la vitesse latérale maximale.",
+    "consignes": [
+      "Distribution très écartée.",
+      "Priorité à la vitesse de déplacement."
+    ],
+    "criteresReussite": [
+      "Atteindre chaque balle."
+    ],
+    "varianteFacile": [
+      "Amplitude réduite."
+    ],
+    "varianteDifficile": [
+      "Amplitude maximale."
+    ],
+    "varianteCompetition": [
+      "Défi de 30 secondes."
+    ]
+  },
+  {
+    "id": "DEP-012",
+    "nom": "Pas croisés",
+    "categorie": "Deplacements",
+    "difficulte": 3,
+    "intensite": 3,
+    "fonctionnalites": [
+      "TechniqueAppuis",
+      "Coordination"
+    ],
+    "objectif": "Maîtriser les déplacements longs.",
+    "consignes": [
+      "Utiliser le pas croisé sur les grandes amplitudes.",
+      "Revenir en pas chassés."
+    ],
+    "criteresReussite": [
+      "Déplacement fluide."
+    ],
+    "varianteFacile": [
+      "Distance réduite."
+    ],
+    "varianteDifficile": [
+      "Distance augmentée."
+    ],
+    "varianteCompetition": [
+      "Évaluation technique."
+    ]
+  },
+  {
+    "id": "DEP-013",
+    "nom": "Pas chassés continus",
+    "categorie": "Deplacements",
+    "difficulte": 2,
+    "intensite": 3,
+    "fonctionnalites": [
+      "Fondamentaux",
+      "Appuis"
+    ],
+    "objectif": "Automatiser le déplacement principal du pongiste.",
+    "consignes": [
+      "Effectuer tous les déplacements en pas chassés.",
+      "Ne jamais croiser les jambes."
+    ],
+    "criteresReussite": [
+      "Déplacements propres et équilibrés."
+    ],
+    "varianteFacile": [
+      "Zones proches."
+    ],
+    "varianteDifficile": [
+      "Cadence élevée."
+    ],
+    "varianteCompetition": [
+      "Défi de régularité."
+    ]
+  },
+  {
+    "id": "DEP-014",
+    "nom": "Déplacement réaction",
+    "categorie": "Deplacements",
+    "difficulte": 5,
+    "intensite": 5,
+    "fonctionnalites": [
+      "Reaction",
+      "Anticipation",
+      "PriseDecision"
+    ],
+    "objectif": "Réagir instantanément à une information.",
+    "consignes": [
+      "Distribution aléatoire.",
+      "Décider rapidement du déplacement adapté."
+    ],
+    "criteresReussite": [
+      "Temps de réaction minimal."
+    ],
+    "varianteFacile": [
+      "Deux zones."
+    ],
+    "varianteDifficile": [
+      "Table complète."
+    ],
+    "varianteCompetition": [
+      "Classement sur nombre de balles réussies."
+    ]
+  },
+  {
+    "id": "DEP-015",
+    "nom": "Déplacement continu haute intensité",
+    "categorie": "Deplacements",
+    "difficulte": 5,
+    "intensite": 5,
+    "fonctionnalites": [
+      "Endurance",
+      "Resistance",
+      "Explosivite"
+    ],
+    "objectif": "Maintenir des déplacements de qualité sous fatigue.",
+    "consignes": [
+      "Série de 60 secondes sans interruption.",
+      "Distribution sur toute la table."
+    ],
+    "criteresReussite": [
+      "Technique conservée jusqu'à la fin.",
+      "Peu de fautes malgré la fatigue."
+    ],
+    "varianteFacile": [
+      "30 secondes."
+    ],
+    "varianteDifficile": [
+      "90 secondes."
+    ],
+    "varianteCompetition": [
+      "Challenge de volume par équipes."
+    ]
+  },
+  {
+    "id": "PAN-001",
+    "nom": "Régularité coup droit",
+    "categorie": "PanierDeBalles",
+    "difficulte": 1,
+    "intensite": 2,
+    "fonctionnalites": [
+      "Regularite",
+      "TechniqueCD"
+    ],
+    "objectif": "Stabiliser le geste de base coup droit.",
+    "consignes": [
+      "L'entraîneur distribue des balles régulières dans le coup droit.",
+      "Chercher une trajectoire identique sur chaque balle.",
+      "Maintenir la même gestuelle."
+    ],
+    "criteresReussite": [
+      "20 balles consécutives réussies.",
+      "Qualité technique constante."
+    ],
+    "varianteFacile": [
+      "Distribution lente."
+    ],
+    "varianteDifficile": [
+      "Cadence accélérée."
+    ],
+    "varianteCompetition": [
+      "Défi de régularité sur 50 balles."
+    ]
+  },
+  {
+    "id": "PAN-002",
+    "nom": "Régularité revers",
+    "categorie": "PanierDeBalles",
+    "difficulte": 1,
+    "intensite": 2,
+    "fonctionnalites": [
+      "Regularite",
+      "TechniqueRV"
+    ],
+    "objectif": "Développer la stabilité du revers.",
+    "consignes": [
+      "Distribution continue dans le revers.",
+      "Maintenir un rythme constant."
+    ],
+    "criteresReussite": [
+      "20 balles réussies sans faute."
+    ],
+    "varianteFacile": [
+      "Balles plus lentes."
+    ],
+    "varianteDifficile": [
+      "Balles rapides."
+    ],
+    "varianteCompetition": [
+      "Record de balles réussies."
+    ]
+  },
+  {
+    "id": "PAN-003",
+    "nom": "Démarrage CD sur balle coupée",
+    "categorie": "PanierDeBalles",
+    "difficulte": 2,
+    "intensite": 3,
+    "fonctionnalites": [
+      "Topspin",
+      "Timing",
+      "Initiative"
+    ],
+    "objectif": "Automatiser le démarrage coup droit.",
+    "consignes": [
+      "Distribution de balles coupées.",
+      "Démarrer en rotation.",
+      "Conserver une trajectoire sécurisée."
+    ],
+    "criteresReussite": [
+      "70 % de démarrages réussis."
+    ],
+    "varianteFacile": [
+      "Effet modéré."
+    ],
+    "varianteDifficile": [
+      "Effet coupé très prononcé."
+    ],
+    "varianteCompetition": [
+      "10 démarrages consécutifs."
+    ]
+  },
+  {
+    "id": "PAN-004",
+    "nom": "Démarrage revers sur balle coupée",
+    "categorie": "PanierDeBalles",
+    "difficulte": 3,
+    "intensite": 3,
+    "fonctionnalites": [
+      "TopspinRV",
+      "Timing"
+    ],
+    "objectif": "Développer le démarrage revers.",
+    "consignes": [
+      "Distribution coupée dans le revers.",
+      "Démarrage en top revers."
+    ],
+    "criteresReussite": [
+      "15 tops revers réussis."
+    ],
+    "varianteFacile": [
+      "Balle longue uniquement."
+    ],
+    "varianteDifficile": [
+      "Longueur variable."
+    ],
+    "varianteCompetition": [
+      "Score sur précision."
+    ]
+  },
+  {
+    "id": "PAN-005",
+    "nom": "Top frappé de finition",
+    "categorie": "PanierDeBalles",
+    "difficulte": 3,
+    "intensite": 4,
+    "fonctionnalites": [
+      "Puissance",
+      "Finition"
+    ],
+    "objectif": "Améliorer la conclusion du point.",
+    "consignes": [
+      "Distribution de balles légèrement hautes.",
+      "Chercher la vitesse et la précision."
+    ],
+    "criteresReussite": [
+      "80 % de réussite."
+    ],
+    "varianteFacile": [
+      "Balles plus hautes."
+    ],
+    "varianteDifficile": [
+      "Placements variés."
+    ],
+    "varianteCompetition": [
+      "Point gagnant obligatoire."
+    ]
+  },
+  {
+    "id": "PAN-006",
+    "nom": "Pivot coup droit",
+    "categorie": "PanierDeBalles",
+    "difficulte": 4,
+    "intensite": 4,
+    "fonctionnalites": [
+      "Pivot",
+      "Explosivite"
+    ],
+    "objectif": "Automatiser le pivot offensif.",
+    "consignes": [
+      "Distribution en revers.",
+      "Toutes les balles sont jouées en pivot coup droit."
+    ],
+    "criteresReussite": [
+      "Position équilibrée.",
+      "Retour rapide."
+    ],
+    "varianteFacile": [
+      "Une balle sur deux en pivot."
+    ],
+    "varianteDifficile": [
+      "Rythme très élevé."
+    ],
+    "varianteCompetition": [
+      "Défi sur 45 secondes."
+    ]
+  },
+  {
+    "id": "PAN-007",
+    "nom": "Déplacements trois points",
+    "categorie": "PanierDeBalles",
+    "difficulte": 4,
+    "intensite": 5,
+    "fonctionnalites": [
+      "Deplacement",
+      "Coordination",
+      "Endurance"
+    ],
+    "objectif": "Développer les déplacements complexes.",
+    "consignes": [
+      "Distribution sur revers, milieu et coup droit.",
+      "Maintenir la qualité technique."
+    ],
+    "criteresReussite": [
+      "10 séquences réussies."
+    ],
+    "varianteFacile": [
+      "Distribution lente."
+    ],
+    "varianteDifficile": [
+      "Distribution rapide."
+    ],
+    "varianteCompetition": [
+      "Challenge de durée."
+    ]
+  },
+  {
+    "id": "PAN-008",
+    "nom": "Multiballes aléatoires",
+    "categorie": "PanierDeBalles",
+    "difficulte": 5,
+    "intensite": 5,
+    "fonctionnalites": [
+      "Reaction",
+      "Adaptation",
+      "LectureJeu"
+    ],
+    "objectif": "Réagir efficacement aux placements imprévus.",
+    "consignes": [
+      "Distribution libre sur toute la table.",
+      "Prendre la bonne décision rapidement."
+    ],
+    "criteresReussite": [
+      "Réactivité élevée.",
+      "Peu de fautes."
+    ],
+    "varianteFacile": [
+      "Deux zones uniquement."
+    ],
+    "varianteDifficile": [
+      "Variation complète."
+    ],
+    "varianteCompetition": [
+      "Classement sur nombre de balles réussies."
+    ]
+  },
+  {
+    "id": "PAN-009",
+    "nom": "Simulation de match",
+    "categorie": "PanierDeBalles",
+    "difficulte": 4,
+    "intensite": 4,
+    "fonctionnalites": [
+      "Tactique",
+      "Decision",
+      "Adaptation"
+    ],
+    "objectif": "Reproduire les situations de compétition.",
+    "consignes": [
+      "L'entraîneur distribue selon des schémas de match.",
+      "Le joueur applique ses choix tactiques."
+    ],
+    "criteresReussite": [
+      "Décisions cohérentes."
+    ],
+    "varianteFacile": [
+      "Schémas connus."
+    ],
+    "varianteDifficile": [
+      "Situations aléatoires."
+    ],
+    "varianteCompetition": [
+      "Départ à 9-9."
+    ]
+  },
+  {
+    "id": "PAN-010",
+    "nom": "Balles de match",
+    "categorie": "PanierDeBalles",
+    "difficulte": 5,
+    "intensite": 4,
+    "fonctionnalites": [
+      "Mental",
+      "Concentration",
+      "GestionStress"
+    ],
+    "objectif": "Travailler sous pression.",
+    "consignes": [
+      "Chaque balle représente une balle de match.",
+      "Routine complète avant chaque exécution."
+    ],
+    "criteresReussite": [
+      "Maintien de la qualité technique."
+    ],
+    "varianteFacile": [
+      "Départ à 8-8."
+    ],
+    "varianteDifficile": [
+      "Départ à 10-10."
+    ],
+    "varianteCompetition": [
+      "Classement des performances."
+    ]
+  },
+  {
+    "id": "PAN-011",
+    "nom": "Service puis attaque",
+    "categorie": "PanierDeBalles",
+    "difficulte": 3,
+    "intensite": 3,
+    "fonctionnalites": [
+      "Service",
+      "TroisiemeBalle",
+      "Initiative"
+    ],
+    "objectif": "Automatiser le schéma service-attaque.",
+    "consignes": [
+      "Service.",
+      "Distribution simulant une remise.",
+      "Attaque immédiate."
+    ],
+    "criteresReussite": [
+      "Prise d'initiative rapide."
+    ],
+    "varianteFacile": [
+      "Remise connue."
+    ],
+    "varianteDifficile": [
+      "Remise aléatoire."
+    ],
+    "varianteCompetition": [
+      "Comptage des schémas réussis."
+    ]
+  },
+  {
+    "id": "PAN-012",
+    "nom": "Jeu court",
+    "categorie": "PanierDeBalles",
+    "difficulte": 2,
+    "intensite": 2,
+    "fonctionnalites": [
+      "Toucher",
+      "JeuCourt"
+    ],
+    "objectif": "Améliorer le contrôle près du filet.",
+    "consignes": [
+      "Balles distribuées courtes.",
+      "Maintenir une trajectoire basse."
+    ],
+    "criteresReussite": [
+      "Deuxième rebond proche du filet."
+    ],
+    "varianteFacile": [
+      "Sans effet."
+    ],
+    "varianteDifficile": [
+      "Effets variés."
+    ],
+    "varianteCompetition": [
+      "Défi de précision."
+    ]
+  },
+  {
+    "id": "PAN-013",
+    "nom": "Jeu long",
+    "categorie": "PanierDeBalles",
+    "difficulte": 2,
+    "intensite": 2,
+    "fonctionnalites": [
+      "Placement",
+      "Profondeur"
+    ],
+    "objectif": "Maîtriser la profondeur des trajectoires.",
+    "consignes": [
+      "Chercher systématiquement le fond de table."
+    ],
+    "criteresReussite": [
+      "80 % des balles longues."
+    ],
+    "varianteFacile": [
+      "Placement libre."
+    ],
+    "varianteDifficile": [
+      "Zones ciblées."
+    ],
+    "varianteCompetition": [
+      "Système de points."
+    ]
+  },
+  {
+    "id": "PAN-014",
+    "nom": "Transition attaque défense",
+    "categorie": "PanierDeBalles",
+    "difficulte": 4,
+    "intensite": 4,
+    "fonctionnalites": [
+      "Transition",
+      "Adaptation"
+    ],
+    "objectif": "Changer rapidement de rôle dans l'échange.",
+    "consignes": [
+      "Enchaîner attaque, bloc puis nouvelle attaque.",
+      "Adapter le placement à chaque situation."
+    ],
+    "criteresReussite": [
+      "Transitions fluides."
+    ],
+    "varianteFacile": [
+      "Schéma fixe."
+    ],
+    "varianteDifficile": [
+      "Schéma variable."
+    ],
+    "varianteCompetition": [
+      "Point libre après la séquence."
+    ]
+  },
+  {
+    "id": "PAN-015",
+    "nom": "Multiballes haute intensité",
+    "categorie": "PanierDeBalles",
+    "difficulte": 5,
+    "intensite": 5,
+    "fonctionnalites": [
+      "Endurance",
+      "Resistance",
+      "Explosivite",
+      "Mental"
+    ],
+    "objectif": "Maintenir la performance sous forte fatigue.",
+    "consignes": [
+      "Distribution continue pendant 45 à 60 secondes.",
+      "Toute la table peut être utilisée.",
+      "L'intensité reste maximale."
+    ],
+    "criteresReussite": [
+      "Qualité technique maintenue jusqu'à la fin.",
+      "Engagement constant."
+    ],
+    "varianteFacile": [
+      "30 secondes."
+    ],
+    "varianteDifficile": [
+      "90 secondes."
+    ],
+    "varianteCompetition": [
+      "Challenge physique par équipes."
+    ]
+  },
+  {
+    "id": "POUS-001",
+    "nom": "Poussette revers diagonale",
+    "categorie": "Poussette",
+    "difficulte": 1,
+    "intensite": 1,
+    "fonctionnalites": [
+      "Poussette",
+      "Regularite",
+      "Controle"
+    ],
+    "objectif": "Stabiliser la poussette revers de base.",
+    "consignes": [
+      "Les deux joueurs poussent en diagonale revers.",
+      "Maintenir une trajectoire basse.",
+      "Chercher la régularité avant la vitesse."
+    ],
+    "criteresReussite": [
+      "20 échanges consécutifs.",
+      "Balles basses."
+    ],
+    "varianteFacile": [
+      "Poussette sans effet imposé."
+    ],
+    "varianteDifficile": [
+      "Chercher un effet coupé important."
+    ],
+    "varianteCompetition": [
+      "Défi de la plus longue série."
+    ]
+  },
+  {
+    "id": "POUS-002",
+    "nom": "Poussette coup droit diagonale",
+    "categorie": "Poussette",
+    "difficulte": 1,
+    "intensite": 1,
+    "fonctionnalites": [
+      "Poussette",
+      "Toucher",
+      "Placement"
+    ],
+    "objectif": "Développer le contrôle en poussette coup droit.",
+    "consignes": [
+      "Jouer uniquement en diagonale coup droit.",
+      "Rechercher une balle tendue et basse."
+    ],
+    "criteresReussite": [
+      "15 échanges sans faute."
+    ],
+    "varianteFacile": [
+      "Zone libre."
+    ],
+    "varianteDifficile": [
+      "Zone cible imposée."
+    ],
+    "varianteCompetition": [
+      "Classement par régularité."
+    ]
+  },
+  {
+    "id": "POUS-003",
+    "nom": "Poussette longue profonde",
+    "categorie": "Poussette",
+    "difficulte": 2,
+    "intensite": 1,
+    "fonctionnalites": [
+      "Placement",
+      "Profondeur",
+      "Variation"
+    ],
+    "objectif": "Empêcher le démarrage adverse facile.",
+    "consignes": [
+      "Chercher systématiquement le fond de table.",
+      "Générer un effet coupé important."
+    ],
+    "criteresReussite": [
+      "80 % des balles dans le dernier tiers."
+    ],
+    "varianteFacile": [
+      "Placement libre."
+    ],
+    "varianteDifficile": [
+      "Zone précise à atteindre."
+    ],
+    "varianteCompetition": [
+      "Points bonus en cible."
+    ]
+  },
+  {
+    "id": "POUS-004",
+    "nom": "Poussette courte",
+    "categorie": "Poussette",
+    "difficulte": 2,
+    "intensite": 1,
+    "fonctionnalites": [
+      "JeuCourt",
+      "Toucher",
+      "Precision"
+    ],
+    "objectif": "Maintenir la balle courte et basse.",
+    "consignes": [
+      "Chercher un deuxième rebond proche du filet.",
+      "Limiter la vitesse de sortie."
+    ],
+    "criteresReussite": [
+      "8 balles sur 10 restent courtes."
+    ],
+    "varianteFacile": [
+      "Sans effet important."
+    ],
+    "varianteDifficile": [
+      "Effet coupé très prononcé."
+    ],
+    "varianteCompetition": [
+      "Défi de précision."
+    ]
+  },
+  {
+    "id": "POUS-005",
+    "nom": "Poussette tendue agressive",
+    "categorie": "Poussette",
+    "difficulte": 3,
+    "intensite": 2,
+    "fonctionnalites": [
+      "Initiative",
+      "Agressivite",
+      "Placement"
+    ],
+    "objectif": "Mettre l'adversaire sous pression sans attaquer.",
+    "consignes": [
+      "Prendre la balle tôt.",
+      "Jouer une poussette rapide et tendue."
+    ],
+    "criteresReussite": [
+      "Balle basse et rapide.",
+      "Adversaire en difficulté."
+    ],
+    "varianteFacile": [
+      "Rythme modéré."
+    ],
+    "varianteDifficile": [
+      "Placement aléatoire."
+    ],
+    "varianteCompetition": [
+      "Point libre après la poussette."
+    ]
+  },
+  {
+    "id": "POUS-006",
+    "nom": "Poussette alternée courte-longue",
+    "categorie": "Poussette",
+    "difficulte": 3,
+    "intensite": 2,
+    "fonctionnalites": [
+      "Variation",
+      "Tactique",
+      "Placement"
+    ],
+    "objectif": "Créer l'incertitude sur la longueur.",
+    "consignes": [
+      "Alterner une poussette courte puis une longue.",
+      "Conserver la même préparation."
+    ],
+    "criteresReussite": [
+      "Alternance maîtrisée.",
+      "Peu d'erreurs de longueur."
+    ],
+    "varianteFacile": [
+      "Schéma annoncé."
+    ],
+    "varianteDifficile": [
+      "Choix libre."
+    ],
+    "varianteCompetition": [
+      "Analyse des erreurs adverses."
+    ]
+  },
+  {
+    "id": "POUS-007",
+    "nom": "Poussette variée en effet",
+    "categorie": "Poussette",
+    "difficulte": 4,
+    "intensite": 2,
+    "fonctionnalites": [
+      "Effet",
+      "Variation",
+      "LectureJeu"
+    ],
+    "objectif": "Modifier la quantité d'effet coupé.",
+    "consignes": [
+      "Alterner poussette très coupée et poussette molle.",
+      "Garder un geste similaire."
+    ],
+    "criteresReussite": [
+      "L'adversaire lit difficilement l'effet."
+    ],
+    "varianteFacile": [
+      "Deux niveaux d'effet."
+    ],
+    "varianteDifficile": [
+      "Variation libre."
+    ],
+    "varianteCompetition": [
+      "Annonce de l'effet par l'adversaire."
+    ]
+  },
+  {
+    "id": "POUS-008",
+    "nom": "Poussette croisée parallèle",
+    "categorie": "Poussette",
+    "difficulte": 3,
+    "intensite": 2,
+    "fonctionnalites": [
+      "Placement",
+      "Precision",
+      "Coordination"
+    ],
+    "objectif": "Changer les angles de jeu.",
+    "consignes": [
+      "Alterner une poussette croisée puis une parallèle.",
+      "Maintenir la même qualité de balle."
+    ],
+    "criteresReussite": [
+      "Angles respectés.",
+      "Peu de fautes directes."
+    ],
+    "varianteFacile": [
+      "Alternance connue."
+    ],
+    "varianteDifficile": [
+      "Choix libre."
+    ],
+    "varianteCompetition": [
+      "Match à thème placement."
+    ]
+  },
+  {
+    "id": "POUS-009",
+    "nom": "Poussette puis démarrage",
+    "categorie": "Poussette",
+    "difficulte": 4,
+    "intensite": 3,
+    "fonctionnalites": [
+      "Transition",
+      "Topspin",
+      "Initiative"
+    ],
+    "objectif": "Préparer une attaque après plusieurs poussettes.",
+    "consignes": [
+      "Réaliser trois poussettes minimum.",
+      "Démarrer à la première opportunité."
+    ],
+    "criteresReussite": [
+      "Choix pertinent du moment d'attaque."
+    ],
+    "varianteFacile": [
+      "Démarrage annoncé."
+    ],
+    "varianteDifficile": [
+      "Moment libre."
+    ],
+    "varianteCompetition": [
+      "Point obligatoire par démarrage."
+    ]
+  },
+  {
+    "id": "POUS-010",
+    "nom": "Poussette tactique libre",
+    "categorie": "Poussette",
+    "difficulte": 5,
+    "intensite": 3,
+    "fonctionnalites": [
+      "Tactique",
+      "Adaptation",
+      "LectureAdverse",
+      "Variation"
+    ],
+    "objectif": "Utiliser toutes les formes de poussette selon la situation.",
+    "consignes": [
+      "Alterner poussettes courtes, longues, agressives et variées.",
+      "Observer la réaction adverse.",
+      "Construire l'échange pour préparer l'attaque."
+    ],
+    "criteresReussite": [
+      "Création d'opportunités offensives.",
+      "Choix tactiques pertinents."
+    ],
+    "varianteFacile": [
+      "Deux types de poussettes uniquement."
+    ],
+    "varianteDifficile": [
+      "Choix totalement libre."
+    ],
+    "varianteCompetition": [
+      "Match avec statistiques de construction du point."
+    ]
+  },
+  {
+    "id": "TAC-001",
+    "nom": "Point uniquement en coup droit",
+    "categorie": "Tactique",
+    "difficulte": 2,
+    "intensite": 3,
+    "fonctionnalites": [
+      "ConstructionPoint",
+      "Placement",
+      "CoupDroit"
+    ],
+    "objectif": "Développer la domination en coup droit.",
+    "consignes": [
+      "Toutes les balles doivent être jouées en coup droit.",
+      "Le revers est interdit.",
+      "Chercher à construire le point."
+    ],
+    "criteresReussite": [
+      "Respect du thème.",
+      "Faible nombre de fautes."
+    ],
+    "varianteFacile": [
+      "Table réduite."
+    ],
+    "varianteDifficile": [
+      "Obligation de pivoter."
+    ],
+    "varianteCompetition": [
+      "Match en 11 points."
+    ]
+  },
+  {
+    "id": "TAC-002",
+    "nom": "Point uniquement en revers",
+    "categorie": "Tactique",
+    "difficulte": 2,
+    "intensite": 3,
+    "fonctionnalites": [
+      "ConstructionPoint",
+      "Revers"
+    ],
+    "objectif": "Développer la confiance en revers.",
+    "consignes": [
+      "Toutes les balles doivent être jouées en revers."
+    ],
+    "criteresReussite": [
+      "Respect des consignes."
+    ],
+    "varianteFacile": [
+      "Terrain réduit."
+    ],
+    "varianteDifficile": [
+      "Interdiction de reculer."
+    ],
+    "varianteCompetition": [
+      "Montée-descente."
+    ]
+  },
+  {
+    "id": "TAC-003",
+    "nom": "Démarrage obligatoire",
+    "categorie": "Tactique",
+    "difficulte": 3,
+    "intensite": 4,
+    "fonctionnalites": [
+      "Initiative",
+      "Topspin"
+    ],
+    "objectif": "Favoriser la prise d'initiative.",
+    "consignes": [
+      "Le premier joueur qui peut démarrer doit le faire.",
+      "Aucune poussette prolongée autorisée."
+    ],
+    "criteresReussite": [
+      "Initiative prise rapidement."
+    ],
+    "varianteFacile": [
+      "Balles longues uniquement."
+    ],
+    "varianteDifficile": [
+      "Démarrage dès la première occasion."
+    ],
+    "varianteCompetition": [
+      "Point annulé sans démarrage."
+    ]
+  },
+  {
+    "id": "TAC-004",
+    "nom": "Deuxième démarrage obligatoire",
+    "categorie": "Tactique",
+    "difficulte": 4,
+    "intensite": 4,
+    "fonctionnalites": [
+      "ConstructionPoint",
+      "CinquiemeBalle"
+    ],
+    "objectif": "Préparer l'attaque suivante après le premier top.",
+    "consignes": [
+      "Après le premier topspin, une nouvelle attaque doit suivre."
+    ],
+    "criteresReussite": [
+      "Enchaînement cohérent."
+    ],
+    "varianteFacile": [
+      "Bloc passif adverse."
+    ],
+    "varianteDifficile": [
+      "Bloc actif adverse."
+    ],
+    "varianteCompetition": [
+      "Points doublés si le schéma est respecté."
+    ]
+  },
+  {
+    "id": "TAC-005",
+    "nom": "Zone cible imposée",
+    "categorie": "Tactique",
+    "difficulte": 3,
+    "intensite": 3,
+    "fonctionnalites": [
+      "Placement",
+      "Precision"
+    ],
+    "objectif": "Développer la qualité du placement.",
+    "consignes": [
+      "Une zone est définie avant chaque échange.",
+      "Chercher cette zone au moins une fois durant le point."
+    ],
+    "criteresReussite": [
+      "Zone atteinte régulièrement."
+    ],
+    "varianteFacile": [
+      "Grande zone."
+    ],
+    "varianteDifficile": [
+      "Petite cible."
+    ],
+    "varianteCompetition": [
+      "Bonus de points."
+    ]
+  },
+  {
+    "id": "TAC-006",
+    "nom": "Point double après 5 échanges",
+    "categorie": "Tactique",
+    "difficulte": 3,
+    "intensite": 3,
+    "fonctionnalites": [
+      "Patience",
+      "ConstructionPoint"
+    ],
+    "objectif": "Éviter la précipitation.",
+    "consignes": [
+      "Les points valent double après 5 échanges."
+    ],
+    "criteresReussite": [
+      "Bonne gestion du risque."
+    ],
+    "varianteFacile": [
+      "Point double après 3 échanges."
+    ],
+    "varianteDifficile": [
+      "Point triple après 7 échanges."
+    ],
+    "varianteCompetition": [
+      "Tournoi à thème."
+    ]
+  },
+  {
+    "id": "TAC-007",
+    "nom": "Schéma de jeu imposé",
+    "categorie": "Tactique",
+    "difficulte": 4,
+    "intensite": 3,
+    "fonctionnalites": [
+      "SchemaJeu",
+      "Automatisation"
+    ],
+    "objectif": "Automatiser un schéma tactique précis.",
+    "consignes": [
+      "Service court coupé.",
+      "Top coup droit.",
+      "Bloc puis finition."
+    ],
+    "criteresReussite": [
+      "Respect intégral du schéma."
+    ],
+    "varianteFacile": [
+      "Remise connue."
+    ],
+    "varianteDifficile": [
+      "Remise libre."
+    ],
+    "varianteCompetition": [
+      "Point gagné uniquement si le schéma est respecté."
+    ]
+  },
+  {
+    "id": "TAC-008",
+    "nom": "Schéma de jeu libre",
+    "categorie": "Tactique",
+    "difficulte": 5,
+    "intensite": 4,
+    "fonctionnalites": [
+      "Adaptation",
+      "LectureAdverse"
+    ],
+    "objectif": "Choisir le meilleur schéma selon la situation.",
+    "consignes": [
+      "Définir un plan avant le point.",
+      "L'adapter selon la remise adverse."
+    ],
+    "criteresReussite": [
+      "Décisions pertinentes."
+    ],
+    "varianteFacile": [
+      "Choix parmi 2 schémas."
+    ],
+    "varianteDifficile": [
+      "Choix totalement libre."
+    ],
+    "varianteCompetition": [
+      "Analyse tactique complète."
+    ]
+  },
+  {
+    "id": "TAC-009",
+    "nom": "Service dominant",
+    "categorie": "Tactique",
+    "difficulte": 3,
+    "intensite": 3,
+    "fonctionnalites": [
+      "Service",
+      "TroisiemeBalle"
+    ],
+    "objectif": "Exploiter son meilleur service.",
+    "consignes": [
+      "Utiliser toujours le même service.",
+      "Chercher à construire le point autour de celui-ci."
+    ],
+    "criteresReussite": [
+      "Création d'opportunités offensives."
+    ],
+    "varianteFacile": [
+      "Remises limitées."
+    ],
+    "varianteDifficile": [
+      "Remises libres."
+    ],
+    "varianteCompetition": [
+      "Match à thème service."
+    ]
+  },
+  {
+    "id": "TAC-010",
+    "nom": "Remise dominante",
+    "categorie": "Tactique",
+    "difficulte": 3,
+    "intensite": 3,
+    "fonctionnalites": [
+      "Remise",
+      "Placement",
+      "Tactique"
+    ],
+    "objectif": "Développer une remise favorite.",
+    "consignes": [
+      "Utiliser systématiquement le même type de remise.",
+      "Analyser son efficacité."
+    ],
+    "criteresReussite": [
+      "Prise d'avantage dans l'échange."
+    ],
+    "varianteFacile": [
+      "Services limités."
+    ],
+    "varianteDifficile": [
+      "Services variés."
+    ],
+    "varianteCompetition": [
+      "Match statistique."
+    ]
+  },
+  {
+    "id": "TAC-011",
+    "nom": "Match avec handicap",
+    "categorie": "Tactique",
+    "difficulte": 4,
+    "intensite": 3,
+    "fonctionnalites": [
+      "Adaptation",
+      "Mental"
+    ],
+    "objectif": "Apprendre à gérer des situations défavorables.",
+    "consignes": [
+      "Départ à 0-4 ou 0-6.",
+      "Adapter la prise de risque."
+    ],
+    "criteresReussite": [
+      "Choix tactiques adaptés."
+    ],
+    "varianteFacile": [
+      "Départ à 0-2."
+    ],
+    "varianteDifficile": [
+      "Départ à 0-8."
+    ],
+    "varianteCompetition": [
+      "Challenge par niveaux."
+    ]
+  },
+  {
+    "id": "TAC-012",
+    "nom": "Set à objectif tactique",
+    "categorie": "Tactique",
+    "difficulte": 4,
+    "intensite": 3,
+    "fonctionnalites": [
+      "Analyse",
+      "Application"
+    ],
+    "objectif": "Mettre en œuvre un objectif précis.",
+    "consignes": [
+      "Définir un objectif avant le set.",
+      "Exemple : jouer au coude ou démarrer en premier."
+    ],
+    "criteresReussite": [
+      "Respect de l'objectif."
+    ],
+    "varianteFacile": [
+      "Objectif simple."
+    ],
+    "varianteDifficile": [
+      "Objectif combiné."
+    ],
+    "varianteCompetition": [
+      "Compte-rendu après le set."
+    ]
+  },
+  {
+    "id": "TAC-013",
+    "nom": "Gestion des fins de set",
+    "categorie": "Tactique",
+    "difficulte": 4,
+    "intensite": 3,
+    "fonctionnalites": [
+      "GestionScore",
+      "Mental",
+      "Decision"
+    ],
+    "objectif": "Optimiser les choix à moments clés.",
+    "consignes": [
+      "Tous les sets commencent à 8-8.",
+      "Analyser chaque prise de risque."
+    ],
+    "criteresReussite": [
+      "Décisions cohérentes."
+    ],
+    "varianteFacile": [
+      "Départ à 7-7."
+    ],
+    "varianteDifficile": [
+      "Départ à 9-9."
+    ],
+    "varianteCompetition": [
+      "Tournoi à élimination."
+    ]
+  },
+  {
+    "id": "TAC-014",
+    "nom": "Coaching autonome",
+    "categorie": "Tactique",
+    "difficulte": 5,
+    "intensite": 2,
+    "fonctionnalites": [
+      "Autonomie",
+      "Analyse",
+      "Adaptation"
+    ],
+    "objectif": "Développer l'autocorrection.",
+    "consignes": [
+      "Identifier seul les problèmes rencontrés.",
+      "Adapter sa tactique entre les sets."
+    ],
+    "criteresReussite": [
+      "Corrections pertinentes."
+    ],
+    "varianteFacile": [
+      "Indices donnés par l'entraîneur."
+    ],
+    "varianteDifficile": [
+      "Aucune aide extérieure."
+    ],
+    "varianteCompetition": [
+      "Analyse écrite après le match."
+    ]
+  },
+  {
+    "id": "TAC-015",
+    "nom": "Analyse tactique libre",
+    "categorie": "Tactique",
+    "difficulte": 5,
+    "intensite": 3,
+    "fonctionnalites": [
+      "LectureAdverse",
+      "Strategie",
+      "Adaptation",
+      "PriseDecision"
+    ],
+    "objectif": "Construire une stratégie complète contre un adversaire.",
+    "consignes": [
+      "Observer les forces et faiblesses adverses.",
+      "Élaborer un plan de jeu.",
+      "L'ajuster durant la rencontre."
+    ],
+    "criteresReussite": [
+      "Adaptation pertinente.",
+      "Plan de jeu efficace."
+    ],
+    "varianteFacile": [
+      "Analyse guidée."
+    ],
+    "varianteDifficile": [
+      "Analyse totalement autonome."
+    ],
+    "varianteCompetition": [
+      "Rapport tactique de fin de match."
+    ]
+  },
+  {
+    "id": "DEF-001",
+    "nom": "Défense coupée revers",
+    "categorie": "Defense",
+    "difficulte": 2,
+    "intensite": 3,
+    "fonctionnalites": [
+      "Defense",
+      "EffetCoupe",
+      "Regularite"
+    ],
+    "objectif": "Maîtriser la défense coupée en revers.",
+    "consignes": [
+      "Le partenaire enchaîne les tops rotations.",
+      "Défendre en coupant fortement la balle.",
+      "Chercher une trajectoire longue et basse."
+    ],
+    "criteresReussite": [
+      "10 défenses consécutives.",
+      "Rotation coupée visible."
+    ],
+    "varianteFacile": [
+      "Top rotation lent."
+    ],
+    "varianteDifficile": [
+      "Top rotation rapide."
+    ],
+    "varianteCompetition": [
+      "Défi du plus grand nombre de défenses."
+    ]
+  },
+  {
+    "id": "DEF-002",
+    "nom": "Défense coupée coup droit",
+    "categorie": "Defense",
+    "difficulte": 3,
+    "intensite": 3,
+    "fonctionnalites": [
+      "Defense",
+      "Controle",
+      "Placement"
+    ],
+    "objectif": "Développer la défense coupée en coup droit.",
+    "consignes": [
+      "Défendre sur topspins continus.",
+      "Privilégier la longueur et la profondeur."
+    ],
+    "criteresReussite": [
+      "70 % de défenses réussies."
+    ],
+    "varianteFacile": [
+      "Top régulier."
+    ],
+    "varianteDifficile": [
+      "Placements variables."
+    ],
+    "varianteCompetition": [
+      "Match défense contre attaque."
+    ]
+  },
+  {
+    "id": "DEF-003",
+    "nom": "Défense loin de la table",
+    "categorie": "Defense",
+    "difficulte": 3,
+    "intensite": 4,
+    "fonctionnalites": [
+      "Defense",
+      "Endurance",
+      "Placement"
+    ],
+    "objectif": "Maintenir la qualité défensive à distance.",
+    "consignes": [
+      "Se placer à 2 ou 3 mètres de la table.",
+      "Renvoyer les tops avec régularité."
+    ],
+    "criteresReussite": [
+      "15 échanges défensifs."
+    ],
+    "varianteFacile": [
+      "Distance réduite."
+    ],
+    "varianteDifficile": [
+      "Distance augmentée."
+    ],
+    "varianteCompetition": [
+      "Défi de durée."
+    ]
+  },
+  {
+    "id": "DEF-004",
+    "nom": "Variation de quantité d'effet",
+    "categorie": "Defense",
+    "difficulte": 4,
+    "intensite": 3,
+    "fonctionnalites": [
+      "Variation",
+      "EffetCoupe",
+      "Tactique"
+    ],
+    "objectif": "Modifier la rotation pour perturber l'attaquant.",
+    "consignes": [
+      "Alterner défense très coupée et moins coupée.",
+      "Conserver le même geste."
+    ],
+    "criteresReussite": [
+      "L'attaquant s'adapte difficilement."
+    ],
+    "varianteFacile": [
+      "Deux niveaux d'effet."
+    ],
+    "varianteDifficile": [
+      "Variation libre."
+    ],
+    "varianteCompetition": [
+      "Analyse des erreurs provoquées."
+    ]
+  },
+  {
+    "id": "DEF-005",
+    "nom": "Défense puis contre-attaque",
+    "categorie": "Defense",
+    "difficulte": 4,
+    "intensite": 4,
+    "fonctionnalites": [
+      "Transition",
+      "ContreInitiative",
+      "Timing"
+    ],
+    "objectif": "Passer de la défense à l'attaque.",
+    "consignes": [
+      "Défendre plusieurs balles.",
+      "Attaquer dès qu'une opportunité apparaît."
+    ],
+    "criteresReussite": [
+      "Bon choix du moment d'attaque."
+    ],
+    "varianteFacile": [
+      "Attaque annoncée."
+    ],
+    "varianteDifficile": [
+      "Choix libre."
+    ],
+    "varianteCompetition": [
+      "Point gagné uniquement sur contre-attaque."
+    ]
+  },
+  {
+    "id": "DEF-006",
+    "nom": "Défense sur topspin revers",
+    "categorie": "Defense",
+    "difficulte": 3,
+    "intensite": 3,
+    "fonctionnalites": [
+      "LectureJeu",
+      "DefenseRV"
+    ],
+    "objectif": "Développer la défense spécifique côté revers.",
+    "consignes": [
+      "Le partenaire joue uniquement en top revers.",
+      "Maintenir une défense régulière."
+    ],
+    "criteresReussite": [
+      "Stabilité de la trajectoire."
+    ],
+    "varianteFacile": [
+      "Top lent."
+    ],
+    "varianteDifficile": [
+      "Top rapide."
+    ],
+    "varianteCompetition": [
+      "Décompte des échanges."
+    ]
+  },
+  {
+    "id": "DEF-007",
+    "nom": "Défense sur topspin coup droit",
+    "categorie": "Defense",
+    "difficulte": 3,
+    "intensite": 3,
+    "fonctionnalites": [
+      "DefenseCD",
+      "Placement"
+    ],
+    "objectif": "Développer la défense côté coup droit.",
+    "consignes": [
+      "Renvoyer toutes les attaques coup droit.",
+      "Chercher les angles."
+    ],
+    "criteresReussite": [
+      "Placement efficace."
+    ],
+    "varianteFacile": [
+      "Zone fixe."
+    ],
+    "varianteDifficile": [
+      "Zone variable."
+    ],
+    "varianteCompetition": [
+      "Défi de précision."
+    ]
+  },
+  {
+    "id": "DEF-008",
+    "nom": "Défense moderne",
+    "categorie": "Defense",
+    "difficulte": 5,
+    "intensite": 4,
+    "fonctionnalites": [
+      "Defense",
+      "Attaque",
+      "Polyvalence"
+    ],
+    "objectif": "Alterner défense coupée et topspin.",
+    "consignes": [
+      "Varier entre défense et attaque.",
+      "Changer de rythme fréquemment."
+    ],
+    "criteresReussite": [
+      "Transitions maîtrisées."
+    ],
+    "varianteFacile": [
+      "Schéma imposé."
+    ],
+    "varianteDifficile": [
+      "Choix libre."
+    ],
+    "varianteCompetition": [
+      "Match à thème défense moderne."
+    ]
+  },
+  {
+    "id": "DEF-009",
+    "nom": "Variation de distance",
+    "categorie": "Defense",
+    "difficulte": 4,
+    "intensite": 4,
+    "fonctionnalites": [
+      "Adaptation",
+      "Deplacement",
+      "LectureJeu"
+    ],
+    "objectif": "Adapter la défense à différentes distances.",
+    "consignes": [
+      "Alterner défense proche et loin de la table.",
+      "Conserver la qualité de balle."
+    ],
+    "criteresReussite": [
+      "Bonne adaptation à chaque distance."
+    ],
+    "varianteFacile": [
+      "Deux distances fixes."
+    ],
+    "varianteDifficile": [
+      "Distance libre."
+    ],
+    "varianteCompetition": [
+      "Challenge sur durée."
+    ]
+  },
+  {
+    "id": "DEF-010",
+    "nom": "Défense tactique libre",
+    "categorie": "Defense",
+    "difficulte": 5,
+    "intensite": 4,
+    "fonctionnalites": [
+      "Tactique",
+      "Adaptation",
+      "LectureAdverse",
+      "Variation"
+    ],
+    "objectif": "Construire un système défensif complet.",
+    "consignes": [
+      "Varier profondeur, effet et hauteur.",
+      "Observer les préférences de l'attaquant.",
+      "Préparer les contre-attaques."
+    ],
+    "criteresReussite": [
+      "Capacité à provoquer l'erreur.",
+      "Choix tactiques pertinents."
+    ],
+    "varianteFacile": [
+      "Types de défenses limités."
+    ],
+    "varianteDifficile": [
+      "Liberté complète."
+    ],
+    "varianteCompetition": [
+      "Match avec analyse tactique post-rencontre."
+    ]
+  },
+  {
+    "id": "CTR-001",
+    "nom": "Contre-attaque coup droit",
+    "categorie": "ContreInitiative",
+    "difficulte": 3,
+    "intensite": 3,
+    "fonctionnalites": [
+      "ContreAttaque",
+      "CoupDroit",
+      "Timing"
+    ],
+    "objectif": "Prendre l'initiative après une balle adverse offensive.",
+    "consignes": [
+      "Le partenaire attaque en rotation.",
+      "Contre-attaquer en coup droit dès qu'une balle favorable apparaît."
+    ],
+    "criteresReussite": [
+      "Choix du bon moment.",
+      "70 % de réussite."
+    ],
+    "varianteFacile": [
+      "Balles plus hautes."
+    ],
+    "varianteDifficile": [
+      "Attaques plus rapides."
+    ],
+    "varianteCompetition": [
+      "Point gagné uniquement sur contre-attaque."
+    ]
+  },
+  {
+    "id": "CTR-002",
+    "nom": "Contre-attaque revers",
+    "categorie": "ContreInitiative",
+    "difficulte": 3,
+    "intensite": 3,
+    "fonctionnalites": [
+      "ContreAttaque",
+      "Revers",
+      "PriseInitiative"
+    ],
+    "objectif": "Développer la contre-initiative en revers.",
+    "consignes": [
+      "Bloquer ou contrôler la première balle.",
+      "Accélérer la suivante en revers."
+    ],
+    "criteresReussite": [
+      "Transition rapide vers l'offensive."
+    ],
+    "varianteFacile": [
+      "Bloc passif adverse."
+    ],
+    "varianteDifficile": [
+      "Bloc placé adverse."
+    ],
+    "varianteCompetition": [
+      "Match à thème."
+    ]
+  },
+  {
+    "id": "CTR-003",
+    "nom": "Bloc actif puis attaque",
+    "categorie": "ContreInitiative",
+    "difficulte": 4,
+    "intensite": 4,
+    "fonctionnalites": [
+      "BlocActif",
+      "Transition",
+      "Offensive"
+    ],
+    "objectif": "Transformer une situation défensive en offensive.",
+    "consignes": [
+      "Effectuer un bloc actif.",
+      "Préparer immédiatement une attaque."
+    ],
+    "criteresReussite": [
+      "Enchaînement fluide.",
+      "Placement pertinent."
+    ],
+    "varianteFacile": [
+      "Bloc dans une zone fixe."
+    ],
+    "varianteDifficile": [
+      "Bloc aléatoire."
+    ],
+    "varianteCompetition": [
+      "Point libre après transition."
+    ]
+  },
+  {
+    "id": "CTR-004",
+    "nom": "Top - Bloc - Top",
+    "categorie": "ContreInitiative",
+    "difficulte": 4,
+    "intensite": 4,
+    "fonctionnalites": [
+      "Transition",
+      "CinquiemeBalle"
+    ],
+    "objectif": "Réattaquer après un premier échange offensif.",
+    "consignes": [
+      "Topper.",
+      "Bloquer la réponse.",
+      "Réattaquer immédiatement."
+    ],
+    "criteresReussite": [
+      "Maîtrise des changements de rythme."
+    ],
+    "varianteFacile": [
+      "Bloc passif."
+    ],
+    "varianteDifficile": [
+      "Bloc actif."
+    ],
+    "varianteCompetition": [
+      "Point bonus si la seconde attaque gagne le point."
+    ]
+  },
+  {
+    "id": "CTR-005",
+    "nom": "Contre-top à la table",
+    "categorie": "ContreInitiative",
+    "difficulte": 5,
+    "intensite": 5,
+    "fonctionnalites": [
+      "ContreTop",
+      "Reaction",
+      "Timing"
+    ],
+    "objectif": "Prendre la balle tôt pour reprendre l'avantage.",
+    "consignes": [
+      "Contre-topper juste après le rebond.",
+      "Rester proche de la table."
+    ],
+    "criteresReussite": [
+      "Précision malgré la vitesse."
+    ],
+    "varianteFacile": [
+      "Top rotation modéré."
+    ],
+    "varianteDifficile": [
+      "Top puissant."
+    ],
+    "varianteCompetition": [
+      "Défi de contre-tops réussis."
+    ]
+  },
+  {
+    "id": "CTR-006",
+    "nom": "Pivot de contre-initiative",
+    "categorie": "ContreInitiative",
+    "difficulte": 4,
+    "intensite": 4,
+    "fonctionnalites": [
+      "Pivot",
+      "Explosivite",
+      "PriseInitiative"
+    ],
+    "objectif": "Utiliser le pivot pour reprendre l'avantage.",
+    "consignes": [
+      "Identifier une balle neutre dans le revers.",
+      "Pivoter et attaquer en coup droit."
+    ],
+    "criteresReussite": [
+      "Pivot rapide.",
+      "Attaque offensive efficace."
+    ],
+    "varianteFacile": [
+      "Balle annoncée."
+    ],
+    "varianteDifficile": [
+      "Placement aléatoire."
+    ],
+    "varianteCompetition": [
+      "Match avec pivot obligatoire."
+    ]
+  },
+  {
+    "id": "CTR-007",
+    "nom": "Réaction rapide sur balle neutre",
+    "categorie": "ContreInitiative",
+    "difficulte": 4,
+    "intensite": 4,
+    "fonctionnalites": [
+      "Reaction",
+      "LectureJeu",
+      "Anticipation"
+    ],
+    "objectif": "Identifier rapidement les opportunités d'attaque.",
+    "consignes": [
+      "Le partenaire varie la qualité des balles.",
+      "Attaquer dès qu'une balle neutre apparaît."
+    ],
+    "criteresReussite": [
+      "Bonne lecture du jeu.",
+      "Choix pertinents."
+    ],
+    "varianteFacile": [
+      "Balles faciles à identifier."
+    ],
+    "varianteDifficile": [
+      "Variations plus subtiles."
+    ],
+    "varianteCompetition": [
+      "Score sur opportunités exploitées."
+    ]
+  },
+  {
+    "id": "CTR-008",
+    "nom": "Première balle offensive",
+    "categorie": "ContreInitiative",
+    "difficulte": 3,
+    "intensite": 3,
+    "fonctionnalites": [
+      "Initiative",
+      "Placement",
+      "Agressivite"
+    ],
+    "objectif": "Transformer rapidement une remise ou un bloc en attaque.",
+    "consignes": [
+      "Chercher l'offensive dès la première balle favorable.",
+      "Privilégier la qualité plutôt que la puissance."
+    ],
+    "criteresReussite": [
+      "Prise d'initiative rapide."
+    ],
+    "varianteFacile": [
+      "Balles prévisibles."
+    ],
+    "varianteDifficile": [
+      "Placements variables."
+    ],
+    "varianteCompetition": [
+      "Points doublés après initiative."
+    ]
+  },
+  {
+    "id": "CTR-009",
+    "nom": "Contre-initiative libre",
+    "categorie": "ContreInitiative",
+    "difficulte": 5,
+    "intensite": 4,
+    "fonctionnalites": [
+      "Adaptation",
+      "Decision",
+      "LectureAdverse"
+    ],
+    "objectif": "Choisir la meilleure réponse offensive selon la situation.",
+    "consignes": [
+      "Identifier les moments favorables.",
+      "Choisir entre top, frappe, pivot ou contre-top."
+    ],
+    "criteresReussite": [
+      "Choix tactiques efficaces."
+    ],
+    "varianteFacile": [
+      "Deux solutions autorisées."
+    ],
+    "varianteDifficile": [
+      "Liberté totale."
+    ],
+    "varianteCompetition": [
+      "Analyse statistique des choix."
+    ]
+  },
+  {
+    "id": "CTR-010",
+    "nom": "Prise de balle précoce",
+    "categorie": "ContreInitiative",
+    "difficulte": 5,
+    "intensite": 5,
+    "fonctionnalites": [
+      "Timing",
+      "Vitesse",
+      "PriseBallePrecoce",
+      "Explosivite"
+    ],
+    "objectif": "Réduire le temps de réaction laissé à l'adversaire.",
+    "consignes": [
+      "Prendre systématiquement la balle au sommet ou juste après le rebond.",
+      "Chercher une trajectoire agressive."
+    ],
+    "criteresReussite": [
+      "Pression constante sur l'adversaire.",
+      "Maintien de la précision."
+    ],
+    "varianteFacile": [
+      "Cadence modérée."
+    ],
+    "varianteDifficile": [
+      "Cadence élevée."
+    ]
+  },
+  {
+    "id": "PHY-001",
+    "nom": "Shadow Ping",
+    "categorie": "Physique",
+    "difficulte": 1,
+    "intensite": 2,
+    "fonctionnalites": [
+      "Coordination",
+      "Technique"
+    ],
+    "objectif": "Automatiser les gestes sans balle.",
+    "consignes": [
+      "Simuler les gestes techniques.",
+      "Respecter les déplacements."
+    ],
+    "criteresReussite": [
+      "Gestuelle correcte."
+    ],
+    "varianteFacile": [
+      "Cadence lente."
+    ],
+    "varianteDifficile": [
+      "Cadence élevée."
+    ]
+  },
+  {
+    "id": "PHY-002",
+    "nom": "Shadow avec élastique",
+    "categorie": "Physique",
+    "difficulte": 3,
+    "intensite": 4,
+    "fonctionnalites": [
+      "Puissance",
+      "Gainage"
+    ],
+    "objectif": "Renforcer les chaînes musculaires spécifiques."
+  },
+  {
+    "id": "PHY-003",
+    "nom": "Sprint latéral",
+    "categorie": "Physique",
+    "difficulte": 3,
+    "intensite": 5,
+    "fonctionnalites": [
+      "Explosivite",
+      "Appuis"
+    ],
+    "objectif": "Améliorer les déplacements latéraux."
+  },
+  {
+    "id": "PHY-004",
+    "nom": "Sprint avant arrière",
+    "categorie": "Physique",
+    "difficulte": 3,
+    "intensite": 5,
+    "fonctionnalites": [
+      "Vitesse",
+      "Coordination"
+    ],
+    "objectif": "Travailler les variations de distance."
+  },
+  {
+    "id": "PHY-005",
+    "nom": "Fractionné 15/15",
+    "categorie": "Physique",
+    "difficulte": 4,
+    "intensite": 5,
+    "fonctionnalites": [
+      "Resistance",
+      "Cardio"
+    ],
+    "objectif": "Développer la capacité de répétition."
+  },
+  {
+    "id": "PHY-006",
+    "nom": "Fractionné 30/30",
+    "categorie": "Physique",
+    "difficulte": 4,
+    "intensite": 5,
+    "fonctionnalites": [
+      "Endurance",
+      "Cardio"
+    ]
+  },
+  {
+    "id": "PHY-007",
+    "nom": "Multiballes intensif",
+    "categorie": "Physique",
+    "difficulte": 5,
+    "intensite": 5,
+    "fonctionnalites": [
+      "Explosivite",
+      "Resistance"
+    ]
+  },
+  {
+    "id": "PHY-008",
+    "nom": "Gainage pongiste",
+    "categorie": "Physique",
+    "difficulte": 2,
+    "intensite": 3,
+    "fonctionnalites": [
+      "Gainage",
+      "Stabilite"
+    ]
+  },
+  {
+    "id": "PHY-009",
+    "nom": "Échelle de rythme",
+    "categorie": "Physique",
+    "difficulte": 2,
+    "intensite": 3,
+    "fonctionnalites": [
+      "Coordination",
+      "Appuis"
+    ]
+  },
+  {
+    "id": "PHY-010",
+    "nom": "Réaction lumineuse",
+    "categorie": "Physique",
+    "difficulte": 4,
+    "intensite": 4,
+    "fonctionnalites": [
+      "Reaction",
+      "PriseDecision"
+    ]
+  },
+  {
+    "id": "PHY-011",
+    "nom": "Vitesse d'appuis",
+    "categorie": "Physique",
+    "difficulte": 3,
+    "intensite": 5,
+    "fonctionnalites": [
+      "Vitesse",
+      "Appuis"
+    ]
+  },
+  {
+    "id": "PHY-012",
+    "nom": "Explosivité jambes",
+    "categorie": "Physique",
+    "difficulte": 4,
+    "intensite": 5,
+    "fonctionnalites": [
+      "Explosivite",
+      "Puissance"
+    ]
+  },
+  {
+    "id": "PHY-013",
+    "nom": "Endurance spécifique ping",
+    "categorie": "Physique",
+    "difficulte": 4,
+    "intensite": 5,
+    "fonctionnalites": [
+      "Endurance",
+      "Resistance"
+    ]
+  },
+  {
+    "id": "PHY-014",
+    "nom": "Résistance lactique",
+    "categorie": "Physique",
+    "difficulte": 5,
+    "intensite": 5,
+    "fonctionnalites": [
+      "Resistance",
+      "Mental"
+    ]
+  },
+  {
+    "id": "PHY-015",
+    "nom": "Circuit physique pongiste",
+    "categorie": "Physique",
+    "difficulte": 4,
+    "intensite": 5,
+    "fonctionnalites": [
+      "Complet",
+      "ConditionPhysique"
+    ]
+  },
+  {
+    "id": "MEN-001",
+    "nom": "Point à thème",
+    "categorie": "Mental",
+    "difficulte": 2,
+    "intensite": 2,
+    "fonctionnalites": [
+      "Concentration"
+    ],
+    "objectif": "Rester focalisé sur une mission simple."
+  },
+  {
+    "id": "MEN-002",
+    "nom": "Match handicap",
+    "categorie": "Mental",
+    "difficulte": 3,
+    "intensite": 2,
+    "fonctionnalites": [
+      "Resilience",
+      "Adaptation"
+    ]
+  },
+  {
+    "id": "MEN-003",
+    "nom": "Départ à 8-8",
+    "categorie": "Mental",
+    "difficulte": 4,
+    "fonctionnalites": [
+      "GestionStress"
+    ]
+  },
+  {
+    "id": "MEN-004",
+    "nom": "Départ à 9-9",
+    "categorie": "Mental",
+    "difficulte": 5,
+    "fonctionnalites": [
+      "GestionStress",
+      "Confiance"
+    ]
+  },
+  {
+    "id": "MEN-005",
+    "nom": "Balle de match",
+    "categorie": "Mental",
+    "difficulte": 4,
+    "fonctionnalites": [
+      "Pression",
+      "Concentration"
+    ]
+  },
+  {
+    "id": "MEN-006",
+    "nom": "Set unique",
+    "categorie": "Mental",
+    "difficulte": 4,
+    "fonctionnalites": [
+      "Engagement"
+    ]
+  },
+  {
+    "id": "MEN-007",
+    "nom": "Temps limité",
+    "categorie": "Mental",
+    "difficulte": 3,
+    "fonctionnalites": [
+      "DecisionRapide"
+    ]
+  },
+  {
+    "id": "MEN-008",
+    "nom": "Match sans coaching",
+    "categorie": "Mental",
+    "difficulte": 3,
+    "fonctionnalites": [
+      "Autonomie"
+    ]
+  },
+  {
+    "id": "MEN-009",
+    "nom": "Gestion frustration",
+    "categorie": "Mental",
+    "difficulte": 4,
+    "fonctionnalites": [
+      "MaitriseEmotionnelle"
+    ]
+  },
+  {
+    "id": "MEN-010",
+    "nom": "Routine service",
+    "categorie": "Mental",
+    "difficulte": 2,
+    "fonctionnalites": [
+      "Routine",
+      "Concentration"
+    ]
+  },
+  {
+    "id": "MEN-011",
+    "nom": "Routine entre points",
+    "categorie": "Mental",
+    "difficulte": 2,
+    "fonctionnalites": [
+      "Recentrage"
+    ]
+  },
+  {
+    "id": "MEN-012",
+    "nom": "Objectif personnel",
+    "categorie": "Mental",
+    "difficulte": 3,
+    "fonctionnalites": [
+      "Responsabilisation"
+    ]
+  },
+  {
+    "id": "MEN-013",
+    "nom": "Challenge concentration",
+    "categorie": "Mental",
+    "difficulte": 4,
+    "fonctionnalites": [
+      "Attention"
+    ]
+  },
+  {
+    "id": "MEN-014",
+    "nom": "Respiration contrôlée",
+    "categorie": "Mental",
+    "difficulte": 1,
+    "fonctionnalites": [
+      "GestionStress"
+    ]
+  },
+  {
+    "id": "MEN-015",
+    "nom": "Visualisation mentale",
+    "categorie": "Mental",
+    "difficulte": 2,
+    "fonctionnalites": [
+      "PreparationCompetition",
+      "Confiance"
+    ]
+  },
+  {
+    "id": "JEU-001",
+    "nom": "Tour de table",
+    "categorie": "Jeunes",
+    "difficulte": 1,
+    "intensite": 2,
+    "fonctionnalites": [
+      "Coordination",
+      "Plaisir"
+    ]
+  },
+  {
+    "id": "JEU-002",
+    "nom": "Roi de table",
+    "categorie": "Jeunes",
+    "difficulte": 2,
+    "intensite": 3,
+    "fonctionnalites": [
+      "Competition",
+      "Motivation"
+    ]
+  },
+  {
+    "id": "JEU-003",
+    "nom": "Montée descente",
+    "categorie": "Jeunes",
+    "difficulte": 2,
+    "intensite": 3,
+    "fonctionnalites": [
+      "Competition"
+    ]
+  },
+  {
+    "id": "JEU-004",
+    "nom": "Cibles de précision",
+    "categorie": "Jeunes",
+    "difficulte": 1,
+    "intensite": 2,
+    "fonctionnalites": [
+      "Precision"
+    ]
+  },
+  {
+    "id": "JEU-005",
+    "nom": "Chamboule-tout pongiste",
+    "categorie": "Jeunes",
+    "difficulte": 1,
+    "intensite": 2,
+    "fonctionnalites": [
+      "Adresse"
+    ]
+  },
+  {
+    "id": "JEU-006",
+    "nom": "Service sur cible",
+    "categorie": "Jeunes",
+    "difficulte": 2,
+    "intensite": 2,
+    "fonctionnalites": [
+      "Service",
+      "Precision"
+    ]
+  },
+  {
+    "id": "JEU-007",
+    "nom": "Relais balles",
+    "categorie": "Jeunes",
+    "difficulte": 2,
+    "intensite": 4,
+    "fonctionnalites": [
+      "Vitesse",
+      "EspritEquipe"
+    ]
+  },
+  {
+    "id": "JEU-008",
+    "nom": "Match par équipes",
+    "categorie": "Jeunes",
+    "difficulte": 2,
+    "intensite": 3,
+    "fonctionnalites": [
+      "Collectif"
+    ]
+  },
+  {
+    "id": "JEU-009",
+    "nom": "Défi régularité",
+    "categorie": "Jeunes",
+    "difficulte": 2,
+    "intensite": 2,
+    "fonctionnalites": [
+      "Regularite"
+    ]
+  },
+  {
+    "id": "JEU-010",
+    "nom": "Défi topspin",
+    "categorie": "Jeunes",
+    "difficulte": 3,
+    "intensite": 3,
+    "fonctionnalites": [
+      "Topspin"
+    ]
+  },
+  {
+    "id": "JEU-011",
+    "nom": "Défi service",
+    "categorie": "Jeunes",
+    "difficulte": 2,
+    "intensite": 2,
+    "fonctionnalites": [
+      "Service"
+    ]
+  },
+  {
+    "id": "JEU-012",
+    "nom": "Défi déplacements",
+    "categorie": "Jeunes",
+    "difficulte": 3,
+    "intensite": 4,
+    "fonctionnalites": [
+      "Deplacement"
+    ]
+  },
+  {
+    "id": "JEU-013",
+    "nom": "Défi tactique",
+    "categorie": "Jeunes",
+    "difficulte": 3,
+    "intensite": 3,
+    "fonctionnalites": [
+      "Reflexion"
+    ]
+  },
+  {
+    "id": "JEU-014",
+    "nom": "Memory trajectoires",
+    "categorie": "Jeunes",
+    "difficulte": 2,
+    "intensite": 2,
+    "fonctionnalites": [
+      "Observation",
+      "Memoire"
+    ]
+  },
+  {
+    "id": "JEU-015",
+    "nom": "Parcours pongiste",
+    "categorie": "Jeunes",
+    "difficulte": 3,
+    "intensite": 4,
+    "fonctionnalites": [
+      "Coordination",
+      "Agilite"
+    ]
   }
 ]

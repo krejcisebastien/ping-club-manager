@@ -1,6 +1,5 @@
 import { Router } from "express";
 import { requireAuth, requireRole } from "../middleware/auth.js";
-import exerciseLibrary from "../data/exercise-library.json" with { type: "json" };
 
 const router = Router();
 
@@ -47,41 +46,6 @@ router.put("/:id", requireRole("ADMIN", "COACH"), async (req, res) => {
   } catch {
     res.status(404).json({ error: "Exercice introuvable." });
   }
-});
-
-// Importe la bibliothèque standard d'exercices dans le club. Idempotent :
-// les exercices déjà importés (même sourceCode) sont ignorés.
-router.post("/import-library", requireRole("ADMIN", "COACH"), async (req, res) => {
-  const existing = await req.db.exercise.findMany({
-    where: { sourceCode: { in: exerciseLibrary.map((e) => e.id) } },
-    select: { sourceCode: true },
-  });
-  const alreadyImported = new Set(existing.map((e) => e.sourceCode));
-  const toImport = exerciseLibrary.filter((e) => !alreadyImported.has(e.id));
-
-  for (const item of toImport) {
-    await req.db.exercise.create({
-      data: {
-        title: item.nom,
-        category: item.categorie,
-        difficulty: item.difficulte ?? null,
-        intensity: item.intensite ?? null,
-        levelMin: item.niveauMin ?? null,
-        levelMax: item.niveauMax ?? null,
-        skills: item.fonctionnalites ?? null,
-        objective: item.objectif ?? null,
-        instructions: item.consignes ?? null,
-        successCriteria: item.criteresReussite ?? null,
-        easierVariant: item.varianteFacile ?? null,
-        harderVariant: item.varianteDifficile ?? null,
-        competitionVariant: item.varianteCompetition ?? null,
-        sourceCode: item.id,
-        createdById: req.user.coachId ?? null,
-      },
-    });
-  }
-
-  res.status(201).json({ imported: toImport.length, skipped: exerciseLibrary.length - toImport.length });
 });
 
 router.delete("/:id", requireRole("ADMIN", "COACH"), async (req, res) => {

@@ -1,4 +1,5 @@
 import { hashPassword } from "../utils/password.js";
+import { seedExerciseLibrary } from "./exerciseLibrary.js";
 
 // Prolonge une fin de licence de N ans, à partir de la fin actuelle si elle est
 // encore dans le futur, sinon à partir d'aujourd'hui.
@@ -17,7 +18,7 @@ export function parseDay(value) {
 }
 
 export async function createClubWithAdmin(prisma, { name, slug, email, password, licenseEndsAt }) {
-  return prisma.club.create({
+  const club = await prisma.club.create({
     data: {
       name,
       slug,
@@ -25,4 +26,6 @@ export async function createClubWithAdmin(prisma, { name, slug, email, password,
       users: { create: { email, passwordHash: await hashPassword(password), roles: ["ADMIN"] } },
     },
   });
+  await seedExerciseLibrary(prisma, club.id);
+  return club;
 }

@@ -6,6 +6,8 @@ import { PrismaClient } from "@prisma/client";
 import jwt from "jsonwebtoken";
 import { createApp } from "../src/app.js";
 import { hashPassword } from "../src/utils/password.js";
+import { seedExerciseLibrary } from "../src/lib/exerciseLibrary.js";
+import exerciseLibrary from "../src/data/exercise-library.json" with { type: "json" };
 
 const prisma = new PrismaClient();
 const server = createApp().listen(0);
@@ -42,7 +44,7 @@ const emailA = `admin-a-${run}@test.local`;
 const emailB = `admin-b-${run}@test.local`;
 
 async function createClub(name, email) {
-  return prisma.club.create({
+  const club = await prisma.club.create({
     data: {
       name,
       slug: `${name.toLowerCase().replace(/\W+/g, "-")}-${run}`,
@@ -50,6 +52,8 @@ async function createClub(name, email) {
       users: { create: { email, passwordHash: await hashPassword(PASSWORD), roles: ["ADMIN"] } },
     },
   });
+  await seedExerciseLibrary(prisma, club.id);
+  return club;
 }
 
 async function login(email) {
@@ -94,12 +98,22 @@ try {
   // ---------- 1. B ne voit rien de A dans les listes ----------
   for (const [path, key] of [
     ["/seasons", "seasons"], ["/players", "players"], ["/coaches", "coaches"], ["/sparrings", "sparrings"],
-    ["/exercises", "exercises"], ["/groups", "groups"], ["/trainings", "trainings"], ["/camps", "camps"],
+    ["/groups", "groups"], ["/trainings", "trainings"], ["/camps", "camps"],
     ["/training-plans", "plans"],
   ]) {
     const r = await call(B.token, "GET", path);
     expect(`B liste vide : ${path}`, r.status === 200 && r.json[key].length === 0, JSON.stringify(r.json).slice(0, 80));
   }
+
+  // Chaque club est initialisé avec sa propre bibliothèque d'exercices de base
+  // (seedExerciseLibrary, appelé à la création du club) : B a la sienne, sans
+  // voir l'exercice "Exercice A" créé manuellement dans le club A.
+  const exercisesB = (await call(B.token, "GET", "/exercises")).json.exercises;
+  expect(
+    "B a sa propre bibliothèque de base sans les exercices de A",
+    exercisesB.length === exerciseLibrary.length && !exercisesB.some((e) => e.title === "Exercice A"),
+    `B a ${exercisesB.length} exercice(s), attendu ${exerciseLibrary.length}`
+  );
   const usersB = (await call(B.token, "GET", "/auth/users")).json.users;
   expect("B ne voit que ses propres comptes", usersB.length === 1 && usersB[0].email === emailB);
 
@@ -305,16 +319,6 @@ try {
     physique: 6,
   });
   expect("un score hors 0-10 est refusé", evalBadScore.status === 400, `status ${evalBadScore.status}`);
-
-  // ---------- Import de la bibliothèque d'exercices : isolation et idempotence ----------
-  const importA1 = (await call(A.token, "POST", "/exercises/import-library")).json;
-  expect("A importe les 55 exercices de la bibliothèque", importA1.imported === 55, JSON.stringify(importA1));
-  const importA2 = (await call(A.token, "POST", "/exercises/import-library")).json;
-  expect("un second import ne recrée rien (idempotent)", importA2.imported === 0 && importA2.skipped === 55, JSON.stringify(importA2));
-  const importB1 = (await call(B.token, "POST", "/exercises/import-library")).json;
-  expect("B importe aussi ses propres 55 exercices", importB1.imported === 55, JSON.stringify(importB1));
-  const exercisesB = (await call(B.token, "GET", "/exercises")).json.exercises;
-  expect("B ne voit que ses exercices (pas ceux de A)", exercisesB.length === 55);
 
   // ---------- 7. Sessions et comptes ----------
   const legacy = jwt.sign({ sub: "x", roles: ["ADMIN"] }, process.env.JWT_SECRET);
