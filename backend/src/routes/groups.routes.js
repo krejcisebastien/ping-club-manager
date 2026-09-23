@@ -65,8 +65,8 @@ router.get("/:id/players", async (req, res) => {
   res.json({ assignments });
 });
 
-// Affecte un joueur à ce groupe. Si le joueur a déjà une affectation ouverte
-// sur un groupe de la même saison, elle est automatiquement close (changement de groupe).
+// Affecte un joueur à ce groupe. Un joueur peut être affecté à plusieurs
+// groupes en même temps (ex. groupe d'âge + groupe de niveau).
 router.post("/:id/players", requireRole("ADMIN", "COACH"), async (req, res) => {
   const { playerId } = req.body ?? {};
   if (!playerId) return res.status(400).json({ error: "playerId est requis." });
@@ -74,13 +74,13 @@ router.post("/:id/players", requireRole("ADMIN", "COACH"), async (req, res) => {
   const group = await req.db.trainingGroup.findUnique({ where: { id: req.params.id } });
   if (!group) return res.status(404).json({ error: "Groupe introuvable." });
 
-  const now = new Date();
-  await req.db.playerGroupAssignment.updateMany({
-    where: { playerId, endDate: null, group: { seasonId: group.seasonId } },
-    data: { endDate: now },
+  const existing = await req.db.playerGroupAssignment.findFirst({
+    where: { playerId, groupId: group.id, endDate: null },
   });
+  if (existing) return res.status(409).json({ error: "Ce joueur est déjà dans ce groupe." });
+
   const assignment = await req.db.playerGroupAssignment.create({
-    data: { playerId, groupId: group.id, startDate: now },
+    data: { playerId, groupId: group.id, startDate: new Date() },
     include: { player: true },
   });
   res.status(201).json({ assignment });
