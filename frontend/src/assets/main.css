@@ -32,6 +32,15 @@
   padding: 0 !important;
 }
 
+/* Les champs de recherche avec icône (classe pl-9) ont besoin d'un padding
+   gauche plus grand pour laisser la place à l'icône : sans cette règle plus
+   spécifique, le "padding: ... !important" ci-dessus l'emporte toujours sur
+   la classe Tailwind pl-9, quel que soit l'ordre des styles, et le texte
+   saisi chevauche l'icône. */
+.p-inputtext.pl-9 {
+  padding-left: 2.25rem !important;
+}
+
 .p-inputtext:enabled:focus,
 .p-dropdown:not(.p-disabled).p-focus,
 .p-multiselect:not(.p-disabled).p-focus,
