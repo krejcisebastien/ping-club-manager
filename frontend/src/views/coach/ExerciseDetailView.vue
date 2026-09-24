@@ -15,7 +15,14 @@ import TableDiagramEditor from "../../components/TableDiagramEditor.vue";
 import { api } from "../../lib/api.js";
 import { sanitizeHtml } from "../../lib/richtext.js";
 import { useNavLinks } from "../../composables/useNavLinks.js";
-import { EXERCISE_CATEGORY_OPTIONS, EXERCISE_CATEGORY_LABELS, EXERCISE_DIFFICULTY_OPTIONS, EXERCISE_DIFFICULTY_LABELS } from "../../lib/exercise.js";
+import {
+  EXERCISE_CATEGORY_OPTIONS,
+  EXERCISE_CATEGORY_LABELS,
+  EXERCISE_DIFFICULTY_OPTIONS,
+  EXERCISE_DIFFICULTY_LABELS,
+  linesToArray,
+  arrayToLines,
+} from "../../lib/exercise.js";
 
 const navLinks = useNavLinks();
 const route = useRoute();
@@ -29,8 +36,6 @@ const editing = ref(false);
 const form = ref(null);
 const saving = ref(false);
 
-const linesToArray = (text) => text.split("\n").map((l) => l.trim()).filter(Boolean);
-const arrayToLines = (arr) => (Array.isArray(arr) ? arr.join("\n") : "");
 const categoryLabel = (ex) => EXERCISE_CATEGORY_LABELS[ex.category] ?? "";
 const difficultyLabel = (ex) => EXERCISE_DIFFICULTY_LABELS[ex.difficulty] ?? "";
 

@@ -1,5 +1,7 @@
 import { Router } from "express";
 import { requireAuth, requireRole } from "../middleware/auth.js";
+import { rateLimit } from "../middleware/rateLimit.js";
+import { generateExercise } from "../lib/ai.js";
 
 const router = Router();
 
@@ -11,6 +13,8 @@ const EXERCISE_FIELDS = [
   "successCriteria", "easierVariant", "harderVariant", "competitionVariant",
 ];
 
+const DIFFICULTY_ENUM = { 1: "NIVEAU_1", 2: "NIVEAU_2", 3: "NIVEAU_3", 4: "NIVEAU_4", 5: "NIVEAU_5" };
+
 router.get("/", async (req, res) => {
   const { category, difficulty } = req.query;
   const exercises = await req.db.exercise.findMany({
@@ -19,6 +23,25 @@ router.get("/", async (req, res) => {
   });
   res.json({ exercises });
 });
+
+// Génère un brouillon d'exercice avec l'IA (non enregistré : le coach
+// valide/édite avant de le créer via POST /exercises).
+router.post(
+  "/generate",
+  requireRole("ADMIN", "COACH"),
+  rateLimit({ windowMs: 60 * 60 * 1000, max: 20 }),
+  async (req, res) => {
+    const { category, difficulty, skills, notes } = req.body ?? {};
+    try {
+      const draft = await generateExercise({ category, difficulty, skills, notes });
+      draft.difficulty = DIFFICULTY_ENUM[draft.difficulty] ?? null;
+      res.json({ draft });
+    } catch (err) {
+      if (err.code === "AI_NOT_CONFIGURED") return res.status(503).json({ error: err.message });
+      throw err;
+    }
+  }
+);
 
 router.get("/:id", async (req, res) => {
   const exercise = await req.db.exercise.findUnique({ where: { id: req.params.id } });

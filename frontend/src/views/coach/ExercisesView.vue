@@ -6,6 +6,8 @@ import Column from "primevue/column";
 import Dialog from "primevue/dialog";
 import Button from "primevue/button";
 import InputText from "primevue/inputtext";
+import Textarea from "primevue/textarea";
+import InputNumber from "primevue/inputnumber";
 import Dropdown from "primevue/dropdown";
 import Tag from "primevue/tag";
 import { useToast } from "primevue/usetoast";
@@ -16,7 +18,14 @@ import { api } from "../../lib/api.js";
 import { stripHtml } from "../../lib/richtext.js";
 import { useNavLinks } from "../../composables/useNavLinks.js";
 import { useTableFilter } from "../../composables/useTableFilter.js";
-import { EXERCISE_CATEGORY_OPTIONS, EXERCISE_CATEGORY_LABELS, EXERCISE_DIFFICULTY_OPTIONS, EXERCISE_DIFFICULTY_LABELS } from "../../lib/exercise.js";
+import {
+  EXERCISE_CATEGORY_OPTIONS,
+  EXERCISE_CATEGORY_LABELS,
+  EXERCISE_DIFFICULTY_OPTIONS,
+  EXERCISE_DIFFICULTY_LABELS,
+  linesToArray,
+  arrayToLines,
+} from "../../lib/exercise.js";
 
 const navLinks = useNavLinks();
 const router = useRouter();
@@ -92,6 +101,68 @@ function onDelete(ex) {
 function onRowClick(event) {
   router.push(`/coach/exercises/${event.data.id}`);
 }
+
+const aiDialogVisible = ref(false);
+const aiStep = ref("criteria");
+const aiCriteria = ref({ category: null, difficulty: null, skills: "", notes: "" });
+const aiGenerating = ref(false);
+const aiDraft = ref(null);
+const aiCreating = ref(false);
+
+function openAiGenerate() {
+  aiStep.value = "criteria";
+  aiCriteria.value = { category: null, difficulty: null, skills: "", notes: "" };
+  aiDraft.value = null;
+  aiDialogVisible.value = true;
+}
+
+async function onAiGenerateDraft() {
+  aiGenerating.value = true;
+  try {
+    const { data } = await api.post("/exercises/generate", {
+      category: aiCriteria.value.category,
+      difficulty: aiCriteria.value.difficulty ? Number(aiCriteria.value.difficulty.replace("NIVEAU_", "")) : undefined,
+      skills: aiCriteria.value.skills.split(",").map((s) => s.trim()).filter(Boolean),
+      notes: aiCriteria.value.notes,
+    });
+    aiDraft.value = {
+      ...data.draft,
+      skills: arrayToLines(data.draft.skills),
+      instructions: arrayToLines(data.draft.instructions),
+      successCriteria: arrayToLines(data.draft.successCriteria),
+      easierVariant: arrayToLines(data.draft.easierVariant),
+      harderVariant: arrayToLines(data.draft.harderVariant),
+      competitionVariant: arrayToLines(data.draft.competitionVariant),
+    };
+    aiStep.value = "review";
+  } catch (err) {
+    toast.add({ severity: "error", summary: "Erreur", detail: err.response?.data?.error ?? "Une erreur est survenue.", life: 5000 });
+  } finally {
+    aiGenerating.value = false;
+  }
+}
+
+async function onAiConfirm() {
+  aiCreating.value = true;
+  try {
+    const { data } = await api.post("/exercises", {
+      ...aiDraft.value,
+      skills: linesToArray(aiDraft.value.skills),
+      instructions: linesToArray(aiDraft.value.instructions),
+      successCriteria: linesToArray(aiDraft.value.successCriteria),
+      easierVariant: linesToArray(aiDraft.value.easierVariant),
+      harderVariant: linesToArray(aiDraft.value.harderVariant),
+      competitionVariant: linesToArray(aiDraft.value.competitionVariant),
+    });
+    aiDialogVisible.value = false;
+    toast.add({ severity: "success", summary: "Exercice créé", life: 3000 });
+    router.push(`/coach/exercises/${data.exercise.id}`);
+  } catch (err) {
+    toast.add({ severity: "error", summary: "Erreur", detail: err.response?.data?.error ?? "Une erreur est survenue.", life: 5000 });
+  } finally {
+    aiCreating.value = false;
+  }
+}
 </script>
 
 <template>
@@ -121,6 +192,7 @@ function onRowClick(event) {
           show-clear
           class="w-40"
         />
+        <Button label="Générer avec l'IA" icon="pi pi-sparkles" severity="secondary" outlined @click="openAiGenerate" />
         <Button label="Nouvel exercice" icon="pi pi-plus" @click="openCreate" />
       </div>
     </div>
@@ -204,6 +276,106 @@ function onRowClick(event) {
         <div class="flex justify-end gap-2 mt-2">
           <Button type="button" label="Annuler" severity="secondary" outlined @click="dialogVisible = false" />
           <Button type="submit" label="Créer" :loading="saving" />
+        </div>
+      </form>
+    </Dialog>
+
+    <Dialog v-model:visible="aiDialogVisible" header="Générer un exercice avec l'IA" modal style="width: 44rem" class="mx-4">
+      <form v-if="aiStep === 'criteria'" class="grid gap-3 pt-2" @submit.prevent="onAiGenerateDraft">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs text-slate-500 block mb-1">Catégorie (optionnel)</label>
+            <Dropdown
+              v-model="aiCriteria.category"
+              :options="EXERCISE_CATEGORY_OPTIONS"
+              option-label="label"
+              option-value="value"
+              placeholder="Laisser l'IA choisir"
+              show-clear
+              class="w-full"
+            />
+          </div>
+          <div>
+            <label class="text-xs text-slate-500 block mb-1">Difficulté (optionnel)</label>
+            <Dropdown
+              v-model="aiCriteria.difficulty"
+              :options="EXERCISE_DIFFICULTY_OPTIONS"
+              option-label="label"
+              option-value="value"
+              placeholder="Laisser l'IA choisir"
+              show-clear
+              class="w-full"
+            />
+          </div>
+        </div>
+        <div>
+          <label class="text-xs text-slate-500 block mb-1">Qualités à travailler (optionnel, séparées par des virgules)</label>
+          <InputText v-model="aiCriteria.skills" class="w-full" placeholder="ex. Pivot, Explosivité" />
+        </div>
+        <div>
+          <label class="text-xs text-slate-500 block mb-1">Précisions pour le coach (optionnel)</label>
+          <Textarea v-model="aiCriteria.notes" class="w-full" rows="2" auto-resize placeholder="ex. pour des jeunes débutants, sans matériel particulier…" />
+        </div>
+        <div class="flex justify-end gap-2 mt-2">
+          <Button type="button" label="Annuler" severity="secondary" outlined @click="aiDialogVisible = false" />
+          <Button type="submit" label="Générer" icon="pi pi-sparkles" :loading="aiGenerating" />
+        </div>
+      </form>
+
+      <form v-else-if="aiDraft" class="grid gap-3 pt-2" @submit.prevent="onAiConfirm">
+        <div>
+          <label class="text-xs text-slate-500 block mb-1">Titre</label>
+          <InputText v-model="aiDraft.title" required class="w-full" />
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div class="col-span-2 sm:col-span-1">
+            <label class="text-xs text-slate-500 block mb-1">Catégorie</label>
+            <Dropdown v-model="aiDraft.category" :options="EXERCISE_CATEGORY_OPTIONS" option-label="label" option-value="value" class="w-full" />
+          </div>
+          <div>
+            <label class="text-xs text-slate-500 block mb-1">Difficulté</label>
+            <Dropdown v-model="aiDraft.difficulty" :options="EXERCISE_DIFFICULTY_OPTIONS" option-label="label" option-value="value" class="w-full" />
+          </div>
+          <div>
+            <label class="text-xs text-slate-500 block mb-1">Intensité (1-5)</label>
+            <InputNumber v-model="aiDraft.intensity" :min="1" :max="5" show-buttons class="w-full" input-class="w-full" />
+          </div>
+        </div>
+        <div>
+          <label class="text-xs text-slate-500 block mb-1">Objectif</label>
+          <Textarea v-model="aiDraft.objective" class="w-full" rows="2" auto-resize />
+        </div>
+        <div>
+          <label class="text-xs text-slate-500 block mb-1">Qualités travaillées (une par ligne)</label>
+          <Textarea v-model="aiDraft.skills" class="w-full" rows="2" auto-resize />
+        </div>
+        <div class="grid sm:grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs text-slate-500 block mb-1">Consignes (une par ligne)</label>
+            <Textarea v-model="aiDraft.instructions" class="w-full" rows="4" auto-resize />
+          </div>
+          <div>
+            <label class="text-xs text-slate-500 block mb-1">Critères de réussite (un par ligne)</label>
+            <Textarea v-model="aiDraft.successCriteria" class="w-full" rows="4" auto-resize />
+          </div>
+        </div>
+        <div class="grid sm:grid-cols-3 gap-3">
+          <div>
+            <label class="text-xs text-slate-500 block mb-1">Variante facile</label>
+            <Textarea v-model="aiDraft.easierVariant" class="w-full" rows="2" auto-resize />
+          </div>
+          <div>
+            <label class="text-xs text-slate-500 block mb-1">Variante difficile</label>
+            <Textarea v-model="aiDraft.harderVariant" class="w-full" rows="2" auto-resize />
+          </div>
+          <div>
+            <label class="text-xs text-slate-500 block mb-1">Variante compétition</label>
+            <Textarea v-model="aiDraft.competitionVariant" class="w-full" rows="2" auto-resize />
+          </div>
+        </div>
+        <div class="flex justify-end gap-2 mt-2">
+          <Button type="button" label="Régénérer" severity="secondary" outlined :loading="aiGenerating" @click="onAiGenerateDraft" />
+          <Button type="submit" label="Créer l'exercice" :loading="aiCreating" />
         </div>
       </form>
     </Dialog>

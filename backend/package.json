@@ -19,6 +19,7 @@
     "test": "node tests/tenant-isolation.mjs && node tests/club-signup.mjs && node tests/licensing.mjs && node tests/platform.mjs"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.128.0",
     "@prisma/client": "^5.20.0",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",

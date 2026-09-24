@@ -54,6 +54,11 @@ services:
         sync: false
       - key: STRIPE_WEBHOOK_SECRET
         sync: false
+      # Génération d'exercices/plans par IA (console.anthropic.com), optionnel.
+      # Sans cette clé, les boutons "Générer avec l'IA" renvoient une erreur
+      # explicite plutôt que de planter le service.
+      - key: ANTHROPIC_API_KEY
+        sync: false
 
   - type: web
     name: ping-club-manager-web

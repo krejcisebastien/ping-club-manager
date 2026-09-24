@@ -24,3 +24,6 @@ export const EXERCISE_DIFFICULTY_OPTIONS = [
   { value: "NIVEAU_5", label: "5/5" },
 ];
 export const EXERCISE_DIFFICULTY_LABELS = Object.fromEntries(EXERCISE_DIFFICULTY_OPTIONS.map((d) => [d.value, d.label]));
+
+export const linesToArray = (text) => (text ?? "").split("\n").map((l) => l.trim()).filter(Boolean);
+export const arrayToLines = (arr) => (Array.isArray(arr) ? arr.join("\n") : "");

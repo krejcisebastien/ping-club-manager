@@ -6,6 +6,8 @@ import Column from "primevue/column";
 import Dialog from "primevue/dialog";
 import Button from "primevue/button";
 import InputText from "primevue/inputtext";
+import Textarea from "primevue/textarea";
+import Checkbox from "primevue/checkbox";
 import Calendar from "primevue/calendar";
 import Dropdown from "primevue/dropdown";
 import { useToast } from "primevue/usetoast";
@@ -16,6 +18,7 @@ import { toDateOnly } from "../../lib/date.js";
 import { useNavLinks } from "../../composables/useNavLinks.js";
 import { useTableFilter } from "../../composables/useTableFilter.js";
 import { fullName } from "../../lib/name.js";
+import { EXERCISE_CATEGORY_LABELS, EXERCISE_DIFFICULTY_LABELS } from "../../lib/exercise.js";
 
 const navLinks = useNavLinks();
 const router = useRouter();
@@ -84,6 +87,62 @@ async function onCreate() {
 function coachName(p) {
   return p.coach ? fullName(p.coach) : "";
 }
+
+const aiDialogVisible = ref(false);
+const aiStep = ref("criteria");
+const aiForm = ref({ theme: "", exerciseCount: 6 });
+const aiGenerating = ref(false);
+const aiDraft = ref(null);
+const aiSelectedIds = ref(new Set());
+const aiCreating = ref(false);
+
+function openAiGenerate() {
+  aiStep.value = "criteria";
+  aiForm.value = { theme: "", exerciseCount: 6 };
+  aiDraft.value = null;
+  aiDialogVisible.value = true;
+}
+
+async function onAiGenerateDraft() {
+  aiGenerating.value = true;
+  try {
+    const { data } = await api.post("/training-plans/generate", aiForm.value);
+    aiDraft.value = data.draft;
+    aiSelectedIds.value = new Set(data.draft.exercises.map((e) => e.id));
+    aiStep.value = "review";
+  } catch (err) {
+    toast.add({ severity: "error", summary: "Erreur", detail: err.response?.data?.error ?? "Une erreur est survenue.", life: 5000 });
+  } finally {
+    aiGenerating.value = false;
+  }
+}
+
+function toggleAiExercise(id) {
+  if (aiSelectedIds.value.has(id)) aiSelectedIds.value.delete(id);
+  else aiSelectedIds.value.add(id);
+}
+
+async function onAiConfirm() {
+  aiCreating.value = true;
+  try {
+    const { data } = await api.post("/training-plans", {
+      seasonId: selectedSeasonId.value,
+      title: aiDraft.value.title,
+      description: aiDraft.value.description,
+    });
+    const orderedIds = aiDraft.value.exercises.map((e) => e.id).filter((id) => aiSelectedIds.value.has(id));
+    for (const exerciseId of orderedIds) {
+      await api.post(`/training-plans/${data.plan.id}/exercises`, { exerciseId });
+    }
+    aiDialogVisible.value = false;
+    toast.add({ severity: "success", summary: "Plan créé", life: 3000 });
+    router.push(`/coach/training-plans/${data.plan.id}`);
+  } catch (err) {
+    toast.add({ severity: "error", summary: "Erreur", detail: err.response?.data?.error ?? "Une erreur est survenue.", life: 5000 });
+  } finally {
+    aiCreating.value = false;
+  }
+}
 </script>
 
 <template>
@@ -100,6 +159,7 @@ function coachName(p) {
           <i class="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
           <InputText v-model="filters.global.value" placeholder="Rechercher…" class="w-full pl-9" />
         </div>
+        <Button label="Générer avec l'IA" icon="pi pi-sparkles" severity="secondary" outlined @click="openAiGenerate" />
         <Button label="Nouveau plan" icon="pi pi-plus" @click="openCreate" />
       </div>
     </div>
@@ -152,6 +212,66 @@ function coachName(p) {
           <Button type="submit" label="Créer" :loading="saving" />
         </div>
       </form>
+    </Dialog>
+
+    <Dialog v-model:visible="aiDialogVisible" header="Générer un plan avec l'IA" modal style="width: 34rem" class="mx-4">
+      <form v-if="aiStep === 'criteria'" class="grid gap-3 pt-2" @submit.prevent="onAiGenerateDraft">
+        <div>
+          <label class="text-xs text-slate-500 block mb-1">Thème de la séance (optionnel)</label>
+          <InputText v-model="aiForm.theme" class="w-full" placeholder="ex. Topspin pour intermédiaires, 1h30" />
+        </div>
+        <div class="max-w-[10rem]">
+          <label class="text-xs text-slate-500 block mb-1">Nombre d'exercices</label>
+          <InputText v-model.number="aiForm.exerciseCount" type="number" min="3" max="12" class="w-full" />
+        </div>
+        <p class="text-xs text-slate-400">
+          L'IA choisit des exercices déjà présents dans la bibliothèque du club (aucun nouvel exercice inventé) et les enchaîne dans un ordre
+          pédagogique cohérent. Tu pourras retirer ou garder chaque exercice avant de créer le plan.
+        </p>
+        <div class="flex justify-end gap-2 mt-2">
+          <Button type="button" label="Annuler" severity="secondary" outlined @click="aiDialogVisible = false" />
+          <Button type="submit" label="Générer" icon="pi pi-sparkles" :loading="aiGenerating" />
+        </div>
+      </form>
+
+      <div v-else-if="aiDraft" class="grid gap-3 pt-2">
+        <div>
+          <label class="text-xs text-slate-500 block mb-1">Titre</label>
+          <InputText v-model="aiDraft.title" class="w-full" />
+        </div>
+        <div>
+          <label class="text-xs text-slate-500 block mb-1">Description</label>
+          <Textarea v-model="aiDraft.description" class="w-full" rows="2" auto-resize />
+        </div>
+        <div>
+          <p class="text-xs text-slate-500 mb-1">Exercices suggérés (décoche pour retirer)</p>
+          <ul class="divide-y divide-slate-100 border border-slate-200 rounded-lg max-h-72 overflow-y-auto">
+            <li v-for="ex in aiDraft.exercises" :key="ex.id" class="flex items-center gap-2 px-3 py-2">
+              <Checkbox
+                :model-value="aiSelectedIds.has(ex.id)"
+                binary
+                @update:model-value="toggleAiExercise(ex.id)"
+              />
+              <div class="min-w-0 flex-1">
+                <p class="text-sm text-slate-700 truncate">{{ ex.title }}</p>
+                <p class="text-xs text-slate-400">
+                  {{ EXERCISE_CATEGORY_LABELS[ex.category] ?? "" }} · {{ EXERCISE_DIFFICULTY_LABELS[ex.difficulty] ?? "" }}
+                </p>
+              </div>
+            </li>
+          </ul>
+        </div>
+        <div class="flex justify-end gap-2 mt-2">
+          <Button type="button" label="Régénérer" severity="secondary" outlined :loading="aiGenerating" @click="onAiGenerateDraft" />
+          <Button
+            type="button"
+            label="Créer le plan"
+            :loading="aiCreating"
+            :disabled="!aiSelectedIds.size"
+            @click="onAiConfirm"
+          />
+        </div>
+      </div>
     </Dialog>
   </AppLayout>
 </template>
