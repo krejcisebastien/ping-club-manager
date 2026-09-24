@@ -1,37 +1,42 @@
 <script setup>
 import { ref, onMounted, watch, computed } from "vue";
-import DataTable from "primevue/datatable";
-import Column from "primevue/column";
 import Dialog from "primevue/dialog";
 import Button from "primevue/button";
 import InputText from "primevue/inputtext";
 import Dropdown from "primevue/dropdown";
 import Tag from "primevue/tag";
+import Avatar from "primevue/avatar";
 import { useToast } from "primevue/usetoast";
 import AppLayout from "../../components/AppLayout.vue";
 import { api } from "../../lib/api.js";
 import { useNavLinks } from "../../composables/useNavLinks.js";
-import { useTableFilter } from "../../composables/useTableFilter.js";
-import { fullName } from "../../lib/name.js";
+import { fullName, initials } from "../../lib/name.js";
 
 const navLinks = useNavLinks();
 const toast = useToast();
-const { filters } = useTableFilter();
 
 const seasons = ref([]);
 const selectedSeasonId = ref("");
 const groups = ref([]);
 const allPlayers = ref([]);
 const loading = ref(true);
+const searchQuery = ref("");
 
-const selectedGroup = ref(null);
-const roster = ref([]);
-const playerToAdd = ref(null);
+const filteredGroups = computed(() => {
+  const q = searchQuery.value.trim().toLowerCase();
+  if (!q) return groups.value;
+  return groups.value.filter((g) => g.name.toLowerCase().includes(q) || g.rankingCriteria?.toLowerCase().includes(q));
+});
 
 const groupDialogVisible = ref(false);
 const editingGroupId = ref(null);
 const groupForm = ref({ name: "", rankingCriteria: "" });
 const saving = ref(false);
+
+const rosterDialogVisible = ref(false);
+const managingGroup = ref(null);
+const roster = ref([]);
+const playerToAdd = ref(null);
 
 const availablePlayers = computed(() => {
   const rosterIds = new Set(roster.value.map((a) => a.player.id));
@@ -47,7 +52,6 @@ async function loadSeasons() {
 }
 
 async function loadGroups() {
-  selectedGroup.value = null;
   if (!selectedSeasonId.value) {
     groups.value = [];
     return;
@@ -71,8 +75,11 @@ onMounted(async () => {
 
 watch(selectedSeasonId, loadGroups);
 
-function onRowSelect(event) {
-  loadRoster(event.data.id);
+function openManage(group) {
+  managingGroup.value = group;
+  playerToAdd.value = null;
+  rosterDialogVisible.value = true;
+  loadRoster(group.id);
 }
 
 function openCreate() {
@@ -105,24 +112,17 @@ async function onSaveGroup() {
   }
 }
 
-function bumpGroupCount(groupId, delta) {
-  const g = groups.value.find((g) => g.id === groupId);
-  if (g) g.playerCount = (g.playerCount ?? 0) + delta;
-}
-
 async function onAddPlayer() {
   if (!playerToAdd.value) return;
-  await api.post(`/groups/${selectedGroup.value.id}/players`, { playerId: playerToAdd.value });
+  await api.post(`/groups/${managingGroup.value.id}/players`, { playerId: playerToAdd.value });
   playerToAdd.value = null;
-  await loadRoster(selectedGroup.value.id);
-  bumpGroupCount(selectedGroup.value.id, 1);
+  await Promise.all([loadRoster(managingGroup.value.id), loadGroups()]);
   toast.add({ severity: "success", summary: "Joueur ajouté au groupe", life: 3000 });
 }
 
 async function onRemovePlayer(playerId) {
-  await api.delete(`/groups/${selectedGroup.value.id}/players/${playerId}`);
-  await loadRoster(selectedGroup.value.id);
-  bumpGroupCount(selectedGroup.value.id, -1);
+  await api.delete(`/groups/${managingGroup.value.id}/players/${playerId}`);
+  await Promise.all([loadRoster(managingGroup.value.id), loadGroups()]);
 }
 </script>
 
@@ -133,82 +133,54 @@ async function onRemovePlayer(playerId) {
       <Dropdown v-model="selectedSeasonId" :options="seasons" option-label="name" option-value="id" class="w-full" />
     </div>
 
-    <div class="grid gap-4 lg:grid-cols-[3fr_2fr]">
-      <div class="min-w-0">
-        <div class="flex items-center justify-between mb-3 gap-2 flex-wrap">
-          <h2 class="text-sm font-medium text-slate-600">{{ groups.length }} groupe(s)</h2>
-          <div class="flex items-center gap-2 flex-wrap">
-            <div class="relative w-40 min-w-[8rem]">
-              <i class="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-              <InputText v-model="filters.global.value" placeholder="Rechercher…" class="w-full pl-9" size="small" />
-            </div>
-            <Button label="Nouveau groupe" icon="pi pi-plus" size="small" @click="openCreate" />
+    <div class="flex items-center justify-between mb-4 gap-3 flex-wrap">
+      <h2 class="text-sm font-medium text-slate-600">{{ filteredGroups.length }} groupe(s)</h2>
+      <div class="flex items-center gap-2 flex-1 sm:flex-none flex-wrap">
+        <div class="relative flex-1 sm:w-64 min-w-[10rem]">
+          <i class="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+          <InputText v-model="searchQuery" placeholder="Rechercher…" class="w-full pl-9" />
+        </div>
+        <Button label="Nouveau groupe" icon="pi pi-plus" @click="openCreate" />
+      </div>
+    </div>
+
+    <div v-if="loading" class="text-slate-400 text-sm py-4">Chargement…</div>
+    <p v-else-if="!filteredGroups.length" class="text-slate-400 text-sm py-4">
+      {{ searchQuery ? "Aucun résultat." : "Aucun groupe pour cette saison." }}
+    </p>
+
+    <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div
+        v-for="g in filteredGroups"
+        :key="g.id"
+        class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 hover:shadow-md hover:border-sky-200 transition-shadow cursor-pointer"
+        @click="openManage(g)"
+      >
+        <div class="flex items-start justify-between gap-2 mb-1">
+          <div class="min-w-0">
+            <p class="font-medium text-slate-800 truncate">{{ g.name }}</p>
+            <p v-if="g.rankingCriteria" class="text-xs text-slate-400 truncate">{{ g.rankingCriteria }}</p>
+          </div>
+          <div class="flex items-center gap-1 shrink-0">
+            <Tag severity="secondary" :value="`${g.playerCount}`" />
+            <Button icon="pi pi-pencil" severity="secondary" text rounded aria-label="Modifier" @click.stop="openEdit(g)" />
           </div>
         </div>
-        <DataTable
-          :value="groups"
-          :loading="loading"
-          v-model:selection="selectedGroup"
-          selection-mode="single"
-          data-key="id"
-          v-model:filters="filters"
-          :global-filter-fields="['name', 'rankingCriteria']"
-          paginator
-          :rows="10"
-          :rows-per-page-options="[10, 25, 50]"
-          class="bg-white rounded-xl shadow border border-slate-200 overflow-hidden"
-          striped-rows
-          @row-select="onRowSelect"
-        >
-          <template #empty>
-            <p class="text-slate-400 text-sm py-4">{{ filters.global.value ? "Aucun résultat." : "Aucun groupe pour cette saison." }}</p>
-          </template>
-          <Column field="name" header="Nom" sortable />
-          <Column field="rankingCriteria" header="Critère de classement" />
-          <Column field="playerCount" header="Joueurs" sortable style="width: 6rem">
-            <template #body="{ data }">
-              <Tag severity="secondary" :value="String(data.playerCount)" />
-            </template>
-          </Column>
-          <Column header="" style="width: 4rem">
-            <template #body="{ data }">
-              <Button icon="pi pi-pencil" severity="secondary" text rounded aria-label="Modifier" @click.stop="openEdit(data)" />
-            </template>
-          </Column>
-        </DataTable>
-      </div>
 
-      <div class="min-w-0">
-        <h2 class="text-sm font-medium text-slate-600 mb-3">Composition</h2>
-        <div class="bg-white rounded-xl shadow border border-slate-200 p-4">
-          <template v-if="selectedGroup">
-            <div class="flex items-center justify-between mb-3">
-              <p class="text-sm font-medium text-slate-700">{{ selectedGroup.name }}</p>
-              <span class="text-xs text-slate-400">{{ roster.length }} joueur(s)</span>
-            </div>
-            <ul class="divide-y divide-slate-100 mb-4">
-              <li v-for="a in roster" :key="a.id" class="py-2 flex items-center justify-between text-sm">
-                <span>{{ fullName(a.player) }}</span>
-                <Button icon="pi pi-times" severity="danger" text rounded size="small" aria-label="Retirer" @click="onRemovePlayer(a.player.id)" />
-              </li>
-              <li v-if="!roster.length" class="py-2 text-slate-400 text-sm">Aucun joueur dans ce groupe.</li>
-            </ul>
-            <div class="flex gap-2">
-              <Dropdown
-                v-model="playerToAdd"
-                :options="availablePlayers"
-                option-label="label"
-                option-value="value"
-                placeholder="Ajouter un joueur…"
-                filter
-                reset-filter-on-hide
-                class="flex-1"
-              />
-              <Button label="Ajouter" @click="onAddPlayer" />
-            </div>
-          </template>
-          <p v-else class="text-slate-400 text-sm">Sélectionne un groupe à gauche.</p>
+        <div v-if="g.players.length" class="flex flex-wrap gap-1.5 mt-3">
+          <span
+            v-for="p in g.players"
+            :key="p.id"
+            class="inline-flex items-center gap-1.5 bg-slate-50 border border-slate-100 text-slate-600 text-xs rounded-full pl-1 pr-2.5 py-0.5"
+          >
+            <Avatar :label="initials(p)" shape="circle" style="width: 1.25rem; height: 1.25rem; font-size: 0.6rem; background-color: #e2e8f0; color: #475569" />
+            {{ fullName(p) }}
+          </span>
+          <span v-if="g.playerCount > g.players.length" class="text-xs text-slate-400 self-center px-1">
+            +{{ g.playerCount - g.players.length }}
+          </span>
         </div>
+        <p v-else class="text-xs text-slate-400 mt-3">Aucun joueur.</p>
       </div>
     </div>
 
@@ -227,6 +199,35 @@ async function onRemovePlayer(playerId) {
           <Button type="submit" label="Enregistrer" :loading="saving" />
         </div>
       </form>
+    </Dialog>
+
+    <Dialog v-model:visible="rosterDialogVisible" :header="managingGroup?.name" modal style="width: 30rem" class="mx-4">
+      <div v-if="managingGroup">
+        <p class="text-xs text-slate-400 mb-3">{{ roster.length }} joueur(s)</p>
+        <ul class="divide-y divide-slate-100 mb-4 max-h-72 overflow-y-auto">
+          <li v-for="a in roster" :key="a.id" class="py-2 flex items-center justify-between text-sm">
+            <span class="flex items-center gap-2 min-w-0">
+              <Avatar :label="initials(a.player)" shape="circle" class="shrink-0" style="background-color: #f1f5f9; color: #475569" />
+              <span class="truncate">{{ fullName(a.player) }}</span>
+            </span>
+            <Button icon="pi pi-times" severity="danger" text rounded size="small" aria-label="Retirer" class="shrink-0" @click="onRemovePlayer(a.player.id)" />
+          </li>
+          <li v-if="!roster.length" class="py-2 text-slate-400 text-sm">Aucun joueur dans ce groupe.</li>
+        </ul>
+        <div class="flex gap-2">
+          <Dropdown
+            v-model="playerToAdd"
+            :options="availablePlayers"
+            option-label="label"
+            option-value="value"
+            placeholder="Ajouter un joueur…"
+            filter
+            reset-filter-on-hide
+            class="flex-1 min-w-0"
+          />
+          <Button label="Ajouter" @click="onAddPlayer" />
+        </div>
+      </div>
     </Dialog>
   </AppLayout>
 </template>

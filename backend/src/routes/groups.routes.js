@@ -5,14 +5,33 @@ const router = Router();
 
 router.use(requireAuth);
 
+// Aperçu de joueurs affiché sur chaque carte, sans devoir ouvrir le groupe.
+const PREVIEW_SIZE = 6;
+
 router.get("/", async (req, res) => {
   const { seasonId } = req.query;
   const groups = await req.db.trainingGroup.findMany({
     where: seasonId ? { seasonId } : undefined,
-    include: { _count: { select: { playerAssignments: { where: { endDate: null } } } } },
+    include: {
+      _count: { select: { playerAssignments: { where: { endDate: null } } } },
+      playerAssignments: {
+        where: { endDate: null },
+        orderBy: { player: { lastName: "asc" } },
+        take: PREVIEW_SIZE,
+        select: { player: { select: { id: true, firstName: true, lastName: true } } },
+      },
+    },
     orderBy: { name: "asc" },
   });
-  res.json({ groups: groups.map((g) => ({ ...g, playerCount: g._count.playerAssignments, _count: undefined })) });
+  res.json({
+    groups: groups.map((g) => ({
+      ...g,
+      playerCount: g._count.playerAssignments,
+      players: g.playerAssignments.map((a) => a.player),
+      _count: undefined,
+      playerAssignments: undefined,
+    })),
+  });
 });
 
 router.get("/:id", async (req, res) => {
