@@ -1,9 +1,10 @@
 import { GoogleGenAI } from "@google/genai";
 import exerciseLibrary from "../data/exercise-library.json" with { type: "json" };
 
-// Modèle gratuit (aucune carte bancaire requise) : 10 requêtes/minute,
-// 500 requêtes/jour, largement suffisant vu la limite de 20/heure ci-dessous.
-const MODEL = "gemini-2.5-flash";
+// Modèle gratuit (aucune carte bancaire requise sur aistudio.google.com).
+// gemini-3.6-flash (dernier modèle) est en surcharge quasi permanente sur le
+// tier gratuit (503 systématique) ; gemini-3.5-flash-lite est stable.
+const MODEL = "gemini-3.5-flash-lite";
 
 const CATEGORIES = [
   "Regularite", "Topspin", "Service", "Remise", "Bloc", "Deplacements",
@@ -43,14 +44,28 @@ function sampleExamples(category, count = 4) {
   }));
 }
 
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+// Le modèle gratuit renvoie régulièrement une surcharge temporaire (503) sous
+// forte demande ; on retente quelques fois avant d'abandonner, plutôt que de
+// faire échouer la génération dès le premier essai.
 async function generateJson({ systemInstruction, prompt, schema, maxOutputTokens = 1500 }) {
-  const response = await getClient().models.generateContent({
-    model: MODEL,
-    contents: prompt,
-    config: { systemInstruction, responseMimeType: "application/json", responseSchema: schema, maxOutputTokens },
-  });
-  if (!response.text) throw new Error("Réponse IA invalide : aucun contenu reçu.");
-  return JSON.parse(response.text);
+  const attempts = 3;
+  for (let attempt = 1; attempt <= attempts; attempt++) {
+    try {
+      const response = await getClient().models.generateContent({
+        model: MODEL,
+        contents: prompt,
+        config: { systemInstruction, responseMimeType: "application/json", responseSchema: schema, maxOutputTokens },
+      });
+      if (!response.text) throw new Error("Réponse IA invalide : aucun contenu reçu.");
+      return JSON.parse(response.text);
+    } catch (err) {
+      const overloaded = err.status === 503 || /UNAVAILABLE|high demand/i.test(err.message ?? "");
+      if (!overloaded || attempt === attempts) throw err;
+      await sleep(attempt * 1500);
+    }
+  }
 }
 
 const EXERCISE_SCHEMA = {
