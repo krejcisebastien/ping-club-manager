@@ -9,7 +9,11 @@ databases:
   - name: ping-club-manager-db
     databaseName: ping_club_manager
     user: ping_club_manager
-    plan: free
+    # Le plan gratuit expire après 30 jours ; la base a été passée sur ce plan
+    # payant pour éviter l'expiration. Garder cette valeur alignée sur le plan
+    # réellement actif dans le dashboard Render (sinon le Blueprint refuse de
+    # se synchroniser, Render n'autorisant pas de "downgrade" automatique).
+    plan: 0.1c-256mb
 
 services:
   - type: web
