@@ -4,6 +4,7 @@ import { useRoute, useRouter } from "vue-router";
 import Button from "primevue/button";
 import InputText from "primevue/inputtext";
 import Rating from "primevue/rating";
+import DifficultyRating from "../../components/DifficultyRating.vue";
 import Dropdown from "primevue/dropdown";
 import Textarea from "primevue/textarea";
 import Tag from "primevue/tag";
@@ -131,15 +132,7 @@ function onDelete() {
           </div>
           <div>
             <label class="text-xs text-slate-500 block mb-1">Difficulté</label>
-            <Dropdown
-              v-model="form.difficulty"
-              :options="EXERCISE_DIFFICULTY_OPTIONS"
-              option-label="label"
-              option-value="value"
-              placeholder="Choisir…"
-              show-clear
-              class="w-full"
-            />
+            <DifficultyRating v-model="form.difficulty" />
           </div>
           <div>
             <label class="text-xs text-slate-500 block mb-1">Intensité (1-5)</label>

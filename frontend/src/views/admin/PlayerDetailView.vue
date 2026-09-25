@@ -6,7 +6,7 @@ import InputText from "primevue/inputtext";
 import Calendar from "primevue/calendar";
 import Dropdown from "primevue/dropdown";
 import Tag from "primevue/tag";
-import InputNumber from "primevue/inputnumber";
+import Slider from "primevue/slider";
 import Chart from "primevue/chart";
 import { useToast } from "primevue/usetoast";
 import AppLayout from "../../components/AppLayout.vue";
@@ -418,8 +418,11 @@ function pointStatusSeverity(status) {
         <form class="grid gap-3" @submit.prevent="onAddEvaluation">
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div v-for="c in EVALUATION_CRITERIA" :key="c.key">
-              <label class="text-xs text-slate-500 block mb-1">{{ c.label }}</label>
-              <InputNumber v-model="newEvaluation[c.key]" :min="0" :max="10" show-buttons button-layout="horizontal" class="w-full" input-class="w-full text-center" />
+              <div class="flex items-baseline justify-between mb-2">
+                <label class="text-xs text-slate-500">{{ c.label }}</label>
+                <span class="text-sm font-semibold tabular-nums" :style="{ color: c.color }">{{ newEvaluation[c.key] }}<span class="text-xs font-normal text-slate-400">/10</span></span>
+              </div>
+              <Slider v-model="newEvaluation[c.key]" :min="0" :max="10" :step="1" class="eval-slider" :style="{ '--slider-color': c.color }" />
             </div>
           </div>
           <InputText v-model="newEvaluation.note" placeholder="Commentaire (optionnel)" class="w-full" />

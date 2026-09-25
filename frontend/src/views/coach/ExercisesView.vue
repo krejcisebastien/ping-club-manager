@@ -8,6 +8,7 @@ import Button from "primevue/button";
 import InputText from "primevue/inputtext";
 import Textarea from "primevue/textarea";
 import Rating from "primevue/rating";
+import DifficultyRating from "../../components/DifficultyRating.vue";
 import Dropdown from "primevue/dropdown";
 import Tag from "primevue/tag";
 import { useToast } from "primevue/usetoast";
@@ -258,15 +259,7 @@ async function onAiConfirm() {
           </div>
           <div>
             <label class="text-xs text-slate-500 block mb-1">Difficulté</label>
-            <Dropdown
-              v-model="form.difficulty"
-              :options="EXERCISE_DIFFICULTY_OPTIONS"
-              option-label="label"
-              option-value="value"
-              placeholder="Choisir…"
-              show-clear
-              class="w-full"
-            />
+            <DifficultyRating v-model="form.difficulty" />
           </div>
         </div>
         <div>
@@ -297,15 +290,7 @@ async function onAiConfirm() {
           </div>
           <div>
             <label class="text-xs text-slate-500 block mb-1">Difficulté (optionnel)</label>
-            <Dropdown
-              v-model="aiCriteria.difficulty"
-              :options="EXERCISE_DIFFICULTY_OPTIONS"
-              option-label="label"
-              option-value="value"
-              placeholder="Laisser l'IA choisir"
-              show-clear
-              class="w-full"
-            />
+            <DifficultyRating v-model="aiCriteria.difficulty" cancel />
           </div>
         </div>
         <div>
@@ -334,7 +319,7 @@ async function onAiConfirm() {
           </div>
           <div>
             <label class="text-xs text-slate-500 block mb-1">Difficulté</label>
-            <Dropdown v-model="aiDraft.difficulty" :options="EXERCISE_DIFFICULTY_OPTIONS" option-label="label" option-value="value" class="w-full" />
+            <DifficultyRating v-model="aiDraft.difficulty" />
           </div>
           <div>
             <label class="text-xs text-slate-500 block mb-1">Intensité (1-5)</label>

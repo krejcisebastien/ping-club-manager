@@ -277,3 +277,60 @@
 .intensity-rating .p-rating-item:hover .p-rating-icon {
   transform: scale(1.15);
 }
+
+/* Note de difficulté : étoiles, ambre quand actives, gris sinon. */
+.difficulty-rating {
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.35rem 0;
+}
+.difficulty-rating .p-rating-item {
+  cursor: pointer;
+}
+.difficulty-rating .p-rating-icon {
+  font-size: 1.5rem;
+  color: #cbd5e1;
+  transition: color 0.15s, transform 0.15s;
+}
+.difficulty-rating .p-rating-item.p-rating-item-active .p-rating-icon {
+  color: #f59e0b;
+}
+.difficulty-rating .p-rating-item:hover .p-rating-icon {
+  transform: scale(1.15);
+}
+.difficulty-rating .p-rating-cancel {
+  color: #94a3b8;
+}
+
+/* Curseur de note (0-10) : couleur du critère via --slider-color. */
+.eval-slider.p-slider {
+  height: 0.4rem;
+  background: #e2e8f0;
+  border-radius: 999px;
+  position: relative;
+  margin: 0.6rem 0.5rem;
+}
+.eval-slider .p-slider-range {
+  background: var(--slider-color, #0284c7);
+  border-radius: 999px;
+  position: absolute;
+  height: 100%;
+}
+.eval-slider .p-slider-handle {
+  position: absolute;
+  top: 50%;
+  height: 1.2rem;
+  width: 1.2rem;
+  margin-top: -0.6rem;
+  margin-left: -0.6rem;
+  background: #fff;
+  border: 2px solid var(--slider-color, #0284c7);
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgb(15 23 42 / 0.2);
+  transition: transform 0.15s;
+}
+.eval-slider .p-slider-handle:hover,
+.eval-slider .p-slider-handle:focus-visible {
+  transform: scale(1.15);
+  outline: none;
+}
