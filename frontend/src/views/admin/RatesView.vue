@@ -23,15 +23,29 @@ const saving = ref(false);
 const coachRates = computed(() => rates.value.filter((r) => r.category === "COACH_LEVEL"));
 const sparringRates = computed(() => rates.value.filter((r) => r.category === "SPARRING_SERIES"));
 
+// Un seul montant par niveau, interprété selon la base choisie (à l'heure ou à la séance).
 async function load() {
-  rates.value = (await api.get("/rates")).data.rates;
+  // Anciennes données : si seul l'autre montant est renseigné, on le reprend avec sa base.
+  rates.value = (await api.get("/rates")).data.rates.map((r) => {
+    let basis = r.basis;
+    if (basis === "HOUR" && r.hourlyRate == null && r.sessionRate != null) basis = "SESSION";
+    if (basis === "SESSION" && r.sessionRate == null && r.hourlyRate != null) basis = "HOUR";
+    return { category: r.category, code: r.code, basis, amount: basis === "SESSION" ? r.sessionRate : r.hourlyRate };
+  });
 }
 onMounted(load);
 
 async function onSave() {
   saving.value = true;
   try {
-    await api.put("/rates", { rates: rates.value });
+    const payload = rates.value.map(({ category, code, basis, amount }) => ({
+      category,
+      code,
+      basis,
+      hourlyRate: basis === "HOUR" ? amount ?? null : null,
+      sessionRate: basis === "SESSION" ? amount ?? null : null,
+    }));
+    await api.put("/rates", { rates: payload });
     toast.add({ severity: "success", summary: "Tarifs enregistrés", life: 3000 });
   } catch (err) {
     toast.add({ severity: "error", summary: "Erreur", detail: err.response?.data?.error ?? "Une erreur est survenue.", life: 4000 });
