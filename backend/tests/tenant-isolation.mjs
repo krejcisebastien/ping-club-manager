@@ -326,6 +326,18 @@ try {
   });
   expect("un score hors 0-10 est refusé", evalBadScore.status === 400, `status ${evalBadScore.status}`);
 
+  // ---------- Plafonds du volontariat : isolation ----------
+  const putCapsA = await call(A.token, "PUT", "/rates/caps", { caps: [{ year: 2026, perDay: 40, perYear: 3000 }] });
+  expect("A enregistre ses plafonds", putCapsA.status === 204, `status ${putCapsA.status}`);
+  const capsA = (await call(A.token, "GET", "/rates/caps")).json;
+  const capsB = (await call(B.token, "GET", "/rates/caps")).json;
+  expect("A relit ses plafonds", capsA.caps.length === 1 && capsA.caps[0].perYear === 3000, JSON.stringify(capsA));
+  expect("B ne voit pas les plafonds de A", capsB.caps.length === 0, JSON.stringify(capsB));
+  await call(B.token, "PUT", "/rates/caps", { caps: [] });
+  expect("vider les plafonds de B ne touche pas A", (await call(A.token, "GET", "/rates/caps")).json.caps.length === 1);
+  const badCaps = await call(A.token, "PUT", "/rates/caps", { caps: [{ year: 2026, perDay: 40, perYear: 3000 }, { year: 2026, perDay: 1, perYear: 1 }] });
+  expect("une année en double est refusée", badCaps.status === 400, `status ${badCaps.status}`);
+
   // ---------- 7. Sessions et comptes ----------
   const legacy = jwt.sign({ sub: "x", roles: ["ADMIN"] }, process.env.JWT_SECRET);
   expect("jeton sans club refusé", (await call(legacy, "GET", "/seasons")).status === 401);

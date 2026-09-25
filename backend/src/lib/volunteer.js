@@ -1,15 +1,16 @@
 import { hoursBetween } from "../utils/occurrences.js";
 import { seriesOf } from "./rankings.js";
 
-// Plafonds fiscaux des indemnités de volontariat (rappelés sur la note de défraiement).
-const CAPS_BY_YEAR = {
-  2026: { perDay: 44.02, perYear: 1760.83, perYearCoach: 3233.91 },
-};
+// Plafonds des indemnités de volontariat utilisés tant que le club n'a rien paramétré (page Tarifs).
+export const DEFAULT_CAPS = { perDay: 44.02, perYear: 3233.91 };
 
-export function capsFor(year) {
-  const years = Object.keys(CAPS_BY_YEAR).map(Number).sort((a, b) => a - b);
-  const known = years.filter((y) => y <= year).pop() ?? years[0];
-  return CAPS_BY_YEAR[known];
+// Plafonds d'une année : ceux de l'année, sinon de la plus récente année antérieure,
+// sinon de la plus proche année suivante, sinon les valeurs par défaut.
+export async function capsFor(db, year) {
+  const cap =
+    (await db.volunteerCap.findFirst({ where: { year: { lte: year } }, orderBy: { year: "desc" } })) ??
+    (await db.volunteerCap.findFirst({ where: { year: { gt: year } }, orderBy: { year: "asc" } }));
+  return cap ? { perDay: Number(cap.perDay), perYear: Number(cap.perYear) } : DEFAULT_CAPS;
 }
 
 const round2 = (n) => Math.round(n * 100) / 100;
@@ -128,10 +129,9 @@ export async function computeVolunteerSheet(db, { type, id, from, to }) {
 
   // Cumul de l'année civile jusqu'à la fin de la période, comparé au plafond annuel.
   const year = toDate.getUTCFullYear();
-  const caps = capsFor(year);
+  const caps = await capsFor(db, year);
   const yearSessions = await loadSessions(db, person, parseDay(`${year}-01-01`), toDate);
   const yearTotal = round2(yearSessions.reduce((sum, s) => sum + (sessionAmount(rate, s) ?? 0), 0));
-  const yearCap = person.type === "coach" ? caps.perYearCoach : caps.perYear;
 
   const warnings = [];
   if (!person.code) {
@@ -145,8 +145,8 @@ export async function computeVolunteerSheet(db, { type, id, from, to }) {
       for (const line of lines) if (line.date === date) line.dayOverCap = true;
     }
   }
-  if (yearTotal > yearCap) {
-    warnings.push(`Cumul ${year} : ${yearTotal.toFixed(2)} € dépasse le plafond annuel de ${yearCap.toFixed(2)} €.`);
+  if (yearTotal > caps.perYear) {
+    warnings.push(`Cumul ${year} : ${yearTotal.toFixed(2)} € dépasse le plafond annuel de ${caps.perYear.toFixed(2)} €.`);
   }
 
   return {
@@ -166,7 +166,7 @@ export async function computeVolunteerSheet(db, { type, id, from, to }) {
     lines,
     total,
     totalHours,
-    year: { year, total: yearTotal, cap: yearCap, dayCap: caps.perDay },
+    year: { year, total: yearTotal, cap: caps.perYear, dayCap: caps.perDay },
     warnings,
   };
 }

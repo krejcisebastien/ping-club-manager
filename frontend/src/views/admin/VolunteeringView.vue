@@ -27,9 +27,12 @@ const personId = ref(null);
 const coaches = ref([]);
 const sparrings = ref([]);
 
+// Une fiche par mois : par défaut le mois précédent.
 const today = new Date();
-const from = ref(new Date(today.getFullYear(), today.getMonth() - 1, 1));
-const to = ref(new Date(today.getFullYear(), today.getMonth(), 0));
+const month = ref(new Date(today.getFullYear(), today.getMonth() - 1, 1));
+const from = computed(() => month.value && new Date(month.value.getFullYear(), month.value.getMonth(), 1));
+const to = computed(() => month.value && new Date(month.value.getFullYear(), month.value.getMonth() + 1, 0));
+const monthLabel = computed(() => month.value?.toLocaleDateString("fr-FR", { month: "long", year: "numeric" }));
 
 const sheet = ref(null);
 const loading = ref(false);
@@ -38,7 +41,7 @@ const downloading = ref(false);
 const people = computed(() => (type.value === "coach" ? coaches.value : sparrings.value).map((p) => ({ label: fullName(p), value: p.id })));
 const sheetCount = computed(() => Math.max(1, Math.ceil((sheet.value?.lines.length ?? 0) / LINES_PER_SHEET)));
 const params = computed(() => ({ type: type.value, id: personId.value, from: toDateOnly(from.value), to: toDateOnly(to.value) }));
-const ready = computed(() => personId.value && from.value && to.value && from.value <= to.value);
+const ready = computed(() => personId.value && month.value);
 
 const eur = (n) => (n == null ? "—" : new Intl.NumberFormat("fr-BE", { style: "currency", currency: "EUR" }).format(n));
 const hours = (n) => `${String(n).replace(".", ",")} h`;
@@ -75,7 +78,7 @@ async function loadSheet() {
 }
 
 watch(type, () => (personId.value = null));
-watch([personId, from, to], loadSheet);
+watch([personId, month], loadSheet);
 
 async function download() {
   downloading.value = true;
@@ -103,7 +106,7 @@ async function download() {
         Prépare la note de défraiement d'un entraineur ou d'un sparring : une ligne par séance d'entrainement ou période de stage où il est
         affecté (séances annulées exclues), valorisée selon son tarif (à l'heure ou à la séance).
       </p>
-      <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div class="grid gap-3 sm:grid-cols-3">
         <div>
           <label class="text-xs text-slate-500 block mb-1">Bénévole</label>
           <SelectButton v-model="type" :options="typeOptions" option-label="label" option-value="value" :allow-empty="false" class="w-full flex" />
@@ -113,17 +116,13 @@ async function download() {
           <Dropdown v-model="personId" :options="people" option-label="label" option-value="value" filter placeholder="Choisir…" class="w-full" />
         </div>
         <div>
-          <label class="text-xs text-slate-500 block mb-1">Du</label>
-          <Calendar v-model="from" date-format="dd/mm/yy" show-icon class="w-full" input-class="w-full" />
-        </div>
-        <div>
-          <label class="text-xs text-slate-500 block mb-1">Au</label>
-          <Calendar v-model="to" date-format="dd/mm/yy" show-icon class="w-full" input-class="w-full" />
+          <label class="text-xs text-slate-500 block mb-1">Mois</label>
+          <Calendar v-model="month" view="month" date-format="MM yy" show-icon class="w-full" input-class="w-full capitalize" />
         </div>
       </div>
     </div>
 
-    <p v-if="!personId" class="text-sm text-slate-400">Choisis une personne et une période.</p>
+    <p v-if="!personId" class="text-sm text-slate-400">Choisis une personne et un mois.</p>
     <p v-else-if="loading" class="text-sm text-slate-400">Calcul en cours…</p>
 
     <div v-else-if="sheet" class="space-y-4">
@@ -155,7 +154,7 @@ async function download() {
             <span class="order-3 sm:order-none min-w-0 text-slate-600">{{ line.nature }} <span class="text-slate-400 whitespace-nowrap">{{ line.startTime }}–{{ line.endTime }}</span></span>
             <span class="order-2 sm:order-none text-right tabular-nums font-medium" :class="line.dayOverCap ? 'text-amber-600' : ''">{{ eur(line.amount) }}</span>
           </li>
-          <li v-if="!sheet.lines.length" class="py-3 text-slate-400">Aucune prestation sur cette période.</li>
+          <li v-if="!sheet.lines.length" class="py-3 text-slate-400">Aucune prestation en {{ monthLabel }}.</li>
           <li v-else class="py-2 grid grid-cols-[1fr_auto] gap-x-3 sm:grid-cols-[9rem_5rem_1fr_6rem] sm:gap-2 font-semibold">
             <span>Total</span><span class="order-4 sm:order-none text-right tabular-nums">{{ hours(sheet.totalHours) }}</span><span class="order-3 sm:order-none"></span>
             <span class="order-2 sm:order-none text-right tabular-nums">{{ eur(sheet.total) }}</span>

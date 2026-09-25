@@ -98,6 +98,7 @@ model Club {
   sparrings   Sparring[]
   exercises   Exercise[]
   hourlyRates HourlyRate[]
+  volunteerCaps VolunteerCap[]
 }
 
 // ---------- Saisons & utilisateurs ----------
@@ -360,6 +361,20 @@ model HourlyRate {
   basis       RateBasis    @default(HOUR)
 
   @@unique([clubId, category, code])
+}
+
+// Plafonds des indemnités de volontariat par année civile (identiques pour
+// entraineurs et sparrings). Sans ligne pour une année, on reprend la plus
+// récente antérieure (ou les valeurs par défaut de backend/src/lib/volunteer.js).
+model VolunteerCap {
+  id      String  @id @default(cuid())
+  clubId  String
+  club    Club    @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  year    Int
+  perDay  Decimal @db.Decimal(8, 2)
+  perYear Decimal @db.Decimal(8, 2)
+
+  @@unique([clubId, year])
 }
 
 model Coach {
