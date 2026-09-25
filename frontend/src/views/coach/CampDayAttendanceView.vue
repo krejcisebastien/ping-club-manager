@@ -10,7 +10,7 @@ import { useToast } from "primevue/usetoast";
 import AppLayout from "../../components/AppLayout.vue";
 import { api } from "../../lib/api.js";
 import { useNavLinks } from "../../composables/useNavLinks.js";
-import { ATTENDANCE_STATUS_OPTIONS, ATTENDANCE_STATUS_COLORS, ATTENDANCE_STATUS_LABELS, ATTENDANCE_STATUS_SEVERITY } from "../../lib/attendance.js";
+import { ATTENDANCE_STATUS_OPTIONS, colorsFor, ATTENDANCE_STATUS_LABELS, ATTENDANCE_STATUS_SEVERITY } from "../../lib/attendance.js";
 import { fullName, initials } from "../../lib/name.js";
 
 const navLinks = useNavLinks();
@@ -64,7 +64,7 @@ function onUndo() {
       undoing.value = true;
       try {
         await api.delete(`/camps/days/${dayId}/attendance`);
-        players.value.forEach((row) => setRow(row, "ABSENT"));
+        players.value.forEach((row) => setRow(row, null));
         encoded.value = false;
         toast.add({ severity: "success", summary: "Encodage annulé", life: 3000 });
       } catch (err) {
@@ -81,7 +81,7 @@ async function onSave() {
   try {
     await api.put(`/camps/days/${dayId}/attendance`, {
       records: players.value.flatMap((row) =>
-        cellsOf(row).map((c) => ({ campPeriodGroupId: c.campPeriodGroupId, playerId: row.playerId, status: c.status }))
+        cellsOf(row).map((c) => ({ campPeriodGroupId: c.campPeriodGroupId, playerId: row.playerId, status: c.status ?? "ABSENT" }))
       ),
     });
     encoded.value = true;
@@ -94,8 +94,9 @@ async function onSave() {
 }
 
 function rowColor(row) {
-  if (isFullDay(row)) return ATTENDANCE_STATUS_COLORS.PRESENT;
-  return cellsOf(row).every((c) => c.status === "ABSENT") ? ATTENDANCE_STATUS_COLORS.ABSENT : ATTENDANCE_STATUS_COLORS.LATE;
+  if (isFullDay(row)) return colorsFor("PRESENT");
+  if (cellsOf(row).every((c) => c.status == null)) return colorsFor(null);
+  return cellsOf(row).every((c) => c.status === "ABSENT") ? colorsFor("ABSENT") : colorsFor("LATE");
 }
 </script>
 
@@ -107,7 +108,7 @@ function rowColor(row) {
       <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
         <div>
           <p class="font-medium text-slate-700 capitalize">{{ dayLabel }}</p>
-          <p class="text-sm text-slate-500">{{ presentPlayers }} / {{ players.length }} présent(s) toute la journée</p>
+          <p class="text-sm text-slate-500">{{ encoded ? `${presentPlayers} / ${players.length} présent(s) toute la journée` : "Journée non encodée" }}</p>
         </div>
         <div class="flex gap-1">
           <Button label="Tous présents (journée)" size="small" text @click="setAll('PRESENT')" />
@@ -131,7 +132,7 @@ function rowColor(row) {
               <template v-if="row.cells[period.id]">
                 <label class="text-xs text-slate-500 block mb-1">{{ period.label }} <span class="text-slate-400">{{ period.startTime }}–{{ period.endTime }}</span></label>
                 <Dropdown v-model="row.cells[period.id].status" :options="ATTENDANCE_STATUS_OPTIONS" option-label="label" option-value="value" class="w-full">
-                  <template #value="{ value }"><Tag :severity="ATTENDANCE_STATUS_SEVERITY[value]" :value="ATTENDANCE_STATUS_LABELS[value]" /></template>
+                  <template #value="{ value }"><Tag v-if="value" :severity="ATTENDANCE_STATUS_SEVERITY[value]" :value="ATTENDANCE_STATUS_LABELS[value]" /><span v-else class="text-slate-400 text-sm">À encoder</span></template>
                 </Dropdown>
               </template>
             </div>

@@ -11,7 +11,7 @@ import { useToast } from "primevue/usetoast";
 import AppLayout from "../../components/AppLayout.vue";
 import { api } from "../../lib/api.js";
 import { useNavLinks } from "../../composables/useNavLinks.js";
-import { ATTENDANCE_STATUS_OPTIONS, ATTENDANCE_STATUS_COLORS, ATTENDANCE_STATUS_LABELS, ATTENDANCE_STATUS_SEVERITY } from "../../lib/attendance.js";
+import { ATTENDANCE_STATUS_OPTIONS, colorsFor, ATTENDANCE_STATUS_LABELS, ATTENDANCE_STATUS_SEVERITY } from "../../lib/attendance.js";
 import { fullName, initials as personInitials } from "../../lib/name.js";
 
 const navLinks = useNavLinks();
@@ -27,7 +27,7 @@ const undoing = ref(false);
 const encoded = ref(false);
 
 const counts = computed(() =>
-  attendance.value.reduce((acc, r) => ({ ...acc, [r.status]: (acc[r.status] ?? 0) + 1 }), { PRESENT: 0, LATE: 0, EXCUSED: 0, ABSENT: 0 })
+  attendance.value.reduce((acc, r) => ({ ...acc, [r.status ?? "NONE"]: (acc[r.status ?? "NONE"] ?? 0) + 1 }), { PRESENT: 0, LATE: 0, EXCUSED: 0, ABSENT: 0, NONE: 0 })
 );
 
 function initials(row) {
@@ -57,7 +57,7 @@ function onUndo() {
       undoing.value = true;
       try {
         await api.delete(`/occurrences/${occurrenceId}/attendance`);
-        attendance.value.forEach((row) => { row.status = "ABSENT"; row.note = null; });
+        attendance.value.forEach((row) => { row.status = null; row.note = null; });
         encoded.value = false;
         toast.add({ severity: "success", summary: "Encodage annulé", life: 3000 });
       } catch (err) {
@@ -73,7 +73,7 @@ async function onSave() {
   saving.value = true;
   try {
     await api.put(`/occurrences/${occurrenceId}/attendance`, {
-      records: attendance.value.map(({ playerId, status, note }) => ({ playerId, status, note })),
+      records: attendance.value.map(({ playerId, status, note }) => ({ playerId, status: status ?? "ABSENT", note })),
     });
     encoded.value = true;
     toast.add({ severity: "success", summary: "Présences enregistrées", life: 3000 });
@@ -90,7 +90,10 @@ async function onSave() {
     <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
       <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
         <p class="text-sm font-medium text-slate-600">
-          {{ counts.PRESENT }} présent(s) · {{ counts.ABSENT }} absent(s) · {{ counts.LATE }} retard(s) · {{ counts.EXCUSED }} excusé(s)
+          <template v-if="attendance.length && counts.NONE === attendance.length">Non encodé</template>
+          <template v-else>
+            {{ counts.PRESENT }} présent(s) · {{ counts.ABSENT }} absent(s) · {{ counts.LATE }} retard(s) · {{ counts.EXCUSED }} excusé(s)<template v-if="counts.NONE"> · {{ counts.NONE }} à encoder</template>
+          </template>
         </p>
         <div class="flex gap-1">
           <Button label="Tous présents" size="small" text @click="markAll('PRESENT')" />
@@ -101,13 +104,13 @@ async function onSave() {
       <ul class="divide-y divide-slate-100 mb-4">
         <li v-for="row in attendance" :key="row.playerId" class="py-3 flex flex-col sm:flex-row sm:items-center gap-2">
           <div class="flex items-center gap-3">
-            <Avatar :label="initials(row)" shape="circle" class="shrink-0" :style="{ backgroundColor: ATTENDANCE_STATUS_COLORS[row.status].bg, color: ATTENDANCE_STATUS_COLORS[row.status].fg }" />
+            <Avatar :label="initials(row)" shape="circle" class="shrink-0" :style="{ backgroundColor: colorsFor(row.status).bg, color: colorsFor(row.status).fg }" />
             <span class="font-medium text-slate-700">{{ fullName(row) }}</span>
           </div>
           <div class="flex flex-wrap items-center gap-2 sm:ml-auto">
             <InputText v-model="row.note" placeholder="Note (optionnel)" class="w-40" />
             <Dropdown v-model="row.status" :options="ATTENDANCE_STATUS_OPTIONS" option-label="label" option-value="value" class="w-36">
-              <template #value="{ value }"><Tag :severity="ATTENDANCE_STATUS_SEVERITY[value]" :value="ATTENDANCE_STATUS_LABELS[value]" /></template>
+              <template #value="{ value }"><Tag v-if="value" :severity="ATTENDANCE_STATUS_SEVERITY[value]" :value="ATTENDANCE_STATUS_LABELS[value]" /><span v-else class="text-slate-400 text-sm">À encoder</span></template>
             </Dropdown>
           </div>
         </li>

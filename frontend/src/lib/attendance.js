@@ -16,6 +16,10 @@ export const ATTENDANCE_STATUS_COLORS = {
   ABSENT: { bg: "#fee2e2", fg: "#991b1b" },
 };
 
+// Aucune présence encodée pour ce joueur (ni présent ni absent : hors statistiques).
+ATTENDANCE_STATUS_COLORS.NONE = { bg: "#f1f5f9", fg: "#64748b" };
+export const colorsFor = (status) => ATTENDANCE_STATUS_COLORS[status ?? "NONE"];
+
 export const ATTENDANCE_STATUS_SEVERITY = {
   PRESENT: "success",
   LATE: "warn",

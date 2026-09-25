@@ -421,7 +421,7 @@ router.get("/days/:dayId/attendance", requireRole("ADMIN", "COACH"), async (req,
         players.get(player.id).cells[period.id] = {
           campPeriodGroupId: pg.id,
           groupName: pg.group.name,
-          status: statusByPlayer.get(player.id) ?? "ABSENT",
+          status: statusByPlayer.get(player.id) ?? null,
         };
       }
     }

@@ -92,7 +92,7 @@ router.get("/:id/attendance", requireRole("ADMIN", "COACH"), async (req, res) =>
     playerId: player.id,
     firstName: player.firstName,
     lastName: player.lastName,
-    status: byPlayerId.get(player.id)?.status ?? "ABSENT",
+    status: byPlayerId.get(player.id)?.status ?? null,
     note: byPlayerId.get(player.id)?.note ?? null,
   }));
 
