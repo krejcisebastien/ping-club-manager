@@ -6,6 +6,7 @@ import Tag from "primevue/tag";
 import AppLayout from "../../components/AppLayout.vue";
 import { api } from "../../lib/api.js";
 import { useNavLinks } from "../../composables/useNavLinks.js";
+import { occurrenceState } from "../../lib/occurrence.js";
 
 const navLinks = useNavLinks();
 
@@ -48,9 +49,6 @@ onMounted(async () => {
 watch(selectedSeasonId, loadTrainings);
 watch(selectedTrainingId, loadOccurrences);
 
-function statusSeverity(status) {
-  return status === "CANCELLED" ? "danger" : "info";
-}
 </script>
 
 <template>
@@ -84,7 +82,7 @@ function statusSeverity(status) {
         >
           <span>{{ new Date(o.date).toLocaleDateString("fr-FR") }} · {{ o.startTime }}–{{ o.endTime }}</span>
           <div class="flex items-center gap-2">
-            <Tag :severity="statusSeverity(o.status)" :value="o.status" />
+            <Tag :severity="occurrenceState(o).severity" :value="occurrenceState(o).label" />
             <i class="pi pi-chevron-right text-xs text-slate-400"></i>
           </div>
         </li>

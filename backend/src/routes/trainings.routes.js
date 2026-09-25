@@ -109,6 +109,7 @@ router.get("/:id/occurrences", async (req, res) => {
   const occurrences = await req.db.trainingOccurrence.findMany({
     where: { trainingId: req.params.id },
     orderBy: { date: "asc" },
+    include: { _count: { select: { attendances: true } } },
   });
   res.json({ occurrences });
 });

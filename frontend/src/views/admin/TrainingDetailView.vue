@@ -18,6 +18,7 @@ import AppLayout from "../../components/AppLayout.vue";
 import CoachAssignmentList from "../../components/CoachAssignmentList.vue";
 import { api } from "../../lib/api.js";
 import { useNavLinks } from "../../composables/useNavLinks.js";
+import { occurrenceState } from "../../lib/occurrence.js";
 
 const navLinks = useNavLinks();
 const route = useRoute();
@@ -146,9 +147,6 @@ async function onUnassignDefault(assignmentId) {
   await loadTraining();
 }
 
-function statusSeverity(status) {
-  return status === "CANCELLED" ? "danger" : "info";
-}
 
 const calendarEvents = computed(() =>
   occurrences.value.map((o) => ({
@@ -156,7 +154,7 @@ const calendarEvents = computed(() =>
     title: `${o.startTime}–${o.endTime}`,
     start: `${o.date.slice(0, 10)}T${o.startTime}`,
     end: `${o.date.slice(0, 10)}T${o.endTime}`,
-    color: o.status === "CANCELLED" ? "#94a3b8" : "#0284c7",
+    color: occurrenceState(o).color,
   }))
 );
 
@@ -228,7 +226,7 @@ const calendarOptions = computed(() => ({
                 <template #body="{ data }">{{ data.startTime }}–{{ data.endTime }}</template>
               </Column>
               <Column header="Statut">
-                <template #body="{ data }"><Tag :severity="statusSeverity(data.status)" :value="data.status" /></template>
+                <template #body="{ data }"><Tag :severity="occurrenceState(data).severity" :value="occurrenceState(data).label" /></template>
               </Column>
               <Column header="" style="width: 14rem">
                 <template #body="{ data }">
