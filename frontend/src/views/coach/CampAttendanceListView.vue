@@ -2,6 +2,7 @@
 import { ref, onMounted, watch, computed } from "vue";
 import { useRouter } from "vue-router";
 import Dropdown from "primevue/dropdown";
+import Button from "primevue/button";
 import AppLayout from "../../components/AppLayout.vue";
 import { api } from "../../lib/api.js";
 import { useNavLinks } from "../../composables/useNavLinks.js";
@@ -15,17 +16,15 @@ const camps = ref([]);
 const selectedCampId = ref(null);
 const camp = ref(null);
 
-const periodGroups = computed(() => {
+const days = computed(() => {
   if (!camp.value) return [];
-  return camp.value.days.flatMap((day) =>
-    day.periods.flatMap((period) =>
-      period.groups.map((pg) => ({
-        id: pg.id,
-        date: new Date(day.date).toLocaleDateString("fr-FR"),
-        label: `${period.label} · ${pg.group.name}`,
-      }))
-    )
-  );
+  return camp.value.days.map((day) => ({
+    id: day.id,
+    date: new Date(day.date).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" }),
+    periodGroups: day.periods.flatMap((period) =>
+      period.groups.map((pg) => ({ id: pg.id, label: `${period.label} · ${pg.group.name}` }))
+    ),
+  }));
 });
 
 async function loadSeasons() {
@@ -74,20 +73,26 @@ watch(selectedCampId, loadCamp);
       </div>
     </div>
 
-    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-      <p class="text-sm font-medium text-slate-600 mb-3">Périodes / groupes</p>
-      <ul class="divide-y divide-slate-100">
-        <li
-          v-for="pg in periodGroups"
-          :key="pg.id"
-          class="py-3 flex items-center justify-between cursor-pointer hover:text-sky-600"
-          @click="router.push(`/coach/camp-attendance/${pg.id}`)"
-        >
-          <span>{{ pg.date }} · {{ pg.label }}</span>
-          <i class="pi pi-chevron-right text-xs text-slate-400"></i>
-        </li>
-        <li v-if="!periodGroups.length" class="py-2 text-slate-400 text-sm">Sélectionne un stage.</li>
-      </ul>
+    <div class="grid gap-3">
+      <div v-for="day in days" :key="day.id" class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+        <div class="flex items-center justify-between flex-wrap gap-2">
+          <p class="font-medium text-slate-700 capitalize">{{ day.date }}</p>
+          <Button label="Présences de la journée" icon="pi pi-check-square" size="small" @click="router.push(`/coach/camp-attendance/day/${day.id}`)" />
+        </div>
+        <div v-if="day.periodGroups.length" class="flex flex-wrap gap-1 mt-3">
+          <Button
+            v-for="pg in day.periodGroups"
+            :key="pg.id"
+            :label="pg.label"
+            size="small"
+            text
+            severity="secondary"
+            @click="router.push(`/coach/camp-attendance/${pg.id}`)"
+          />
+        </div>
+        <p v-else class="text-sm text-slate-400 mt-2">Aucun groupe affecté à cette journée.</p>
+      </div>
+      <p v-if="!days.length" class="text-slate-400 text-sm">Sélectionne un stage.</p>
     </div>
   </AppLayout>
 </template>

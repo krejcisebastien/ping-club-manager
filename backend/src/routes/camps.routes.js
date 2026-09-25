@@ -197,6 +197,34 @@ async function copyGroupDefaults(db, campGroupId, campPeriodGroupId) {
   ]);
 }
 
+// Affecte d'office tous les groupes du stage aux périodes données (avec leurs
+// encadrants et joueurs par défaut). Appelé à la création de journées/périodes :
+// on retire ensuite à la main les groupes absents d'une période.
+async function assignAllGroups(db, campId, periods) {
+  if (!periods.length) return;
+  const groups = await db.campGroup.findMany({ where: { campId }, include: { coaches: true, players: true } });
+  if (!groups.length) return;
+
+  const periodIds = periods.map((p) => p.id);
+  await db.campPeriodGroup.createMany({
+    data: periodIds.flatMap((campPeriodId) => groups.map((g) => ({ campPeriodId, campGroupId: g.id }))),
+    skipDuplicates: true,
+  });
+
+  const groupById = new Map(groups.map((g) => [g.id, g]));
+  const periodGroups = await db.campPeriodGroup.findMany({ where: { campPeriodId: { in: periodIds } } });
+  const coachRows = [];
+  const playerRows = [];
+  for (const pg of periodGroups) {
+    const group = groupById.get(pg.campGroupId);
+    if (!group) continue;
+    for (const c of group.coaches) coachRows.push({ campPeriodGroupId: pg.id, coachId: c.coachId, sparringId: c.sparringId });
+    for (const pl of group.players) playerRows.push({ campPeriodGroupId: pg.id, playerId: pl.playerId });
+  }
+  if (coachRows.length) await db.campPeriodGroupCoach.createMany({ data: coachRows });
+  if (playerRows.length) await db.campPeriodGroupPlayer.createMany({ data: playerRows });
+}
+
 // Ajoute une ou plusieurs journées d'un coup, entre startDate et endDate
 // (inclus). Idempotent : ne recrée pas une journée déjà existante à la même
 // date. endDate peut être égal à startDate pour n'ajouter qu'un seul jour.
@@ -215,7 +243,7 @@ router.post("/:campId/days", requireRole("ADMIN"), async (req, res) => {
   const toCreate = dates.filter((d) => !existingTimes.has(d.getTime()));
 
   if (toCreate.length > 0) {
-    await req.db.$transaction(
+    const createdDays = await req.db.$transaction(
       toCreate.map((date) =>
         req.db.campDay.create({
           data: {
@@ -230,9 +258,11 @@ router.post("/:campId/days", requireRole("ADMIN"), async (req, res) => {
               },
             }),
           },
+          include: { periods: true },
         })
       )
     );
+    await assignAllGroups(req.db, req.params.campId, createdDays.flatMap((d) => d.periods));
   }
 
   res.status(201).json({ created: toCreate.length, skipped: dates.length - toCreate.length });
@@ -256,7 +286,9 @@ router.post("/days/:dayId/periods", requireRole("ADMIN"), async (req, res) => {
   }
   const period = await req.db.campPeriod.create({
     data: { campDayId: req.params.dayId, label, startTime, endTime },
+    include: { campDay: { select: { campId: true } } },
   });
+  await assignAllGroups(req.db, period.campDay.campId, [period]);
   res.status(201).json({ period });
 });
 
@@ -279,6 +311,7 @@ router.post("/:campId/periods/generate", requireRole("ADMIN"), async (req, res) 
 
   let created = 0;
   let skipped = 0;
+  const newPeriods = [];
   for (const date of dates) {
     let day = dayByTime.get(date.getTime());
     if (!day) {
@@ -288,9 +321,10 @@ router.post("/:campId/periods/generate", requireRole("ADMIN"), async (req, res) 
       skipped += 1;
       continue;
     }
-    await req.db.campPeriod.create({ data: { campDayId: day.id, label, startTime, endTime } });
+    newPeriods.push(await req.db.campPeriod.create({ data: { campDayId: day.id, label, startTime, endTime } }));
     created += 1;
   }
+  await assignAllGroups(req.db, req.params.campId, newPeriods);
 
   res.status(201).json({ created, skipped });
 });
@@ -348,6 +382,84 @@ router.delete("/period-groups/:periodGroupId", requireRole("ADMIN"), async (req,
   } catch {
     res.status(404).json({ error: "Affectation introuvable." });
   }
+});
+
+// ---------- Présences par journée (toutes périodes d'un coup) ----------
+
+const ATTENDANCE_STATUSES = ["PRESENT", "ABSENT", "EXCUSED", "LATE"];
+
+// Une ligne par joueur inscrit sur au moins une période de la journée, avec sa
+// présence pour chaque période où il est inscrit.
+router.get("/days/:dayId/attendance", requireRole("ADMIN", "COACH"), async (req, res) => {
+  const day = await req.db.campDay.findUnique({
+    where: { id: req.params.dayId },
+    include: {
+      periods: {
+        orderBy: { startTime: "asc" },
+        include: {
+          groups: {
+            include: {
+              group: true,
+              players: { include: { player: true } },
+              attendances: true,
+            },
+          },
+        },
+      },
+    },
+  });
+  if (!day) return res.status(404).json({ error: "Journée introuvable." });
+
+  const players = new Map();
+  for (const period of day.periods) {
+    for (const pg of period.groups) {
+      const statusByPlayer = new Map(pg.attendances.map((a) => [a.playerId, a.status]));
+      for (const { player } of pg.players) {
+        if (!players.has(player.id)) {
+          players.set(player.id, { playerId: player.id, firstName: player.firstName, lastName: player.lastName, cells: {} });
+        }
+        players.get(player.id).cells[period.id] = {
+          campPeriodGroupId: pg.id,
+          groupName: pg.group.name,
+          status: statusByPlayer.get(player.id) ?? "ABSENT",
+        };
+      }
+    }
+  }
+
+  res.json({
+    day: { id: day.id, date: day.date, campId: day.campId },
+    periods: day.periods.map((p) => ({ id: p.id, label: p.label, startTime: p.startTime, endTime: p.endTime })),
+    players: [...players.values()].sort((a, b) => a.lastName.localeCompare(b.lastName) || a.firstName.localeCompare(b.firstName)),
+  });
+});
+
+router.put("/days/:dayId/attendance", requireRole("ADMIN", "COACH"), async (req, res) => {
+  const { records } = req.body ?? {};
+  if (!Array.isArray(records)) return res.status(400).json({ error: "records doit être un tableau." });
+  if (records.some((r) => !r.campPeriodGroupId || !r.playerId || !ATTENDANCE_STATUSES.includes(r.status))) {
+    return res.status(400).json({ error: `Chaque ligne exige campPeriodGroupId, playerId et un status parmi : ${ATTENDANCE_STATUSES.join(", ")}.` });
+  }
+
+  const periodGroups = await req.db.campPeriodGroup.findMany({
+    where: { period: { campDayId: req.params.dayId } },
+    select: { id: true },
+  });
+  const allowed = new Set(periodGroups.map((pg) => pg.id));
+  if (records.some((r) => !allowed.has(r.campPeriodGroupId))) {
+    return res.status(400).json({ error: "Une des affectations n'appartient pas à cette journée." });
+  }
+
+  await req.db.$transaction(
+    records.map(({ campPeriodGroupId, playerId, status }) =>
+      req.db.campAttendance.upsert({
+        where: { campPeriodGroupId_playerId: { campPeriodGroupId, playerId } },
+        create: { campPeriodGroupId, playerId, status },
+        update: { status },
+      })
+    )
+  );
+  res.status(204).end();
 });
 
 export default router;

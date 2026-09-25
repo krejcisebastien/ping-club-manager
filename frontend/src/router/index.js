@@ -118,6 +118,12 @@ const routes = [
     meta: { roles: ["ADMIN", "COACH"] },
   },
   {
+    path: "/coach/camp-attendance/day/:dayId",
+    name: "coach-camp-day-attendance",
+    component: () => import("../views/coach/CampDayAttendanceView.vue"),
+    meta: { roles: ["ADMIN", "COACH"] },
+  },
+  {
     path: "/coach/camp-attendance/:periodGroupId",
     name: "coach-camp-attendance-detail",
     component: () => import("../views/coach/CampAttendanceDetailView.vue"),
