@@ -25,45 +25,61 @@ function getClient() {
 
 // Quelques exemples réels de la bibliothèque, comme référence de style et de
 // niveau de détail (consignes actionnables, critères chiffrés/observables).
-function sampleExamples(category, count = 4) {
+// Volontairement peu nombreux et allégés : un prompt trop long ralentit
+// nettement la génération sur le modèle gratuit (et peut faire dépasser le
+// délai accepté par le navigateur/proxy).
+function sampleExamples(category, count = 2) {
   const pool = category ? exerciseLibrary.filter((e) => e.categorie === category) : exerciseLibrary;
   const source = pool.length >= count ? pool : exerciseLibrary;
   const shuffled = [...source].sort(() => Math.random() - 0.5);
   return shuffled.slice(0, count).map((e) => ({
     nom: e.nom,
     categorie: e.categorie,
-    difficulte: e.difficulte,
-    intensite: e.intensite,
-    fonctionnalites: e.fonctionnalites,
     objectif: e.objectif,
     consignes: e.consignes,
     criteresReussite: e.criteresReussite,
-    varianteFacile: e.varianteFacile,
-    varianteDifficile: e.varianteDifficile,
-    varianteCompetition: e.varianteCompetition,
   }));
 }
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+// Délai max par tentative : le modèle gratuit peut mettre très longtemps à
+// répondre en cas de forte demande plutôt que d'échouer vite, ce qui bloque
+// la requête du navigateur. On préfère échouer proprement et retenter.
+const REQUEST_TIMEOUT_MS = 12_000;
+
 // Le modèle gratuit renvoie régulièrement une surcharge temporaire (503) sous
-// forte demande ; on retente quelques fois avant d'abandonner, plutôt que de
-// faire échouer la génération dès le premier essai.
-async function generateJson({ systemInstruction, prompt, schema, maxOutputTokens = 1500 }) {
-  const attempts = 3;
+// forte demande ; on retente une fois avant d'abandonner, plutôt que de faire
+// échouer la génération dès le premier essai (mais sans trop allonger
+// l'attente côté utilisateur).
+async function generateJson({ systemInstruction, prompt, schema, maxOutputTokens = 1200 }) {
+  const attempts = 2;
   for (let attempt = 1; attempt <= attempts; attempt++) {
     try {
       const response = await getClient().models.generateContent({
         model: MODEL,
         contents: prompt,
-        config: { systemInstruction, responseMimeType: "application/json", responseSchema: schema, maxOutputTokens },
+        config: {
+          systemInstruction,
+          responseMimeType: "application/json",
+          responseSchema: schema,
+          maxOutputTokens,
+          httpOptions: { timeout: REQUEST_TIMEOUT_MS },
+        },
       });
       if (!response.text) throw new Error("Réponse IA invalide : aucun contenu reçu.");
       return JSON.parse(response.text);
     } catch (err) {
-      const overloaded = err.status === 503 || /UNAVAILABLE|high demand/i.test(err.message ?? "");
-      if (!overloaded || attempt === attempts) throw err;
-      await sleep(attempt * 1500);
+      const transient = err.status === 503 || /UNAVAILABLE|high demand|timeout|timed out|deadline/i.test(err.message ?? "");
+      if (!transient || attempt === attempts) {
+        if (transient) {
+          const timeoutErr = new Error("Génération IA indisponible pour le moment (service surchargé). Réessaie dans quelques instants.");
+          timeoutErr.code = "AI_UNAVAILABLE";
+          throw timeoutErr;
+        }
+        throw err;
+      }
+      await sleep(500);
     }
   }
 }
@@ -129,10 +145,17 @@ const PLAN_SCHEMA = {
   required: ["title", "description", "exerciseIds"],
 };
 
+const CATALOG_LIMIT = 60;
+
 // Sélectionne et ordonne des exercices existants du club pour construire un
 // plan d'entrainement (l'IA n'invente pas de nouveaux exercices ici).
 export async function generateTrainingPlan({ theme, exerciseCount, availableExercises }) {
-  const catalog = availableExercises.map((e) => ({
+  // On plafonne le catalogue envoyé au modèle : un club peut avoir 200+
+  // exercices, ce qui alourdit énormément le prompt et ralentit la réponse.
+  const shuffled = availableExercises.length > CATALOG_LIMIT
+    ? [...availableExercises].sort(() => Math.random() - 0.5).slice(0, CATALOG_LIMIT)
+    : availableExercises;
+  const catalog = shuffled.map((e) => ({
     id: e.id,
     title: e.title,
     category: e.category,

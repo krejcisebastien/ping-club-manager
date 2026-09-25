@@ -28,7 +28,7 @@ router.post(
         .filter(Boolean);
       res.json({ draft: { title: draft.title, description: draft.description, exercises } });
     } catch (err) {
-      if (err.code === "AI_NOT_CONFIGURED") return res.status(503).json({ error: err.message });
+      if (err.code === "AI_NOT_CONFIGURED" || err.code === "AI_UNAVAILABLE") return res.status(503).json({ error: err.message });
       throw err;
     }
   }
