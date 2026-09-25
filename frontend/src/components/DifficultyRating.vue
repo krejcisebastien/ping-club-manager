@@ -14,5 +14,8 @@ const level = computed({
 </script>
 
 <template>
-  <Rating v-model="level" :stars="5" :cancel="cancel" on-icon="pi pi-star-fill" off-icon="pi pi-star-fill" class="difficulty-rating" />
+  <Rating v-model="level" :stars="5" :cancel="cancel" class="difficulty-rating">
+    <template #onicon><span class="biceps biceps-on" aria-hidden="true">💪</span></template>
+    <template #officon><span class="biceps biceps-off" aria-hidden="true">💪</span></template>
+  </Rating>
 </template>

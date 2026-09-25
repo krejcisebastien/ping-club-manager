@@ -117,8 +117,8 @@ function onDelete() {
           <label class="text-xs text-slate-500 block mb-1">Titre</label>
           <InputText v-model="form.title" required class="w-full" />
         </div>
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div class="col-span-2 sm:col-span-1">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
             <label class="text-xs text-slate-500 block mb-1">Catégorie</label>
             <Dropdown
               v-model="form.category"

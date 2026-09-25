@@ -278,7 +278,7 @@
   transform: scale(1.15);
 }
 
-/* Note de difficulté : étoiles, ambre quand actives, gris sinon. */
+/* Note de difficulté : biceps, en couleur quand actifs, grisés sinon. */
 .difficulty-rating {
   display: flex;
   gap: 0.25rem;
@@ -287,15 +287,16 @@
 .difficulty-rating .p-rating-item {
   cursor: pointer;
 }
-.difficulty-rating .p-rating-icon {
+.difficulty-rating .biceps {
+  display: inline-block;
   font-size: 1.5rem;
-  color: #cbd5e1;
-  transition: color 0.15s, transform 0.15s;
+  line-height: 1;
+  transition: transform 0.15s, filter 0.15s;
 }
-.difficulty-rating .p-rating-item.p-rating-item-active .p-rating-icon {
-  color: #f59e0b;
+.difficulty-rating .biceps-off {
+  filter: grayscale(1) opacity(0.35);
 }
-.difficulty-rating .p-rating-item:hover .p-rating-icon {
+.difficulty-rating .p-rating-item:hover .biceps {
   transform: scale(1.15);
 }
 .difficulty-rating .p-rating-cancel {
