@@ -335,3 +335,29 @@
   transform: scale(1.15);
   outline: none;
 }
+
+/* Tableaux en mobile (responsive-layout="stack") : une carte compacte par ligne. */
+@media (max-width: 767px) {
+  .p-datatable-responsive-stack .p-datatable-tbody > tr {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  .p-datatable-responsive-stack .p-datatable-tbody > tr > td {
+    width: 100% !important;
+    padding: 0.3rem 1rem !important;
+    border: 0 !important;
+    gap: 0.75rem;
+  }
+  .p-datatable-responsive-stack .p-datatable-tbody > tr > td .p-column-title {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #64748b;
+    min-width: 6rem;
+  }
+  .p-datatable-responsive-stack .p-datatable-tbody > tr > td .p-column-title:empty {
+    display: none;
+  }
+  .p-datatable-responsive-stack .p-datatable-tbody > tr > td:last-child:has(.p-column-title:empty) {
+    justify-content: flex-end;
+  }
+}

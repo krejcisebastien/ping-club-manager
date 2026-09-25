@@ -97,7 +97,7 @@ function formatDate(d) {
       </div>
     </div>
 
-    <DataTable
+    <DataTable responsive-layout="stack" breakpoint="768px"
       :value="players"
       :loading="loading"
       v-model:filters="filters"

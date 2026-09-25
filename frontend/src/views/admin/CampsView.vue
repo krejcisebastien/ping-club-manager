@@ -98,7 +98,7 @@ async function onCreate() {
       </div>
     </div>
 
-    <DataTable
+    <DataTable responsive-layout="stack" breakpoint="768px"
       :value="camps"
       :loading="loading"
       v-model:filters="filters"

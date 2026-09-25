@@ -115,7 +115,7 @@ function weekdayLabel(w) {
       </div>
     </div>
 
-    <DataTable
+    <DataTable responsive-layout="stack" breakpoint="768px"
       :value="trainings"
       :loading="loading"
       v-model:filters="filters"

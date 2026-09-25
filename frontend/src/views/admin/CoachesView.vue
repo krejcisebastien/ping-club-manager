@@ -97,7 +97,7 @@ function onDelete(coach) {
       </div>
     </div>
 
-    <DataTable
+    <DataTable responsive-layout="stack" breakpoint="768px"
       :value="coaches"
       :loading="loading"
       v-model:filters="filters"
