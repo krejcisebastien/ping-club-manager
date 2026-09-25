@@ -12,6 +12,7 @@
     "seed": "node prisma/seed.js",
     "seed:exercises": "node scripts/seed-exercises.js",
     "club": "node scripts/clubs.js",
+    "tabt:test": "node scripts/tabt-test.js",
     "test:isolation": "node tests/tenant-isolation.mjs",
     "test:signup": "node tests/club-signup.mjs",
     "test:licensing": "node tests/licensing.mjs",
