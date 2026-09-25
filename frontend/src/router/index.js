@@ -55,7 +55,7 @@ const routes = [
     path: "/admin/groups",
     name: "admin-groups",
     component: () => import("../views/admin/GroupsView.vue"),
-    meta: { roles: ["ADMIN"] },
+    meta: { roles: ["ADMIN", "COACH"] },
   },
   {
     path: "/admin/trainings",
@@ -124,9 +124,9 @@ const routes = [
     meta: { roles: ["ADMIN", "COACH"] },
   },
   {
-    path: "/coach/camp-attendance/:periodGroupId",
-    name: "coach-camp-attendance-detail",
-    component: () => import("../views/coach/CampAttendanceDetailView.vue"),
+    path: "/coach/camp-assignment/day/:dayId",
+    name: "coach-camp-day-assignment",
+    component: () => import("../views/coach/CampAssignmentView.vue"),
     meta: { roles: ["ADMIN", "COACH"] },
   },
   {

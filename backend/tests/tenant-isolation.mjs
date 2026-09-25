@@ -91,7 +91,10 @@ try {
   await post(A.token, `/camps/${camp.id}/days`, { startDate: "2026-08-01", endDate: "2026-08-01", withDefaultPeriods: true });
   const campFull = (await call(A.token, "GET", `/camps/${camp.id}`)).json.camp;
   const period = campFull.days[0].periods[0];
-  const periodGroup = (await post(A.token, `/camps/periods/${period.id}/groups`, { campGroupId: campGroup.id })).periodGroup;
+  const campDay = campFull.days[0];
+  // Créer une journée y affecte d'office les groupes du stage.
+  const periodGroup = period.groups[0];
+  await post(A.token, `/camps/${camp.id}/players`, { playerId: player.id });
   const account = (await post(A.token, "/auth/users", { email: `joueur-a-${run}@test.local`, password: PASSWORD, roles: ["PLAYER"], playerIds: [player.id] })).user;
   expect("le club A est correctement construit", season && player && coach && sparring && group && training && occurrence && exercise && plan && camp && campGroup && periodGroup && account);
 
@@ -126,7 +129,7 @@ try {
     `/sparrings/${sparring.id}`, `/groups/${group.id}`, `/groups/${group.id}/players`, `/trainings/${training.id}`,
     `/trainings/${training.id}/occurrences`, `/occurrences/${occurrence.id}`, `/occurrences/${occurrence.id}/attendance`,
     `/camps/${camp.id}`, `/camps/groups/${campGroup.id}`, `/camp-period-groups/${periodGroup.id}`,
-    `/camp-period-groups/${periodGroup.id}/attendance`, `/training-plans/${plan.id}`, `/exercises/${exercise.id}`,
+    `/camps/days/${campDay.id}/attendance`, `/camps/days/${campDay.id}/assignment`, `/training-plans/${plan.id}`, `/exercises/${exercise.id}`,
   ];
   for (const path of reads) {
     const r = await call(B.token, "GET", path);
@@ -198,7 +201,10 @@ try {
     ["POST", `/camps/${camp.id}/groups`, { name: "x" }],
     ["POST", `/camps/${camp.id}/periods/generate`, { startDate: "2026-08-01", endDate: "2026-08-01", label: "x", startTime: "09:00", endTime: "10:00" }],
     ["POST", `/camps/groups/${campGroup.id}/coaches`, { coachId: bCoach.id }],
-    ["POST", `/camps/groups/${campGroup.id}/players`, { playerId: bPlayer.id }],
+    ["POST", `/camps/${camp.id}/players`, { playerId: bPlayer.id }],
+    ["DELETE", `/camps/${camp.id}/players/${player.id}`, {}],
+    ["PUT", `/camps/days/${campDay.id}/assignment`, { assignments: [] }],
+    ["DELETE", `/camps/days/${campDay.id}/attendance`, {}],
     ["PUT", `/camps/groups/${campGroup.id}`, { trainingPlanId: bPlan.id }],
     ["POST", `/camps/periods/${period.id}/groups`, { campGroupId: campGroup.id }],
     ["POST", `/camp-period-groups/${periodGroup.id}/coaches`, { coachId: bCoach.id }],
@@ -217,7 +223,7 @@ try {
   // présences : B ne peut pas écrire sur la séance / la période de A, ni y mettre un de ses joueurs
   const bAtt = await call(B.token, "PUT", `/occurrences/${occurrence.id}/attendance`, { records: [{ playerId: bPlayer.id, status: "PRESENT" }] });
   expect("B écrit une présence sur une séance de A : refusé", bAtt.status >= 400 && bAtt.status < 500, `status ${bAtt.status}`);
-  const bCampAtt = await call(B.token, "PUT", `/camp-period-groups/${periodGroup.id}/attendance`, { records: [{ playerId: bPlayer.id, status: "PRESENT" }] });
+  const bCampAtt = await call(B.token, "PUT", `/camps/days/${campDay.id}/attendance`, { records: [{ campPeriodId: period.id, playerId: bPlayer.id, status: "PRESENT" }] });
   expect("B écrit une présence de stage chez A : refusé", bCampAtt.status >= 400 && bCampAtt.status < 500, `status ${bCampAtt.status}`);
   const aAttWithB = await call(A.token, "PUT", `/occurrences/${occurrence.id}/attendance`, { records: [{ playerId: bPlayer.id, status: "PRESENT" }] });
   expect("A ne peut pas pointer un joueur de B", aAttWithB.status >= 400 && aAttWithB.status < 500, `status ${aAttWithB.status}`);
@@ -230,7 +236,7 @@ try {
   await call(A.token, "PUT", `/occurrences/${trainingOccurrences[1].id}/attendance`, { records: [{ playerId: player.id, status: "ABSENT" }] });
   await call(A.token, "PUT", `/occurrences/${trainingOccurrences[2].id}/attendance`, { records: [{ playerId: player.id, status: "EXCUSED" }] });
   await call(A.token, "PUT", `/occurrences/${trainingOccurrences[3].id}/attendance`, { records: [{ playerId: player.id, status: "LATE" }] });
-  await call(A.token, "PUT", `/camp-period-groups/${periodGroup.id}/attendance`, { records: [{ playerId: player.id, status: "PRESENT" }] });
+  await call(A.token, "PUT", `/camps/days/${campDay.id}/attendance`, { records: [{ campPeriodId: period.id, playerId: player.id, status: "PRESENT" }] });
 
   expect("stats : seasonId requis", (await call(A.token, "GET", `/players/${player.id}/stats`)).status === 400);
   const stats = (await call(A.token, "GET", `/players/${player.id}/stats?seasonId=${season.id}`)).json.stats;
@@ -275,7 +281,7 @@ try {
   // ---------- 6. Contrôles positifs : un club fonctionne normalement ----------
   const put = await call(A.token, "PUT", `/occurrences/${occurrence.id}/attendance`, { records: [{ playerId: player.id, status: "PRESENT" }] });
   expect("A enregistre une présence (upsert)", put.status === 204, `status ${put.status}`);
-  const campPut = await call(A.token, "PUT", `/camp-period-groups/${periodGroup.id}/attendance`, { records: [] });
+  const campPut = await call(A.token, "PUT", `/camps/days/${campDay.id}/attendance`, { records: [] });
   expect("A enregistre une présence de stage", campPut.status === 204, `status ${campPut.status}`);
   const move = await call(B.token, "POST", `/groups/${bGroup.id}/players`, { playerId: bPlayer.id });
   expect("B affecte son joueur à son groupe", move.status === 201, `status ${move.status}`);

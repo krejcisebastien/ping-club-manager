@@ -81,7 +81,7 @@ async function onSave() {
   try {
     await api.put(`/camps/days/${dayId}/attendance`, {
       records: players.value.flatMap((row) =>
-        cellsOf(row).map((c) => ({ campPeriodGroupId: c.campPeriodGroupId, playerId: row.playerId, status: c.status ?? "ABSENT" }))
+        Object.entries(row.cells).map(([campPeriodId, c]) => ({ campPeriodId, playerId: row.playerId, status: c.status ?? "ABSENT" }))
       ),
     });
     encoded.value = true;
@@ -130,7 +130,10 @@ function rowColor(row) {
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
             <div v-for="period in periods" :key="period.id">
               <template v-if="row.cells[period.id]">
-                <label class="text-xs text-slate-500 block mb-1">{{ period.label }} <span class="text-slate-400">{{ period.startTime }}–{{ period.endTime }}</span></label>
+                <label class="text-xs text-slate-500 block mb-1">
+                  {{ period.label }} <span class="text-slate-400">{{ period.startTime }}–{{ period.endTime }}</span>
+                  <span v-if="row.cells[period.id].groupName" class="text-sky-600"> · {{ row.cells[period.id].groupName }}</span>
+                </label>
                 <Dropdown v-model="row.cells[period.id].status" :options="ATTENDANCE_STATUS_OPTIONS" option-label="label" option-value="value" class="w-full">
                   <template #value="{ value }"><Tag v-if="value" :severity="ATTENDANCE_STATUS_SEVERITY[value]" :value="ATTENDANCE_STATUS_LABELS[value]" /><span v-else class="text-slate-400 text-sm">À encoder</span></template>
                 </Dropdown>
@@ -138,7 +141,7 @@ function rowColor(row) {
             </div>
           </div>
         </li>
-        <li v-if="!players.length" class="py-2 text-slate-400 text-sm">Aucun joueur inscrit sur les groupes de cette journée.</li>
+        <li v-if="!players.length" class="py-2 text-slate-400 text-sm">Aucun joueur inscrit au stage : inscris-les d'abord.</li>
       </ul>
 
             <div class="flex flex-wrap items-center gap-2">

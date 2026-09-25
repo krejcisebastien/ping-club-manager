@@ -37,8 +37,8 @@ const { attendances, campAttendances, stats } = usePlayerSpace();
         <ul class="divide-y divide-slate-100 text-sm">
           <li v-for="a in campAttendances" :key="a.id" class="py-2 flex items-center justify-between gap-2">
             <span>
-              {{ formatDate(a.campPeriodGroup.period.campDay.date) }} — {{ a.campPeriodGroup.period.campDay.camp.name }}
-              ({{ a.campPeriodGroup.period.label }} · {{ a.campPeriodGroup.group.name }})
+              {{ formatDate(a.campPeriod.campDay.date) }} — {{ a.campPeriod.campDay.camp.name }}
+              ({{ a.campPeriod.label }}<template v-if="a.groupName"> · {{ a.groupName }}</template>)
             </span>
             <Tag :severity="ATTENDANCE_STATUS_SEVERITY[a.status]" :value="ATTENDANCE_STATUS_LABELS[a.status]" />
           </li>

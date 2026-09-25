@@ -82,8 +82,8 @@ model Club {
 
 model Season {
   id        String   @id @default(cuid())
-  clubId String
-  club   Club   @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  clubId    String
+  club      Club     @relation(fields: [clubId], references: [id], onDelete: Cascade)
   name      String
   startDate DateTime
   endDate   DateTime
@@ -104,8 +104,8 @@ model Season {
 
 model User {
   id           String   @id @default(cuid())
-  clubId String
-  club   Club   @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  clubId       String
+  club         Club     @relation(fields: [clubId], references: [id], onDelete: Cascade)
   email        String   @unique
   passwordHash String
   roles        Role[]
@@ -142,8 +142,8 @@ model UserPlayer {
 
 model Player {
   id            String   @id @default(cuid())
-  clubId String
-  club   Club   @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  clubId        String
+  club          Club     @relation(fields: [clubId], references: [id], onDelete: Cascade)
   firstName     String
   lastName      String
   birthDate     DateTime
@@ -152,28 +152,28 @@ model Player {
   updatedAt     DateTime @updatedAt
 
   // Coordonnées et signalétique complémentaires.
-  phone                String?
+  phone                 String?
   emergencyContactName  String?
   emergencyContactPhone String?
   photoUrl              String? // data URL (base64)
   playStyle             String?
   dominantHand          DominantHand?
 
-  users            UserPlayer[]
-  playerSeasons    PlayerSeason[]
-  rankingHistories RankingHistory[]
-  evaluations      Evaluation[]
-  equipment        Equipment[]
-  traits           PlayerTrait[]
-  pointsToWork     PointToWork[]
-  evolutionNotes   EvolutionNote[]
-  media            PlayerMedia[]
-  groupAssignments PlayerGroupAssignment[]
-  attendances      Attendance[]
-  campEnrollments  CampPeriodGroupPlayer[]
-  campAttendances  CampAttendance[]
-  sparringProfile  Sparring?
-  campGroups       CampGroupPlayer[]
+  users             UserPlayer[]
+  playerSeasons     PlayerSeason[]
+  rankingHistories  RankingHistory[]
+  evaluations       Evaluation[]
+  equipment         Equipment[]
+  traits            PlayerTrait[]
+  pointsToWork      PointToWork[]
+  evolutionNotes    EvolutionNote[]
+  media             PlayerMedia[]
+  groupAssignments  PlayerGroupAssignment[]
+  attendances       Attendance[]
+  campEnrollments   CampPeriodGroupPlayer[]
+  campAttendances   CampAttendance[]
+  sparringProfile   Sparring?
+  campRegistrations CampPlayer[]
 
   @@index([clubId])
 }
@@ -306,7 +306,7 @@ model TrainingGroup {
   rankingCriteria String?
   createdAt       DateTime @default(now())
 
-  season            Season                   @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  season            Season                  @relation(fields: [seasonId], references: [id], onDelete: Cascade)
   playerAssignments PlayerGroupAssignment[]
   trainings         Training[]
 }
@@ -327,8 +327,8 @@ model PlayerGroupAssignment {
 
 model Coach {
   id        String   @id @default(cuid())
-  clubId String
-  club   Club   @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  clubId    String
+  club      Club     @relation(fields: [clubId], references: [id], onDelete: Cascade)
   firstName String
   lastName  String
   email     String?
@@ -346,14 +346,14 @@ model Coach {
   trainings           TrainingCoach[]
   campGroups          CampGroupCoach[]
 
-  @@index([clubId])
   @@unique([clubId, email])
+  @@index([clubId])
 }
 
 model Sparring {
   id           String   @id @default(cuid())
-  clubId String
-  club   Club   @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  clubId       String
+  club         Club     @relation(fields: [clubId], references: [id], onDelete: Cascade)
   firstName    String
   lastName     String
   ranking      String?
@@ -451,8 +451,8 @@ model TrainingPlan {
   periodEnd   DateTime?
   createdAt   DateTime  @default(now())
 
-  season     Season                  @relation(fields: [seasonId], references: [id], onDelete: Cascade)
-  coach      Coach?                  @relation(fields: [coachId], references: [id])
+  season     Season                 @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  coach      Coach?                 @relation(fields: [coachId], references: [id])
   exercises  TrainingPlanExercise[]
   campGroups CampGroup[]
 }
@@ -483,29 +483,29 @@ enum ExerciseDifficulty {
 }
 
 model Exercise {
-  id               String              @id @default(cuid())
-  clubId String
-  club   Club   @relation(fields: [clubId], references: [id], onDelete: Cascade)
-  title            String
-  description      String?
-  category         ExerciseCategory?
-  difficulty       ExerciseDifficulty?
-  diagram          Json? // schéma table de ping-pong : { points: [{ id, x, y }] }
-  createdById      String?
-  createdAt        DateTime @default(now())
+  id          String              @id @default(cuid())
+  clubId      String
+  club        Club                @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  category    ExerciseCategory?
+  difficulty  ExerciseDifficulty?
+  diagram     Json? // schéma table de ping-pong : { points: [{ id, x, y }] }
+  createdById String?
+  createdAt   DateTime            @default(now())
 
   // Fiche pédagogique enrichie (bibliothèque d'exercices standard).
-  intensity           Int? // 1 à 5
-  skills              Json? // string[] — qualités travaillées (ex. "Regularite", "Pivot")
-  objective           String?
-  instructions        Json? // string[] — consignes
-  successCriteria     Json? // string[] — critères de réussite
-  easierVariant       Json? // string[]
-  harderVariant       Json? // string[]
-  competitionVariant  Json? // string[]
-  sourceCode          String? // référence dans la bibliothèque source (ex. "REG-001"), pour import idempotent
+  intensity          Int? // 1 à 5
+  skills             Json? // string[] — qualités travaillées (ex. "Regularite", "Pivot")
+  objective          String?
+  instructions       Json? // string[] — consignes
+  successCriteria    Json? // string[] — critères de réussite
+  easierVariant      Json? // string[]
+  harderVariant      Json? // string[]
+  competitionVariant Json? // string[]
+  sourceCode         String? // référence dans la bibliothèque source (ex. "REG-001"), pour import idempotent
 
-  createdBy Coach?                  @relation(fields: [createdById], references: [id])
+  createdBy Coach?                 @relation(fields: [createdById], references: [id])
   plans     TrainingPlanExercise[]
 
   @@unique([clubId, sourceCode])
@@ -534,9 +534,23 @@ model Camp {
   endDate   DateTime
   createdAt DateTime @default(now())
 
-  season Season      @relation(fields: [seasonId], references: [id], onDelete: Cascade)
-  days   CampDay[]
-  groups CampGroup[]
+  season  Season       @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  days    CampDay[]
+  groups  CampGroup[]
+  players CampPlayer[]
+}
+
+// Joueurs inscrits au stage (liste de référence des présences). Chaque période,
+// les entraineurs répartissent ces joueurs dans les groupes (CampPeriodGroupPlayer).
+model CampPlayer {
+  id       String @id @default(cuid())
+  campId   String
+  playerId String
+
+  camp   Camp   @relation(fields: [campId], references: [id], onDelete: Cascade)
+  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@unique([campId, playerId])
 }
 
 model CampDay {
@@ -555,8 +569,9 @@ model CampPeriod {
   startTime String
   endTime   String
 
-  campDay CampDay           @relation(fields: [campDayId], references: [id], onDelete: Cascade)
-  groups  CampPeriodGroup[]
+  campDay     CampDay           @relation(fields: [campDayId], references: [id], onDelete: Cascade)
+  groups      CampPeriodGroup[]
+  attendances CampAttendance[]
 }
 
 model CampGroup {
@@ -565,16 +580,15 @@ model CampGroup {
   name           String // "Initiation", "Perfectionnement", "Psychomotricité", ...
   trainingPlanId String?
 
-  camp         Camp                @relation(fields: [campId], references: [id], onDelete: Cascade)
-  trainingPlan TrainingPlan?       @relation(fields: [trainingPlanId], references: [id])
+  camp         Camp              @relation(fields: [campId], references: [id], onDelete: Cascade)
+  trainingPlan TrainingPlan?     @relation(fields: [trainingPlanId], references: [id])
   periods      CampPeriodGroup[]
   coaches      CampGroupCoach[]
-  players      CampGroupPlayer[]
 }
 
-// Encadrants et joueurs par défaut d'un groupe de stage : copiés sur chaque
-// CampPeriodGroup créé (quand le groupe est affecté à une période), modifiable
-// ensuite au cas par cas sur cette période via CampPeriodGroupCoach/Player.
+// Encadrants par défaut d'un groupe de stage : copiés sur chaque CampPeriodGroup
+// créé (quand le groupe est affecté à une période), modifiables ensuite au cas
+// par cas sur cette période via CampPeriodGroupCoach.
 model CampGroupCoach {
   id          String  @id @default(cuid())
   campGroupId String
@@ -586,27 +600,15 @@ model CampGroupCoach {
   sparring  Sparring? @relation(fields: [sparringId], references: [id], onDelete: Cascade)
 }
 
-model CampGroupPlayer {
-  id          String @id @default(cuid())
-  campGroupId String
-  playerId    String
-
-  campGroup CampGroup @relation(fields: [campGroupId], references: [id], onDelete: Cascade)
-  player    Player    @relation(fields: [playerId], references: [id], onDelete: Cascade)
-
-  @@unique([campGroupId, playerId])
-}
-
 model CampPeriodGroup {
   id           String @id @default(cuid())
   campPeriodId String
   campGroupId  String
 
-  period      CampPeriod               @relation(fields: [campPeriodId], references: [id], onDelete: Cascade)
-  group       CampGroup                @relation(fields: [campGroupId], references: [id], onDelete: Cascade)
-  coaches     CampPeriodGroupCoach[]
-  players     CampPeriodGroupPlayer[]
-  attendances CampAttendance[]
+  period  CampPeriod              @relation(fields: [campPeriodId], references: [id], onDelete: Cascade)
+  group   CampGroup               @relation(fields: [campGroupId], references: [id], onDelete: Cascade)
+  coaches CampPeriodGroupCoach[]
+  players CampPeriodGroupPlayer[]
 
   @@unique([campPeriodId, campGroupId])
 }
@@ -633,14 +635,15 @@ model CampPeriodGroupPlayer {
   @@unique([campPeriodGroupId, playerId])
 }
 
+// Présence d'un joueur inscrit sur une période (indépendante de son groupe).
 model CampAttendance {
-  id                String           @id @default(cuid())
-  campPeriodGroupId String
-  playerId          String
-  status            AttendanceStatus @default(ABSENT)
+  id           String           @id @default(cuid())
+  campPeriodId String
+  playerId     String
+  status       AttendanceStatus @default(ABSENT)
 
-  campPeriodGroup CampPeriodGroup @relation(fields: [campPeriodGroupId], references: [id], onDelete: Cascade)
-  player          Player          @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  campPeriod CampPeriod @relation(fields: [campPeriodId], references: [id], onDelete: Cascade)
+  player     Player     @relation(fields: [playerId], references: [id], onDelete: Cascade)
 
-  @@unique([campPeriodGroupId, playerId])
+  @@unique([campPeriodId, playerId])
 }

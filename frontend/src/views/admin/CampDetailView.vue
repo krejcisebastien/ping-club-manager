@@ -17,6 +17,7 @@ import { useToast } from "primevue/usetoast";
 import { CALENDAR_PLUGINS_DAY_ONLY } from "../../lib/calendar.js";
 import { useConfirm } from "primevue/useconfirm";
 import AppLayout from "../../components/AppLayout.vue";
+import CampRegistrations from "../../components/CampRegistrations.vue";
 import { api } from "../../lib/api.js";
 import { toDateOnly } from "../../lib/date.js";
 import { useNavLinks } from "../../composables/useNavLinks.js";
@@ -277,6 +278,12 @@ const calendarOptions = computed(() => ({
       </div>
 
       <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+        <p class="text-sm font-medium text-slate-600 mb-1">Joueurs inscrits ({{ camp.players.length }})</p>
+        <p class="text-xs text-slate-400 mb-3">Liste de référence des présences. Les entraineurs répartissent ensuite ces joueurs dans les groupes, période par période.</p>
+        <CampRegistrations :camp-id="camp.id" :registrations="camp.players" @changed="loadCamp" />
+      </div>
+
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
         <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
           <p class="text-sm font-medium text-slate-600">Journées ({{ camp.days.length }})</p>
           <div class="flex gap-2">
@@ -297,6 +304,10 @@ const calendarOptions = computed(() => ({
                 </template>
 
                 <div class="space-y-3">
+                  <div class="flex flex-wrap gap-2">
+                    <Button label="Répartir les joueurs" icon="pi pi-sitemap" size="small" outlined :disabled="!day.periods.length" @click="router.push(`/coach/camp-assignment/day/${day.id}`)" />
+                    <Button label="Présences de la journée" icon="pi pi-check-square" size="small" outlined :disabled="!day.periods.length" @click="router.push(`/coach/camp-attendance/day/${day.id}`)" />
+                  </div>
                   <div v-for="period in day.periods" :key="period.id" class="bg-slate-50 rounded-lg p-3">
                     <div class="flex items-center justify-between">
                       <span class="text-sm font-medium">{{ period.label }} · {{ period.startTime }}–{{ period.endTime }}</span>
@@ -313,7 +324,7 @@ const calendarOptions = computed(() => ({
                           icon="pi pi-users"
                           text
                           size="small"
-                          title="Gérer les encadrants et joueurs de ce groupe"
+                          title="Gérer les encadrants et les joueurs de ce groupe sur cette période"
                           class="!py-0.5 !px-2 !text-sky-700 !gap-1.5"
                           @click="router.push(`/admin/camp-period-groups/${pg.id}`)"
                         />

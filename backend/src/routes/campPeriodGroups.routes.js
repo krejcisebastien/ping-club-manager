@@ -16,7 +16,12 @@ router.get("/:id", async (req, res) => {
     },
   });
   if (!periodGroup) return res.status(404).json({ error: "Affectation introuvable." });
-  res.json({ periodGroup });
+  const registered = await req.db.campPlayer.findMany({
+    where: { campId: periodGroup.group.campId },
+    include: { player: true },
+    orderBy: { player: { lastName: "asc" } },
+  });
+  res.json({ periodGroup, registered: registered.map((r) => r.player) });
 });
 
 // ---------- Encadrants (entraineurs / sparrings) affectés ----------
@@ -47,18 +52,21 @@ router.delete("/:id/coaches/:assignmentId", requireRole("ADMIN"), async (req, re
 router.post("/:id/players", requireRole("ADMIN", "COACH"), async (req, res) => {
   const { playerId } = req.body ?? {};
   if (!playerId) return res.status(400).json({ error: "playerId est requis." });
-  try {
-    const enrollment = await req.db.campPeriodGroupPlayer.create({
-      data: { campPeriodGroupId: req.params.id, playerId },
-      include: { player: true },
-    });
-    res.status(201).json({ enrollment });
-  } catch (err) {
-    if (err.code === "P2002") {
-      return res.status(409).json({ error: "Ce joueur est déjà inscrit sur cette période." });
-    }
-    throw err;
-  }
+
+  const periodGroup = await req.db.campPeriodGroup.findUnique({ where: { id: req.params.id }, include: { group: true } });
+  if (!periodGroup) return res.status(404).json({ error: "Affectation introuvable." });
+  const registered = await req.db.campPlayer.findFirst({ where: { campId: periodGroup.group.campId, playerId } });
+  if (!registered) return res.status(400).json({ error: "Ce joueur n'est pas inscrit au stage." });
+
+  // Un joueur n'est que dans un seul groupe par période : on le retire des autres.
+  await req.db.campPeriodGroupPlayer.deleteMany({
+    where: { playerId, campPeriodGroup: { campPeriodId: periodGroup.campPeriodId } },
+  });
+  const enrollment = await req.db.campPeriodGroupPlayer.create({
+    data: { campPeriodGroupId: req.params.id, playerId },
+    include: { player: true },
+  });
+  res.status(201).json({ enrollment });
 });
 
 router.delete("/:id/players/:playerId", requireRole("ADMIN", "COACH"), async (req, res) => {
@@ -70,61 +78,6 @@ router.delete("/:id/players/:playerId", requireRole("ADMIN", "COACH"), async (re
   } catch {
     res.status(404).json({ error: "Inscription introuvable." });
   }
-});
-
-// ---------- Présences ----------
-
-router.get("/:id/attendance", requireRole("ADMIN", "COACH"), async (req, res) => {
-  const [roster, records] = await Promise.all([
-    req.db.campPeriodGroupPlayer.findMany({
-      where: { campPeriodGroupId: req.params.id },
-      include: { player: true },
-      orderBy: { player: { lastName: "asc" } },
-    }),
-    req.db.campAttendance.findMany({ where: { campPeriodGroupId: req.params.id } }),
-  ]);
-
-  const byPlayerId = new Map(records.map((r) => [r.playerId, r]));
-  const attendance = roster.map(({ player }) => ({
-    playerId: player.id,
-    firstName: player.firstName,
-    lastName: player.lastName,
-    status: byPlayerId.get(player.id)?.status ?? null,
-  }));
-
-  res.json({ attendance, encoded: records.length > 0 });
-});
-
-const ATTENDANCE_STATUSES = ["PRESENT", "ABSENT", "EXCUSED", "LATE"];
-
-router.put("/:id/attendance", requireRole("ADMIN", "COACH"), async (req, res) => {
-  const { records } = req.body ?? {};
-  if (!Array.isArray(records)) {
-    return res.status(400).json({ error: "records doit être un tableau." });
-  }
-  if (records.some(({ status }) => status !== undefined && !ATTENDANCE_STATUSES.includes(status))) {
-    return res.status(400).json({ error: `status doit être l'un de : ${ATTENDANCE_STATUSES.join(", ")}.` });
-  }
-
-  await req.db.$transaction(
-    records.map(({ playerId, status }) =>
-      req.db.campAttendance.upsert({
-        where: { campPeriodGroupId_playerId: { campPeriodGroupId: req.params.id, playerId } },
-        create: { campPeriodGroupId: req.params.id, playerId, status: status ?? "ABSENT" },
-        update: { status: status ?? "ABSENT" },
-      })
-    )
-  );
-
-  res.status(204).end();
-});
-
-// Annule l'encodage de cette période/groupe (ex. erreur de jour).
-router.delete("/:id/attendance", requireRole("ADMIN", "COACH"), async (req, res) => {
-  const periodGroup = await req.db.campPeriodGroup.findUnique({ where: { id: req.params.id }, select: { id: true } });
-  if (!periodGroup) return res.status(404).json({ error: "Affectation introuvable." });
-  await req.db.campAttendance.deleteMany({ where: { campPeriodGroupId: periodGroup.id } });
-  res.status(204).end();
 });
 
 export default router;

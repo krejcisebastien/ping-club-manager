@@ -322,12 +322,18 @@ router.get("/:id/attendance", requireSelfPlayerOrRole("id", "ADMIN", "COACH"), a
 router.get("/:id/camp-attendance", requireSelfPlayerOrRole("id", "ADMIN", "COACH"), async (req, res) => {
   const attendances = await req.db.campAttendance.findMany({
     where: { playerId: req.params.id },
-    include: {
-      campPeriodGroup: { include: { group: true, period: { include: { campDay: { include: { camp: true } } } } } },
-    },
-    orderBy: { campPeriodGroup: { period: { campDay: { date: "desc" } } } },
+    include: { campPeriod: { include: { campDay: { include: { camp: true } } } } },
+    orderBy: { campPeriod: { campDay: { date: "desc" } } },
   });
-  res.json({ attendances });
+
+  // Groupe qui accueillait le joueur sur chaque période (s'il avait été réparti).
+  const assignments = await req.db.campPeriodGroupPlayer.findMany({
+    where: { playerId: req.params.id, campPeriodGroup: { campPeriodId: { in: attendances.map((a) => a.campPeriodId) } } },
+    include: { campPeriodGroup: { include: { group: true } } },
+  });
+  const groupByPeriod = new Map(assignments.map((a) => [a.campPeriodGroup.campPeriodId, a.campPeriodGroup.group.name]));
+
+  res.json({ attendances: attendances.map((a) => ({ ...a, groupName: groupByPeriod.get(a.campPeriodId) ?? null })) });
 });
 
 // ---------- Statistiques (taux de présence, heures) ----------
@@ -345,8 +351,8 @@ router.get("/:id/stats", requireSelfPlayerOrRole("id", "ADMIN", "COACH"), async 
       include: { occurrence: true },
     }),
     req.db.campAttendance.findMany({
-      where: { playerId: req.params.id, campPeriodGroup: { group: { camp: { seasonId } } } },
-      include: { campPeriodGroup: { include: { period: true } } },
+      where: { playerId: req.params.id, campPeriod: { campDay: { camp: { seasonId } } } },
+      include: { campPeriod: true },
     }),
   ]);
 
@@ -364,7 +370,7 @@ router.get("/:id/stats", requireSelfPlayerOrRole("id", "ADMIN", "COACH"), async 
   const campCounted = campCounts.PRESENT + campCounts.ABSENT + campCounts.LATE;
   const campHours = campAttendances
     .filter((r) => attended(r.status))
-    .reduce((sum, r) => sum + hoursBetween(r.campPeriodGroup.period.startTime, r.campPeriodGroup.period.endTime), 0);
+    .reduce((sum, r) => sum + hoursBetween(r.campPeriod.startTime, r.campPeriod.endTime), 0);
 
   res.json({
     stats: {

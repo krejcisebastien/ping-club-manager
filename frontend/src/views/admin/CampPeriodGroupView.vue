@@ -17,18 +17,18 @@ const id = route.params.id;
 const periodGroup = ref(null);
 const allCoaches = ref([]);
 const allSparrings = ref([]);
-const allPlayers = ref([]);
+const registered = ref([]);
 
 async function load() {
   const { data } = await api.get(`/camp-period-groups/${id}`);
   periodGroup.value = data.periodGroup;
+  registered.value = data.registered;
 }
 
 onMounted(async () => {
-  const [, c, s, p] = await Promise.all([load(), api.get("/coaches"), api.get("/sparrings"), api.get("/players")]);
+  const [, c, s] = await Promise.all([load(), api.get("/coaches"), api.get("/sparrings")]);
   allCoaches.value = c.data.coaches;
   allSparrings.value = s.data.sparrings;
-  allPlayers.value = p.data.players;
 });
 
 async function onAddCoach(payload) {
@@ -62,7 +62,7 @@ async function onRemovePlayer(playerId) {
           <span class="font-medium">{{ periodGroup.group.name }}</span> — {{ periodGroup.period.label }}
           <span class="text-slate-400">({{ new Date(periodGroup.period.campDay.date).toLocaleDateString("fr-FR") }})</span>
         </p>
-        <Button label="Prendre les présences" icon="pi pi-check-square" size="small" @click="router.push(`/coach/camp-attendance/${id}`)" />
+        <Button label="Présences de la journée" icon="pi pi-check-square" size="small" @click="router.push(`/coach/camp-attendance/day/${periodGroup.period.campDay.id}`)" />
       </div>
 
       <div class="grid gap-4 md:grid-cols-2">
@@ -73,9 +73,9 @@ async function onRemovePlayer(playerId) {
         </div>
 
         <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-          <p class="text-sm font-medium text-slate-600 mb-1">Joueurs inscrits</p>
-          <p class="text-xs text-slate-400 mb-3">Repris par défaut du groupe, modifiable ici pour cette période uniquement.</p>
-          <PlayerEnrollmentList :assignments="periodGroup.players" :players="allPlayers" @add="onAddPlayer" @remove="onRemovePlayer" />
+          <p class="text-sm font-medium text-slate-600 mb-1">Joueurs de ce groupe</p>
+          <p class="text-xs text-slate-400 mb-3">Choisis parmi les inscrits au stage. Un joueur n'est que dans un groupe par période.</p>
+          <PlayerEnrollmentList :assignments="periodGroup.players" :players="registered" placeholder="Ajouter un joueur inscrit…" @add="onAddPlayer" @remove="onRemovePlayer" />
         </div>
       </div>
     </div>

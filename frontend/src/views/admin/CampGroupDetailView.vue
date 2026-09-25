@@ -7,7 +7,6 @@ import Dropdown from "primevue/dropdown";
 import { useToast } from "primevue/usetoast";
 import AppLayout from "../../components/AppLayout.vue";
 import CoachAssignmentList from "../../components/CoachAssignmentList.vue";
-import PlayerEnrollmentList from "../../components/PlayerEnrollmentList.vue";
 import { api } from "../../lib/api.js";
 import { useNavLinks } from "../../composables/useNavLinks.js";
 
@@ -23,7 +22,6 @@ const savingInfo = ref(false);
 const trainingPlans = ref([]);
 const coaches = ref([]);
 const sparrings = ref([]);
-const players = ref([]);
 
 async function loadGroup() {
   const { data } = await api.get(`/camps/groups/${groupId}`);
@@ -33,16 +31,14 @@ async function loadGroup() {
 
 onMounted(async () => {
   await loadGroup();
-  const [p, c, s, pl] = await Promise.all([
+  const [p, c, s] = await Promise.all([
     api.get("/training-plans", { params: { seasonId: group.value.camp.seasonId } }),
     api.get("/coaches"),
     api.get("/sparrings"),
-    api.get("/players"),
   ]);
   trainingPlans.value = p.data.plans;
   coaches.value = c.data.coaches;
   sparrings.value = s.data.sparrings;
-  players.value = pl.data.players;
 });
 
 async function onSaveInfo() {
@@ -62,15 +58,6 @@ async function onAddCoach(payload) {
 }
 async function onRemoveCoach(assignmentId) {
   await api.delete(`/camps/groups/${groupId}/coaches/${assignmentId}`);
-  await loadGroup();
-}
-
-async function onAddPlayer(playerId) {
-  await api.post(`/camps/groups/${groupId}/players`, { playerId });
-  await loadGroup();
-}
-async function onRemovePlayer(playerId) {
-  await api.delete(`/camps/groups/${groupId}/players/${playerId}`);
   await loadGroup();
 }
 </script>
@@ -93,12 +80,6 @@ async function onRemovePlayer(playerId) {
         <p class="text-sm font-medium text-slate-600 mb-1">Encadrants par défaut</p>
         <p class="text-xs text-slate-400 mb-3">Affectés automatiquement à chaque période où ce groupe est programmé. Modifiable ensuite au cas par cas sur une période.</p>
         <CoachAssignmentList :assignments="group.coaches" :coaches="coaches" :sparrings="sparrings" empty-label="Aucun encadrant par défaut." @add="onAddCoach" @remove="onRemoveCoach" />
-      </div>
-
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-        <p class="text-sm font-medium text-slate-600 mb-1">Joueurs du groupe</p>
-        <p class="text-xs text-slate-400 mb-3">Inscrits automatiquement à chaque période où ce groupe est programmé. Modifiable ensuite au cas par cas sur une période.</p>
-        <PlayerEnrollmentList :assignments="group.players" :players="players" empty-label="Aucun joueur dans ce groupe." @add="onAddPlayer" @remove="onRemovePlayer" />
       </div>
     </div>
   </AppLayout>

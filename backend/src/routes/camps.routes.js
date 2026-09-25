@@ -22,6 +22,7 @@ router.get("/:campId", async (req, res) => {
     where: { id: req.params.campId },
     include: {
       groups: { include: { trainingPlan: true } },
+      players: { include: { player: true }, orderBy: { player: { lastName: "asc" } } },
       days: {
         orderBy: { date: "asc" },
         include: {
@@ -117,7 +118,6 @@ router.get("/groups/:groupId", async (req, res) => {
       camp: true,
       trainingPlan: true,
       coaches: { include: { coach: true, sparring: true } },
-      players: { include: { player: true } },
     },
   });
   if (!group) return res.status(404).json({ error: "Groupe de stage introuvable." });
@@ -147,62 +147,56 @@ router.delete("/groups/:groupId/coaches/:assignmentId", requireRole("ADMIN"), as
   }
 });
 
-// ---------- Joueurs par défaut du groupe (copiés sur chaque période affectée) ----------
+// ---------- Joueurs inscrits au stage ----------
 
-router.post("/groups/:groupId/players", requireRole("ADMIN", "COACH"), async (req, res) => {
-  const { playerId } = req.body ?? {};
-  if (!playerId) return res.status(400).json({ error: "playerId est requis." });
-  try {
-    const enrollment = await req.db.campGroupPlayer.create({
-      data: { campGroupId: req.params.groupId, playerId },
-      include: { player: true },
-    });
-    res.status(201).json({ enrollment });
-  } catch (err) {
-    if (err.code === "P2002") {
-      return res.status(409).json({ error: "Ce joueur est déjà dans ce groupe." });
-    }
-    throw err;
-  }
+// La liste d'inscrits sert de base aux présences ; chaque période, les
+// entraineurs répartissent ces joueurs dans les groupes (voir /days/:dayId/assignment).
+router.post("/:campId/players", requireRole("ADMIN", "COACH"), async (req, res) => {
+  const { playerId, playerIds } = req.body ?? {};
+  const ids = Array.isArray(playerIds) ? playerIds : playerId ? [playerId] : [];
+  if (!ids.length) return res.status(400).json({ error: "playerId ou playerIds est requis." });
+
+  const camp = await req.db.camp.findUnique({ where: { id: req.params.campId }, select: { id: true } });
+  if (!camp) return res.status(404).json({ error: "Stage introuvable." });
+
+  await req.db.campPlayer.createMany({ data: ids.map((id) => ({ campId: camp.id, playerId: id })), skipDuplicates: true });
+  const players = await req.db.campPlayer.findMany({
+    where: { campId: camp.id },
+    include: { player: true },
+    orderBy: { player: { lastName: "asc" } },
+  });
+  res.status(201).json({ players });
 });
 
-router.delete("/groups/:groupId/players/:playerId", requireRole("ADMIN", "COACH"), async (req, res) => {
-  try {
-    await req.db.campGroupPlayer.delete({
-      where: { campGroupId_playerId: { campGroupId: req.params.groupId, playerId: req.params.playerId } },
-    });
-    res.status(204).end();
-  } catch {
-    res.status(404).json({ error: "Inscription introuvable." });
-  }
+// Désinscrit un joueur : ses affectations aux groupes et ses présences du stage sont supprimées.
+router.delete("/:campId/players/:playerId", requireRole("ADMIN", "COACH"), async (req, res) => {
+  const { campId, playerId } = req.params;
+  const registration = await req.db.campPlayer.findFirst({ where: { campId, playerId }, select: { id: true } });
+  if (!registration) return res.status(404).json({ error: "Inscription introuvable." });
+
+  await req.db.campPeriodGroupPlayer.deleteMany({ where: { playerId, campPeriodGroup: { period: { campDay: { campId } } } } });
+  await req.db.campAttendance.deleteMany({ where: { playerId, campPeriod: { campDay: { campId } } } });
+  await req.db.campPlayer.delete({ where: { id: registration.id } });
+  res.status(204).end();
 });
 
 // ---------- Jours du stage ----------
 
-// Copie les encadrants et joueurs par défaut du groupe sur la période-groupe donnée.
+// Copie les encadrants par défaut du groupe sur la période-groupe donnée.
 async function copyGroupDefaults(db, campGroupId, campPeriodGroupId) {
-  const [defaultCoaches, defaultPlayers] = await Promise.all([
-    db.campGroupCoach.findMany({ where: { campGroupId } }),
-    db.campGroupPlayer.findMany({ where: { campGroupId } }),
-  ]);
-  await Promise.all([
-    defaultCoaches.length &&
-      db.campPeriodGroupCoach.createMany({
-        data: defaultCoaches.map((d) => ({ campPeriodGroupId, coachId: d.coachId, sparringId: d.sparringId })),
-      }),
-    defaultPlayers.length &&
-      db.campPeriodGroupPlayer.createMany({
-        data: defaultPlayers.map((d) => ({ campPeriodGroupId, playerId: d.playerId })),
-      }),
-  ]);
+  const defaultCoaches = await db.campGroupCoach.findMany({ where: { campGroupId } });
+  if (!defaultCoaches.length) return;
+  await db.campPeriodGroupCoach.createMany({
+    data: defaultCoaches.map((d) => ({ campPeriodGroupId, coachId: d.coachId, sparringId: d.sparringId })),
+  });
 }
 
 // Affecte d'office tous les groupes du stage aux périodes données (avec leurs
-// encadrants et joueurs par défaut). Appelé à la création de journées/périodes :
+// encadrants par défaut). Appelé à la création de journées/périodes :
 // on retire ensuite à la main les groupes absents d'une période.
 async function assignAllGroups(db, campId, periods) {
   if (!periods.length) return;
-  const groups = await db.campGroup.findMany({ where: { campId }, include: { coaches: true, players: true } });
+  const groups = await db.campGroup.findMany({ where: { campId }, include: { coaches: true } });
   if (!groups.length) return;
 
   const periodIds = periods.map((p) => p.id);
@@ -214,15 +208,12 @@ async function assignAllGroups(db, campId, periods) {
   const groupById = new Map(groups.map((g) => [g.id, g]));
   const periodGroups = await db.campPeriodGroup.findMany({ where: { campPeriodId: { in: periodIds } } });
   const coachRows = [];
-  const playerRows = [];
   for (const pg of periodGroups) {
     const group = groupById.get(pg.campGroupId);
     if (!group) continue;
     for (const c of group.coaches) coachRows.push({ campPeriodGroupId: pg.id, coachId: c.coachId, sparringId: c.sparringId });
-    for (const pl of group.players) playerRows.push({ campPeriodGroupId: pg.id, playerId: pl.playerId });
   }
   if (coachRows.length) await db.campPeriodGroupCoach.createMany({ data: coachRows });
-  if (playerRows.length) await db.campPeriodGroupPlayer.createMany({ data: playerRows });
 }
 
 // Ajoute une ou plusieurs journées d'un coup, entre startDate et endDate
@@ -384,80 +375,141 @@ router.delete("/period-groups/:periodGroupId", requireRole("ADMIN"), async (req,
   }
 });
 
-// ---------- Présences par journée (toutes périodes d'un coup) ----------
+// ---------- Répartition des inscrits dans les groupes, par période ----------
 
-const ATTENDANCE_STATUSES = ["PRESENT", "ABSENT", "EXCUSED", "LATE"];
-
-// Une ligne par joueur inscrit sur au moins une période de la journée, avec sa
-// présence pour chaque période où il est inscrit.
-router.get("/days/:dayId/attendance", requireRole("ADMIN", "COACH"), async (req, res) => {
-  const day = await req.db.campDay.findUnique({
-    where: { id: req.params.dayId },
+async function loadDay(db, dayId) {
+  return db.campDay.findUnique({
+    where: { id: dayId },
     include: {
+      camp: { include: { groups: { orderBy: { name: "asc" } } } },
       periods: {
         orderBy: { startTime: "asc" },
-        include: {
-          groups: {
-            include: {
-              group: true,
-              players: { include: { player: true } },
-              attendances: true,
-            },
-          },
-        },
+        include: { groups: { include: { players: true } }, attendances: true },
       },
     },
   });
+}
+
+const sortPlayers = (list) => list.sort((a, b) => a.lastName.localeCompare(b.lastName) || a.firstName.localeCompare(b.firstName));
+
+// Une ligne par joueur inscrit au stage ; pour chaque période, le groupe qui
+// l'accueille (ou null s'il n'est pas encore réparti).
+router.get("/days/:dayId/assignment", requireRole("ADMIN", "COACH"), async (req, res) => {
+  const day = await loadDay(req.db, req.params.dayId);
   if (!day) return res.status(404).json({ error: "Journée introuvable." });
+  const registered = await req.db.campPlayer.findMany({ where: { campId: day.campId }, include: { player: true } });
 
-  const players = new Map();
-  for (const period of day.periods) {
-    for (const pg of period.groups) {
-      const statusByPlayer = new Map(pg.attendances.map((a) => [a.playerId, a.status]));
-      for (const { player } of pg.players) {
-        if (!players.has(player.id)) {
-          players.set(player.id, { playerId: player.id, firstName: player.firstName, lastName: player.lastName, cells: {} });
-        }
-        players.get(player.id).cells[period.id] = {
-          campPeriodGroupId: pg.id,
-          groupName: pg.group.name,
-          status: statusByPlayer.get(player.id) ?? null,
-        };
-      }
-    }
-  }
-
-  const encoded = day.periods.some((p) => p.groups.some((pg) => pg.attendances.length > 0));
+  const players = registered.map(({ player }) => ({
+    playerId: player.id,
+    firstName: player.firstName,
+    lastName: player.lastName,
+    cells: Object.fromEntries(
+      day.periods.map((period) => {
+        const pg = period.groups.find((g) => g.players.some((p) => p.playerId === player.id));
+        return [period.id, pg?.campGroupId ?? null];
+      })
+    ),
+  }));
 
   res.json({
-    encoded,
     day: { id: day.id, date: day.date, campId: day.campId },
     periods: day.periods.map((p) => ({ id: p.id, label: p.label, startTime: p.startTime, endTime: p.endTime })),
-    players: [...players.values()].sort((a, b) => a.lastName.localeCompare(b.lastName) || a.firstName.localeCompare(b.firstName)),
+    groups: day.camp.groups.map((g) => ({ id: g.id, name: g.name })),
+    players: sortPlayers(players),
   });
 });
 
+async function findOrCreatePeriodGroup(db, campPeriodId, campGroupId) {
+  const existing = await db.campPeriodGroup.findFirst({ where: { campPeriodId, campGroupId } });
+  if (existing) return existing;
+  const created = await db.campPeriodGroup.create({ data: { campPeriodId, campGroupId } });
+  await copyGroupDefaults(db, campGroupId, created.id);
+  return created;
+}
+
+// Répartit des joueurs dans les groupes : { assignments: [{ periodId, playerId, campGroupId|null }] }.
+// Un joueur n'est que dans un seul groupe par période.
+router.put("/days/:dayId/assignment", requireRole("ADMIN", "COACH"), async (req, res) => {
+  const { assignments } = req.body ?? {};
+  if (!Array.isArray(assignments)) return res.status(400).json({ error: "assignments doit être un tableau." });
+
+  const day = await loadDay(req.db, req.params.dayId);
+  if (!day) return res.status(404).json({ error: "Journée introuvable." });
+  const periodIds = new Set(day.periods.map((p) => p.id));
+  const groupIds = new Set(day.camp.groups.map((g) => g.id));
+  const registered = new Set((await req.db.campPlayer.findMany({ where: { campId: day.campId } })).map((r) => r.playerId));
+
+  for (const a of assignments) {
+    if (!periodIds.has(a.periodId)) return res.status(400).json({ error: "Une période n'appartient pas à cette journée." });
+    if (!registered.has(a.playerId)) return res.status(400).json({ error: "Un joueur n'est pas inscrit à ce stage." });
+    if (a.campGroupId && !groupIds.has(a.campGroupId)) return res.status(400).json({ error: "Un groupe n'appartient pas à ce stage." });
+  }
+
+  for (const { periodId, playerId, campGroupId } of assignments) {
+    await req.db.campPeriodGroupPlayer.deleteMany({ where: { playerId, campPeriodGroup: { campPeriodId: periodId } } });
+    if (campGroupId) {
+      const pg = await findOrCreatePeriodGroup(req.db, periodId, campGroupId);
+      await req.db.campPeriodGroupPlayer.create({ data: { campPeriodGroupId: pg.id, playerId } });
+    }
+  }
+  res.status(204).end();
+});
+
+// ---------- Présences par journée (base : la liste des inscrits, pas les groupes) ----------
+
+const ATTENDANCE_STATUSES = ["PRESENT", "ABSENT", "EXCUSED", "LATE"];
+
+router.get("/days/:dayId/attendance", requireRole("ADMIN", "COACH"), async (req, res) => {
+  const day = await loadDay(req.db, req.params.dayId);
+  if (!day) return res.status(404).json({ error: "Journée introuvable." });
+  const registered = await req.db.campPlayer.findMany({ where: { campId: day.campId }, include: { player: true } });
+  const groupName = new Map(day.camp.groups.map((g) => [g.id, g.name]));
+
+  const players = registered.map(({ player }) => ({
+    playerId: player.id,
+    firstName: player.firstName,
+    lastName: player.lastName,
+    cells: Object.fromEntries(
+      day.periods.map((period) => {
+        const pg = period.groups.find((g) => g.players.some((p) => p.playerId === player.id));
+        const record = period.attendances.find((a) => a.playerId === player.id);
+        return [period.id, { status: record?.status ?? null, groupName: pg ? groupName.get(pg.campGroupId) ?? null : null }];
+      })
+    ),
+  }));
+
+  res.json({
+    encoded: day.periods.some((p) => p.attendances.length > 0),
+    day: { id: day.id, date: day.date, campId: day.campId },
+    periods: day.periods.map((p) => ({ id: p.id, label: p.label, startTime: p.startTime, endTime: p.endTime })),
+    players: sortPlayers(players),
+  });
+});
+
+// Enregistre : { records: [{ campPeriodId, playerId, status }] }
 router.put("/days/:dayId/attendance", requireRole("ADMIN", "COACH"), async (req, res) => {
   const { records } = req.body ?? {};
   if (!Array.isArray(records)) return res.status(400).json({ error: "records doit être un tableau." });
-  if (records.some((r) => !r.campPeriodGroupId || !r.playerId || !ATTENDANCE_STATUSES.includes(r.status))) {
-    return res.status(400).json({ error: `Chaque ligne exige campPeriodGroupId, playerId et un status parmi : ${ATTENDANCE_STATUSES.join(", ")}.` });
+  if (records.some((r) => !r.campPeriodId || !r.playerId || !ATTENDANCE_STATUSES.includes(r.status))) {
+    return res.status(400).json({ error: `Chaque ligne exige campPeriodId, playerId et un status parmi : ${ATTENDANCE_STATUSES.join(", ")}.` });
   }
 
-  const periodGroups = await req.db.campPeriodGroup.findMany({
-    where: { period: { campDayId: req.params.dayId } },
-    select: { id: true },
-  });
-  const allowed = new Set(periodGroups.map((pg) => pg.id));
-  if (records.some((r) => !allowed.has(r.campPeriodGroupId))) {
-    return res.status(400).json({ error: "Une des affectations n'appartient pas à cette journée." });
+  const day = await loadDay(req.db, req.params.dayId);
+  if (!day) return res.status(404).json({ error: "Journée introuvable." });
+  const periodIds = new Set(day.periods.map((p) => p.id));
+  const registered = new Set((await req.db.campPlayer.findMany({ where: { campId: day.campId } })).map((r) => r.playerId));
+  if (records.some((r) => !periodIds.has(r.campPeriodId))) {
+    return res.status(400).json({ error: "Une période n'appartient pas à cette journée." });
+  }
+  if (records.some((r) => !registered.has(r.playerId))) {
+    return res.status(400).json({ error: "Un joueur n'est pas inscrit à ce stage." });
   }
 
   await req.db.$transaction(
-    records.map(({ campPeriodGroupId, playerId, status }) =>
+    records.map(({ campPeriodId, playerId, status }) =>
       req.db.campAttendance.upsert({
-        where: { campPeriodGroupId_playerId: { campPeriodGroupId, playerId } },
-        create: { campPeriodGroupId, playerId, status },
+        where: { campPeriodId_playerId: { campPeriodId, playerId } },
+        create: { campPeriodId, playerId, status },
         update: { status },
       })
     )
@@ -469,7 +521,7 @@ router.put("/days/:dayId/attendance", requireRole("ADMIN", "COACH"), async (req,
 router.delete("/days/:dayId/attendance", requireRole("ADMIN", "COACH"), async (req, res) => {
   const day = await req.db.campDay.findUnique({ where: { id: req.params.dayId }, select: { id: true } });
   if (!day) return res.status(404).json({ error: "Journée introuvable." });
-  await req.db.campAttendance.deleteMany({ where: { campPeriodGroup: { period: { campDayId: day.id } } } });
+  await req.db.campAttendance.deleteMany({ where: { campPeriod: { campDayId: day.id } } });
   res.status(204).end();
 });
 

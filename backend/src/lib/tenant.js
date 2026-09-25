@@ -25,7 +25,7 @@ const PATHS = {
   Attendance: ["player"],
   CampAttendance: ["player"],
   CampPeriodGroupPlayer: ["player"],
-  CampGroupPlayer: ["player"],
+  CampPlayer: ["player"],
   UserPlayer: ["user"],
   TrainingGroup: ["season"],
   Training: ["season"],

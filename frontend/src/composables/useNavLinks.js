@@ -20,6 +20,7 @@ const COACH_LINKS = [
   { to: "/coach", label: "Tableau de bord", icon: "pi pi-home" },
   { to: "/admin/players", label: "Joueurs", icon: "pi pi-users" },
   { to: "/admin/sparrings", label: "Sparrings", icon: "pi pi-bolt" },
+  { to: "/admin/groups", label: "Groupes", icon: "pi pi-sitemap" },
   { to: "/coach/attendance", label: "Présences entrainements", icon: "pi pi-check-square" },
   { to: "/coach/camps", label: "Présences stages", icon: "pi pi-check-circle" },
   { to: "/coach/exercises", label: "Exercices", icon: "pi pi-book" },

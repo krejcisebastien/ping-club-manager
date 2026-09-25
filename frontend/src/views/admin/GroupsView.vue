@@ -10,9 +10,11 @@ import { useToast } from "primevue/usetoast";
 import AppLayout from "../../components/AppLayout.vue";
 import { api } from "../../lib/api.js";
 import { useNavLinks } from "../../composables/useNavLinks.js";
+import { useAuthStore } from "../../stores/auth.js";
 import { fullName, initials } from "../../lib/name.js";
 
 const navLinks = useNavLinks();
+const auth = useAuthStore();
 const toast = useToast();
 
 const seasons = ref([]);
@@ -140,7 +142,7 @@ async function onRemovePlayer(playerId) {
           <i class="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
           <InputText v-model="searchQuery" placeholder="Rechercher…" class="w-full pl-9" />
         </div>
-        <Button class="w-full sm:w-auto" label="Nouveau groupe" icon="pi pi-plus" @click="openCreate" />
+        <Button v-if="auth.isAdmin" class="w-full sm:w-auto" label="Nouveau groupe" icon="pi pi-plus" @click="openCreate" />
       </div>
     </div>
 
@@ -163,7 +165,7 @@ async function onRemovePlayer(playerId) {
           </div>
           <div class="flex items-center gap-1 shrink-0">
             <Tag severity="secondary" :value="`${g.playerCount}`" />
-            <Button icon="pi pi-pencil" severity="secondary" text rounded aria-label="Modifier" @click.stop="openEdit(g)" />
+            <Button v-if="auth.isAdmin" icon="pi pi-pencil" severity="secondary" text rounded aria-label="Modifier" @click.stop="openEdit(g)" />
           </div>
         </div>
 
