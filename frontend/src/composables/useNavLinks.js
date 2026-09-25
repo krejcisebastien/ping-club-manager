@@ -14,6 +14,7 @@ const ADMIN_LINKS = [
   { to: "/coach/exercises", label: "Exercices", icon: "pi pi-book" },
   { to: "/coach/training-plans", label: "Plans d'entrainement", icon: "pi pi-clipboard" },
   { to: "/admin/rates", label: "Tarifs", icon: "pi pi-euro" },
+  { to: "/admin/volunteering", label: "Fiches bénévolat", icon: "pi pi-file-excel" },
   { to: "/license", label: "Licence", icon: "pi pi-credit-card" },
 ];
 

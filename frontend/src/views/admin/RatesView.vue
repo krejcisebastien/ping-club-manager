@@ -2,6 +2,7 @@
 import { ref, computed, onMounted } from "vue";
 import Button from "primevue/button";
 import InputNumber from "primevue/inputnumber";
+import SelectButton from "primevue/selectbutton";
 import { useToast } from "primevue/usetoast";
 import AppLayout from "../../components/AppLayout.vue";
 import { api } from "../../lib/api.js";
@@ -10,6 +11,11 @@ import { COACH_LEVEL_LABELS, SERIES_LABELS } from "../../lib/ranking.js";
 
 const navLinks = useNavLinks();
 const toast = useToast();
+
+const basisOptions = [
+  { label: "À l'heure", value: "HOUR" },
+  { label: "À la séance", value: "SESSION" },
+];
 
 const rates = ref([]);
 const saving = ref(false);
@@ -36,15 +42,30 @@ async function onSave() {
 </script>
 
 <template>
-  <AppLayout title="Tarifs horaires" :nav-links="navLinks">
-    <div class="grid gap-4 md:grid-cols-2 max-w-4xl">
+  <AppLayout title="Tarifs" :nav-links="navLinks">
+    <p class="text-sm text-slate-500 mb-4 max-w-3xl">
+      Pour chaque niveau, renseigne un tarif à l'heure et/ou à la séance, puis choisis lequel s'applique. À la séance, chaque séance
+      d'entrainement et chaque période de stage compte pour un forfait ; à l'heure, on multiplie la durée par le tarif horaire.
+    </p>
+
+    <div class="grid gap-4 lg:grid-cols-2 max-w-5xl">
       <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
         <p class="text-sm font-medium text-slate-600 mb-1">Entraineurs — niveau Adeps</p>
-        <p class="text-xs text-slate-400 mb-3">Tarif appliqué selon le niveau attribué à chaque entraineur.</p>
-        <ul class="grid gap-3">
-          <li v-for="r in coachRates" :key="r.code" class="flex items-center justify-between gap-3">
+        <p class="text-xs text-slate-400 mb-3">Selon le niveau attribué à chaque entraineur.</p>
+        <ul class="grid gap-4">
+          <li v-for="r in coachRates" :key="r.code" class="grid gap-2">
             <span class="text-sm font-medium text-slate-700">{{ COACH_LEVEL_LABELS[r.code] }}</span>
-            <InputNumber v-model="r.hourlyRate" mode="currency" currency="EUR" locale="fr-BE" :min="0" :max-fraction-digits="2" placeholder="—" class="w-40" input-class="w-full text-right" />
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="text-xs text-slate-400 block mb-1">€ / heure</label>
+                <InputNumber v-model="r.hourlyRate" mode="currency" currency="EUR" locale="fr-BE" :min="0" :max-fraction-digits="2" placeholder="—" class="w-full" input-class="w-full text-right" />
+              </div>
+              <div>
+                <label class="text-xs text-slate-400 block mb-1">€ / séance</label>
+                <InputNumber v-model="r.sessionRate" mode="currency" currency="EUR" locale="fr-BE" :min="0" :max-fraction-digits="2" placeholder="—" class="w-full" input-class="w-full text-right" />
+              </div>
+            </div>
+            <SelectButton v-model="r.basis" :options="basisOptions" option-label="label" option-value="value" :allow-empty="false" class="w-full flex" />
           </li>
         </ul>
       </div>
@@ -52,10 +73,20 @@ async function onSave() {
       <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
         <p class="text-sm font-medium text-slate-600 mb-1">Sparrings — série</p>
         <p class="text-xs text-slate-400 mb-3">Déduite du classement du sparring (NC compte dans la série E).</p>
-        <ul class="grid gap-3">
-          <li v-for="r in sparringRates" :key="r.code" class="flex items-center justify-between gap-3">
+        <ul class="grid gap-4">
+          <li v-for="r in sparringRates" :key="r.code" class="grid gap-2">
             <span class="text-sm font-medium text-slate-700">{{ SERIES_LABELS[r.code] }}</span>
-            <InputNumber v-model="r.hourlyRate" mode="currency" currency="EUR" locale="fr-BE" :min="0" :max-fraction-digits="2" placeholder="—" class="w-40" input-class="w-full text-right" />
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="text-xs text-slate-400 block mb-1">€ / heure</label>
+                <InputNumber v-model="r.hourlyRate" mode="currency" currency="EUR" locale="fr-BE" :min="0" :max-fraction-digits="2" placeholder="—" class="w-full" input-class="w-full text-right" />
+              </div>
+              <div>
+                <label class="text-xs text-slate-400 block mb-1">€ / séance</label>
+                <InputNumber v-model="r.sessionRate" mode="currency" currency="EUR" locale="fr-BE" :min="0" :max-fraction-digits="2" placeholder="—" class="w-full" input-class="w-full text-right" />
+              </div>
+            </div>
+            <SelectButton v-model="r.basis" :options="basisOptions" option-label="label" option-value="value" :allow-empty="false" class="w-full flex" />
           </li>
         </ul>
       </div>

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, watch, onMounted } from "vue";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import Dialog from "primevue/dialog";
@@ -15,14 +15,14 @@ import { api } from "../../lib/api.js";
 import { useNavLinks } from "../../composables/useNavLinks.js";
 import { useTableFilter } from "../../composables/useTableFilter.js";
 import { fullName } from "../../lib/name.js";
-import { RANKING_OPTIONS, SERIES_LABELS } from "../../lib/ranking.js";
+import { RANKING_OPTIONS, SERIES_LABELS, seriesOf } from "../../lib/ranking.js";
 
 const navLinks = useNavLinks();
 const toast = useToast();
 const confirm = useConfirm();
 const { filters } = useTableFilter();
 
-const emptyForm = () => ({ firstName: "", lastName: "", ranking: null, isClubMember: false, playerId: null, externalClub: "" });
+const emptyForm = () => ({ firstName: "", lastName: "", ranking: null, isClubMember: false, playerId: null, externalClub: "", address: "", iban: "" });
 
 const sparrings = ref([]);
 const players = ref([]);
@@ -41,6 +41,19 @@ async function load() {
 }
 
 onMounted(load);
+
+// Classement du joueur choisi : lu sur sa fiche (dernier classement enregistré).
+const selectedPlayerRanking = ref({ ranking: null, series: null });
+watch(
+  () => [form.value.isClubMember, form.value.playerId],
+  async ([isClubMember, playerId]) => {
+    selectedPlayerRanking.value = { ranking: null, series: null };
+    if (!isClubMember || !playerId) return;
+    const { data } = await api.get(`/players/${playerId}/rankings`);
+    const ranking = data.rankings[0]?.rankingValue ?? null;
+    selectedPlayerRanking.value = { ranking, series: seriesOf(ranking) };
+  }
+);
 
 function playerOptions() {
   return players.value.map((p) => ({ label: fullName(p), value: p.id }));
@@ -65,6 +78,8 @@ function openEdit(sparring) {
     isClubMember: sparring.isClubMember,
     playerId: sparring.playerId ?? null,
     externalClub: sparring.externalClub ?? "",
+    address: sparring.address ?? "",
+    iban: sparring.iban ?? "",
   };
   dialogVisible.value = true;
 }
@@ -169,7 +184,14 @@ function onDelete(sparring) {
             <label class="text-xs text-slate-500 block mb-1">Joueur</label>
             <Dropdown v-model="form.playerId" :options="playerOptions()" option-label="label" option-value="value" filter placeholder="Choisir le joueur…" class="w-full" />
           </div>
-          <p class="text-xs text-slate-400">Le nom et le classement sont repris de la fiche du joueur : rien à ressaisir.</p>
+          <div class="rounded-lg bg-slate-50 p-3 text-sm">
+            <p class="text-xs text-slate-400 mb-1">Classement (repris de la fiche du joueur)</p>
+            <template v-if="selectedPlayerRanking.ranking">
+              <span class="font-medium">{{ selectedPlayerRanking.ranking }}</span>
+              <Tag v-if="selectedPlayerRanking.series" severity="secondary" :value="SERIES_LABELS[selectedPlayerRanking.series]" class="ml-2" />
+            </template>
+            <span v-else class="text-slate-400">Aucun classement enregistré sur sa fiche.</span>
+          </div>
         </template>
         <template v-else>
           <div class="grid grid-cols-2 gap-3">
@@ -191,6 +213,15 @@ function onDelete(sparring) {
             <InputText v-model="form.externalClub" class="w-full" />
           </div>
         </template>
+        <div>
+          <label class="text-xs text-slate-500 block mb-1">Adresse (note de défraiement)</label>
+          <InputText v-model="form.address" class="w-full" />
+        </div>
+        <div>
+          <label class="text-xs text-slate-500 block mb-1">N° de compte (IBAN)</label>
+          <InputText v-model="form.iban" placeholder="BE68 5390 0754 7034" class="w-full" />
+          <p class="text-xs text-slate-400 mt-1">Contrôlé à l'enregistrement ; repris sur la note de défraiement.</p>
+        </div>
         <div class="flex justify-end gap-2 mt-2">
           <Button type="button" label="Annuler" severity="secondary" outlined @click="dialogVisible = false" />
           <Button type="submit" label="Enregistrer" :loading="saving" />

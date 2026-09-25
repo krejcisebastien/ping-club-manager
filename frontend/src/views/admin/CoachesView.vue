@@ -21,7 +21,7 @@ const toast = useToast();
 const confirm = useConfirm();
 const { filters } = useTableFilter();
 
-const emptyForm = () => ({ firstName: "", lastName: "", email: "", phone: "", level: null });
+const emptyForm = () => ({ firstName: "", lastName: "", email: "", phone: "", level: null, address: "", iban: "" });
 
 const coaches = ref([]);
 const loading = ref(true);
@@ -47,7 +47,7 @@ function openCreate() {
 
 function openEdit(coach) {
   editingId.value = coach.id;
-  form.value = { firstName: coach.firstName, lastName: coach.lastName, email: coach.email ?? "", phone: coach.phone ?? "", level: coach.level ?? null };
+  form.value = { firstName: coach.firstName, lastName: coach.lastName, email: coach.email ?? "", phone: coach.phone ?? "", level: coach.level ?? null, address: coach.address ?? "", iban: coach.iban ?? "" };
   dialogVisible.value = true;
 }
 
@@ -154,6 +154,15 @@ function onDelete(coach) {
         <div>
           <label class="text-xs text-slate-500 block mb-1">Téléphone (optionnel)</label>
           <InputText v-model="form.phone" class="w-full" />
+        </div>
+        <div>
+          <label class="text-xs text-slate-500 block mb-1">Adresse (note de défraiement)</label>
+          <InputText v-model="form.address" class="w-full" />
+        </div>
+        <div>
+          <label class="text-xs text-slate-500 block mb-1">N° de compte (IBAN)</label>
+          <InputText v-model="form.iban" placeholder="BE68 5390 0754 7034" class="w-full" />
+          <p class="text-xs text-slate-400 mt-1">Contrôlé à l'enregistrement ; repris sur la note de défraiement.</p>
         </div>
         <div class="flex justify-end gap-2 mt-2">
           <Button type="button" label="Annuler" severity="secondary" outlined @click="dialogVisible = false" />

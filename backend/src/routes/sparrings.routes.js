@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { requireAuth, requireRole } from "../middleware/auth.js";
 import { isRanking, seriesOf } from "../lib/rankings.js";
+import { isValidIban, normalizeIban } from "../lib/iban.js";
 
 const router = Router();
 
@@ -26,8 +27,16 @@ async function withRanking(db, sparrings) {
 }
 
 // Valide et prépare les champs communs à la création et à la modification.
-async function buildData(db, body, current) {
+async function buildData(db, body, current, isAdmin) {
   const isClubMember = body.isClubMember !== undefined ? !!body.isClubMember : current?.isClubMember ?? false;
+  // Adresse et IBAN : données de paiement, modifiables par les administrateurs uniquement.
+  if (isAdmin && body.iban && !isValidIban(body.iban)) return { error: "IBAN invalide." };
+  const payment = isAdmin
+    ? {
+        ...(body.address !== undefined && { address: body.address || null }),
+        ...(body.iban !== undefined && { iban: body.iban ? normalizeIban(body.iban) : null }),
+      }
+    : {};
   const playerId = body.playerId !== undefined ? body.playerId : current?.playerId ?? null;
 
   if (isClubMember) {
@@ -35,7 +44,7 @@ async function buildData(db, body, current) {
     const player = await db.player.findUnique({ where: { id: playerId } });
     if (!player) return { error: "Joueur introuvable." };
     return {
-      data: { isClubMember: true, playerId, firstName: player.firstName, lastName: player.lastName, ranking: null, externalClub: null },
+      data: { isClubMember: true, playerId, firstName: player.firstName, lastName: player.lastName, ranking: null, externalClub: null, ...payment },
     };
   }
 
@@ -52,6 +61,7 @@ async function buildData(db, body, current) {
       lastName,
       ranking,
       externalClub: body.externalClub !== undefined ? body.externalClub || null : current?.externalClub ?? null,
+      ...payment,
     },
   };
 }
@@ -68,7 +78,7 @@ router.get("/:id", async (req, res) => {
 });
 
 router.post("/", requireRole("ADMIN", "COACH"), async (req, res) => {
-  const { data, error } = await buildData(req.db, req.body ?? {}, null);
+  const { data, error } = await buildData(req.db, req.body ?? {}, null, req.user.roles?.includes("ADMIN"));
   if (error) return res.status(400).json({ error });
   try {
     const sparring = await req.db.sparring.create({ data });
@@ -84,7 +94,7 @@ router.post("/", requireRole("ADMIN", "COACH"), async (req, res) => {
 router.put("/:id", requireRole("ADMIN", "COACH"), async (req, res) => {
   const current = await req.db.sparring.findUnique({ where: { id: req.params.id } });
   if (!current) return res.status(404).json({ error: "Sparring introuvable." });
-  const { data, error } = await buildData(req.db, req.body ?? {}, current);
+  const { data, error } = await buildData(req.db, req.body ?? {}, current, req.user.roles?.includes("ADMIN"));
   if (error) return res.status(400).json({ error });
   try {
     const sparring = await req.db.sparring.update({ where: { id: req.params.id }, data });

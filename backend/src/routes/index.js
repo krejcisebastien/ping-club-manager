@@ -16,6 +16,7 @@ import exercisesRoutes from "./exercises.routes.js";
 import trainingPlansRoutes from "./trainingPlans.routes.js";
 import dashboardRoutes from "./dashboard.routes.js";
 import ratesRoutes from "./rates.routes.js";
+import volunteeringRoutes from "./volunteering.routes.js";
 
 const router = Router();
 
@@ -36,5 +37,6 @@ router.use("/exercises", exercisesRoutes);
 router.use("/training-plans", trainingPlansRoutes);
 router.use("/dashboard", dashboardRoutes);
 router.use("/rates", ratesRoutes);
+router.use("/volunteering", volunteeringRoutes);
 
 export default router;

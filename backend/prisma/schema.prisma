@@ -49,6 +49,12 @@ enum RateCategory {
   SPARRING_SERIES
 }
 
+// Base de calcul d'un tarif : à l'heure (heures x tarif horaire) ou à la séance (tarif fixe par séance / période de stage).
+enum RateBasis {
+  HOUR
+  SESSION
+}
+
 enum OccurrenceStatus {
   PLANNED
   CANCELLED
@@ -341,14 +347,17 @@ model PlayerGroupAssignment {
   @@index([groupId])
 }
 
-// Tarif horaire (€/h) du club par niveau Adeps ou par série de sparring.
+// Tarifs du club par niveau Adeps ou par série de sparring : à l'heure et/ou à la
+// séance ; `basis` indique celui qui s'applique.
 model HourlyRate {
-  id         String       @id @default(cuid())
-  clubId     String
-  club       Club         @relation(fields: [clubId], references: [id], onDelete: Cascade)
-  category   RateCategory
-  code       String // ANIMATEUR | MSIN | MSED | MSEN  ou  E | D | C | B
-  hourlyRate Decimal      @db.Decimal(8, 2)
+  id          String       @id @default(cuid())
+  clubId      String
+  club        Club         @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  category    RateCategory
+  code        String // ANIMATEUR | MSIN | MSED | MSEN  ou  E | D | C | B
+  hourlyRate  Decimal?     @db.Decimal(8, 2)
+  sessionRate Decimal?     @db.Decimal(8, 2)
+  basis       RateBasis    @default(HOUR)
 
   @@unique([clubId, category, code])
 }
@@ -362,6 +371,8 @@ model Coach {
   email     String?
   phone     String?
   level     CoachLevel?
+  address   String?
+  iban      String?
   createdAt DateTime    @default(now())
 
   user                User?
@@ -389,6 +400,8 @@ model Sparring {
   isClubMember Boolean  @default(false)
   playerId     String?  @unique
   externalClub String?
+  address      String?
+  iban         String?
   createdAt    DateTime @default(now())
 
   player              Player?                   @relation(fields: [playerId], references: [id])
