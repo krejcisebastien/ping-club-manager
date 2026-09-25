@@ -6,6 +6,8 @@ const routes = [
   { path: "/", redirect: "/login" },
   { path: "/login", name: "login", component: () => import("../views/LoginView.vue") },
   { path: "/license", name: "license", component: () => import("../views/LicenseView.vue") },
+  // Manuel utilisateur : ouvert à tout utilisateur connecté (contenu filtré par rôle dans la page).
+  { path: "/help", name: "help", component: () => import("../views/HelpView.vue") },
   {
     path: "/platform",
     name: "platform",

@@ -47,6 +47,8 @@ function playerLinks(playerId, hasSeveralPlayers) {
 }
 
 const PLATFORM_LINK = { to: "/platform", label: "Plateforme", icon: "pi pi-globe" };
+// Manuel utilisateur, en fin de menu pour tous les rôles.
+const HELP_LINK = { to: "/help", label: "Aide", icon: "pi pi-question-circle" };
 
 const LINKS_BY_ROLE = { ADMIN: ADMIN_LINKS, COACH: COACH_LINKS };
 
@@ -61,10 +63,11 @@ export function useNavLinks() {
     if (auth.activeRole === "PLAYER") {
       const ids = auth.user?.playerIds ?? [];
       const playerId = ids.includes(route.params.id) ? route.params.id : ids.length === 1 ? ids[0] : null;
-      return playerLinks(playerId, ids.length > 1);
+      return [...playerLinks(playerId, ids.length > 1), HELP_LINK];
     }
     const links = LINKS_BY_ROLE[auth.activeRole] ?? [];
     // Gestion de la plateforme : réservée au propriétaire (PLATFORM_ADMIN_EMAILS).
-    return auth.activeRole === "ADMIN" && auth.user?.isPlatformAdmin ? [...links, PLATFORM_LINK] : links;
+    const withPlatform = auth.activeRole === "ADMIN" && auth.user?.isPlatformAdmin ? [...links, PLATFORM_LINK] : links;
+    return [...withPlatform, HELP_LINK];
   });
 }
