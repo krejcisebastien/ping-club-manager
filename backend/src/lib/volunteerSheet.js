@@ -33,8 +33,8 @@ function cloneSheet(workbook, source, name) {
   return copy;
 }
 
-// À la séance, le nombre de séances explique le montant (le modèle n'a pas de colonne dédiée).
-const natureLabel = (line, rate) => (rate?.basis === "SESSION" ? `${line.nature} (${line.sessions} séance${line.sessions > 1 ? "s" : ""})` : line.nature);
+// Une ligne par séance : l'horaire distingue deux séances du même jour.
+const natureLabel = (line) => `${line.nature} (${line.startTime.replace(":", "h")}-${line.endTime.replace(":", "h")})`;
 
 const excelDate = (day) => new Date(`${day}T00:00:00.000Z`);
 
@@ -49,7 +49,7 @@ function fillSheet(sheet, sheetData, page) {
     const line = page[i];
     sheet.getCell(`B${row}`).value = line ? excelDate(line.date) : null;
     sheet.getCell(`C${row}`).value = line ? line.hours : null;
-    sheet.getCell(`D${row}`).value = line ? natureLabel(line, sheetData.rate) : null;
+    sheet.getCell(`D${row}`).value = line ? natureLabel(line) : null;
     sheet.getCell(`E${row}`).value = line && line.amount != null ? line.amount : null;
   }
 
@@ -60,7 +60,7 @@ function fillSheet(sheet, sheetData, page) {
   sheet.getCell(`E${TOTAL_ROW}`).value = { formula: `SUM(E${FIRST_LINE}:E${LAST_LINE})`, result: Math.round(pageTotal * 100) / 100 };
 }
 
-// Renvoie le classeur Excel (Buffer) : une feuille par tranche de 10 jours prestés.
+// Renvoie le classeur Excel (Buffer) : une feuille par tranche de 10 séances.
 export async function buildVolunteerWorkbook(sheetData) {
   const workbook = new ExcelJS.Workbook();
   await workbook.xlsx.readFile(TEMPLATE_PATH);

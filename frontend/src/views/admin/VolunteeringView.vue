@@ -100,8 +100,8 @@ async function download() {
   <AppLayout title="Fiches bénévolat" :nav-links="navLinks">
     <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 mb-4">
       <p class="text-xs text-slate-400 mb-3">
-        Prépare la note de défraiement d'un entraineur ou d'un sparring : les heures viennent des séances et des stages où il est affecté
-        (séances annulées exclues), multipliées par son tarif horaire.
+        Prépare la note de défraiement d'un entraineur ou d'un sparring : une ligne par séance d'entrainement ou période de stage où il est
+        affecté (séances annulées exclues), valorisée selon son tarif (à l'heure ou à la séance).
       </p>
       <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <div>
@@ -145,26 +145,27 @@ async function download() {
         </div>
 
         <ul class="divide-y divide-slate-100 text-sm">
-          <li class="py-2 grid grid-cols-[6rem_4rem_1fr_5rem] sm:grid-cols-[9rem_5rem_1fr_6rem] gap-2 text-xs text-slate-400">
+          <!-- Mobile : date | montant, puis nature | heures ; à partir de sm : 4 colonnes. -->
+          <li class="py-2 hidden sm:grid grid-cols-[9rem_5rem_1fr_6rem] gap-2 text-xs text-slate-400">
             <span>Date</span><span class="text-right">Heures</span><span>Nature de la prestation</span><span class="text-right">Total</span>
           </li>
-          <li v-for="line in sheet.lines" :key="line.date" class="py-2 grid grid-cols-[6rem_4rem_1fr_5rem] sm:grid-cols-[9rem_5rem_1fr_6rem] gap-2 items-baseline">
-            <span class="capitalize">{{ dateLabel(line.date) }}</span>
-            <span class="text-right tabular-nums">{{ hours(line.hours) }}</span>
-            <span class="text-slate-600">{{ line.nature }}<span v-if="sheet.rate?.basis === 'SESSION'" class="text-slate-400"> ({{ line.sessions }} séance{{ line.sessions > 1 ? "s" : "" }})</span></span>
-            <span class="text-right tabular-nums font-medium" :class="line.amount > sheet.year.dayCap ? 'text-amber-600' : ''">{{ eur(line.amount) }}</span>
+          <li v-for="line in sheet.lines" :key="line.id" class="py-2 grid grid-cols-[1fr_auto] gap-x-3 gap-y-0.5 sm:grid-cols-[9rem_5rem_1fr_6rem] sm:gap-2 items-baseline">
+            <span class="capitalize font-medium sm:font-normal">{{ dateLabel(line.date) }}</span>
+            <span class="order-4 sm:order-none text-right tabular-nums">{{ hours(line.hours) }}</span>
+            <span class="order-3 sm:order-none min-w-0 text-slate-600">{{ line.nature }} <span class="text-slate-400 whitespace-nowrap">{{ line.startTime }}–{{ line.endTime }}</span></span>
+            <span class="order-2 sm:order-none text-right tabular-nums font-medium" :class="line.dayOverCap ? 'text-amber-600' : ''">{{ eur(line.amount) }}</span>
           </li>
           <li v-if="!sheet.lines.length" class="py-3 text-slate-400">Aucune prestation sur cette période.</li>
-          <li v-else class="py-2 grid grid-cols-[6rem_4rem_1fr_5rem] sm:grid-cols-[9rem_5rem_1fr_6rem] gap-2 font-semibold">
-            <span>Total</span><span class="text-right tabular-nums">{{ hours(sheet.totalHours) }}</span><span></span>
-            <span class="text-right tabular-nums">{{ eur(sheet.total) }}</span>
+          <li v-else class="py-2 grid grid-cols-[1fr_auto] gap-x-3 sm:grid-cols-[9rem_5rem_1fr_6rem] sm:gap-2 font-semibold">
+            <span>Total</span><span class="order-4 sm:order-none text-right tabular-nums">{{ hours(sheet.totalHours) }}</span><span class="order-3 sm:order-none"></span>
+            <span class="order-2 sm:order-none text-right tabular-nums">{{ eur(sheet.total) }}</span>
           </li>
         </ul>
       </div>
 
       <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
         <div class="flex items-baseline justify-between text-sm mb-2">
-          <span class="text-slate-600">Cumul {{ sheet.year.year }} (jusqu'au {{ dateLabel(sheet.to) }})</span>
+          <span class="text-slate-600">Cumul {{ sheet.year.year }} (du 1er janvier au {{ dateLabel(sheet.to) }})</span>
           <span class="tabular-nums"><strong>{{ eur(sheet.year.total) }}</strong> <span class="text-slate-400">/ {{ eur(sheet.year.cap) }}</span></span>
         </div>
         <div class="h-2 rounded-full bg-slate-100 overflow-hidden">
@@ -174,7 +175,7 @@ async function download() {
 
       <div class="flex items-center gap-3 flex-wrap">
         <Button label="Télécharger la note (Excel)" icon="pi pi-file-excel" :loading="downloading" :disabled="!sheet.lines.length" @click="download" />
-        <span v-if="sheetCount > 1" class="text-xs text-slate-500">{{ sheet.lines.length }} jours prestés : le fichier contiendra {{ sheetCount }} feuilles de {{ LINES_PER_SHEET }} lignes.</span>
+        <span v-if="sheetCount > 1" class="text-xs text-slate-500">{{ sheet.lines.length }} séances : le fichier contiendra {{ sheetCount }} feuilles de {{ LINES_PER_SHEET }} lignes.</span>
       </div>
     </div>
   </AppLayout>

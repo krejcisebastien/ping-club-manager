@@ -38,10 +38,10 @@ async function loadPerson(db, type, id) {
   return { type, ...sparring, ranking, category: "SPARRING_SERIES", code: seriesOf(ranking) };
 }
 
-// Heures prestées par jour : séances d'entrainement non annulées et périodes de
+// Prestations une par une : séances d'entrainement non annulées et périodes de
 // stage où la personne est affectée (une période comptée une fois même si elle
-// encadre plusieurs groupes).
-async function loadDays(db, person, from, to) {
+// encadre plusieurs groupes). Triées par date puis heure de début.
+async function loadSessions(db, person, from, to) {
   const owner = person.type === "coach" ? { coachId: person.id } : { sparringId: person.id };
 
   const [occurrences, campAssignments] = await Promise.all([
@@ -55,21 +55,19 @@ async function loadDays(db, person, from, to) {
     }),
   ]);
 
-  const days = new Map();
-  const add = (date, hours, nature) => {
-    const key = dayKey(date);
-    const day = days.get(key) ?? { date: key, hours: 0, sessions: 0, natures: [] };
-    day.hours += hours;
-    day.sessions += 1;
-    if (!day.natures.includes(nature)) day.natures.push(nature);
-    days.set(key, day);
-  };
-
+  const sessions = [];
   const seenOccurrences = new Set();
   for (const { occurrence } of occurrences) {
     if (seenOccurrences.has(occurrence.id)) continue;
     seenOccurrences.add(occurrence.id);
-    add(occurrence.date, hoursBetween(occurrence.startTime, occurrence.endTime), withPrefix("Entrainement", occurrence.training.name));
+    sessions.push({
+      id: occurrence.id,
+      date: dayKey(occurrence.date),
+      startTime: occurrence.startTime,
+      endTime: occurrence.endTime,
+      hours: round2(hoursBetween(occurrence.startTime, occurrence.endTime)),
+      nature: withPrefix("Entrainement", occurrence.training.name),
+    });
   }
 
   const seenPeriods = new Set();
@@ -77,10 +75,17 @@ async function loadDays(db, person, from, to) {
     const { period, group } = campPeriodGroup;
     if (seenPeriods.has(period.id)) continue;
     seenPeriods.add(period.id);
-    add(period.campDay.date, hoursBetween(period.startTime, period.endTime), withPrefix("Stage", group.camp.name));
+    sessions.push({
+      id: period.id,
+      date: dayKey(period.campDay.date),
+      startTime: period.startTime,
+      endTime: period.endTime,
+      hours: round2(hoursBetween(period.startTime, period.endTime)),
+      nature: withPrefix("Stage", group.camp.name),
+    });
   }
 
-  return [...days.values()].sort((a, b) => a.date.localeCompare(b.date));
+  return sessions.sort((a, b) => a.date.localeCompare(b.date) || a.startTime.localeCompare(b.startTime));
 }
 
 // Tarif de la catégorie de la personne : montants à l'heure et à la séance, et base retenue.
@@ -95,11 +100,11 @@ async function findRate(db, person) {
   };
 }
 
-// Montant d'un jour : heures x tarif horaire, ou nombre de séances x tarif à la séance.
-function dayAmount(rate, day) {
+// Montant d'une séance : heures x tarif horaire, ou forfait à la séance.
+function sessionAmount(rate, session) {
   if (!rate) return null;
-  if (rate.basis === "SESSION") return rate.sessionRate == null ? null : round2(day.sessions * rate.sessionRate);
-  return rate.hourlyRate == null ? null : round2(day.hours * rate.hourlyRate);
+  if (rate.basis === "SESSION") return rate.sessionRate;
+  return rate.hourlyRate == null ? null : round2(session.hours * rate.hourlyRate);
 }
 
 // Prépare la note de défraiement d'une personne sur une période (dates "AAAA-MM-JJ").
@@ -111,11 +116,12 @@ export async function computeVolunteerSheet(db, { type, id, from, to }) {
   const fromDate = parseDay(from);
   const toDate = parseDay(to);
 
-  const days = await loadDays(db, person, fromDate, toDate);
-  const lines = days.map((d) => {
-    const hours = round2(d.hours);
-    return { date: d.date, hours, sessions: d.sessions, nature: d.natures.join(" + "), amount: dayAmount(rate, { ...d, hours }) };
-  });
+  const sessions = await loadSessions(db, person, fromDate, toDate);
+  const lines = sessions.map((s) => ({ ...s, amount: sessionAmount(rate, s), dayOverCap: false }));
+
+  // Le plafond journalier porte sur la somme des séances d'un même jour.
+  const dayTotals = new Map();
+  for (const line of lines) dayTotals.set(line.date, round2((dayTotals.get(line.date) ?? 0) + (line.amount ?? 0)));
 
   const total = round2(lines.reduce((sum, l) => sum + (l.amount ?? 0), 0));
   const totalHours = round2(lines.reduce((sum, l) => sum + l.hours, 0));
@@ -123,8 +129,8 @@ export async function computeVolunteerSheet(db, { type, id, from, to }) {
   // Cumul de l'année civile jusqu'à la fin de la période, comparé au plafond annuel.
   const year = toDate.getUTCFullYear();
   const caps = capsFor(year);
-  const yearDays = await loadDays(db, person, parseDay(`${year}-01-01`), toDate);
-  const yearTotal = round2(yearDays.reduce((sum, d) => sum + (dayAmount(rate, d) ?? 0), 0));
+  const yearSessions = await loadSessions(db, person, parseDay(`${year}-01-01`), toDate);
+  const yearTotal = round2(yearSessions.reduce((sum, s) => sum + (sessionAmount(rate, s) ?? 0), 0));
   const yearCap = person.type === "coach" ? caps.perYearCoach : caps.perYear;
 
   const warnings = [];
@@ -133,9 +139,10 @@ export async function computeVolunteerSheet(db, { type, id, from, to }) {
   } else if (!rate || (rate.basis === "SESSION" ? rate.sessionRate : rate.hourlyRate) == null) {
     warnings.push(`Aucun tarif ${rate?.basis === "SESSION" ? "à la séance" : "horaire"} défini pour cette catégorie (page Tarifs).`);
   }
-  for (const line of lines) {
-    if (line.amount != null && line.amount > caps.perDay) {
-      warnings.push(`Le ${line.date.split("-").reverse().join("/")} : ${line.amount.toFixed(2)} € dépasse le plafond journalier de ${caps.perDay.toFixed(2)} €.`);
+  for (const [date, amount] of dayTotals) {
+    if (amount > caps.perDay) {
+      warnings.push(`Le ${date.split("-").reverse().join("/")} : ${amount.toFixed(2)} € dépasse le plafond journalier de ${caps.perDay.toFixed(2)} €.`);
+      for (const line of lines) if (line.date === date) line.dayOverCap = true;
     }
   }
   if (yearTotal > yearCap) {
