@@ -3,7 +3,7 @@ import { ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import Button from "primevue/button";
 import InputText from "primevue/inputtext";
-import InputNumber from "primevue/inputnumber";
+import SelectButton from "primevue/selectbutton";
 import Dropdown from "primevue/dropdown";
 import Textarea from "primevue/textarea";
 import Tag from "primevue/tag";
@@ -143,7 +143,7 @@ function onDelete() {
           </div>
           <div>
             <label class="text-xs text-slate-500 block mb-1">Intensité (1-5)</label>
-            <InputNumber v-model="form.intensity" :min="1" :max="5" show-buttons class="w-full" input-class="w-full" />
+            <SelectButton v-model="form.intensity" :options="[1, 2, 3, 4, 5]" :allow-empty="true" class="w-full flex" />
           </div>
         </div>
         <div>

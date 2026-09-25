@@ -210,3 +210,19 @@
   color: #0284c7;
   text-decoration: underline;
 }
+
+/* SelectButton : le style global des .p-button les rend tous pleins ; on distingue l'option choisie.
+   Même chaîne de :not() que la règle globale pour l'emporter en spécificité. */
+.p-selectbutton .p-button:not(.p-button-text):not(.p-button-outlined):not(.p-button-link):not(.p-button-secondary):not(.p-button-danger):not(.p-highlight) {
+  flex: 1;
+  background-color: #fff !important;
+  border-color: #cbd5e1 !important;
+  color: #475569 !important;
+}
+.p-selectbutton .p-button:not(.p-button-text):not(.p-button-outlined):not(.p-button-link):not(.p-button-secondary):not(.p-button-danger):not(.p-disabled):not(.p-highlight):hover {
+  background-color: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+}
+.p-selectbutton .p-button.p-highlight {
+  flex: 1;
+}
