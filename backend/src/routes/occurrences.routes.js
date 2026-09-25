@@ -96,7 +96,7 @@ router.get("/:id/attendance", requireRole("ADMIN", "COACH"), async (req, res) =>
     note: byPlayerId.get(player.id)?.note ?? null,
   }));
 
-  res.json({ attendance });
+  res.json({ attendance, encoded: records.length > 0 });
 });
 
 const ATTENDANCE_STATUSES = ["PRESENT", "ABSENT", "EXCUSED", "LATE"];
@@ -121,6 +121,15 @@ router.put("/:id/attendance", requireRole("ADMIN", "COACH"), async (req, res) =>
     )
   );
 
+  res.status(204).end();
+});
+
+// Annule l'encodage (ex. erreur de jour) : supprime tous les enregistrements de
+// présence de la séance, qui ne compte plus ni dans les taux ni dans les heures.
+router.delete("/:id/attendance", requireRole("ADMIN", "COACH"), async (req, res) => {
+  const occurrence = await req.db.trainingOccurrence.findUnique({ where: { id: req.params.id }, select: { id: true } });
+  if (!occurrence) return res.status(404).json({ error: "Séance introuvable." });
+  await req.db.attendance.deleteMany({ where: { occurrenceId: occurrence.id } });
   res.status(204).end();
 });
 

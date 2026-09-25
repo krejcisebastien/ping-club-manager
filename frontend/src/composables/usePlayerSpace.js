@@ -22,6 +22,19 @@ export const formatDate = (d) => new Date(d).toLocaleDateString("fr-FR");
 export const formatRate = (rate) => (rate == null ? "—" : `${Math.round(rate * 100)}%`);
 export const average = (e) => EVALUATION_CRITERIA.reduce((sum, c) => sum + e[c.key], 0) / EVALUATION_CRITERIA.length;
 
+// Saison utilisée pour les statistiques : la saison marquée active, sinon celle
+// qui couvre aujourd'hui, sinon la plus récente (l'admin n'active pas toujours
+// une saison, et les statistiques restaient alors vides).
+function pickSeason(seasons) {
+  const now = Date.now();
+  return (
+    seasons.find((s) => s.isActive) ??
+    seasons.find((s) => new Date(s.startDate) <= now && now <= new Date(s.endDate)) ??
+    [...seasons].sort((a, b) => new Date(b.startDate) - new Date(a.startDate))[0] ??
+    null
+  );
+}
+
 const KEY = Symbol("playerSpace");
 
 // Données de l'espace joueur, chargées une fois par la page parente puis
@@ -37,6 +50,7 @@ export function providePlayerSpace(playerId) {
   const attendances = ref([]);
   const campAttendances = ref([]);
   const stats = ref(null);
+  const statsSeason = ref(null);
 
   async function load() {
     const id = playerId.value;
@@ -63,8 +77,8 @@ export function providePlayerSpace(playerId) {
     attendances.value = att.data.attendances;
     campAttendances.value = campAtt.data.attendances;
 
-    const activeSeason = seasons.data.seasons.find((s) => s.isActive);
-    stats.value = activeSeason ? (await get(`/stats?seasonId=${activeSeason.id}`)).data.stats : null;
+    statsSeason.value = pickSeason(seasons.data.seasons);
+    stats.value = statsSeason.value ? (await get(`/stats?seasonId=${statsSeason.value.id}`)).data.stats : null;
   }
 
   const age = computed(() => {
@@ -139,7 +153,7 @@ export function providePlayerSpace(playerId) {
   };
 
   const space = {
-    player, evaluations, rankings, equipment, traits, pointsToWork, evolutionNotes, attendances, campAttendances, stats,
+    player, evaluations, rankings, equipment, traits, pointsToWork, evolutionNotes, attendances, campAttendances, stats, statsSeason,
     age, currentRanking, currentEquipment, strengths, weaknesses, openPoints,
     latest, previous, delta, latestAverage, strongestCriteria, weakestCriteria,
     radarData, radarOptions, evolutionData, evolutionOptions,

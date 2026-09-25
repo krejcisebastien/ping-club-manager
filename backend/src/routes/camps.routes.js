@@ -427,7 +427,10 @@ router.get("/days/:dayId/attendance", requireRole("ADMIN", "COACH"), async (req,
     }
   }
 
+  const encoded = day.periods.some((p) => p.groups.some((pg) => pg.attendances.length > 0));
+
   res.json({
+    encoded,
     day: { id: day.id, date: day.date, campId: day.campId },
     periods: day.periods.map((p) => ({ id: p.id, label: p.label, startTime: p.startTime, endTime: p.endTime })),
     players: [...players.values()].sort((a, b) => a.lastName.localeCompare(b.lastName) || a.firstName.localeCompare(b.firstName)),
@@ -459,6 +462,14 @@ router.put("/days/:dayId/attendance", requireRole("ADMIN", "COACH"), async (req,
       })
     )
   );
+  res.status(204).end();
+});
+
+// Annule l'encodage de toute la journée (ex. erreur de jour).
+router.delete("/days/:dayId/attendance", requireRole("ADMIN", "COACH"), async (req, res) => {
+  const day = await req.db.campDay.findUnique({ where: { id: req.params.dayId }, select: { id: true } });
+  if (!day) return res.status(404).json({ error: "Journée introuvable." });
+  await req.db.campAttendance.deleteMany({ where: { campPeriodGroup: { period: { campDayId: day.id } } } });
   res.status(204).end();
 });
 

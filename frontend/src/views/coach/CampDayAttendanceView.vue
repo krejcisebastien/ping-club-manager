@@ -4,6 +4,7 @@ import { useRoute, useRouter } from "vue-router";
 import Button from "primevue/button";
 import Dropdown from "primevue/dropdown";
 import Tag from "primevue/tag";
+import { useConfirm } from "primevue/useconfirm";
 import Avatar from "primevue/avatar";
 import { useToast } from "primevue/usetoast";
 import AppLayout from "../../components/AppLayout.vue";
@@ -16,12 +17,15 @@ const navLinks = useNavLinks();
 const route = useRoute();
 const router = useRouter();
 const toast = useToast();
+const confirm = useConfirm();
 const dayId = route.params.dayId;
 
 const day = ref(null);
 const periods = ref([]);
 const players = ref([]);
 const saving = ref(false);
+const undoing = ref(false);
+const encoded = ref(false);
 
 const dayLabel = computed(() =>
   day.value ? new Date(day.value.date).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" }) : ""
@@ -36,6 +40,7 @@ onMounted(async () => {
   day.value = data.day;
   periods.value = data.periods;
   players.value = data.players;
+  encoded.value = data.encoded;
 });
 
 function setRow(row, status) {
@@ -46,6 +51,31 @@ function setAll(status) {
   players.value.forEach((row) => setRow(row, status));
 }
 
+function onUndo() {
+  confirm.require({
+    message: "Annuler l'encodage : toutes les présences enregistrées seront effacées. Continuer ?",
+    header: "Confirmation",
+    icon: "pi pi-exclamation-triangle",
+    acceptLabel: "Effacer",
+    acceptClass: "p-button-danger",
+    rejectLabel: "Garder",
+    rejectClass: "p-button-secondary p-button-outlined",
+    accept: async () => {
+      undoing.value = true;
+      try {
+        await api.delete(`/camps/days/${dayId}/attendance`);
+        players.value.forEach((row) => setRow(row, "ABSENT"));
+        encoded.value = false;
+        toast.add({ severity: "success", summary: "Encodage annulé", life: 3000 });
+      } catch (err) {
+        toast.add({ severity: "error", summary: "Erreur", detail: err.response?.data?.error ?? "Une erreur est survenue.", life: 4000 });
+      } finally {
+        undoing.value = false;
+      }
+    },
+  });
+}
+
 async function onSave() {
   saving.value = true;
   try {
@@ -54,6 +84,7 @@ async function onSave() {
         cellsOf(row).map((c) => ({ campPeriodGroupId: c.campPeriodGroupId, playerId: row.playerId, status: c.status }))
       ),
     });
+    encoded.value = true;
     toast.add({ severity: "success", summary: "Présences enregistrées", life: 3000 });
   } catch (err) {
     toast.add({ severity: "error", summary: "Erreur", detail: err.response?.data?.error ?? "Une erreur est survenue.", life: 4000 });
@@ -109,7 +140,11 @@ function rowColor(row) {
         <li v-if="!players.length" class="py-2 text-slate-400 text-sm">Aucun joueur inscrit sur les groupes de cette journée.</li>
       </ul>
 
-      <Button label="Enregistrer" :loading="saving" @click="onSave" />
+            <div class="flex flex-wrap items-center gap-2">
+        <Button label="Enregistrer" :loading="saving" @click="onSave" />
+        <Button v-if="encoded" label="Annuler l'encodage" icon="pi pi-undo" severity="danger" outlined :loading="undoing" @click="onUndo" />
+        <span v-if="encoded" class="text-xs text-slate-400">Efface toutes les présences de cette journée (mauvais jour, par exemple).</span>
+      </div>
     </div>
   </AppLayout>
 </template>

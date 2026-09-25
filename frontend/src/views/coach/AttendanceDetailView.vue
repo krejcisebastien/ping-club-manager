@@ -5,6 +5,7 @@ import Button from "primevue/button";
 import InputText from "primevue/inputtext";
 import Dropdown from "primevue/dropdown";
 import Tag from "primevue/tag";
+import { useConfirm } from "primevue/useconfirm";
 import Avatar from "primevue/avatar";
 import { useToast } from "primevue/usetoast";
 import AppLayout from "../../components/AppLayout.vue";
@@ -17,10 +18,13 @@ const navLinks = useNavLinks();
 const route = useRoute();
 const router = useRouter();
 const toast = useToast();
+const confirm = useConfirm();
 const occurrenceId = route.params.occurrenceId;
 
 const attendance = ref([]);
 const saving = ref(false);
+const undoing = ref(false);
+const encoded = ref(false);
 
 const counts = computed(() =>
   attendance.value.reduce((acc, r) => ({ ...acc, [r.status]: (acc[r.status] ?? 0) + 1 }), { PRESENT: 0, LATE: 0, EXCUSED: 0, ABSENT: 0 })
@@ -33,10 +37,36 @@ function initials(row) {
 onMounted(async () => {
   const { data } = await api.get(`/occurrences/${occurrenceId}/attendance`);
   attendance.value = data.attendance;
+  encoded.value = data.encoded;
 });
 
 function markAll(status) {
   attendance.value.forEach((row) => (row.status = status));
+}
+
+function onUndo() {
+  confirm.require({
+    message: "Annuler l'encodage : toutes les présences enregistrées seront effacées. Continuer ?",
+    header: "Confirmation",
+    icon: "pi pi-exclamation-triangle",
+    acceptLabel: "Effacer",
+    acceptClass: "p-button-danger",
+    rejectLabel: "Garder",
+    rejectClass: "p-button-secondary p-button-outlined",
+    accept: async () => {
+      undoing.value = true;
+      try {
+        await api.delete(`/occurrences/${occurrenceId}/attendance`);
+        attendance.value.forEach((row) => { row.status = "ABSENT"; row.note = null; });
+        encoded.value = false;
+        toast.add({ severity: "success", summary: "Encodage annulé", life: 3000 });
+      } catch (err) {
+        toast.add({ severity: "error", summary: "Erreur", detail: err.response?.data?.error ?? "Une erreur est survenue.", life: 4000 });
+      } finally {
+        undoing.value = false;
+      }
+    },
+  });
 }
 
 async function onSave() {
@@ -45,6 +75,7 @@ async function onSave() {
     await api.put(`/occurrences/${occurrenceId}/attendance`, {
       records: attendance.value.map(({ playerId, status, note }) => ({ playerId, status, note })),
     });
+    encoded.value = true;
     toast.add({ severity: "success", summary: "Présences enregistrées", life: 3000 });
   } finally {
     saving.value = false;
@@ -83,7 +114,11 @@ async function onSave() {
         <li v-if="!attendance.length" class="py-2 text-slate-400 text-sm">Aucun joueur dans le groupe de cet entrainement.</li>
       </ul>
 
-      <Button label="Enregistrer" :loading="saving" @click="onSave" />
+            <div class="flex flex-wrap items-center gap-2">
+        <Button label="Enregistrer" :loading="saving" @click="onSave" />
+        <Button v-if="encoded" label="Annuler l'encodage" icon="pi pi-undo" severity="danger" outlined :loading="undoing" @click="onUndo" />
+        <span v-if="encoded" class="text-xs text-slate-400">Efface toutes les présences de cette séance (mauvais jour, par exemple).</span>
+      </div>
     </div>
   </AppLayout>
 </template>

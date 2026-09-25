@@ -7,7 +7,7 @@ import { fullName, initials } from "../../lib/name.js";
 import { usePlayerSpace, formatDate, formatRate } from "../../composables/usePlayerSpace.js";
 
 const {
-  player, age, currentRanking, stats, latest, latestAverage, openPoints, evolutionNotes,
+  statsSeason, player, age, currentRanking, stats, latest, latestAverage, openPoints, evolutionNotes,
   radarData, radarOptions, strongestCriteria, weakestCriteria,
 } = usePlayerSpace();
 </script>
@@ -42,12 +42,12 @@ const {
       <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
         <p class="text-xs text-slate-500 mb-1">Présence entrainements</p>
         <p class="text-2xl font-semibold text-slate-800">{{ formatRate(stats?.training.attendanceRate) }}</p>
-        <p class="text-xs text-slate-400">{{ stats?.training.hours ?? 0 }} h cette saison</p>
+        <p class="text-xs text-slate-400">{{ stats?.training.hours ?? 0 }} h · {{ statsSeason?.name ?? "saison" }}</p>
       </div>
       <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
         <p class="text-xs text-slate-500 mb-1">Présence stages</p>
         <p class="text-2xl font-semibold text-slate-800">{{ formatRate(stats?.camp.attendanceRate) }}</p>
-        <p class="text-xs text-slate-400">{{ stats?.camp.hours ?? 0 }} h cette saison</p>
+        <p class="text-xs text-slate-400">{{ stats?.camp.hours ?? 0 }} h · {{ statsSeason?.name ?? "saison" }}</p>
       </div>
       <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
         <p class="text-xs text-slate-500 mb-1">À travailler</p>
