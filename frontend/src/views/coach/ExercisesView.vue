@@ -181,7 +181,7 @@ async function onAiConfirm() {
           option-value="value"
           placeholder="Toutes catégories"
           show-clear
-          class="w-48"
+          class="w-56"
         />
         <Dropdown
           v-model="difficultyFilter"
@@ -190,7 +190,7 @@ async function onAiConfirm() {
           option-value="value"
           placeholder="Toutes difficultés"
           show-clear
-          class="w-40"
+          class="w-52"
         />
         <Button label="Générer avec l'IA" icon="pi pi-sparkles" severity="secondary" outlined @click="openAiGenerate" />
         <Button label="Nouvel exercice" icon="pi pi-plus" @click="openCreate" />

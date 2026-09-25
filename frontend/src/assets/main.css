@@ -226,3 +226,49 @@
 .p-selectbutton .p-button.p-highlight {
   flex: 1;
 }
+
+/* Panneau des listes déroulantes (Dropdown / MultiSelect), rendu hors du composant. */
+.p-dropdown-panel,
+.p-multiselect-panel {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 25px -5px rgb(15 23 42 / 0.12), 0 4px 10px -6px rgb(15 23 42 / 0.1);
+  overflow: hidden;
+}
+.p-dropdown-items-wrapper,
+.p-multiselect-items-wrapper {
+  max-height: 20rem !important;
+  padding: 0.25rem;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+.p-dropdown-items,
+.p-multiselect-items {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.p-dropdown-item,
+.p-multiselect-item {
+  padding: 0.5rem 0.75rem !important;
+  margin: 1px 0;
+  border-radius: 0.5rem;
+  color: #334155;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+.p-dropdown-item:not(.p-highlight):not(.p-disabled):hover,
+.p-multiselect-item:not(.p-highlight):not(.p-disabled):hover,
+.p-dropdown-item.p-focus {
+  background: #f1f5f9;
+}
+.p-dropdown-item.p-highlight,
+.p-multiselect-item.p-highlight {
+  background: #e0f2fe;
+  color: #0369a1;
+  font-weight: 500;
+}
+.p-dropdown-filter-container {
+  padding: 0.5rem;
+}
