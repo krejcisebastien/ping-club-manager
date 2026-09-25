@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Icône provisoire (raquette + balle). Remplacer par le logo du club puis
+       relancer « npm run icons » (PWA) et « npm run icons:mobile » (iOS/Android). -->
+  <rect width="512" height="512" fill="#0284c7"/>
+  <g transform="rotate(-40 256 256)">
+    <rect x="238" y="310" width="36" height="110" rx="14" fill="#7c2d12"/>
+    <circle cx="256" cy="220" r="112" fill="#ffffff"/>
+    <circle cx="256" cy="220" r="96" fill="#dc2626"/>
+  </g>
+  <circle cx="370" cy="150" r="36" fill="#fb923c"/>
+</svg>

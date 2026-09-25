@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Ping Club Manager</string>
+    <string name="title_activity_main">Ping Club Manager</string>
+    <string name="package_name">be.gckconsulting.pingclubmanager</string>
+    <string name="custom_url_scheme">be.gckconsulting.pingclubmanager</string>
+</resources>

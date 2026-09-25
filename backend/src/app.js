@@ -4,16 +4,18 @@ import cors from "cors";
 import apiRouter from "./routes/index.js";
 import { stripeWebhook } from "./routes/billing.routes.js";
 
+export const MOBILE_APP_ORIGINS = ["capacitor://localhost", "https://localhost"];
+
 export function createApp() {
   const app = express();
   // Derrière le proxy Render : sans ça, req.ip serait toujours celle du proxy.
   app.set("trust proxy", 1);
 
-  app.use(
-    cors({
-      origin: process.env.CORS_ORIGIN || "http://localhost:5173",
-    })
-  );
+  // Origines autorisées : le site (CORS_ORIGIN) + l'app mobile Capacitor, dont
+  // la page est servie en local sur le téléphone (capacitor://localhost sur iOS,
+  // https://localhost sur Android).
+  const allowedOrigins = [process.env.CORS_ORIGIN || "http://localhost:5173", ...MOBILE_APP_ORIGINS];
+  app.use(cors({ origin: allowedOrigins }));
   // Webhook Stripe : corps brut requis pour vérifier la signature, donc monté
   // avant express.json.
   app.post("/api/billing/webhook", express.raw({ type: "application/json" }), stripeWebhook);

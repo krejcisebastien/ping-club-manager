@@ -83,6 +83,40 @@ Une page publique `/signup` (« Créer mon club », lien sur l'écran de connexi
 
 Supprimer un club supprime en cascade toutes ses données.
 
+## Application mobile
+
+### PWA (installable depuis le navigateur)
+
+Rien à faire au déploiement : le build produit le manifest et le service worker.
+- Android (Chrome) : menu ⋮ > « Installer l'application ».
+- iOS (Safari) : Partager > « Sur l'écran d'accueil ».
+
+Le service worker ne met en cache que l'interface, jamais les réponses de l'API.
+Après un déploiement, l'app propose « Mettre à jour ».
+
+Icônes : remplacer `frontend/public/logo.svg` par le logo, puis `npm run icons`
+(PWA) et `npm run icons:mobile` (iOS/Android), dans `frontend/`.
+
+### Apps natives (Capacitor)
+
+Prérequis : Node 22+, Xcode (iOS), Android Studio (Android).
+
+```bash
+cd frontend
+npm install
+npm run build:mobile   # build avec .env.capacitor (API de prod) + cap sync
+npm run ios            # ouvre le projet dans Xcode
+npm run android        # ouvre le projet dans Android Studio
+```
+
+À relancer après chaque changement du frontend : `npm run build:mobile`. L'app native
+embarque l'interface : une nouvelle version passe par une nouvelle soumission aux stores.
+L'API autorise les origines `capacitor://localhost` (iOS) et `https://localhost` (Android).
+
+Publication : compte Apple Developer (99 $/an) et Google Play Console (25 $ une fois).
+L'identifiant `be.gckconsulting.pingclubmanager` (capacitor.config.json) est définitif
+une fois l'app publiée.
+
 ## Ce qui n'est pas encore là
 
 - Pas de vérification de l'email à l'inscription : n'importe qui peut créer un club (sans licence, donc inutilisable) avec l'adresse de quelqu'un d'autre, ce qui bloque ensuite l'inscription de la vraie personne (qui peut toutefois récupérer le compte via « mot de passe oublié »). À traiter avant d'ouvrir l'inscription au public ; pas de nettoyage automatique des clubs jamais payés non plus.
