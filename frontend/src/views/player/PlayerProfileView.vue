@@ -30,7 +30,6 @@ function fillForm(p) {
     emergencyContactName: p.emergencyContactName ?? "",
     emergencyContactPhone: p.emergencyContactPhone ?? "",
     dominantHand: p.dominantHand ?? null,
-    playStyle: p.playStyle ?? "",
     photoUrl: p.photoUrl ?? null,
   };
 }
@@ -109,7 +108,8 @@ async function onSave() {
         </div>
         <div>
           <label class="text-xs text-slate-500 block mb-1">Style de jeu</label>
-          <InputText v-model="form.playStyle" placeholder="Ex. attaquant, défenseur, all-round" class="w-full" />
+          <InputText :model-value="player.playStyle || '—'" disabled class="w-full" />
+          <p class="text-xs text-slate-400 mt-1">Défini par ton entraineur.</p>
         </div>
       </div>
     </div>

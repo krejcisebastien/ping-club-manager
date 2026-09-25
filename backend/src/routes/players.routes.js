@@ -78,8 +78,8 @@ router.put("/:id", requireRole("ADMIN", "COACH"), async (req, res) => {
 });
 
 // Le joueur (ou son compte familial) met à jour lui-même son identité, ses
-// coordonnées et sa description de jeu ; le n° de licence reste réservé au staff.
-const SELF_EDITABLE_TEXT_FIELDS = ["phone", "emergencyContactName", "emergencyContactPhone", "playStyle"];
+// coordonnées et sa main ; le n° de licence et le style de jeu restent réservés au staff.
+const SELF_EDITABLE_TEXT_FIELDS = ["phone", "emergencyContactName", "emergencyContactPhone"];
 const MAX_PHOTO_LENGTH = 1_500_000;
 
 router.put("/:id/profile", requireSelfPlayerOrRole("id", "ADMIN", "COACH"), async (req, res) => {
