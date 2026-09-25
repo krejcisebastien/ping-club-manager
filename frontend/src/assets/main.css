@@ -361,3 +361,8 @@
     justify-content: flex-end;
   }
 }
+
+/* Tableaux dont la ligne ouvre l'élément (fiche ou fenêtre de modification). */
+.clickable-rows .p-datatable-tbody > tr {
+  cursor: pointer;
+}

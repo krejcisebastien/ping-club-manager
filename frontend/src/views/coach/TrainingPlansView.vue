@@ -172,7 +172,7 @@ async function onAiConfirm() {
       paginator
       :rows="10"
       :rows-per-page-options="[10, 25, 50]"
-      class="bg-white rounded-xl shadow border border-slate-200 overflow-hidden"
+      class="bg-white rounded-xl shadow border border-slate-200 overflow-hidden clickable-rows"
       striped-rows
       @row-click="router.push(`/coach/training-plans/${$event.data.id}`)"
     >
@@ -184,6 +184,13 @@ async function onAiConfirm() {
       </Column>
       <Column header="Auteur">
         <template #body="{ data }">{{ coachName(data) }}</template>
+      </Column>
+      <Column header="" style="width: 4rem">
+        <template #body="{ data }">
+          <div class="flex gap-1 justify-end">
+            <Button icon="pi pi-pencil" severity="secondary" text rounded aria-label="Modifier" @click.stop="router.push(`/coach/training-plans/${data.id}`)" />
+          </div>
+        </template>
       </Column>
     </DataTable>
 

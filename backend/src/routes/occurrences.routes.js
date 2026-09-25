@@ -17,8 +17,27 @@ router.get("/:id", async (req, res) => {
   res.json({ occurrence });
 });
 
+const OCCURRENCE_STATUSES = ["PLANNED", "CANCELLED"];
+
 router.put("/:id", requireRole("ADMIN", "COACH"), async (req, res) => {
   const { date, startTime, endTime, status } = req.body ?? {};
+
+  // Annuler / rétablir une séance est réservé aux administrateurs.
+  if (status !== undefined) {
+    if (!req.user.roles?.includes("ADMIN")) {
+      return res.status(403).json({ error: "Seul un administrateur peut annuler ou rétablir une séance." });
+    }
+    if (!OCCURRENCE_STATUSES.includes(status)) {
+      return res.status(400).json({ error: `status doit être l'un de : ${OCCURRENCE_STATUSES.join(", ")}.` });
+    }
+    if (status === "CANCELLED") {
+      const encoded = await req.db.attendance.count({ where: { occurrenceId: req.params.id } });
+      if (encoded > 0) {
+        return res.status(409).json({ error: "Des présences sont déjà encodées : annule d'abord l'encodage avant d'annuler la séance." });
+      }
+    }
+  }
+
   try {
     const occurrence = await req.db.trainingOccurrence.update({
       where: { id: req.params.id },
@@ -109,6 +128,12 @@ router.put("/:id/attendance", requireRole("ADMIN", "COACH"), async (req, res) =>
   }
   if (records.some(({ status }) => status !== undefined && !ATTENDANCE_STATUSES.includes(status))) {
     return res.status(400).json({ error: `status doit être l'un de : ${ATTENDANCE_STATUSES.join(", ")}.` });
+  }
+
+  const occurrence = await req.db.trainingOccurrence.findUnique({ where: { id: req.params.id }, select: { status: true } });
+  if (!occurrence) return res.status(404).json({ error: "Séance introuvable." });
+  if (occurrence.status === "CANCELLED") {
+    return res.status(409).json({ error: "Cette séance est annulée : impossible d'encoder des présences." });
   }
 
   await req.db.$transaction(

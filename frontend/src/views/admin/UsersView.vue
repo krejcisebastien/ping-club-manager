@@ -167,8 +167,9 @@ function roleSeverity(role) {
       paginator
       :rows="10"
       :rows-per-page-options="[10, 25, 50]"
-      class="bg-white rounded-xl shadow border border-slate-200 overflow-hidden"
+      class="bg-white rounded-xl shadow border border-slate-200 overflow-hidden clickable-rows"
       striped-rows
+      @row-click="openEdit($event.data)"
     >
       <template #empty>
         <p class="text-slate-400 text-sm py-4">{{ filters.global.value ? "Aucun résultat." : "Aucun compte." }}</p>
@@ -192,16 +193,16 @@ function roleSeverity(role) {
       <Column header="" style="width: 11rem">
         <template #body="{ data }">
           <div class="flex gap-1 justify-end">
-            <Button icon="pi pi-pencil" severity="secondary" text rounded aria-label="Modifier" @click="openEdit(data)" />
+            <Button icon="pi pi-pencil" severity="secondary" text rounded aria-label="Modifier" @click.stop="openEdit(data)" />
             <Button
               :icon="data.isActive ? 'pi pi-ban' : 'pi pi-check'"
               severity="secondary"
               text
               rounded
               :aria-label="data.isActive ? 'Désactiver' : 'Activer'"
-              @click="onToggleActive(data)"
+              @click.stop="onToggleActive(data)"
             />
-            <Button icon="pi pi-trash" severity="danger" text rounded aria-label="Supprimer" @click="onDelete(data)" />
+            <Button icon="pi pi-trash" severity="danger" text rounded aria-label="Supprimer" @click.stop="onDelete(data)" />
           </div>
         </template>
       </Column>

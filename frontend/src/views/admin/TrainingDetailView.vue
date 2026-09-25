@@ -13,17 +13,21 @@ import TabView from "primevue/tabview";
 import TabPanel from "primevue/tabpanel";
 import FullCalendar from "@fullcalendar/vue3";
 import { useToast } from "primevue/usetoast";
+import { useConfirm } from "primevue/useconfirm";
 import { CALENDAR_PLUGINS } from "../../lib/calendar.js";
 import AppLayout from "../../components/AppLayout.vue";
 import CoachAssignmentList from "../../components/CoachAssignmentList.vue";
 import { api } from "../../lib/api.js";
 import { useNavLinks } from "../../composables/useNavLinks.js";
+import { useAuthStore } from "../../stores/auth.js";
 import { occurrenceState } from "../../lib/occurrence.js";
 
 const navLinks = useNavLinks();
+const auth = useAuthStore();
 const route = useRoute();
 const router = useRouter();
 const toast = useToast();
+const confirm = useConfirm();
 const trainingId = route.params.id;
 
 const WEEKDAYS = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
@@ -148,6 +152,29 @@ async function onUnassignDefault(assignmentId) {
 }
 
 
+function onToggleCancel(occurrence) {
+  const cancelling = occurrence.status !== "CANCELLED";
+  const label = new Date(occurrence.date).toLocaleDateString("fr-FR");
+  confirm.require({
+    message: cancelling ? `Annuler la séance du ${label} ?` : `Rétablir la séance du ${label} ?`,
+    header: "Confirmation",
+    icon: "pi pi-exclamation-triangle",
+    acceptLabel: cancelling ? "Annuler la séance" : "Rétablir",
+    acceptClass: cancelling ? "p-button-danger" : "",
+    rejectLabel: "Retour",
+    rejectClass: "p-button-secondary p-button-outlined",
+    accept: async () => {
+      try {
+        await api.put(`/occurrences/${occurrence.id}`, { status: cancelling ? "CANCELLED" : "PLANNED" });
+        toast.add({ severity: "success", summary: cancelling ? "Séance annulée" : "Séance rétablie", life: 3000 });
+        await loadOccurrences();
+      } catch (err) {
+        toast.add({ severity: "error", summary: "Erreur", detail: err.response?.data?.error ?? "Une erreur est survenue.", life: 5000 });
+      }
+    },
+  });
+}
+
 const calendarEvents = computed(() =>
   occurrences.value.map((o) => ({
     id: o.id,
@@ -228,11 +255,20 @@ const calendarOptions = computed(() => ({
               <Column header="Statut">
                 <template #body="{ data }"><Tag :severity="occurrenceState(data).severity" :value="occurrenceState(data).label" /></template>
               </Column>
-              <Column header="" style="width: 14rem">
+              <Column header="" style="width: 20rem">
                 <template #body="{ data }">
                   <div class="flex gap-1 justify-end">
                     <Button label="Encadrants" icon="pi pi-users" size="small" text @click="openAssignDialog(data)" />
-                    <Button label="Présences" icon="pi pi-check-square" size="small" text @click="router.push(`/coach/attendance/${data.id}`)" />
+                    <Button label="Présences" icon="pi pi-check-square" size="small" text :disabled="data.status === 'CANCELLED'" @click="router.push(`/coach/attendance/${data.id}`)" />
+                    <Button
+                      v-if="auth.isAdmin"
+                      :label="data.status === 'CANCELLED' ? 'Rétablir' : 'Annuler'"
+                      :icon="data.status === 'CANCELLED' ? 'pi pi-replay' : 'pi pi-ban'"
+                      size="small"
+                      text
+                      :severity="data.status === 'CANCELLED' ? 'secondary' : 'danger'"
+                      @click="onToggleCancel(data)"
+                    />
                   </div>
                 </template>
               </Column>

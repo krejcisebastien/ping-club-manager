@@ -123,7 +123,7 @@ function weekdayLabel(w) {
       paginator
       :rows="10"
       :rows-per-page-options="[10, 25, 50]"
-      class="bg-white rounded-xl shadow border border-slate-200 overflow-hidden"
+      class="bg-white rounded-xl shadow border border-slate-200 overflow-hidden clickable-rows"
       striped-rows
       @row-click="router.push(`/admin/trainings/${$event.data.id}`)"
     >
@@ -138,6 +138,13 @@ function weekdayLabel(w) {
       </Column>
       <Column header="Horaire">
         <template #body="{ data }">{{ weekdayLabel(data.weekday) }} {{ data.startTime }}–{{ data.endTime }}</template>
+      </Column>
+      <Column header="" style="width: 4rem">
+        <template #body="{ data }">
+          <div class="flex gap-1 justify-end">
+            <Button icon="pi pi-pencil" severity="secondary" text rounded aria-label="Modifier" @click.stop="router.push(`/admin/trainings/${data.id}`)" />
+          </div>
+        </template>
       </Column>
     </DataTable>
 

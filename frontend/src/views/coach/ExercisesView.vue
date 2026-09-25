@@ -206,7 +206,7 @@ async function onAiConfirm() {
       paginator
       :rows="10"
       :rows-per-page-options="[10, 25, 50]"
-      class="bg-white rounded-xl shadow border border-slate-200 overflow-hidden"
+      class="bg-white rounded-xl shadow border border-slate-200 overflow-hidden clickable-rows"
       striped-rows
       @row-click="onRowClick"
     >
@@ -229,9 +229,10 @@ async function onAiConfirm() {
           <span class="text-slate-500 text-sm line-clamp-1">{{ stripHtml(data.description) || data.objective || "" }}</span>
         </template>
       </Column>
-      <Column header="" style="width: 4rem">
+      <Column header="" style="width: 7rem">
         <template #body="{ data }">
           <div class="flex gap-1 justify-end">
+            <Button icon="pi pi-pencil" severity="secondary" text rounded aria-label="Modifier" @click.stop="router.push(`/coach/exercises/${data.id}`)" />
             <Button icon="pi pi-trash" severity="danger" text rounded aria-label="Supprimer" @click.stop="onDelete(data)" />
           </div>
         </template>

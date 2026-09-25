@@ -106,7 +106,7 @@ async function onCreate() {
       paginator
       :rows="10"
       :rows-per-page-options="[10, 25, 50]"
-      class="bg-white rounded-xl shadow border border-slate-200 overflow-hidden"
+      class="bg-white rounded-xl shadow border border-slate-200 overflow-hidden clickable-rows"
       striped-rows
       @row-click="router.push(`/admin/camps/${$event.data.id}`)"
     >
@@ -120,6 +120,13 @@ async function onCreate() {
       <Column header="Période">
         <template #body="{ data }">
           {{ new Date(data.startDate).toLocaleDateString("fr-FR") }} → {{ new Date(data.endDate).toLocaleDateString("fr-FR") }}
+        </template>
+      </Column>
+      <Column header="" style="width: 4rem">
+        <template #body="{ data }">
+          <div class="flex gap-1 justify-end">
+            <Button icon="pi pi-pencil" severity="secondary" text rounded aria-label="Modifier" @click.stop="router.push(`/admin/camps/${data.id}`)" />
+          </div>
         </template>
       </Column>
     </DataTable>
