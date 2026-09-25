@@ -303,28 +303,35 @@
   color: #94a3b8;
 }
 
-/* Note d'évaluation (0-10) : raquettes, en couleur quand actives, grisées sinon. */
-.eval-rating {
-  display: flex;
-  align-items: center;
-  gap: 0.1rem;
+/* Curseur de note (0-10) : couleur du critère via --slider-color. */
+.eval-slider.p-slider {
+  height: 0.4rem;
+  background: #e2e8f0;
+  border-radius: 999px;
+  position: relative;
+  margin: 0.6rem 0.5rem;
 }
-.eval-rating .p-rating-item {
-  cursor: pointer;
+.eval-slider .p-slider-range {
+  background: var(--slider-color, #0284c7);
+  border-radius: 999px;
+  position: absolute;
+  height: 100%;
 }
-.eval-rating .ball {
-  display: inline-block;
-  font-size: 1.3rem;
-  line-height: 1;
-  transition: transform 0.15s, filter 0.15s;
+.eval-slider .p-slider-handle {
+  position: absolute;
+  top: 50%;
+  height: 1.2rem;
+  width: 1.2rem;
+  margin-top: -0.6rem;
+  margin-left: -0.6rem;
+  background: #fff;
+  border: 2px solid var(--slider-color, #0284c7);
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgb(15 23 42 / 0.2);
+  transition: transform 0.15s;
 }
-.eval-rating .ball-off {
-  filter: grayscale(1) opacity(0.3);
-}
-.eval-rating .p-rating-item:hover .ball {
+.eval-slider .p-slider-handle:hover,
+.eval-slider .p-slider-handle:focus-visible {
   transform: scale(1.15);
-}
-.eval-rating .p-rating-cancel {
-  color: #94a3b8;
-  margin-right: 0.25rem;
+  outline: none;
 }

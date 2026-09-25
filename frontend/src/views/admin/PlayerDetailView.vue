@@ -6,7 +6,7 @@ import InputText from "primevue/inputtext";
 import Calendar from "primevue/calendar";
 import Dropdown from "primevue/dropdown";
 import Tag from "primevue/tag";
-import Rating from "primevue/rating";
+import Slider from "primevue/slider";
 import Chart from "primevue/chart";
 import { useToast } from "primevue/usetoast";
 import AppLayout from "../../components/AppLayout.vue";
@@ -212,9 +212,7 @@ async function onAddRanking() {
 async function onAddEvaluation() {
   savingEvaluation.value = true;
   try {
-    const payload = { ...newEvaluation.value };
-    for (const c of EVALUATION_CRITERIA) payload[c.key] ??= 0;
-    await api.post(`/players/${playerId}/evaluations`, payload);
+    await api.post(`/players/${playerId}/evaluations`, newEvaluation.value);
     newEvaluation.value = emptyEvaluation();
     toast.add({ severity: "success", summary: "Évaluation enregistrée", life: 3000 });
     await loadAll();
@@ -418,14 +416,13 @@ function pointStatusSeverity(status) {
         </ul>
 
         <form class="grid gap-3" @submit.prevent="onAddEvaluation">
-          <div class="grid gap-2">
-            <div v-for="c in EVALUATION_CRITERIA" :key="c.key" class="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
-              <label class="text-sm text-slate-600 w-28 shrink-0">{{ c.label }}</label>
-              <Rating v-model="newEvaluation[c.key]" :stars="10" cancel class="eval-rating">
-                <template #onicon><span class="ball ball-on" aria-hidden="true">🏓</span></template>
-                <template #officon><span class="ball ball-off" aria-hidden="true">🏓</span></template>
-              </Rating>
-              <span class="text-sm font-semibold tabular-nums w-10 text-right" :style="{ color: c.color }">{{ newEvaluation[c.key] ?? 0 }}<span class="text-xs font-normal text-slate-400">/10</span></span>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div v-for="c in EVALUATION_CRITERIA" :key="c.key">
+              <div class="flex items-baseline justify-between mb-2">
+                <label class="text-xs text-slate-500">{{ c.label }}</label>
+                <span class="text-sm font-semibold tabular-nums" :style="{ color: c.color }">{{ newEvaluation[c.key] }}<span class="text-xs font-normal text-slate-400">/10</span></span>
+              </div>
+              <Slider v-model="newEvaluation[c.key]" :min="0" :max="10" :step="1" class="eval-slider" :style="{ '--slider-color': c.color }" />
             </div>
           </div>
           <InputText v-model="newEvaluation.note" placeholder="Commentaire (optionnel)" class="w-full" />
