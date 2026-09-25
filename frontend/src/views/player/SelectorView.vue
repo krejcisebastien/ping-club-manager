@@ -3,10 +3,12 @@ import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import AppLayout from "../../components/AppLayout.vue";
 import { api } from "../../lib/api.js";
+import { useNavLinks } from "../../composables/useNavLinks.js";
 import { useAuthStore } from "../../stores/auth.js";
 import { fullName } from "../../lib/name.js";
 
 const auth = useAuthStore();
+const navLinks = useNavLinks();
 const router = useRouter();
 const players = ref([]);
 const loading = ref(true);
@@ -23,7 +25,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <AppLayout title="Mon espace joueur">
+  <AppLayout title="Mon espace joueur" :nav-links="navLinks">
     <div v-if="!loading" class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
       <p class="text-sm text-slate-500 mb-3">Choisis un joueur</p>
       <ul class="divide-y divide-slate-100">

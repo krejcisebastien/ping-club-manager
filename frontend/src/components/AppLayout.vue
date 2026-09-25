@@ -14,8 +14,10 @@ import { api } from "../lib/api.js";
 
 defineProps({
   title: { type: String, required: true },
-  navLinks: { type: Array, default: () => [] }, // [{ to, label, icon }]
+  navLinks: { type: Array, default: () => [] }, // [{ to, label, icon, exact? }]
 });
+
+const ACTIVE_LINK_CLASS = "!bg-sky-50 !text-sky-700 font-medium";
 
 const auth = useAuthStore();
 const router = useRouter();
@@ -91,7 +93,8 @@ async function onChangePassword() {
           :key="link.to"
           :to="link.to"
           class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-100"
-          active-class="!bg-sky-50 !text-sky-700 font-medium"
+          :active-class="link.exact ? '' : ACTIVE_LINK_CLASS"
+          :exact-active-class="ACTIVE_LINK_CLASS"
         >
           <i :class="link.icon" class="text-base"></i>
           {{ link.label }}
@@ -131,7 +134,8 @@ async function onChangePassword() {
           :key="link.to"
           :to="link.to"
           class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-100"
-          active-class="!bg-sky-50 !text-sky-700 font-medium"
+          :active-class="link.exact ? '' : ACTIVE_LINK_CLASS"
+          :exact-active-class="ACTIVE_LINK_CLASS"
           @click="drawerOpen = false"
         >
           <i :class="link.icon" class="text-base"></i>

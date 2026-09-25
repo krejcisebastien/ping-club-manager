@@ -77,28 +77,50 @@ router.put("/:id", requireRole("ADMIN", "COACH"), async (req, res) => {
   }
 });
 
-// Le joueur (ou son compte familial) met à jour lui-même quelques données de
-// contact ; le reste de la fiche (licence, date de naissance, photo...) reste
-// réservé au staff.
-const SELF_EDITABLE_TEXT_FIELDS = ["phone", "emergencyContactName", "emergencyContactPhone"];
+// Le joueur (ou son compte familial) met à jour lui-même son identité, ses
+// coordonnées et sa description de jeu ; le n° de licence reste réservé au staff.
+const SELF_EDITABLE_TEXT_FIELDS = ["phone", "emergencyContactName", "emergencyContactPhone", "playStyle"];
+const MAX_PHOTO_LENGTH = 1_500_000;
 
 router.put("/:id/profile", requireSelfPlayerOrRole("id", "ADMIN", "COACH"), async (req, res) => {
-  const { firstName, lastName } = req.body ?? {};
+  const { firstName, lastName, birthDate, dominantHand, photoUrl } = req.body ?? {};
   for (const [key, value] of Object.entries({ firstName, lastName })) {
     if (value !== undefined && (typeof value !== "string" || !value.trim())) {
       return res.status(400).json({ error: `${key} ne peut pas être vide.` });
     }
   }
+  if (invalidDominantHand(dominantHand)) {
+    return res.status(400).json({ error: "dominantHand doit être LEFT ou RIGHT." });
+  }
+
   const data = {
     ...(firstName !== undefined && { firstName: firstName.trim() }),
     ...(lastName !== undefined && { lastName: lastName.trim() }),
+    ...(dominantHand !== undefined && { dominantHand }),
   };
+
+  if (birthDate !== undefined) {
+    const date = new Date(birthDate);
+    if (!birthDate || Number.isNaN(date.getTime()) || date > new Date() || date.getFullYear() < 1900) {
+      return res.status(400).json({ error: "birthDate est invalide." });
+    }
+    data.birthDate = date;
+  }
+
+  if (photoUrl !== undefined) {
+    if (photoUrl !== null && (typeof photoUrl !== "string" || !photoUrl.startsWith("data:image/") || photoUrl.length > MAX_PHOTO_LENGTH)) {
+      return res.status(400).json({ error: "photoUrl doit être une image de 1 Mo maximum." });
+    }
+    data.photoUrl = photoUrl;
+  }
+
   for (const key of SELF_EDITABLE_TEXT_FIELDS) {
     const value = req.body?.[key];
     if (value === undefined) continue;
     if (value !== null && typeof value !== "string") return res.status(400).json({ error: `${key} doit être du texte.` });
     data[key] = value?.trim() || null;
   }
+
   try {
     const player = await req.db.player.update({ where: { id: req.params.id }, data });
     res.json({ player });
