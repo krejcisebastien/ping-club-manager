@@ -39,9 +39,33 @@ async function loadPerson(db, type, id) {
   return { type, ...sparring, ranking, category: "SPARRING_SERIES", code: seriesOf(ranking) };
 }
 
-// Prestations une par une : séances d'entrainement non annulées et périodes de
-// stage où la personne est affectée (une période comptée une fois même si elle
-// encadre plusieurs groupes). Triées par date puis heure de début.
+// Heure murale du club ("AAAA-MM-JJ HH:MM") : les dates/horaires des séances sont
+// saisis en heure belge, alors que le serveur tourne en UTC.
+const CLUB_TIME_ZONE = "Europe/Brussels";
+function clubNow(now = new Date()) {
+  const parts = Object.fromEntries(
+    new Intl.DateTimeFormat("en-CA", {
+      timeZone: CLUB_TIME_ZONE,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hourCycle: "h23",
+    })
+      .formatToParts(now)
+      .map((p) => [p.type, p.value])
+  );
+  return `${parts.year}-${parts.month}-${parts.day} ${parts.hour}:${parts.minute}`;
+}
+
+// "9:5" -> "09:05", pour comparer les horaires comme des chaînes.
+const padTime = (time) => time.split(":").map((n) => n.padStart(2, "0")).join(":");
+
+// Prestations une par une : séances d'entrainement et périodes de stage où la
+// personne est affectée et qui ont EU LIEU (non annulées et déjà terminées : une
+// séance à venir n'est pas défrayée). Une période est comptée une fois même si
+// la personne encadre plusieurs groupes. Triées par date puis heure de début.
 async function loadSessions(db, person, from, to) {
   const owner = person.type === "coach" ? { coachId: person.id } : { sparringId: person.id };
 
@@ -86,7 +110,10 @@ async function loadSessions(db, person, from, to) {
     });
   }
 
-  return sessions.sort((a, b) => a.date.localeCompare(b.date) || a.startTime.localeCompare(b.startTime));
+  const now = clubNow();
+  return sessions
+    .filter((s) => `${s.date} ${padTime(s.endTime)}` <= now)
+    .sort((a, b) => a.date.localeCompare(b.date) || a.startTime.localeCompare(b.startTime));
 }
 
 // Tarif de la catégorie de la personne : montants à l'heure et à la séance, et base retenue.

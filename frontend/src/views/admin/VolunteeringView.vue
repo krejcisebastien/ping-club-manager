@@ -104,7 +104,7 @@ async function download() {
     <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 mb-4">
       <p class="text-xs text-slate-400 mb-3">
         Prépare la note de défraiement d'un entraineur ou d'un sparring : une ligne par séance d'entrainement ou période de stage où il est
-        affecté (séances annulées exclues), valorisée selon son tarif (à l'heure ou à la séance).
+        affecté et qui a eu lieu (séances annulées ou à venir exclues), valorisée selon son tarif (à l'heure ou à la séance).
       </p>
       <div class="grid gap-3 sm:grid-cols-3">
         <div>
