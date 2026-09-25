@@ -15,6 +15,7 @@ import { api } from "../../lib/api.js";
 import { toDateOnly } from "../../lib/date.js";
 import { useNavLinks } from "../../composables/useNavLinks.js";
 import { fullName } from "../../lib/name.js";
+import { RANKING_OPTIONS } from "../../lib/ranking.js";
 
 const navLinks = useNavLinks();
 const route = useRoute();
@@ -373,7 +374,7 @@ function pointStatusSeverity(status) {
         </ul>
         <div class="flex flex-wrap gap-2">
           <Dropdown v-model="newRanking.seasonId" :options="seasons" option-label="name" option-value="id" placeholder="Saison…" class="w-40" />
-          <InputText v-model="newRanking.rankingValue" placeholder="Classement (ex. 1500)" class="flex-1 min-w-[10rem]" />
+          <Dropdown v-model="newRanking.rankingValue" :options="RANKING_OPTIONS" option-label="label" option-value="value" placeholder="Classement…" class="flex-1 min-w-[10rem]" />
           <Button label="Ajouter" @click="onAddRanking" />
         </div>
       </div>

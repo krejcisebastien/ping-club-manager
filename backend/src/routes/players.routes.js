@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { requireAuth, requireRole, requireSelfPlayerOrRole } from "../middleware/auth.js";
 import { hoursBetween } from "../utils/occurrences.js";
+import { isRanking, RANKINGS } from "../lib/rankings.js";
 
 const router = Router();
 
@@ -18,6 +19,11 @@ router.get("/:id", requireSelfPlayerOrRole("id", "ADMIN", "COACH"), async (req, 
   if (!player) return res.status(404).json({ error: "Joueur introuvable." });
   res.json({ player });
 });
+
+// Un sparring rattaché à ce joueur reprend son nom (pas de saisie en double).
+async function syncSparringName(db, player) {
+  await db.sparring.updateMany({ where: { playerId: player.id }, data: { firstName: player.firstName, lastName: player.lastName } });
+}
 
 function invalidDominantHand(dominantHand) {
   return dominantHand !== undefined && dominantHand !== null && !["LEFT", "RIGHT"].includes(dominantHand);
@@ -71,6 +77,7 @@ router.put("/:id", requireRole("ADMIN", "COACH"), async (req, res) => {
         ...(dominantHand !== undefined && { dominantHand }),
       },
     });
+    await syncSparringName(req.db, player);
     res.json({ player });
   } catch {
     res.status(404).json({ error: "Joueur introuvable." });
@@ -123,6 +130,7 @@ router.put("/:id/profile", requireSelfPlayerOrRole("id", "ADMIN", "COACH"), asyn
 
   try {
     const player = await req.db.player.update({ where: { id: req.params.id }, data });
+    await syncSparringName(req.db, player);
     res.json({ player });
   } catch {
     res.status(404).json({ error: "Joueur introuvable." });
@@ -152,6 +160,9 @@ router.post("/:id/rankings", requireRole("ADMIN", "COACH"), async (req, res) => 
   const { seasonId, rankingValue, effectiveDate } = req.body ?? {};
   if (!seasonId || !rankingValue) {
     return res.status(400).json({ error: "seasonId et rankingValue sont requis." });
+  }
+  if (!isRanking(rankingValue)) {
+    return res.status(400).json({ error: `rankingValue doit être l'un de : ${RANKINGS.join(", ")}.` });
   }
   const ranking = await req.db.rankingHistory.create({
     data: {

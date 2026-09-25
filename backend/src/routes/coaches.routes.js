@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { requireAuth, requireRole } from "../middleware/auth.js";
+import { COACH_LEVELS } from "../lib/rankings.js";
 
 const router = Router();
 
@@ -16,15 +17,18 @@ router.get("/:id", async (req, res) => {
   res.json({ coach });
 });
 
+const invalidLevel = (level) => level !== undefined && level !== null && !COACH_LEVELS.includes(level);
+
 router.post("/", requireRole("ADMIN"), async (req, res) => {
-  const { firstName, lastName, email, phone } = req.body ?? {};
+  const { firstName, lastName, email, phone, level } = req.body ?? {};
   if (!firstName || !lastName) {
     return res.status(400).json({ error: "firstName et lastName sont requis." });
   }
+  if (invalidLevel(level)) return res.status(400).json({ error: `level doit être l'un de : ${COACH_LEVELS.join(", ")}.` });
   try {
     // Chaîne vide -> null : Postgres n'applique la contrainte unique qu'entre valeurs
     // non nulles, donc plusieurs entraineurs sans email ne doivent pas être bloqués.
-    const coach = await req.db.coach.create({ data: { firstName, lastName, email: email || null, phone } });
+    const coach = await req.db.coach.create({ data: { firstName, lastName, email: email || null, phone, level: level ?? null } });
     res.status(201).json({ coach });
   } catch (err) {
     if (err.code === "P2002") {
@@ -35,7 +39,8 @@ router.post("/", requireRole("ADMIN"), async (req, res) => {
 });
 
 router.put("/:id", requireRole("ADMIN"), async (req, res) => {
-  const { firstName, lastName, email, phone } = req.body ?? {};
+  const { firstName, lastName, email, phone, level } = req.body ?? {};
+  if (invalidLevel(level)) return res.status(400).json({ error: `level doit être l'un de : ${COACH_LEVELS.join(", ")}.` });
   try {
     const coach = await req.db.coach.update({
       where: { id: req.params.id },
@@ -44,6 +49,7 @@ router.put("/:id", requireRole("ADMIN"), async (req, res) => {
         ...(lastName !== undefined && { lastName }),
         ...(email !== undefined && { email: email || null }),
         ...(phone !== undefined && { phone }),
+        ...(level !== undefined && { level }),
       },
     });
     res.json({ coach });

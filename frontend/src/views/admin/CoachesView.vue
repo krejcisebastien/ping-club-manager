@@ -4,6 +4,8 @@ import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import Dialog from "primevue/dialog";
 import Button from "primevue/button";
+import Dropdown from "primevue/dropdown";
+import Tag from "primevue/tag";
 import InputText from "primevue/inputtext";
 import { useToast } from "primevue/usetoast";
 import { useConfirm } from "primevue/useconfirm";
@@ -12,13 +14,14 @@ import { api } from "../../lib/api.js";
 import { useNavLinks } from "../../composables/useNavLinks.js";
 import { useTableFilter } from "../../composables/useTableFilter.js";
 import { fullName } from "../../lib/name.js";
+import { COACH_LEVEL_OPTIONS, COACH_LEVEL_LABELS } from "../../lib/ranking.js";
 
 const navLinks = useNavLinks();
 const toast = useToast();
 const confirm = useConfirm();
 const { filters } = useTableFilter();
 
-const emptyForm = () => ({ firstName: "", lastName: "", email: "", phone: "" });
+const emptyForm = () => ({ firstName: "", lastName: "", email: "", phone: "", level: null });
 
 const coaches = ref([]);
 const loading = ref(true);
@@ -44,7 +47,7 @@ function openCreate() {
 
 function openEdit(coach) {
   editingId.value = coach.id;
-  form.value = { firstName: coach.firstName, lastName: coach.lastName, email: coach.email ?? "", phone: coach.phone ?? "" };
+  form.value = { firstName: coach.firstName, lastName: coach.lastName, email: coach.email ?? "", phone: coach.phone ?? "", level: coach.level ?? null };
   dialogVisible.value = true;
 }
 
@@ -115,6 +118,9 @@ function onDelete(coach) {
       <Column field="lastName" header="Nom" sortable>
         <template #body="{ data }">{{ fullName(data) }}</template>
       </Column>
+      <Column header="Niveau Adeps">
+        <template #body="{ data }"><Tag v-if="data.level" severity="info" :value="COACH_LEVEL_LABELS[data.level]" /></template>
+      </Column>
       <Column field="email" header="Email" />
       <Column field="phone" header="Téléphone" />
       <Column header="" style="width: 7rem">
@@ -136,6 +142,10 @@ function onDelete(coach) {
         <div>
           <label class="text-xs text-slate-500 block mb-1">Nom</label>
           <InputText v-model="form.lastName" required class="w-full" />
+        </div>
+        <div>
+          <label class="text-xs text-slate-500 block mb-1">Niveau Adeps</label>
+          <Dropdown v-model="form.level" :options="COACH_LEVEL_OPTIONS" option-label="label" option-value="value" placeholder="Non défini" show-clear class="w-full" />
         </div>
         <div>
           <label class="text-xs text-slate-500 block mb-1">Email (optionnel)</label>

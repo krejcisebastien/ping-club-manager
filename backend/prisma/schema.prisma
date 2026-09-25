@@ -34,6 +34,21 @@ enum PointStatus {
   DONE
 }
 
+// Niveaux de formation Adeps des entraineurs.
+enum CoachLevel {
+  ANIMATEUR
+  MSIN
+  MSED
+  MSEN
+}
+
+// Ce à quoi un tarif horaire s'applique : niveau Adeps d'un entraineur, ou série
+// (E/D/C/B) déduite du classement d'un sparring.
+enum RateCategory {
+  COACH_LEVEL
+  SPARRING_SERIES
+}
+
 enum OccurrenceStatus {
   PLANNED
   CANCELLED
@@ -70,12 +85,13 @@ model Club {
   stripeCustomerId     String?   @unique
   stripeSubscriptionId String?
 
-  seasons   Season[]
-  users     User[]
-  players   Player[]
-  coaches   Coach[]
-  sparrings Sparring[]
-  exercises Exercise[]
+  seasons     Season[]
+  users       User[]
+  players     Player[]
+  coaches     Coach[]
+  sparrings   Sparring[]
+  exercises   Exercise[]
+  hourlyRates HourlyRate[]
 }
 
 // ---------- Saisons & utilisateurs ----------
@@ -325,15 +341,28 @@ model PlayerGroupAssignment {
   @@index([groupId])
 }
 
+// Tarif horaire (€/h) du club par niveau Adeps ou par série de sparring.
+model HourlyRate {
+  id         String       @id @default(cuid())
+  clubId     String
+  club       Club         @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  category   RateCategory
+  code       String // ANIMATEUR | MSIN | MSED | MSEN  ou  E | D | C | B
+  hourlyRate Decimal      @db.Decimal(8, 2)
+
+  @@unique([clubId, category, code])
+}
+
 model Coach {
-  id        String   @id @default(cuid())
+  id        String      @id @default(cuid())
   clubId    String
-  club      Club     @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  club      Club        @relation(fields: [clubId], references: [id], onDelete: Cascade)
   firstName String
   lastName  String
   email     String?
   phone     String?
-  createdAt DateTime @default(now())
+  level     CoachLevel?
+  createdAt DateTime    @default(now())
 
   user                User?
   trainingOccurrences TrainingOccurrenceCoach[]

@@ -15,13 +15,14 @@ import { api } from "../../lib/api.js";
 import { useNavLinks } from "../../composables/useNavLinks.js";
 import { useTableFilter } from "../../composables/useTableFilter.js";
 import { fullName } from "../../lib/name.js";
+import { RANKING_OPTIONS, SERIES_LABELS } from "../../lib/ranking.js";
 
 const navLinks = useNavLinks();
 const toast = useToast();
 const confirm = useConfirm();
 const { filters } = useTableFilter();
 
-const emptyForm = () => ({ firstName: "", lastName: "", ranking: "", isClubMember: false, playerId: null, externalClub: "" });
+const emptyForm = () => ({ firstName: "", lastName: "", ranking: null, isClubMember: false, playerId: null, externalClub: "" });
 
 const sparrings = ref([]);
 const players = ref([]);
@@ -60,7 +61,7 @@ function openEdit(sparring) {
   form.value = {
     firstName: sparring.firstName,
     lastName: sparring.lastName,
-    ranking: sparring.ranking ?? "",
+    ranking: sparring.isClubMember ? null : sparring.ranking ?? null,
     isClubMember: sparring.isClubMember,
     playerId: sparring.playerId ?? null,
     externalClub: sparring.externalClub ?? "",
@@ -135,7 +136,12 @@ function onDelete(sparring) {
       <Column field="lastName" header="Nom" sortable>
         <template #body="{ data }">{{ fullName(data) }}</template>
       </Column>
-      <Column field="ranking" header="Classement" />
+      <Column header="Classement">
+        <template #body="{ data }">
+          <span v-if="data.ranking" class="font-medium">{{ data.ranking }}</span>
+          <Tag v-if="data.series" severity="secondary" :value="SERIES_LABELS[data.series]" class="ml-2" />
+        </template>
+      </Column>
       <Column header="Origine">
         <template #body="{ data }">
           <Tag v-if="data.isClubMember" severity="info" :value="`Club — ${playerName(data.playerId)}`" />
@@ -154,30 +160,37 @@ function onDelete(sparring) {
 
     <Dialog v-model:visible="dialogVisible" :header="editingId ? 'Modifier le sparring' : 'Nouveau sparring'" modal style="width: 28rem" class="mx-4">
       <form class="grid gap-3 pt-2" @submit.prevent="onSave">
-        <div>
-          <label class="text-xs text-slate-500 block mb-1">Prénom</label>
-          <InputText v-model="form.firstName" required class="w-full" />
-        </div>
-        <div>
-          <label class="text-xs text-slate-500 block mb-1">Nom</label>
-          <InputText v-model="form.lastName" required class="w-full" />
-        </div>
-        <div>
-          <label class="text-xs text-slate-500 block mb-1">Classement (optionnel)</label>
-          <InputText v-model="form.ranking" class="w-full" />
-        </div>
         <div class="flex items-center gap-2">
           <Checkbox v-model="form.isClubMember" binary input-id="isClubMember" />
           <label for="isClubMember" class="text-sm text-slate-600">Joueur du club</label>
         </div>
-        <div v-if="form.isClubMember">
-          <label class="text-xs text-slate-500 block mb-1">Joueur</label>
-          <Dropdown v-model="form.playerId" :options="playerOptions()" option-label="label" option-value="value" placeholder="Choisir le joueur…" class="w-full" />
-        </div>
-        <div v-else>
-          <label class="text-xs text-slate-500 block mb-1">Club extérieur (optionnel)</label>
-          <InputText v-model="form.externalClub" class="w-full" />
-        </div>
+        <template v-if="form.isClubMember">
+          <div>
+            <label class="text-xs text-slate-500 block mb-1">Joueur</label>
+            <Dropdown v-model="form.playerId" :options="playerOptions()" option-label="label" option-value="value" filter placeholder="Choisir le joueur…" class="w-full" />
+          </div>
+          <p class="text-xs text-slate-400">Le nom et le classement sont repris de la fiche du joueur : rien à ressaisir.</p>
+        </template>
+        <template v-else>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="text-xs text-slate-500 block mb-1">Prénom</label>
+              <InputText v-model="form.firstName" required class="w-full" />
+            </div>
+            <div>
+              <label class="text-xs text-slate-500 block mb-1">Nom</label>
+              <InputText v-model="form.lastName" required class="w-full" />
+            </div>
+          </div>
+          <div>
+            <label class="text-xs text-slate-500 block mb-1">Classement</label>
+            <Dropdown v-model="form.ranking" :options="RANKING_OPTIONS" option-label="label" option-value="value" placeholder="Non défini" show-clear class="w-full" />
+          </div>
+          <div>
+            <label class="text-xs text-slate-500 block mb-1">Club extérieur (optionnel)</label>
+            <InputText v-model="form.externalClub" class="w-full" />
+          </div>
+        </template>
         <div class="flex justify-end gap-2 mt-2">
           <Button type="button" label="Annuler" severity="secondary" outlined @click="dialogVisible = false" />
           <Button type="submit" label="Enregistrer" :loading="saving" />

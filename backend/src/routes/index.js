@@ -15,6 +15,7 @@ import campPeriodGroupsRoutes from "./campPeriodGroups.routes.js";
 import exercisesRoutes from "./exercises.routes.js";
 import trainingPlansRoutes from "./trainingPlans.routes.js";
 import dashboardRoutes from "./dashboard.routes.js";
+import ratesRoutes from "./rates.routes.js";
 
 const router = Router();
 
@@ -34,5 +35,6 @@ router.use("/camp-period-groups", campPeriodGroupsRoutes);
 router.use("/exercises", exercisesRoutes);
 router.use("/training-plans", trainingPlansRoutes);
 router.use("/dashboard", dashboardRoutes);
+router.use("/rates", ratesRoutes);
 
 export default router;

@@ -12,6 +12,7 @@ const PATHS = {
   Player: [],
   Coach: [],
   Sparring: [],
+  HourlyRate: [],
   Exercise: [],
   PlayerSeason: ["player"],
   RankingHistory: ["player"],
