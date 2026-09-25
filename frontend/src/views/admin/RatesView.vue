@@ -58,7 +58,7 @@ async function onSave() {
 <template>
   <AppLayout title="Tarifs" :nav-links="navLinks">
     <p class="text-sm text-slate-500 mb-4 max-w-3xl">
-      Pour chaque niveau, renseigne un tarif à l'heure et/ou à la séance, puis choisis lequel s'applique. À la séance, chaque séance
+      Pour chaque niveau, renseigne un montant puis choisis s'il s'applique à l'heure ou à la séance. À la séance, chaque séance
       d'entrainement et chaque période de stage compte pour un forfait ; à l'heure, on multiplie la durée par le tarif horaire.
     </p>
 
@@ -69,17 +69,10 @@ async function onSave() {
         <ul class="grid gap-4">
           <li v-for="r in coachRates" :key="r.code" class="grid gap-2">
             <span class="text-sm font-medium text-slate-700">{{ COACH_LEVEL_LABELS[r.code] }}</span>
-            <div class="grid grid-cols-2 gap-2">
-              <div>
-                <label class="text-xs text-slate-400 block mb-1">€ / heure</label>
-                <InputNumber v-model="r.hourlyRate" mode="currency" currency="EUR" locale="fr-BE" :min="0" :max-fraction-digits="2" placeholder="—" class="w-full" input-class="w-full text-right" />
-              </div>
-              <div>
-                <label class="text-xs text-slate-400 block mb-1">€ / séance</label>
-                <InputNumber v-model="r.sessionRate" mode="currency" currency="EUR" locale="fr-BE" :min="0" :max-fraction-digits="2" placeholder="—" class="w-full" input-class="w-full text-right" />
-              </div>
+            <div class="grid gap-2 sm:grid-cols-[10rem_1fr] sm:items-center">
+              <InputNumber v-model="r.amount" mode="currency" currency="EUR" locale="fr-BE" :min="0" :max-fraction-digits="2" placeholder="—" :aria-label="`Montant ${r.basis === 'SESSION' ? 'par séance' : 'par heure'}`" class="w-full" input-class="w-full text-right" />
+              <SelectButton v-model="r.basis" :options="basisOptions" option-label="label" option-value="value" :allow-empty="false" class="w-full flex" />
             </div>
-            <SelectButton v-model="r.basis" :options="basisOptions" option-label="label" option-value="value" :allow-empty="false" class="w-full flex" />
           </li>
         </ul>
       </div>
@@ -90,17 +83,10 @@ async function onSave() {
         <ul class="grid gap-4">
           <li v-for="r in sparringRates" :key="r.code" class="grid gap-2">
             <span class="text-sm font-medium text-slate-700">{{ SERIES_LABELS[r.code] }}</span>
-            <div class="grid grid-cols-2 gap-2">
-              <div>
-                <label class="text-xs text-slate-400 block mb-1">€ / heure</label>
-                <InputNumber v-model="r.hourlyRate" mode="currency" currency="EUR" locale="fr-BE" :min="0" :max-fraction-digits="2" placeholder="—" class="w-full" input-class="w-full text-right" />
-              </div>
-              <div>
-                <label class="text-xs text-slate-400 block mb-1">€ / séance</label>
-                <InputNumber v-model="r.sessionRate" mode="currency" currency="EUR" locale="fr-BE" :min="0" :max-fraction-digits="2" placeholder="—" class="w-full" input-class="w-full text-right" />
-              </div>
+            <div class="grid gap-2 sm:grid-cols-[10rem_1fr] sm:items-center">
+              <InputNumber v-model="r.amount" mode="currency" currency="EUR" locale="fr-BE" :min="0" :max-fraction-digits="2" placeholder="—" :aria-label="`Montant ${r.basis === 'SESSION' ? 'par séance' : 'par heure'}`" class="w-full" input-class="w-full text-right" />
+              <SelectButton v-model="r.basis" :options="basisOptions" option-label="label" option-value="value" :allow-empty="false" class="w-full flex" />
             </div>
-            <SelectButton v-model="r.basis" :options="basisOptions" option-label="label" option-value="value" :allow-empty="false" class="w-full flex" />
           </li>
         </ul>
       </div>
