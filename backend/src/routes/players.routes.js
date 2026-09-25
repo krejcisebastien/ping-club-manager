@@ -77,6 +77,36 @@ router.put("/:id", requireRole("ADMIN", "COACH"), async (req, res) => {
   }
 });
 
+// Le joueur (ou son compte familial) met à jour lui-même quelques données de
+// contact ; le reste de la fiche (licence, date de naissance, photo...) reste
+// réservé au staff.
+const SELF_EDITABLE_TEXT_FIELDS = ["phone", "emergencyContactName", "emergencyContactPhone"];
+
+router.put("/:id/profile", requireSelfPlayerOrRole("id", "ADMIN", "COACH"), async (req, res) => {
+  const { firstName, lastName } = req.body ?? {};
+  for (const [key, value] of Object.entries({ firstName, lastName })) {
+    if (value !== undefined && (typeof value !== "string" || !value.trim())) {
+      return res.status(400).json({ error: `${key} ne peut pas être vide.` });
+    }
+  }
+  const data = {
+    ...(firstName !== undefined && { firstName: firstName.trim() }),
+    ...(lastName !== undefined && { lastName: lastName.trim() }),
+  };
+  for (const key of SELF_EDITABLE_TEXT_FIELDS) {
+    const value = req.body?.[key];
+    if (value === undefined) continue;
+    if (value !== null && typeof value !== "string") return res.status(400).json({ error: `${key} doit être du texte.` });
+    data[key] = value?.trim() || null;
+  }
+  try {
+    const player = await req.db.player.update({ where: { id: req.params.id }, data });
+    res.json({ player });
+  } catch {
+    res.status(404).json({ error: "Joueur introuvable." });
+  }
+});
+
 router.delete("/:id", requireRole("ADMIN"), async (req, res) => {
   try {
     await req.db.player.delete({ where: { id: req.params.id } });
