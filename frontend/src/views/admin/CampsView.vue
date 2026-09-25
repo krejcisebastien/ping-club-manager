@@ -87,14 +87,14 @@ async function onCreate() {
       <Dropdown v-model="selectedSeasonId" :options="seasons" option-label="name" option-value="id" class="w-full" />
     </div>
 
-    <div class="flex items-center justify-between mb-4 gap-3 flex-wrap">
+    <div class="flex flex-col items-stretch sm:flex-row sm:items-center sm:justify-between mb-4 gap-3">
       <h2 class="text-sm font-medium text-slate-600">{{ camps.length }} stage(s)</h2>
-      <div class="flex items-center gap-2 flex-1 sm:flex-none flex-wrap">
-        <div class="relative flex-1 sm:w-64 min-w-[10rem]">
+      <div class="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2">
+        <div class="relative sm:w-64">
           <i class="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
           <InputText v-model="filters.global.value" placeholder="Rechercher…" class="w-full pl-9" />
         </div>
-        <Button label="Nouveau stage" icon="pi pi-plus" @click="openCreate" />
+        <Button class="w-full sm:w-auto" label="Nouveau stage" icon="pi pi-plus" @click="openCreate" />
       </div>
     </div>
 
