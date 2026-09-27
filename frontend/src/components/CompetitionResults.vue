@@ -176,7 +176,7 @@ const chartOptions = {
       </div>
       <div class="flex flex-wrap items-baseline gap-x-6 gap-y-1 mt-2">
         <p class="text-3xl font-semibold text-slate-800 tabular-nums">{{ formatPoints(latestPoints.points) }} <span class="text-base font-normal text-slate-500">pts</span></p>
-        <p v-if="latestPoints.rankingPosition" class="text-sm text-slate-600">{{ latestPoints.rankingPosition }}<sup>e</sup> au ranking mixte</p>
+        <p v-if="latestPoints.rankingPosition" class="text-sm text-slate-600">{{ latestPoints.rankingPosition }}<sup>e</sup> au ranking mixte <span class="text-slate-400">(sans les inactifs)</span></p>
         <p v-if="pointsDelta" class="text-sm font-medium tabular-nums" :class="pointsDelta.value >= 0 ? 'text-green-700' : 'text-red-600'">
           {{ pointsDelta.value >= 0 ? "+" : "−" }}{{ formatPoints(Math.abs(pointsDelta.value)) }} pts depuis le {{ formatDate(pointsDelta.since) }}
         </p>
