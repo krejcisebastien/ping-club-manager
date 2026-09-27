@@ -181,6 +181,7 @@ const routes = [
       { path: "", name: "player-dashboard", component: () => import("../views/player/PlayerDashboardView.vue"), meta: { title: "Tableau de bord" } },
       { path: "evaluation", name: "player-evaluation", component: () => import("../views/player/PlayerEvaluationView.vue"), meta: { title: "Mon évaluation" } },
       { path: "follow-up", name: "player-follow-up", component: () => import("../views/player/PlayerFollowUpView.vue"), meta: { title: "Mon suivi" } },
+      { path: "results", name: "player-competition", component: () => import("../views/player/PlayerCompetitionView.vue"), meta: { title: "Mes résultats" } },
       { path: "attendance", name: "player-attendance", component: () => import("../views/player/PlayerAttendanceView.vue"), meta: { title: "Mes présences" } },
       { path: "profile", name: "player-profile", component: () => import("../views/player/PlayerProfileView.vue"), meta: { title: "Ma fiche" } },
     ],

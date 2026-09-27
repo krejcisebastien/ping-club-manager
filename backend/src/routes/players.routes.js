@@ -2,6 +2,7 @@ import { Router } from "express";
 import { requireAuth, requireRole, requireSelfPlayerOrRole } from "../middleware/auth.js";
 import { hoursBetween } from "../utils/occurrences.js";
 import { isRanking, RANKINGS } from "../lib/rankings.js";
+import { parseLicence, syncPlayer, TabtError } from "../lib/tabt.js";
 
 const router = Router();
 
@@ -62,9 +63,13 @@ router.put("/:id", requireRole("ADMIN", "COACH"), async (req, res) => {
     return res.status(400).json({ error: "dominantHand doit être LEFT ou RIGHT." });
   }
   try {
+    const before = await req.db.player.findUniqueOrThrow({ where: { id: req.params.id }, select: { licenseNumber: true } });
+    const licenceChanged = licenseNumber !== undefined && (licenseNumber || null) !== (before.licenseNumber || null);
     const player = await req.db.player.update({
       where: { id: req.params.id },
       data: {
+        // Nouveau n° de licence : les résultats importés concernaient l'ancien.
+        ...(licenceChanged && { competitionSyncedAt: null, competitionSyncError: null }),
         ...(firstName !== undefined && { firstName }),
         ...(lastName !== undefined && { lastName }),
         ...(birthDate !== undefined && { birthDate: new Date(birthDate) }),
@@ -78,6 +83,10 @@ router.put("/:id", requireRole("ADMIN", "COACH"), async (req, res) => {
       },
     });
     await syncSparringName(req.db, player);
+    if (licenceChanged) {
+      await req.db.competitionResult.deleteMany({ where: { playerId: player.id } });
+      await req.db.competitionSeason.deleteMany({ where: { playerId: player.id } });
+    }
     res.json({ player });
   } catch {
     res.status(404).json({ error: "Joueur introuvable." });
@@ -397,6 +406,49 @@ router.get("/:id/stats", requireSelfPlayerOrRole("id", "ADMIN", "COACH"), async 
       },
     },
   });
+});
+
+// ---------- Résultats de compétition (importés de TabT) ----------
+
+router.get("/:id/competition", requireSelfPlayerOrRole("id", "ADMIN", "COACH"), async (req, res) => {
+  const player = await req.db.player.findUnique({
+    where: { id: req.params.id },
+    select: { licenseNumber: true, competitionSyncedAt: true, competitionSyncError: true },
+  });
+  if (!player) return res.status(404).json({ error: "Joueur introuvable." });
+  const [seasons, results] = await Promise.all([
+    req.db.competitionSeason.findMany({ where: { playerId: req.params.id }, orderBy: { season: "desc" } }),
+    req.db.competitionResult.findMany({ where: { playerId: req.params.id }, orderBy: [{ date: "desc" }, { eventName: "asc" }] }),
+  ]);
+  res.json({
+    licenseNumber: player.licenseNumber,
+    syncedAt: player.competitionSyncedAt,
+    syncError: player.competitionSyncError,
+    seasons,
+    results,
+  });
+});
+
+// Actualisation à la demande (la synchronisation quotidienne passe par
+// scripts/tabt-sync.js). Limitée à une fois toutes les 10 minutes par joueur
+// pour ménager le quota TabT, partagé par tous les clubs.
+const REFRESH_COOLDOWN_MS = 10 * 60 * 1000;
+
+router.post("/:id/competition/refresh", requireSelfPlayerOrRole("id", "ADMIN", "COACH"), async (req, res) => {
+  const player = await req.db.player.findUnique({ where: { id: req.params.id } });
+  if (!player) return res.status(404).json({ error: "Joueur introuvable." });
+  if (!player.licenseNumber) return res.status(400).json({ error: "Renseigne d'abord le n° de licence du joueur." });
+  if (!parseLicence(player.licenseNumber)) return res.status(400).json({ error: "Le n° de licence doit être le numéro AFTT (chiffres uniquement)." });
+  if (player.competitionSyncedAt && Date.now() - player.competitionSyncedAt.getTime() < REFRESH_COOLDOWN_MS) {
+    return res.status(429).json({ error: "Résultats déjà actualisés il y a moins de 10 minutes." });
+  }
+  try {
+    const summary = await syncPlayer(player);
+    res.json({ summary });
+  } catch (err) {
+    if (err instanceof TabtError) return res.status(502).json({ error: err.message });
+    throw err;
+  }
 });
 
 export default router;

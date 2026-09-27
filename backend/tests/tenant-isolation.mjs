@@ -5,6 +5,7 @@ import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
 import jwt from "jsonwebtoken";
 import { createApp } from "../src/app.js";
+import { tenantClient } from "../src/lib/tenant.js";
 import { hashPassword } from "../src/utils/password.js";
 import { seedExerciseLibrary } from "../src/lib/exerciseLibrary.js";
 import exerciseLibrary from "../src/data/exercise-library.json" with { type: "json" };
@@ -125,7 +126,7 @@ try {
     `/seasons/${season.id}`, `/players/${player.id}`, `/players/${player.id}/rankings`, `/players/${player.id}/equipment`,
     `/players/${player.id}/traits`, `/players/${player.id}/points-to-work`, `/players/${player.id}/evolution-notes`,
     `/players/${player.id}/evaluations`,
-    `/players/${player.id}/attendance`, `/players/${player.id}/camp-attendance`, `/coaches/${coach.id}`,
+    `/players/${player.id}/attendance`, `/players/${player.id}/camp-attendance`, `/players/${player.id}/competition`, `/coaches/${coach.id}`,
     `/sparrings/${sparring.id}`, `/groups/${group.id}`, `/groups/${group.id}/players`, `/trainings/${training.id}`,
     `/trainings/${training.id}/occurrences`, `/occurrences/${occurrence.id}`, `/occurrences/${occurrence.id}/attendance`,
     `/camps/${camp.id}`, `/camps/groups/${campGroup.id}`, `/camp-period-groups/${periodGroup.id}`,
@@ -141,6 +142,7 @@ try {
   const writes = [
     ["PUT", `/seasons/${season.id}`, { name: "PIRATE" }], ["DELETE", `/seasons/${season.id}`],
     ["PUT", `/players/${player.id}`, { firstName: "PIRATE" }], ["DELETE", `/players/${player.id}`],
+    ["POST", `/players/${player.id}/competition/refresh`, {}],
     ["PUT", `/coaches/${coach.id}`, { firstName: "PIRATE" }], ["DELETE", `/coaches/${coach.id}`],
     ["PUT", `/sparrings/${sparring.id}`, { firstName: "PIRATE" }], ["DELETE", `/sparrings/${sparring.id}`],
     ["PUT", `/groups/${group.id}`, { name: "PIRATE" }], ["DELETE", `/groups/${group.id}`],
@@ -261,6 +263,31 @@ try {
     statsB.training.attendanceRate === null && statsB.training.hours === 0 && statsB.camp.attendanceRate === null,
     JSON.stringify(statsB)
   );
+
+  // ---------- 4 bis. Résultats de compétition (TabT), sans appel réseau ----------
+  await prisma.competitionSeason.create({ data: { playerId: player.id, season: 27, seasonName: "2026-2027", ranking: "D4" } });
+  await prisma.competitionResult.create({
+    data: {
+      playerId: player.id, season: 27, date: new Date("2026-09-20"), competition: "CHAMPIONSHIP", opponentFirstName: "Opp",
+      opponentLastName: "X", opponentRanking: "D2", won: true, setsFor: 3, setsAgainst: 1, eventName: "HAI/001",
+    },
+  });
+  const compA = await call(A.token, "GET", `/players/${player.id}/competition`);
+  expect("A voit les résultats de compétition de son joueur", compA.status === 200 && compA.json.results.length === 1 && compA.json.seasons.length === 1);
+  const compB = await call(B.token, "GET", `/players/${player.id}/competition`);
+  expect("B ne voit pas les résultats de compétition de A", compB.status === 404, `status ${compB.status}`);
+  expect("B ne voit aucun résultat de A dans ses tables", (await tenantClient(B.user.clubId).competitionResult.count()) === 0);
+  const noLicence = await call(A.token, "POST", `/players/${player.id}/competition/refresh`, {});
+  expect("actualisation refusée sans n° de licence", noLicence.status === 400, `status ${noLicence.status}`);
+  await call(A.token, "PUT", `/players/${player.id}`, { licenseNumber: "abc" });
+  const badLicence = await call(A.token, "POST", `/players/${player.id}/competition/refresh`, {});
+  expect("actualisation refusée avec un n° de licence non numérique", badLicence.status === 400, `status ${badLicence.status}`);
+  expect("changer de n° de licence efface les résultats importés", (await call(A.token, "GET", `/players/${player.id}/competition`)).json.results.length === 0);
+  await call(A.token, "PUT", `/players/${player.id}`, { licenseNumber: "123456" });
+  await prisma.player.update({ where: { id: player.id }, data: { competitionSyncedAt: new Date() } });
+  const tooSoon = await call(A.token, "POST", `/players/${player.id}/competition/refresh`, {});
+  expect("actualisation limitée à une fois toutes les 10 minutes", tooSoon.status === 429, `status ${tooSoon.status}`);
+  await call(A.token, "PUT", `/players/${player.id}`, { licenseNumber: "" });
 
   // ---------- 5. A n'a rien perdu ni gagné ----------
   const count = async (tok, path, key) => (await call(tok, "GET", path)).json[key].length;

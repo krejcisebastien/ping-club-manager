@@ -11,6 +11,7 @@ import Chart from "primevue/chart";
 import { useToast } from "primevue/usetoast";
 import AppLayout from "../../components/AppLayout.vue";
 import ImageUpload from "../../components/ImageUpload.vue";
+import CompetitionResults from "../../components/CompetitionResults.vue";
 import { api } from "../../lib/api.js";
 import { toDateOnly } from "../../lib/date.js";
 import { useNavLinks } from "../../composables/useNavLinks.js";
@@ -503,6 +504,12 @@ function pointStatusSeverity(status) {
           <Button label="Ajouter" @click="onAddNote" />
         </div>
       </div>
+
+      <CompetitionResults
+        :key="player.licenseNumber ?? ''"
+        :player-id="player.id"
+        missing-licence-hint="renseigne-le dans la signalétique ci-dessus pour importer ses résultats depuis TabT."
+      />
     </div>
   </AppLayout>
 </template>

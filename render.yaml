@@ -64,6 +64,34 @@ services:
       # planter le service.
       - key: GEMINI_API_KEY
         sync: false
+      # Compte API TabT (AFTT) pour l'actualisation à la demande des résultats
+      # de compétition. Secrets : à renseigner dans le dashboard Render.
+      - key: TABT_ACCOUNT
+        sync: false
+      - key: TABT_PASSWORD
+        sync: false
+
+  # Import quotidien des résultats de compétition depuis TabT (AFTT) pour tous
+  # les joueurs ayant un n° de licence. Les cron jobs Render ne sont pas
+  # disponibles en plan gratuit (facturés à la minute d'exécution).
+  - type: cron
+    name: ping-club-manager-tabt-sync
+    runtime: node
+    rootDir: backend
+    plan: starter
+    # Tous les jours à 4 h UTC (5 h ou 6 h à Bruxelles).
+    schedule: "0 4 * * *"
+    buildCommand: npm install && npx prisma generate
+    startCommand: node scripts/tabt-sync.js
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ping-club-manager-db
+          property: connectionString
+      - key: TABT_ACCOUNT
+        sync: false
+      - key: TABT_PASSWORD
+        sync: false
 
   - type: web
     name: ping-club-manager-web

@@ -23,6 +23,11 @@ enum TraitCategory {
   WEAKNESS
 }
 
+enum CompetitionType {
+  CHAMPIONSHIP
+  TOURNAMENT
+}
+
 enum DominantHand {
   LEFT
   RIGHT
@@ -182,6 +187,10 @@ model Player {
   playStyle             String?
   dominantHand          DominantHand?
 
+  // Synchronisation des résultats de compétition depuis TabT (AFTT).
+  competitionSyncedAt  DateTime?
+  competitionSyncError String?
+
   users             UserPlayer[]
   playerSeasons     PlayerSeason[]
   rankingHistories  RankingHistory[]
@@ -197,8 +206,54 @@ model Player {
   campAttendances   CampAttendance[]
   sparringProfile   Sparring?
   campRegistrations CampPlayer[]
+  competitionSeasons CompetitionSeason[]
+  competitionResults CompetitionResult[]
 
   @@index([clubId])
+}
+
+// ---------- Résultats de compétition (TabT / AFTT) ----------
+
+// Situation du joueur pour une saison TabT (27 = 2026-2027) : classement,
+// club et ELO tels que renvoyés par TabT lors de la dernière synchronisation.
+model CompetitionSeason {
+  id         String   @id @default(cuid())
+  playerId   String
+  season     Int
+  seasonName String
+  ranking    String?
+  club       String?
+  elo        Int?
+  syncedAt   DateTime @default(now())
+
+  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@unique([playerId, season])
+}
+
+// Un match individuel (championnat ou tournoi). Les lignes d'une saison sont
+// entièrement remplacées à chaque synchronisation : TabT fait foi.
+model CompetitionResult {
+  id                String          @id @default(cuid())
+  playerId          String
+  season            Int
+  date              DateTime
+  competition       CompetitionType
+  opponentLicence   Int?
+  opponentFirstName String
+  opponentLastName  String
+  opponentRanking   String
+  opponentClub      String?
+  won               Boolean
+  walkover          Boolean         @default(false)
+  setsFor           Int
+  setsAgainst       Int
+  // Rencontre de championnat (ex. HAI_VET01/022) ou tournoi — série.
+  eventName         String?
+
+  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@index([playerId, season])
 }
 
 model PlayerSeason {
