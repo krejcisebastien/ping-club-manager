@@ -86,15 +86,15 @@ function toResult(playerId, season, e) {
 }
 
 // Importe une saison TabT d'un joueur : remplace ses matchs de la saison et
-// met à jour sa situation (classement, club, ELO). Renvoie le nombre de matchs.
-async function syncSeason(playerId, licence, season, seasonName, withElo) {
-  const r = await call("GetMembers", { UniqueIndex: licence, Season: season, WithResults: true, RankingPointsInformation: withElo });
+// met à jour sa situation (classement, club). Renvoie le nombre de matchs.
+// L'« ELO » que TabT peut renvoyer n'est pas le classement numérique AFTT
+// (points affichés sur data.aftt.be) : il n'est volontairement pas importé.
+async function syncSeason(playerId, licence, season, seasonName) {
+  const r = await call("GetMembers", { UniqueIndex: licence, Season: season, WithResults: true });
   const member = r.MemberEntries?.[0];
   if (!member) return null;
   const results = (member.ResultEntries ?? []).map((e) => toResult(playerId, season, e));
-  const eloEntry = (member.RankingPointsEntries ?? []).find((p) => p.MethodName === "ELO");
-  const elo = Number.parseInt(eloEntry?.Value, 10);
-  const situation = { seasonName, ranking: member.Ranking ?? null, club: member.Club ?? null, elo: Number.isNaN(elo) ? null : elo, syncedAt: new Date() };
+  const situation = { seasonName, ranking: member.Ranking ?? null, club: member.Club ?? null, syncedAt: new Date() };
 
   await prisma.$transaction([
     prisma.competitionResult.deleteMany({ where: { playerId, season } }),
@@ -135,7 +135,7 @@ export async function syncPlayer(player, { delayMs = 0 } = {}) {
     let matches = 0;
     for (const [i, season] of seasons.entries()) {
       if (i > 0 && delayMs) await sleep(delayMs);
-      matches += (await syncSeason(player.id, licence, season, names.get(season) ?? String(season), season === current)) ?? 0;
+      matches += (await syncSeason(player.id, licence, season, names.get(season) ?? String(season))) ?? 0;
     }
     await prisma.player.update({ where: { id: player.id }, data: { competitionSyncedAt: new Date(), competitionSyncError: null } });
     return { seasons: seasons.length, matches };

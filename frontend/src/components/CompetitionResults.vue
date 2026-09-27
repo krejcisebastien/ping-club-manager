@@ -113,7 +113,6 @@ const chartOptions = {
           <p v-if="current" class="text-sm text-slate-700 mt-1">
             Classement <strong>{{ current.ranking ?? "—" }}</strong>
             <template v-if="current.club"> · club {{ current.club }}</template>
-            <template v-if="current.elo"> · ELO {{ current.elo }}</template>
             <span class="text-slate-400"> · licence {{ data.licenseNumber }}</span>
           </p>
           <p class="text-xs text-slate-400 mt-1">
@@ -207,7 +206,7 @@ const chartOptions = {
           <p class="text-sm font-medium text-slate-600">Évolution dans le temps</p>
           <p class="text-xs text-slate-400 mb-3">
             Victoires / matchs contre chaque classement,
-            {{ allSeasons ? "saison par saison" : "par période de la saison" }}.
+            {{ allSeasons ? "saison par saison" : "mois par mois" }}.
             <span class="whitespace-nowrap"><span class="legend bg-red-100"></span>moins d'1 sur 3</span>
             <span class="whitespace-nowrap"><span class="legend bg-amber-100"></span>entre les deux</span>
             <span class="whitespace-nowrap"><span class="legend bg-green-100"></span>au moins 2 sur 3</span>

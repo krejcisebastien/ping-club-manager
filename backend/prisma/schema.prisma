@@ -215,7 +215,7 @@ model Player {
 // ---------- Résultats de compétition (TabT / AFTT) ----------
 
 // Situation du joueur pour une saison TabT (27 = 2026-2027) : classement,
-// club et ELO tels que renvoyés par TabT lors de la dernière synchronisation.
+// et club tels que renvoyés par TabT lors de la dernière synchronisation.
 model CompetitionSeason {
   id         String   @id @default(cuid())
   playerId   String
@@ -223,7 +223,6 @@ model CompetitionSeason {
   seasonName String
   ranking    String?
   club       String?
-  elo        Int?
   syncedAt   DateTime @default(now())
 
   player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)

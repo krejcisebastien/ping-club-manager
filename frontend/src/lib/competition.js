@@ -43,24 +43,21 @@ export function byStrength(results, rankingBySeason) {
   return Object.fromEntries(Object.entries(buckets).map(([k, list]) => [k, summarize(list)]));
 }
 
-// Périodes d'une saison (septembre -> août) pour suivre l'évolution en cours de saison.
-const PHASES = [
-  { label: "Sept.–oct.", months: [8, 9] },
-  { label: "Nov.–déc.", months: [10, 11] },
-  { label: "Janv.–févr.", months: [0, 1] },
-  { label: "Mars–avr.", months: [2, 3] },
-  { label: "Mai–août", months: [4, 5, 6, 7] },
-];
-const phaseOf = (date) => PHASES.findIndex((p) => p.months.includes(new Date(date).getMonth()));
+// Mois d'un match, sous forme de clé triable (année x 12 + mois).
+const monthKey = (date) => {
+  const d = new Date(date);
+  return d.getFullYear() * 12 + d.getMonth();
+};
+const monthLabel = (key) => new Date(Math.floor(key / 12), key % 12, 1).toLocaleDateString("fr-FR", { month: "short" });
 
 // Grille classement adverse x période : une colonne par saison (vue toutes
-// saisons) ou par période de deux mois (vue d'une saison). Seules les colonnes
-// et lignes contenant des matchs sont gardées.
+// saisons) ou par mois (vue d'une saison). Seules les colonnes et lignes
+// contenant des matchs sont gardées.
 export function evolutionGrid(results, { seasonNames, singleSeason }) {
   const matches = played(results);
-  const columnKey = (r) => (singleSeason ? phaseOf(r.date) : r.season);
+  const columnKey = (r) => (singleSeason ? monthKey(r.date) : r.season);
   const keys = [...new Set(matches.map(columnKey))].sort((a, b) => a - b);
-  const columns = keys.map((k) => ({ key: k, label: singleSeason ? PHASES[k].label : seasonNames.get(k) ?? String(k) }));
+  const columns = keys.map((k) => ({ key: k, label: singleSeason ? monthLabel(k) : seasonNames.get(k) ?? String(k) }));
   const rankings = [...new Set(matches.map((r) => r.opponentRanking))].sort((a, b) => rankIndex(a) - rankIndex(b));
   const rows = rankings.map((ranking) => ({
     ranking,
