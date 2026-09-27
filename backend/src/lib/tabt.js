@@ -1,5 +1,6 @@
 import soap from "soap";
 import { prisma } from "./prisma.js";
+import { fetchNumericRanking } from "./afttData.js";
 
 // Import des résultats de compétition depuis TabT, l'API de l'AFTT
 // (https://api.aftt.be). Identifiants : TABT_ACCOUNT / TABT_PASSWORD.
@@ -108,6 +109,21 @@ async function syncSeason(playerId, licence, season, seasonName) {
   return results.length;
 }
 
+// Relevé du jour des points du classement numérique (un par joueur et par jour,
+// remplacé si l'import est relancé le même jour).
+async function recordPoints(playerId, licence, seasonName) {
+  const ranking = await fetchNumericRanking(licence);
+  if (!ranking) return;
+  const now = new Date();
+  const date = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+  const data = { seasonName, points: ranking.points, rankingPosition: ranking.rankingPosition };
+  await prisma.competitionPoints.upsert({
+    where: { playerId_date: { playerId, date } },
+    create: { playerId, date, ...data },
+    update: data,
+  });
+}
+
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 // Synchronise un joueur : la saison en cours à chaque fois, plus les saisons
@@ -137,7 +153,16 @@ export async function syncPlayer(player, { delayMs = 0 } = {}) {
       if (i > 0 && delayMs) await sleep(delayMs);
       matches += (await syncSeason(player.id, licence, season, names.get(season) ?? String(season))) ?? 0;
     }
-    await prisma.player.update({ where: { id: player.id }, data: { competitionSyncedAt: new Date(), competitionSyncError: null } });
+
+    // Points du classement numérique (data.aftt.be) : un échec n'annule pas
+    // l'import des matchs, il est seulement signalé.
+    let pointsError = null;
+    try {
+      await recordPoints(player.id, licence, names.get(current) ?? String(current));
+    } catch (err) {
+      pointsError = `Points AFTT non mis à jour : ${err.message}`;
+    }
+    await prisma.player.update({ where: { id: player.id }, data: { competitionSyncedAt: new Date(), competitionSyncError: pointsError } });
     return { seasons: seasons.length, matches };
   } catch (err) {
     await prisma.player.update({ where: { id: player.id }, data: { competitionSyncError: err.message.slice(0, 500) } });

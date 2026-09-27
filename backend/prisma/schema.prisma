@@ -208,6 +208,7 @@ model Player {
   campRegistrations CampPlayer[]
   competitionSeasons CompetitionSeason[]
   competitionResults CompetitionResult[]
+  competitionPoints  CompetitionPoints[]
 
   @@index([clubId])
 }
@@ -228,6 +229,21 @@ model CompetitionSeason {
   player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
 
   @@unique([playerId, season])
+}
+
+// Points du classement numérique AFTT relevés chaque jour (source :
+// data.aftt.be, TabT ne les fournit pas) pour tracer leur évolution.
+model CompetitionPoints {
+  id              String   @id @default(cuid())
+  playerId        String
+  date            DateTime @db.Date
+  seasonName      String
+  points          Decimal  @db.Decimal(8, 2)
+  rankingPosition Int?
+
+  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@unique([playerId, date])
 }
 
 // Un match individuel (championnat ou tournoi). Les lignes d'une saison sont

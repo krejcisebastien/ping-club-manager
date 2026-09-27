@@ -30,6 +30,7 @@ const PATHS = {
   CampPlayer: ["player"],
   CompetitionSeason: ["player"],
   CompetitionResult: ["player"],
+  CompetitionPoints: ["player"],
   UserPlayer: ["user"],
   TrainingGroup: ["season"],
   Training: ["season"],

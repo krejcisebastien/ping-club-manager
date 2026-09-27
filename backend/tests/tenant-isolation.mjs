@@ -272,17 +272,21 @@ try {
       opponentLastName: "X", opponentRanking: "D2", won: true, setsFor: 3, setsAgainst: 1, eventName: "HAI/001",
     },
   });
+  await prisma.competitionPoints.create({ data: { playerId: player.id, date: new Date("2026-09-27"), seasonName: "2026-2027", points: 1410.3, rankingPosition: 365 } });
   const compA = await call(A.token, "GET", `/players/${player.id}/competition`);
   expect("A voit les résultats de compétition de son joueur", compA.status === 200 && compA.json.results.length === 1 && compA.json.seasons.length === 1);
+  expect("points du classement numérique renvoyés en nombre", compA.json.points.length === 1 && compA.json.points[0].points === 1410.3, JSON.stringify(compA.json.points));
   const compB = await call(B.token, "GET", `/players/${player.id}/competition`);
   expect("B ne voit pas les résultats de compétition de A", compB.status === 404, `status ${compB.status}`);
   expect("B ne voit aucun résultat de A dans ses tables", (await tenantClient(B.user.clubId).competitionResult.count()) === 0);
+  expect("B ne voit aucun relevé de points de A", (await tenantClient(B.user.clubId).competitionPoints.count()) === 0);
   const noLicence = await call(A.token, "POST", `/players/${player.id}/competition/refresh`, {});
   expect("actualisation refusée sans n° de licence", noLicence.status === 400, `status ${noLicence.status}`);
   await call(A.token, "PUT", `/players/${player.id}`, { licenseNumber: "abc" });
   const badLicence = await call(A.token, "POST", `/players/${player.id}/competition/refresh`, {});
   expect("actualisation refusée avec un n° de licence non numérique", badLicence.status === 400, `status ${badLicence.status}`);
-  expect("changer de n° de licence efface les résultats importés", (await call(A.token, "GET", `/players/${player.id}/competition`)).json.results.length === 0);
+  const afterChange = (await call(A.token, "GET", `/players/${player.id}/competition`)).json;
+  expect("changer de n° de licence efface les résultats et points importés", afterChange.results.length === 0 && afterChange.points.length === 0);
   await call(A.token, "PUT", `/players/${player.id}`, { licenseNumber: "123456" });
   await prisma.player.update({ where: { id: player.id }, data: { competitionSyncedAt: new Date() } });
   const tooSoon = await call(A.token, "POST", `/players/${player.id}/competition/refresh`, {});

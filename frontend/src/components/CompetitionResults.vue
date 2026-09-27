@@ -77,6 +77,38 @@ const STRENGTH_LABELS = [
   { key: "weaker", label: "Moins bien classés" },
 ];
 
+// Points du classement numérique : relevés de la saison du dernier relevé.
+const latestPoints = computed(() => data.value?.points?.at(-1) ?? null);
+const seasonPoints = computed(() => (data.value?.points ?? []).filter((p) => p.seasonName === latestPoints.value?.seasonName));
+const pointsDelta = computed(() => {
+  if (seasonPoints.value.length < 2) return null;
+  const first = seasonPoints.value[0];
+  return { value: latestPoints.value.points - first.points, since: first.date };
+});
+const formatPoints = (v) => v.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const pointsChartData = computed(() => ({
+  labels: seasonPoints.value.map((p) => formatDate(p.date)),
+  datasets: [
+    {
+      label: "Points",
+      data: seasonPoints.value.map((p) => p.points),
+      borderColor: "#0284c7",
+      backgroundColor: "#0284c7",
+      tension: 0,
+      pointRadius: seasonPoints.value.length > 40 ? 0 : 2,
+      pointHitRadius: 8,
+    },
+  ],
+}));
+const pointsChartOptions = {
+  maintainAspectRatio: false,
+  scales: {
+    x: { ticks: { maxTicksLimit: 6, maxRotation: 0 } },
+    y: { ticks: { callback: (v) => Number(v).toLocaleString("fr-FR") } },
+  },
+  plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => ` ${formatPoints(c.parsed.y)} pts` } } },
+};
+
 const rolling = computed(() => rollingRate(results.value));
 const chartData = computed(() => ({
   labels: rolling.value.map((p) => formatDate(p.date)),
@@ -132,7 +164,28 @@ const chartOptions = {
       </div>
       <p v-if="!data.licenseNumber" class="text-sm text-slate-500 mt-3">Aucun n° de licence : {{ missingLicenceHint }}</p>
       <p v-else-if="data.syncError" class="text-sm text-red-600 mt-3">
-        <i class="pi pi-exclamation-triangle mr-1"></i>Dernière synchronisation en échec : {{ data.syncError }}
+        <i class="pi pi-exclamation-triangle mr-1"></i>Problème lors de la dernière synchronisation : {{ data.syncError }}
+      </p>
+    </div>
+
+    <!-- Classement numérique (points relevés chaque jour sur data.aftt.be) -->
+    <div v-if="latestPoints" class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+      <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <p class="text-sm font-medium text-slate-600">Classement numérique {{ latestPoints.seasonName }}</p>
+        <p class="text-xs text-slate-400">Relevé du {{ formatDate(latestPoints.date) }} · source data.aftt.be</p>
+      </div>
+      <div class="flex flex-wrap items-baseline gap-x-6 gap-y-1 mt-2">
+        <p class="text-3xl font-semibold text-slate-800 tabular-nums">{{ formatPoints(latestPoints.points) }} <span class="text-base font-normal text-slate-500">pts</span></p>
+        <p v-if="latestPoints.rankingPosition" class="text-sm text-slate-600">{{ latestPoints.rankingPosition }}<sup>e</sup> au ranking mixte</p>
+        <p v-if="pointsDelta" class="text-sm font-medium tabular-nums" :class="pointsDelta.value >= 0 ? 'text-green-700' : 'text-red-600'">
+          {{ pointsDelta.value >= 0 ? "+" : "−" }}{{ formatPoints(Math.abs(pointsDelta.value)) }} pts depuis le {{ formatDate(pointsDelta.since) }}
+        </p>
+      </div>
+      <div v-if="seasonPoints.length >= 2" class="h-44 mt-3">
+        <Chart type="line" :data="pointsChartData" :options="pointsChartOptions" class="h-full" />
+      </div>
+      <p v-else class="text-xs text-slate-400 mt-2">
+        Les points sont relevés chaque nuit : la courbe d'évolution se construira au fil des jours.
       </p>
     </div>
 

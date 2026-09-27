@@ -86,6 +86,7 @@ router.put("/:id", requireRole("ADMIN", "COACH"), async (req, res) => {
     if (licenceChanged) {
       await req.db.competitionResult.deleteMany({ where: { playerId: player.id } });
       await req.db.competitionSeason.deleteMany({ where: { playerId: player.id } });
+      await req.db.competitionPoints.deleteMany({ where: { playerId: player.id } });
     }
     res.json({ player });
   } catch {
@@ -416,9 +417,10 @@ router.get("/:id/competition", requireSelfPlayerOrRole("id", "ADMIN", "COACH"), 
     select: { licenseNumber: true, competitionSyncedAt: true, competitionSyncError: true },
   });
   if (!player) return res.status(404).json({ error: "Joueur introuvable." });
-  const [seasons, results] = await Promise.all([
+  const [seasons, results, points] = await Promise.all([
     req.db.competitionSeason.findMany({ where: { playerId: req.params.id }, orderBy: { season: "desc" } }),
     req.db.competitionResult.findMany({ where: { playerId: req.params.id }, orderBy: [{ date: "desc" }, { eventName: "asc" }] }),
+    req.db.competitionPoints.findMany({ where: { playerId: req.params.id }, orderBy: { date: "asc" } }),
   ]);
   res.json({
     licenseNumber: player.licenseNumber,
@@ -426,6 +428,7 @@ router.get("/:id/competition", requireSelfPlayerOrRole("id", "ADMIN", "COACH"), 
     syncError: player.competitionSyncError,
     seasons,
     results,
+    points: points.map((p) => ({ ...p, points: Number(p.points) })),
   });
 });
 
