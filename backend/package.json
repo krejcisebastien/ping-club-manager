@@ -18,7 +18,8 @@
     "test:signup": "node tests/club-signup.mjs",
     "test:licensing": "node tests/licensing.mjs",
     "test:platform": "node tests/platform.mjs",
-    "test": "node tests/tenant-isolation.mjs && node tests/club-signup.mjs && node tests/licensing.mjs && node tests/platform.mjs"
+    "test:aftt-sheet": "node tests/aftt-sheet.mjs",
+    "test": "node tests/tenant-isolation.mjs && node tests/club-signup.mjs && node tests/licensing.mjs && node tests/platform.mjs && node tests/aftt-sheet.mjs"
   },
   "dependencies": {
     "@google/genai": "^2.24.0",

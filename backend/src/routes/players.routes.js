@@ -426,11 +426,14 @@ router.get("/:id/competition", requireSelfPlayerOrRole("id", "ADMIN", "COACH"), 
     licenseNumber: player.licenseNumber,
     syncedAt: player.competitionSyncedAt,
     syncError: player.competitionSyncError,
-    seasons,
-    results,
+    seasons: seasons.map((s) => ({ ...s, basePoints: toNumber(s.basePoints) })),
+    results: results.map((r) => ({ ...r, opponentPoints: toNumber(r.opponentPoints), pointsDelta: toNumber(r.pointsDelta) })),
     points: points.map((p) => ({ ...p, points: Number(p.points) })),
   });
 });
+
+// Décimaux Prisma -> nombres JSON (null conservé).
+const toNumber = (v) => (v == null ? null : Number(v));
 
 // Actualisation à la demande (la synchronisation quotidienne passe par
 // scripts/tabt-sync.js). Limitée à une fois toutes les 10 minutes par joueur

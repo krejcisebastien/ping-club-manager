@@ -1,6 +1,6 @@
 import soap from "soap";
 import { prisma } from "./prisma.js";
-import { fetchNumericRanking } from "./afttData.js";
+import { fetchNumericRanking, fetchPlayerSheet } from "./afttData.js";
 
 // Import des résultats de compétition depuis TabT, l'API de l'AFTT
 // (https://api.aftt.be). Identifiants : TABT_ACCOUNT / TABT_PASSWORD.
@@ -62,6 +62,8 @@ export function parseLicence(licenseNumber) {
   return /^\d{3,7}$/.test(value) ? Number(value) : null;
 }
 
+const matchKey = (date, opponentLicence) => `${new Date(date).toISOString().slice(0, 10)}|${opponentLicence}`;
+
 function toResult(playerId, season, e) {
   const tournament = e.CompetitionType === "T";
   const eventName = tournament
@@ -95,6 +97,20 @@ async function syncSeason(playerId, licence, season, seasonName) {
   const member = r.MemberEntries?.[0];
   if (!member) return null;
   const results = (member.ResultEntries ?? []).map((e) => toResult(playerId, season, e));
+
+  // Les matchs sont remplacés à chaque import : on reporte l'enrichissement
+  // data.aftt.be déjà connu, pour qu'un échec ultérieur de celui-ci ne fasse
+  // pas disparaître les +/- déjà affichés.
+  const previous = await prisma.competitionResult.findMany({
+    where: { playerId, season, OR: [{ opponentPoints: { not: null } }, { pointsDelta: { not: null } }] },
+    select: { date: true, opponentLicence: true, opponentPoints: true, pointsDelta: true },
+  });
+  const known = new Map(previous.map((r) => [matchKey(r.date, r.opponentLicence), r]));
+  for (const r of results) {
+    const k = known.get(matchKey(r.date, r.opponentLicence));
+    if (k) Object.assign(r, { opponentPoints: k.opponentPoints, pointsDelta: k.pointsDelta });
+  }
+
   const situation = { seasonName, ranking: member.Ranking ?? null, club: member.Club ?? null, syncedAt: new Date() };
 
   await prisma.$transaction([
@@ -122,6 +138,27 @@ async function recordPoints(playerId, licence, seasonName) {
     create: { playerId, date, ...data },
     update: data,
   });
+}
+
+// Points de base de la saison, points des adversaires et +/- par match, lus
+// sur la fiche data.aftt.be (saison en cours uniquement). Les matchs sont
+// rapprochés par date et licence de l'adversaire.
+async function enrichFromSheet(playerId, licence, season) {
+  const sheet = await fetchPlayerSheet(licence);
+  const updates = [];
+  if (sheet.basePoints != null) {
+    updates.push(prisma.competitionSeason.updateMany({ where: { playerId, season }, data: { basePoints: sheet.basePoints } }));
+  }
+  for (const m of sheet.matches) {
+    updates.push(
+      prisma.competitionResult.updateMany({
+        where: { playerId, season, date: m.date, opponentLicence: m.opponentLicence },
+        data: { opponentPoints: m.opponentPoints, pointsDelta: m.pointsDelta },
+      })
+    );
+  }
+  if (updates.length) await prisma.$transaction(updates);
+  return sheet.matches.length;
 }
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -163,6 +200,15 @@ export async function syncPlayer(player, { delayMs = 0 } = {}) {
       pointsError = `Points AFTT non mis à jour : ${err.message}`;
     }
     await prisma.player.update({ where: { id: player.id }, data: { competitionSyncedAt: new Date(), competitionSyncError: pointsError } });
+
+    // Enrichissement facultatif (fiche HTML data.aftt.be) : jamais bloquant,
+    // un échec est seulement journalisé et les données déjà connues restent.
+    try {
+      if (delayMs) await sleep(1000);
+      await enrichFromSheet(player.id, licence, current);
+    } catch (err) {
+      console.warn(`Enrichissement data.aftt.be ignoré pour la licence ${licence} : ${err.message}`);
+    }
     return { seasons: seasons.length, matches };
   } catch (err) {
     await prisma.player.update({ where: { id: player.id }, data: { competitionSyncError: err.message.slice(0, 500) } });

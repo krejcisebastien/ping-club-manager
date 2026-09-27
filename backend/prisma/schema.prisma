@@ -224,6 +224,8 @@ model CompetitionSeason {
   seasonName String
   ranking    String?
   club       String?
+  // Points de base de la saison (après dérive), lus sur data.aftt.be.
+  basePoints Decimal? @db.Decimal(8, 2)
   syncedAt   DateTime @default(now())
 
   player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
@@ -265,6 +267,10 @@ model CompetitionResult {
   setsAgainst       Int
   // Rencontre de championnat (ex. HAI_VET01/022) ou tournoi — série.
   eventName         String?
+  // Enrichissement data.aftt.be (saison en cours) : points de l'adversaire et
+  // points gagnés/perdus sur ce match au classement numérique.
+  opponentPoints    Decimal?        @db.Decimal(8, 2)
+  pointsDelta       Decimal?        @db.Decimal(7, 2)
 
   player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
 

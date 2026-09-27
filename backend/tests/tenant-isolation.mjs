@@ -270,11 +270,13 @@ try {
     data: {
       playerId: player.id, season: 27, date: new Date("2026-09-20"), competition: "CHAMPIONSHIP", opponentFirstName: "Opp",
       opponentLastName: "X", opponentRanking: "D2", won: true, setsFor: 3, setsAgainst: 1, eventName: "HAI/001",
+      opponentPoints: 1224.45, pointsDelta: -2.6,
     },
   });
   await prisma.competitionPoints.create({ data: { playerId: player.id, date: new Date("2026-09-27"), seasonName: "2026-2027", points: 1410.3, rankingPosition: 365 } });
   const compA = await call(A.token, "GET", `/players/${player.id}/competition`);
   expect("A voit les résultats de compétition de son joueur", compA.status === 200 && compA.json.results.length === 1 && compA.json.seasons.length === 1);
+  expect("points adverses et +/- du match renvoyés en nombre", compA.json.results[0].opponentPoints === 1224.45 && compA.json.results[0].pointsDelta === -2.6, JSON.stringify(compA.json.results[0]));
   expect("points du classement numérique renvoyés en nombre", compA.json.points.length === 1 && compA.json.points[0].points === 1410.3, JSON.stringify(compA.json.points));
   const compB = await call(B.token, "GET", `/players/${player.id}/competition`);
   expect("B ne voit pas les résultats de compétition de A", compB.status === 404, `status ${compB.status}`);

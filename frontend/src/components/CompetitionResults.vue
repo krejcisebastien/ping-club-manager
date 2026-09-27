@@ -86,6 +86,17 @@ const pointsDelta = computed(() => {
   return { value: latestPoints.value.points - first.points, since: first.date };
 });
 const formatPoints = (v) => v.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const formatDelta = (v) => `${v > 0 ? "+" : v < 0 ? "−" : "±"}${formatPoints(Math.abs(v))}`;
+const deltaClass = (v) => (v > 0 ? "text-green-700" : v < 0 ? "text-red-600" : "text-slate-500");
+
+// Enrichissement data.aftt.be (facultatif) : points de base et +/- par match
+// de la saison en cours. Rien n'est affiché tant qu'il n'est pas disponible.
+const basePoints = computed(() => current.value?.basePoints ?? null);
+const sumDeltas = (matches) => {
+  const known = matches.filter((m) => m.pointsDelta != null);
+  return known.length ? known.reduce((sum, m) => sum + m.pointsDelta, 0) : null;
+};
+const seasonGain = computed(() => sumDeltas((data.value?.results ?? []).filter((r) => r.season === current.value?.season)));
 const pointsChartData = computed(() => ({
   labels: seasonPoints.value.map((p) => formatDate(p.date)),
   datasets: [
@@ -181,6 +192,14 @@ const chartOptions = {
           {{ pointsDelta.value >= 0 ? "+" : "−" }}{{ formatPoints(Math.abs(pointsDelta.value)) }} pts depuis le {{ formatDate(pointsDelta.since) }}
         </p>
       </div>
+      <p v-if="basePoints != null || seasonGain != null" class="text-sm text-slate-600 mt-2">
+        <template v-if="basePoints != null">Points de base {{ formatPoints(basePoints) }}</template>
+        <template v-if="basePoints != null && seasonGain != null"> · </template>
+        <template v-if="seasonGain != null">
+          gagnés en match cette saison :
+          <strong class="tabular-nums" :class="deltaClass(seasonGain)">{{ formatDelta(seasonGain) }} pts</strong>
+        </template>
+      </p>
       <div v-if="seasonPoints.length >= 2" class="h-44 mt-3">
         <Chart type="line" :data="pointsChartData" :options="pointsChartOptions" class="h-full" />
       </div>
@@ -312,16 +331,27 @@ const chartOptions = {
                     <template v-if="day.competition === 'CHAMPIONSHIP' && day.clubs.length"> · {{ day.clubs.join(", ") }}</template>
                   </span>
                 </p>
-                <span class="text-xs text-slate-500 tabular-nums">{{ day.summary.wins }} V – {{ day.summary.losses }} D</span>
+                <span class="text-xs text-slate-500 tabular-nums">
+                  {{ day.summary.wins }} V – {{ day.summary.losses }} D
+                  <template v-if="sumDeltas(day.matches) != null">
+                    · <span class="font-semibold" :class="deltaClass(sumDeltas(day.matches))">{{ formatDelta(sumDeltas(day.matches)) }} pts</span>
+                  </template>
+                </span>
               </div>
               <ul class="text-sm">
-                <li v-for="m in day.matches" :key="m.id" class="grid grid-cols-[1fr_auto_auto_auto] items-center gap-2 py-1">
-                  <span class="truncate text-slate-700">
-                    {{ opponentName(m) }}
-                    <span v-if="day.competition === 'TOURNAMENT' && m.opponentClub" class="text-xs text-slate-400">({{ m.opponentClub }})</span>
+                <li v-for="m in day.matches" :key="m.id" class="grid grid-cols-[1fr_auto_auto_auto_auto] items-center gap-2 py-1">
+                  <span class="min-w-0">
+                    <span class="block truncate text-slate-700">
+                      {{ opponentName(m) }}
+                      <span v-if="day.competition === 'TOURNAMENT' && m.opponentClub" class="text-xs text-slate-400">({{ m.opponentClub }})</span>
+                    </span>
+                    <span v-if="m.opponentPoints != null" class="block text-xs text-slate-400 tabular-nums">{{ formatPoints(m.opponentPoints) }} pts</span>
                   </span>
                   <span class="text-xs font-semibold text-slate-500 w-7 text-center">{{ m.opponentRanking }}</span>
                   <span class="tabular-nums text-slate-600 w-8 text-center">{{ m.setsFor }}-{{ m.setsAgainst }}</span>
+                  <span class="text-xs font-semibold tabular-nums w-12 text-right" :class="m.pointsDelta != null ? deltaClass(m.pointsDelta) : ''">
+                    {{ m.pointsDelta != null ? formatDelta(m.pointsDelta) : "" }}
+                  </span>
                   <Tag
                     :severity="m.won ? 'success' : 'danger'"
                     :value="(m.won ? 'V' : 'D') + (m.walkover ? ' (WO)' : '')"
