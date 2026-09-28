@@ -7,11 +7,11 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "icons": "npx -y @vite-pwa/assets-generator@1",
+    "icons": "pwa-assets-generator",
     "build:mobile": "vite build --mode capacitor && cap sync",
     "ios": "cap open ios",
     "android": "cap open android",
-    "icons:mobile": "cp public/logo.svg assets/logo.svg && npx -y @capacitor/assets@3 generate --ios --android --iconBackgroundColor '#0284c7' --iconBackgroundColorDark '#0284c7' --splashBackgroundColor '#ffffff' --splashBackgroundColorDark '#0f172a'"
+    "icons:mobile": "cp public/logo.svg assets/logo.svg && npx -y @capacitor/assets@3 generate --ios --android --iconBackgroundColor \"#0284c7\" --iconBackgroundColorDark \"#0284c7\" --splashBackgroundColor \"#ffffff\" --splashBackgroundColorDark \"#0f172a\""
   },
   "dependencies": {
     "@capacitor/android": "^8.5.2",
@@ -34,6 +34,7 @@
   },
   "devDependencies": {
     "@capacitor/cli": "^8.5.2",
+    "@vite-pwa/assets-generator": "^1.0.4",
     "@vitejs/plugin-vue": "^5.1.2",
     "autoprefixer": "^10.4.20",
     "postcss": "^8.4.41",
