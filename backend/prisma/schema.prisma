@@ -23,6 +23,18 @@ enum TraitCategory {
   WEAKNESS
 }
 
+// Critères de l'évaluation sportive (colonnes de Evaluation).
+enum EvaluationCriterion {
+  SERVICE
+  REMISE
+  COUP_DROIT
+  REVERS
+  DEPLACEMENTS
+  TACTIQUE
+  MENTAL
+  PHYSIQUE
+}
+
 enum CompetitionType {
   CHAMPIONSHIP
   TOURNAMENT
@@ -104,6 +116,7 @@ model Club {
   exercises   Exercise[]
   hourlyRates HourlyRate[]
   volunteerCaps VolunteerCap[]
+  evaluationItems EvaluationItem[]
 }
 
 // ---------- Saisons & utilisateurs ----------
@@ -311,21 +324,55 @@ model Evaluation {
   playerId     String
   coachId      String?
   date         DateTime @default(now())
-  service      Int
-  remise       Int
-  coupDroit    Int
-  revers       Int
-  deplacements Int
-  tactique     Int
-  mental       Int
-  physique     Int
+  service      Float
+  remise       Float
+  coupDroit    Float
+  revers       Float
+  deplacements Float
+  tactique     Float
+  mental       Float
+  physique     Float
   note         String?
   createdAt    DateTime @default(now())
 
-  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
-  coach  Coach? @relation(fields: [coachId], references: [id])
+  player     Player                @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  coach      Coach?                @relation(fields: [coachId], references: [id])
+  itemScores EvaluationItemScore[]
 
   @@index([playerId])
+}
+
+// Grille d'évaluation du club : pour chaque critère, une liste de points
+// notés de 1 à 5 ; la note du critère (sur 10) = moyenne des points x 2.
+// Un critère sans point défini se note directement sur 10.
+model EvaluationItem {
+  id        String              @id @default(cuid())
+  clubId    String
+  club      Club                @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  criterion EvaluationCriterion
+  label     String
+  position  Int                 @default(0)
+  createdAt DateTime            @default(now())
+
+  scores EvaluationItemScore[]
+
+  @@index([clubId, criterion])
+}
+
+// Note d'un point lors d'une évaluation. Critère et libellé sont recopiés :
+// supprimer ou renommer un point de la grille ne modifie pas l'historique.
+model EvaluationItemScore {
+  id               String              @id @default(cuid())
+  evaluationId     String
+  evaluationItemId String?
+  criterion        EvaluationCriterion
+  label            String
+  score            Int
+
+  evaluation     Evaluation      @relation(fields: [evaluationId], references: [id], onDelete: Cascade)
+  evaluationItem EvaluationItem? @relation(fields: [evaluationItemId], references: [id], onDelete: SetNull)
+
+  @@index([evaluationId])
 }
 
 model Equipment {

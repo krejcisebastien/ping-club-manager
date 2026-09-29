@@ -4,7 +4,7 @@ import Tag from "primevue/tag";
 import Avatar from "primevue/avatar";
 import Chart from "primevue/chart";
 import { fullName, initials } from "../../lib/name.js";
-import { usePlayerSpace, formatDate, formatRate } from "../../composables/usePlayerSpace.js";
+import { usePlayerSpace, formatDate, formatRate, formatScore } from "../../composables/usePlayerSpace.js";
 
 const {
   statsSeason, player, age, currentRanking, stats, latest, latestAverage, openPoints, evolutionNotes,
@@ -64,8 +64,8 @@ const {
         </div>
         <div class="h-64"><Chart type="radar" :data="radarData" :options="radarOptions" class="h-full" /></div>
         <p class="text-xs text-slate-500 mt-2">
-          Point fort : <strong>{{ strongestCriteria.label }}</strong> ({{ latest[strongestCriteria.key] }}/10) ·
-          à progresser : <strong>{{ weakestCriteria.label }}</strong> ({{ latest[weakestCriteria.key] }}/10)
+          Point fort : <strong>{{ strongestCriteria.label }}</strong> ({{ formatScore(latest[strongestCriteria.key]) }}/10) ·
+          à progresser : <strong>{{ weakestCriteria.label }}</strong> ({{ formatScore(latest[weakestCriteria.key]) }}/10)
         </p>
       </div>
       <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">

@@ -7,6 +7,7 @@ import Calendar from "primevue/calendar";
 import Dropdown from "primevue/dropdown";
 import Tag from "primevue/tag";
 import Slider from "primevue/slider";
+import Rating from "primevue/rating";
 import Chart from "primevue/chart";
 import { useToast } from "primevue/usetoast";
 import AppLayout from "../../components/AppLayout.vue";
@@ -17,6 +18,7 @@ import { toDateOnly } from "../../lib/date.js";
 import { useNavLinks } from "../../composables/useNavLinks.js";
 import { fullName } from "../../lib/name.js";
 import { RANKING_OPTIONS } from "../../lib/ranking.js";
+import { EVALUATION_CRITERIA, criterionScore, formatScore } from "../../lib/evaluation.js";
 
 const navLinks = useNavLinks();
 const route = useRoute();
@@ -36,16 +38,6 @@ const statusOptions = [
 const dominantHandOptions = [
   { label: "Droitier", value: "RIGHT" },
   { label: "Gaucher", value: "LEFT" },
-];
-const EVALUATION_CRITERIA = [
-  { key: "service", label: "Service", color: "#0ea5e9" },
-  { key: "remise", label: "Remise", color: "#8b5cf6" },
-  { key: "coupDroit", label: "Coup droit", color: "#f97316" },
-  { key: "revers", label: "Revers", color: "#22c55e" },
-  { key: "deplacements", label: "Déplacements", color: "#ef4444" },
-  { key: "tactique", label: "Tactique", color: "#eab308" },
-  { key: "mental", label: "Mental", color: "#14b8a6" },
-  { key: "physique", label: "Physique", color: "#6366f1" },
 ];
 const emptyEvaluation = () => ({
   service: 5,
@@ -188,7 +180,10 @@ async function loadAll() {
   await loadStats();
 }
 
-onMounted(loadAll);
+onMounted(() => {
+  loadAll();
+  loadGrid();
+});
 
 async function onSaveInfo() {
   savingInfo.value = true;
@@ -211,11 +206,28 @@ async function onAddRanking() {
   await loadAll();
 }
 
+// Grille d'évaluation du club : un critère qui a des points se note point par
+// point (1 à 5) ; sans point noté, sa note directe (curseur) est utilisée.
+const gridItems = ref([]);
+const itemScores = ref({});
+const gridByCriterion = computed(() =>
+  Object.fromEntries(EVALUATION_CRITERIA.map((c) => [c.criterion, gridItems.value.filter((i) => i.criterion === c.criterion)]))
+);
+const computedScore = (c) => criterionScore(gridByCriterion.value[c.criterion].map((i) => itemScores.value[i.id]).filter((v) => v > 0));
+
+async function loadGrid() {
+  gridItems.value = (await api.get("/evaluation-items")).data.items;
+}
+
 async function onAddEvaluation() {
   savingEvaluation.value = true;
   try {
-    await api.post(`/players/${playerId}/evaluations`, newEvaluation.value);
+    const items = gridItems.value
+      .filter((i) => itemScores.value[i.id] > 0)
+      .map((i) => ({ evaluationItemId: i.id, score: itemScores.value[i.id] }));
+    await api.post(`/players/${playerId}/evaluations`, { ...newEvaluation.value, items });
     newEvaluation.value = emptyEvaluation();
+    itemScores.value = {};
     toast.add({ severity: "success", summary: "Évaluation enregistrée", life: 3000 });
     await loadAll();
   } catch (err) {
@@ -418,13 +430,34 @@ function pointStatusSeverity(status) {
         </ul>
 
         <form class="grid gap-3" @submit.prevent="onAddEvaluation">
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div v-for="c in EVALUATION_CRITERIA" :key="c.key">
+          <p class="text-xs text-slate-400">
+            Les critères dotés de points d'évaluation se notent point par point (1 à 5, moyenne x 2) ; sans point noté, le curseur
+            donne la note directe. <RouterLink to="/admin/evaluation-grid" class="text-sky-600 hover:underline">Gérer la grille</RouterLink>
+          </p>
+          <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <div v-for="c in EVALUATION_CRITERIA" :key="c.key" :class="gridByCriterion[c.criterion].length ? 'rounded-lg border border-slate-200 p-3 sm:col-span-2' : ''">
               <div class="flex items-baseline justify-between mb-2">
                 <label class="text-xs text-slate-500">{{ c.label }}</label>
-                <span class="text-sm font-semibold tabular-nums" :style="{ color: c.color }">{{ newEvaluation[c.key] }}<span class="text-xs font-normal text-slate-400">/10</span></span>
+                <span class="text-sm font-semibold tabular-nums" :style="{ color: c.color }">
+                  {{ formatScore(computedScore(c) ?? newEvaluation[c.key]) }}<span class="text-xs font-normal text-slate-400">/10</span>
+                </span>
               </div>
-              <Slider v-model="newEvaluation[c.key]" :min="0" :max="10" :step="1" class="eval-slider" :style="{ '--slider-color': c.color }" />
+              <ul v-if="gridByCriterion[c.criterion].length" class="space-y-1.5 mb-2">
+                <li v-for="item in gridByCriterion[c.criterion]" :key="item.id" class="flex flex-wrap items-center gap-x-3 gap-y-0.5">
+                  <span class="flex-1 min-w-[9rem] text-sm text-slate-700">{{ item.label }}</span>
+                  <Rating v-model="itemScores[item.id]" :stars="5" class="eval-rating ml-auto" :style="{ '--rating-color': c.color }" />
+                </li>
+              </ul>
+              <Slider
+                v-if="computedScore(c) == null"
+                v-model="newEvaluation[c.key]"
+                :min="0"
+                :max="10"
+                :step="1"
+                class="eval-slider"
+                :style="{ '--slider-color': c.color }"
+              />
+              <p v-if="gridByCriterion[c.criterion].length && computedScore(c) == null" class="text-xs text-slate-400 mt-2">Aucun point noté : note directe.</p>
             </div>
           </div>
           <InputText v-model="newEvaluation.note" placeholder="Commentaire (optionnel)" class="w-full" />
