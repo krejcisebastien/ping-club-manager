@@ -1,0 +1,448 @@
+<title>Politique de confidentialité</title>
+<style>
+  :root {
+    /* layout: colonne de lecture centrée, bandeau d'identité en tête, sections numérotées */
+    --bg: #f7f9fb;
+    --surface: #ffffff;
+    --ink: #0f1b2a;
+    --ink-dim: #52606d;
+    --line: #e1e7ec;
+    --accent: #0284c7;
+    --accent-ink: #ffffff;
+    --warn-bg: #fff8e6;
+    --warn-line: #f0c869;
+    --warn-ink: #6b4e00;
+    --mono: #eef2f5;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0b1420;
+      --surface: #121d2c;
+      --ink: #e8edf2;
+      --ink-dim: #93a2b2;
+      --line: #223349;
+      --accent: #38bdf8;
+      --accent-ink: #06202e;
+      --warn-bg: #2a2308;
+      --warn-line: #6b5518;
+      --warn-ink: #f2d27a;
+      --mono: #0e1a28;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0b1420;
+    --surface: #121d2c;
+    --ink: #e8edf2;
+    --ink-dim: #93a2b2;
+    --line: #223349;
+    --accent: #38bdf8;
+    --accent-ink: #06202e;
+    --warn-bg: #2a2308;
+    --warn-line: #6b5518;
+    --warn-ink: #f2d27a;
+    --mono: #0e1a28;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Source Serif 4", Georgia, "Times New Roman", serif;
+    line-height: 1.65;
+    padding-inline: 20px;
+    padding-block: 32px;
+  }
+  .page {
+    max-width: 760px;
+    margin: 0 auto;
+  }
+
+  .masthead {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px 20px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid var(--ink);
+    margin-bottom: 28px;
+  }
+  .masthead .brand {
+    font-family: "Inter", system-ui, sans-serif;
+    font-weight: 700;
+    font-size: 1.2rem;
+    letter-spacing: -0.01em;
+  }
+  .masthead .meta {
+    font-family: "Inter", system-ui, sans-serif;
+    font-size: 0.8rem;
+    color: var(--ink-dim);
+  }
+
+  .notice {
+    background: var(--warn-bg);
+    border: 1px solid var(--warn-line);
+    color: var(--warn-ink);
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-family: "Inter", system-ui, sans-serif;
+    font-size: 0.85rem;
+    line-height: 1.55;
+    margin-bottom: 36px;
+  }
+  .notice strong { font-weight: 700; }
+
+  h1 {
+    font-family: "Inter", system-ui, sans-serif;
+    font-weight: 700;
+    font-size: clamp(1.7rem, 4vw, 2.3rem);
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+    margin: 0 0 10px;
+  }
+  .lede {
+    font-size: 1.05rem;
+    color: var(--ink-dim);
+    max-width: 62ch;
+    margin: 0 0 36px;
+  }
+
+  section { margin-bottom: 34px; }
+  section > h2 {
+    font-family: "Inter", system-ui, sans-serif;
+    font-weight: 700;
+    font-size: 1.05rem;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--line);
+    margin: 0 0 14px;
+  }
+  section > h2 .num {
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+    min-width: 1.6em;
+  }
+  h3 {
+    font-family: "Inter", system-ui, sans-serif;
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--ink);
+    margin: 20px 0 8px;
+  }
+  p { margin: 0 0 12px; max-width: 68ch; }
+  ul, ol { margin: 0 0 12px; padding-left: 1.3em; max-width: 64ch; }
+  li { margin-bottom: 6px; }
+  strong { font-weight: 700; }
+  a { color: var(--accent); }
+
+  .pill-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 16px; }
+  .pill {
+    font-family: "Inter", system-ui, sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+    background: var(--mono);
+    color: var(--ink-dim);
+    border-radius: 999px;
+    padding: 5px 12px;
+  }
+
+  .data-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 16px 18px;
+    margin-bottom: 14px;
+  }
+  .data-card h3 { margin-top: 0; }
+  .data-card .fields {
+    font-family: "Inter", system-ui, sans-serif;
+    font-size: 0.82rem;
+    color: var(--ink-dim);
+    line-height: 1.7;
+  }
+
+  .table-wrap { overflow-x: auto; margin-bottom: 14px; }
+  table {
+    width: 100%;
+    min-width: 560px;
+    border-collapse: collapse;
+    font-family: "Inter", system-ui, sans-serif;
+    font-size: 0.85rem;
+  }
+  caption { caption-side: bottom; text-align: left; font-size: 0.78rem; color: var(--ink-dim); padding-top: 8px; }
+  thead th {
+    text-align: left;
+    font-weight: 600;
+    color: var(--ink-dim);
+    font-size: 0.75rem;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    padding: 0 10px 8px;
+    border-bottom: 1px solid var(--ink);
+  }
+  tbody td {
+    padding: 10px 10px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+
+  .rights-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
+    margin: 10px 0 16px;
+  }
+  .right-item {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-family: "Inter", system-ui, sans-serif;
+  }
+  .right-item .t { font-weight: 600; font-size: 0.88rem; margin-bottom: 3px; }
+  .right-item .d { font-size: 0.78rem; color: var(--ink-dim); line-height: 1.5; }
+
+  .contact-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 18px 20px;
+    font-family: "Inter", system-ui, sans-serif;
+  }
+  .contact-card .role { font-size: 0.78rem; color: var(--ink-dim); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 2px; }
+  .contact-card .who { font-weight: 700; margin-bottom: 2px; }
+  .contact-card .mail { font-size: 0.9rem; }
+  .contact-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+
+  footer {
+    margin-top: 40px;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+    font-family: "Inter", system-ui, sans-serif;
+    font-size: 0.78rem;
+    color: var(--ink-dim);
+  }
+</style>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+
+<div class="page">
+
+  <div class="masthead">
+    <div class="brand">Ping Desk</div>
+    <div class="meta">Politique de confidentialité · dernière mise à jour : 1 octobre 2026</div>
+  </div>
+
+  <div class="notice">
+    <strong>Brouillon.</strong> Ce texte est rédigé à partir du fonctionnement réel de l'application, mais n'a pas encore été relu par un juriste. Vu la présence de données de mineurs, une relecture est recommandée avant publication définitive sur les stores — en particulier la section 9 (mineurs) et la confirmation de la région d'hébergement (section 6).
+  </div>
+
+  <h1>Politique de confidentialité</h1>
+  <p class="lede">
+    Cette politique explique quelles données l'application <strong>Ping Desk</strong> collecte, pourquoi, qui les reçoit,
+    et comment les joueurs, parents, entraineurs et bénévoles peuvent exercer leurs droits.
+  </p>
+
+  <section>
+    <h2><span class="num">1</span> Qui fait quoi</h2>
+    <p>
+      Ping Desk est un logiciel de gestion de club de tennis de table, utilisé par plusieurs clubs indépendamment les uns
+      des autres. Deux entités interviennent, avec des rôles distincts au sens du RGPD :
+    </p>
+    <div class="contact-grid">
+      <div class="contact-card">
+        <div class="role">Responsable de traitement</div>
+        <div class="who">Le club dont vous ou votre enfant êtes membre</div>
+        <div class="mail">C'est le club qui décide quelles données collecter sur ses membres (inscription, présences,
+          évaluations sportives...) et qui reste votre interlocuteur pour tout ce qui concerne votre dossier chez lui.</div>
+      </div>
+      <div class="contact-card">
+        <div class="role">Sous-traitant technique</div>
+        <div class="who">GCK Consulting</div>
+        <div class="mail">Édite et héberge le logiciel pour le compte des clubs, qui lui confient le traitement
+          technique de ces données (serveurs, sauvegardes, notifications...), sans les utiliser pour son propre compte.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">2</span> Comment les comptes fonctionnent</h2>
+    <p>
+      Les fiches des joueurs sont créées et gérées par le club (un entraineur ou un administrateur), pas par inscription
+      directe en ligne par le joueur. Un compte de connexion peut être <strong>familial</strong> : un seul identifiant
+      (email d'un parent, par exemple) peut donner accès à plusieurs fiches enfants.
+    </p>
+    <p>
+      La création d'un compte ne nécessite pas de confirmation d'email. Le mot de passe est transformé (haché) avant
+      stockage : personne, pas même le club ni GCK Consulting, ne peut le consulter en clair.
+    </p>
+  </section>
+
+  <section>
+    <h2><span class="num">3</span> Données collectées</h2>
+    <p>Selon votre rôle dans le club, les données suivantes peuvent être traitées :</p>
+
+    <div class="data-card">
+      <h3>Fiche joueur</h3>
+      <div class="fields">
+        Identité : nom, prénom, <strong>date de naissance</strong> (obligatoire), n° de licence fédérale · Coordonnées :
+        téléphone, nom et téléphone d'un contact d'urgence · Photo (optionnelle, stockée directement sur nos serveurs) ·
+        Main dominante, style de jeu · Suivi sportif : évaluations techniques périodiques, points forts/à travailler,
+        notes d'évolution rédigées par l'entraineur, classement, matériel déclaré · Présences aux entrainements et stages.
+      </div>
+    </div>
+
+    <div class="data-card">
+      <h3>Compte de connexion</h3>
+      <div class="fields">
+        Email, mot de passe (haché), rôle (administrateur / entraineur / joueur), appareils enregistrés pour les
+        notifications (identifiant technique de l'appareil, aucune autre donnée transmise à cette occasion).
+      </div>
+    </div>
+
+    <div class="data-card">
+      <h3>Entraineurs et partenaires d'entrainement bénévoles</h3>
+      <div class="fields">
+        Identité, coordonnées, adresse postale et <strong>numéro de compte bancaire (IBAN)</strong> — utilisés
+        uniquement pour établir les notes de défraiement de volontariat, à la demande du club.
+      </div>
+    </div>
+
+    <div class="data-card">
+      <h3>Résultats de compétition</h3>
+      <div class="fields">
+        Importés depuis la fédération (AFTT/TabT) à partir du numéro de licence du joueur : classement, points,
+        résultats de matchs. Ces résultats mentionnent aussi l'identité des <strong>adversaires</strong> rencontrés
+        (nom, club, classement) — des personnes non inscrites sur Ping Desk, dont les données publiques fédérales sont
+        reprises telles que publiées par la fédération.
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">4</span> Pourquoi ces données</h2>
+    <ul>
+      <li><strong>Gestion de l'adhésion</strong> au club : inscription, groupes, présences, stages — nécessaire à l'exécution de votre relation avec le club.</li>
+      <li><strong>Suivi sportif et pédagogique</strong> : évaluations, classements, plans d'entrainement — intérêt légitime du club à faire progresser ses membres.</li>
+      <li><strong>Sécurité</strong> : contact d'urgence, en cas d'incident pendant une activité du club.</li>
+      <li><strong>Notifications</strong> : uniquement si vous avez autorisé les notifications sur votre appareil.</li>
+      <li><strong>Défraiement des bénévoles</strong> : obligation légale de justification des indemnités de volontariat.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2><span class="num">5</span> Qui reçoit ces données</h2>
+    <p>Aucune donnée n'est vendue ni utilisée à des fins publicitaires. Certains prestataires techniques y ont accès, strictement pour faire fonctionner l'application :</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Prestataire</th><th>Rôle</th><th>Données concernées</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Render</td><td>Hébergement du serveur et de la base de données</td><td>L'ensemble des données ci-dessus</td></tr>
+          <tr><td>Resend</td><td>Envoi d'email de réinitialisation de mot de passe</td><td>Adresse email</td></tr>
+          <tr><td>Firebase (Google)</td><td>Notifications push sur l'appareil mobile</td><td>Identifiant technique de l'appareil, contenu du message</td></tr>
+          <tr><td>Stripe</td><td>Paiement de l'abonnement du club (si applicable)</td><td>Email et moyen de paiement de l'administrateur payeur du club — jamais les données des joueurs</td></tr>
+          <tr><td>AFTT / TabT</td><td>Fédération belge de tennis de table</td><td>Numéro de licence, en échange des résultats et classements officiels</td></tr>
+          <tr><td>Google (génération assistée)</td><td>Suggestion d'exercices et de plans d'entrainement</td><td>Critères pédagogiques génériques, aucune donnée de joueur identifié</td></tr>
+        </tbody>
+        <caption>Liste à jour au 1 octobre 2026. Chacun de ces prestataires n'a accès qu'aux données strictement nécessaires à son rôle.</caption>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">6</span> Où les données sont stockées</h2>
+    <p>
+      Les serveurs sont hébergés chez Render. <strong>La région exacte d'hébergement est en cours de confirmation</strong> ;
+      sauf configuration régionale spécifique, l'hébergeur stocke par défaut aux États-Unis. Lorsqu'un transfert hors
+      de l'Union européenne a lieu, il s'appuie sur les garanties prévues par le RGPD (clauses contractuelles types).
+    </p>
+  </section>
+
+  <section>
+    <h2><span class="num">7</span> Combien de temps</h2>
+    <p>
+      Les données sont conservées tant que le compte ou la fiche joueur reste actif au sein du club. La suppression
+      d'une fiche joueur ou d'un compte par le club entraine la suppression <strong>définitive et immédiate</strong> de
+      toutes les données associées (évaluations, présences, notes, historique de classement) — il n'existe pas de
+      corbeille ni de récupération a posteriori.
+    </p>
+  </section>
+
+  <section>
+    <h2><span class="num">8</span> Sur votre appareil</h2>
+    <p>
+      L'application garde un jeton de connexion sur votre téléphone ou votre ordinateur (stockage local du navigateur)
+      pour éviter de vous reconnecter à chaque ouverture. Aucun cookie publicitaire, aucun outil de mesure d'audience ou
+      de suivi n'est utilisé.
+    </p>
+  </section>
+
+  <section>
+    <h2><span class="num">9</span> Mineurs</h2>
+    <p>
+      La majorité des joueurs suivis par l'application sont mineurs. Leur fiche est créée et administrée par le club,
+      en lien avec leurs parents ou responsables légaux lors de l'inscription au club — l'application elle-même ne
+      collecte pas de données directement auprès d'un enfant en ligne. Un parent peut, via son propre compte, consulter
+      les données de ses enfants rattachés et exercer les droits décrits ci-dessous en leur nom.
+    </p>
+  </section>
+
+  <section>
+    <h2><span class="num">10</span> Vos droits</h2>
+    <p>Pour toute donnée vous concernant (ou concernant un enfant dont vous êtes responsable légal), vous pouvez :</p>
+    <div class="rights-grid">
+      <div class="right-item"><div class="t">Accéder</div><div class="d">obtenir une copie des données détenues</div></div>
+      <div class="right-item"><div class="t">Rectifier</div><div class="d">corriger une information inexacte</div></div>
+      <div class="right-item"><div class="t">Effacer</div><div class="d">demander la suppression du dossier</div></div>
+      <div class="right-item"><div class="t">Vous opposer</div><div class="d">à un traitement précis</div></div>
+      <div class="right-item"><div class="t">Portabilité</div><div class="d">récupérer vos données dans un format exploitable</div></div>
+    </div>
+    <p>
+      Adressez votre demande en priorité à votre club, qui reste responsable de votre dossier. Vous pouvez aussi
+      contacter GCK Consulting (coordonnées ci-dessous), qui transmettra. Vous disposez également d'un droit de
+      réclamation auprès de l'<a href="https://www.autoriteprotectiondonnees.be" target="_blank" rel="noopener">Autorité de protection des données</a> belge.
+    </p>
+  </section>
+
+  <section>
+    <h2><span class="num">11</span> Sécurité</h2>
+    <p>
+      Les échanges entre l'application et le serveur sont chiffrés (HTTPS). Les mots de passe sont hachés. L'accès aux
+      données d'un club est strictement cloisonné : aucun autre club utilisant Ping Desk ne peut voir ses données, et
+      chaque rôle (administrateur, entraineur, joueur) n'a accès qu'à ce qui le concerne.
+    </p>
+  </section>
+
+  <section>
+    <h2><span class="num">12</span> Modifications</h2>
+    <p>
+      Cette politique peut évoluer, notamment avec l'arrivée de nouvelles fonctionnalités. La date de dernière mise à
+      jour figure en haut de page. En cas de changement important, les clubs utilisateurs en seront informés.
+    </p>
+  </section>
+
+  <section>
+    <h2><span class="num">13</span> Contact</h2>
+    <div class="pill-row">
+      <span class="pill">GCK Consulting</span>
+    </div>
+    <div class="contact-card">
+      <div class="role">Demandes RGPD et questions techniques</div>
+      <div class="who">Sébastien Krejci — GCK Consulting</div>
+      <div class="mail">sebastien.krejci@gckconsulting.be</div>
+    </div>
+  </section>
+
+  <footer>
+    Ping Desk est un produit de GCK Consulting, utilisé sous licence par les clubs de tennis de table abonnés.
+  </footer>
+
+</div>
