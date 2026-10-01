@@ -96,13 +96,13 @@ model Club {
   stripeCustomerId     String?   @unique
   stripeSubscriptionId String?
 
-  seasons     Season[]
-  users       User[]
-  players     Player[]
-  coaches     Coach[]
-  sparrings   Sparring[]
-  exercises   Exercise[]
-  hourlyRates HourlyRate[]
+  seasons       Season[]
+  users         User[]
+  players       Player[]
+  coaches       Coach[]
+  sparrings     Sparring[]
+  exercises     Exercise[]
+  hourlyRates   HourlyRate[]
   volunteerCaps VolunteerCap[]
 }
 
@@ -144,12 +144,27 @@ model User {
   resetTokenHash      String?
   resetTokenExpiresAt DateTime?
 
-  players UserPlayer[]
+  players    UserPlayer[]
+  pushTokens PushToken[]
 
   coachId String? @unique
   coach   Coach?  @relation(fields: [coachId], references: [id])
 
   @@index([clubId])
+}
+
+// Jeton FCM d'un appareil (iOS/Android) sur lequel ce compte est connecté dans
+// l'app native — sert à cibler les notifications push. Un compte peut avoir
+// plusieurs appareils ; un jeton peut se réattribuer (réinstall, autre compte).
+model PushToken {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  platform  String // "ios" | "android"
+  createdAt DateTime @default(now())
+
+  @@index([userId])
 }
 
 // Association many-to-many : un compte (ex. parent) peut voir la fiche de
@@ -191,21 +206,21 @@ model Player {
   competitionSyncedAt  DateTime?
   competitionSyncError String?
 
-  users             UserPlayer[]
-  playerSeasons     PlayerSeason[]
-  rankingHistories  RankingHistory[]
-  evaluations       Evaluation[]
-  equipment         Equipment[]
-  traits            PlayerTrait[]
-  pointsToWork      PointToWork[]
-  evolutionNotes    EvolutionNote[]
-  media             PlayerMedia[]
-  groupAssignments  PlayerGroupAssignment[]
-  attendances       Attendance[]
-  campEnrollments   CampPeriodGroupPlayer[]
-  campAttendances   CampAttendance[]
-  sparringProfile   Sparring?
-  campRegistrations CampPlayer[]
+  users              UserPlayer[]
+  playerSeasons      PlayerSeason[]
+  rankingHistories   RankingHistory[]
+  evaluations        Evaluation[]
+  equipment          Equipment[]
+  traits             PlayerTrait[]
+  pointsToWork       PointToWork[]
+  evolutionNotes     EvolutionNote[]
+  media              PlayerMedia[]
+  groupAssignments   PlayerGroupAssignment[]
+  attendances        Attendance[]
+  campEnrollments    CampPeriodGroupPlayer[]
+  campAttendances    CampAttendance[]
+  sparringProfile    Sparring?
+  campRegistrations  CampPlayer[]
   competitionSeasons CompetitionSeason[]
   competitionResults CompetitionResult[]
   competitionPoints  CompetitionPoints[]

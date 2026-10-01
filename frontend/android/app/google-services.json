@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "31868495535",
+    "project_id": "pingdesk-2454f",
+    "storage_bucket": "pingdesk-2454f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:31868495535:android:f2904c99d4f10e638b165a",
+        "android_client_info": {
+          "package_name": "be.gckconsulting.pingdesk"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDKMM5ynQVCQnVaJSJl2oF2yfWcDqV4PKg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

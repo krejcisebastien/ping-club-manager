@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import { api } from "../lib/api.js";
 import { defaultRole } from "../lib/roles.js";
+import { registerPushToken, unregisterPushToken } from "../lib/push.js";
 
 export const useAuthStore = defineStore("auth", {
   state: () => ({
@@ -33,6 +34,10 @@ export const useAuthStore = defineStore("auth", {
       this.user = data.user;
       this.syncActiveRole();
       await this.fetchLicense();
+      // Best-effort : une app native enregistre son appareil pour les
+      // notifications push. Jamais bloquant pour la connexion (web, PWA,
+      // permission refusée, FCM indisponible...).
+      registerPushToken().catch(() => {});
       return data.user;
     },
     async login(email, password) {
@@ -53,6 +58,7 @@ export const useAuthStore = defineStore("auth", {
       }
     },
     logout() {
+      unregisterPushToken().catch(() => {});
       localStorage.removeItem("token");
       localStorage.removeItem("activeRole");
       this.user = null;
@@ -77,6 +83,7 @@ export const useAuthStore = defineStore("auth", {
         this.user = data.user;
         this.syncActiveRole();
         await this.fetchLicense();
+        registerPushToken().catch(() => {});
       } catch {
         localStorage.removeItem("token");
         this.user = null;

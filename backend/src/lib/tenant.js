@@ -9,6 +9,7 @@ import { prisma } from "./prisma.js";
 const PATHS = {
   Season: [],
   User: [],
+  PushToken: ["user"],
   Player: [],
   Coach: [],
   Sparring: [],

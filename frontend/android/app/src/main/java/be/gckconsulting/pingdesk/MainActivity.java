@@ -1,4 +1,4 @@
-package be.gckconsulting.pingclubmanager;
+package be.gckconsulting.pingdesk;
 
 import com.getcapacitor.BridgeActivity;
 

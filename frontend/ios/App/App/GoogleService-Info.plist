@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>API_KEY</key>
+	<string>AIzaSyCdL9YNIv8KIVEfqGwj9ol9kAPcvhMSxlE</string>
+	<key>GCM_SENDER_ID</key>
+	<string>31868495535</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>be.gckconsulting.pingdesk</string>
+	<key>PROJECT_ID</key>
+	<string>pingdesk-2454f</string>
+	<key>STORAGE_BUCKET</key>
+	<string>pingdesk-2454f.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:31868495535:ios:1899225a252179b88b165a</string>
+</dict>
+</plist>

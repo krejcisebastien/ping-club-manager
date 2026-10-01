@@ -45,6 +45,22 @@ function onLogout() {
   router.push("/login");
 }
 
+// Phase de test des notifications push, réservée à ce compte (vérifié aussi
+// côté serveur : masquer le bouton ne suffit pas à restreindre l'accès).
+const PUSH_TEST_EMAIL = "seb.krejci@live.com";
+const sendingReminder = ref(false);
+async function onSendReminder() {
+  sendingReminder.value = true;
+  try {
+    const { data } = await api.post("/push/reminder", { message: "Rappel depuis Ping Club Manager" });
+    toast.add({ severity: "success", summary: `Notification envoyée (${data.sent} appareil(s))`, life: 3000 });
+  } catch (err) {
+    toast.add({ severity: "error", summary: "Erreur", detail: err.response?.data?.error ?? "Une erreur est survenue.", life: 5000 });
+  } finally {
+    sendingReminder.value = false;
+  }
+}
+
 const passwordDialogVisible = ref(false);
 const passwordForm = ref({ currentPassword: "", newPassword: "", confirmPassword: "" });
 const passwordSaving = ref(false);
@@ -120,6 +136,17 @@ async function onChangePassword() {
         <div class="flex items-center gap-2">
           <Avatar :label="initials(auth.user?.email)" shape="circle" class="bg-sky-100 text-sky-700 shrink-0" />
           <span class="text-sm text-slate-600 truncate flex-1">{{ auth.user?.email }}</span>
+          <Button
+            v-if="auth.user?.email === PUSH_TEST_EMAIL"
+            icon="pi pi-bell"
+            severity="secondary"
+            text
+            rounded
+            :loading="sendingReminder"
+            aria-label="Envoyer un rappel (test)"
+            title="Envoyer un rappel (test)"
+            @click="onSendReminder"
+          />
           <Button icon="pi pi-lock" severity="secondary" text rounded aria-label="Changer le mot de passe" @click="openPasswordDialog" />
           <Button icon="pi pi-sign-out" severity="secondary" text rounded aria-label="Déconnexion" @click="onLogout" />
         </div>
@@ -162,6 +189,17 @@ async function onChangePassword() {
         <div class="flex items-center gap-2">
           <Avatar :label="initials(auth.user?.email)" shape="circle" class="bg-sky-100 text-sky-700 shrink-0" />
           <span class="text-sm text-slate-600 truncate flex-1">{{ auth.user?.email }}</span>
+          <Button
+            v-if="auth.user?.email === PUSH_TEST_EMAIL"
+            icon="pi pi-bell"
+            severity="secondary"
+            text
+            rounded
+            :loading="sendingReminder"
+            aria-label="Envoyer un rappel (test)"
+            title="Envoyer un rappel (test)"
+            @click="onSendReminder"
+          />
           <Button icon="pi pi-lock" severity="secondary" text rounded aria-label="Changer le mot de passe" @click="openPasswordDialog" />
           <Button icon="pi pi-sign-out" severity="secondary" text rounded aria-label="Déconnexion" @click="onLogout" />
         </div>

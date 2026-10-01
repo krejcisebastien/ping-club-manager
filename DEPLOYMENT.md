@@ -114,7 +114,7 @@ embarque l'interface : une nouvelle version passe par une nouvelle soumission au
 L'API autorise les origines `capacitor://localhost` (iOS) et `https://localhost` (Android).
 
 Publication : compte Apple Developer (99 $/an) et Google Play Console (25 $ une fois).
-L'identifiant `be.gckconsulting.pingclubmanager` (capacitor.config.json) est définitif
+L'identifiant `be.gckconsulting.pingdesk` (capacitor.config.json) est définitif
 une fois l'app publiée.
 
 ## Ce qui n'est pas encore là
