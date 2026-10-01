@@ -3,6 +3,7 @@ import { requireAuth, requireRole, requireSelfPlayerOrRole } from "../middleware
 import { hoursBetween } from "../utils/occurrences.js";
 import { isRanking, RANKINGS } from "../lib/rankings.js";
 import { parseLicence, syncPlayer, TabtError } from "../lib/tabt.js";
+import { CRITERIA, CRITERION_KEYS, criterionScore } from "../lib/evaluation.js";
 
 const router = Router();
 
@@ -187,28 +188,55 @@ router.post("/:id/rankings", requireRole("ADMIN", "COACH"), async (req, res) => 
 
 // ---------- Évaluation sportive (score /10 par critère) ----------
 
-const EVALUATION_CRITERIA = ["service", "remise", "coupDroit", "revers", "deplacements", "tactique", "mental", "physique"];
-
+// Chaque critère est noté sur 10 : soit par la moyenne (x 2) des points de la
+// grille d'évaluation du club notés de 1 à 5 (items), soit directement quand
+// aucun point de ce critère n'est noté.
 router.get("/:id/evaluations", requireSelfPlayerOrRole("id", "ADMIN", "COACH"), async (req, res) => {
   const evaluations = await req.db.evaluation.findMany({
     where: { playerId: req.params.id },
     orderBy: { date: "desc" },
+    include: { itemScores: { orderBy: { id: "asc" } } },
   });
   res.json({ evaluations });
 });
 
 router.post("/:id/evaluations", requireRole("ADMIN", "COACH"), async (req, res) => {
   const { note } = req.body ?? {};
+  const items = req.body?.items ?? [];
+  if (!Array.isArray(items)) return res.status(400).json({ error: "items doit être un tableau." });
+  for (const i of items) {
+    if (typeof i?.evaluationItemId !== "string" || !Number.isInteger(i.score) || i.score < 1 || i.score > 5) {
+      return res.status(400).json({ error: "Chaque point d'évaluation doit être noté de 1 à 5." });
+    }
+  }
+  const ids = items.map((i) => i.evaluationItemId);
+  if (new Set(ids).size !== ids.length) return res.status(400).json({ error: "Un point d'évaluation est noté deux fois." });
+  const gridItems = ids.length ? await req.db.evaluationItem.findMany({ where: { id: { in: ids } } }) : [];
+  if (gridItems.length !== ids.length) return res.status(404).json({ error: "Point d'évaluation introuvable." });
+  const gridById = new Map(gridItems.map((g) => [g.id, g]));
+  const itemScores = items.map((i) => {
+    const g = gridById.get(i.evaluationItemId);
+    return { evaluationItemId: g.id, criterion: g.criterion, label: g.label, score: i.score };
+  });
+
   const scores = {};
-  for (const key of EVALUATION_CRITERIA) {
+  for (const key of CRITERION_KEYS) {
+    const rated = itemScores.filter((i) => i.criterion === CRITERIA[key]).map((i) => i.score);
+    if (rated.length) {
+      scores[key] = criterionScore(rated);
+      continue;
+    }
     const value = req.body?.[key];
     if (!Number.isInteger(value) || value < 0 || value > 10) {
-      return res.status(400).json({ error: `${key} doit être un entier entre 0 et 10.` });
+      return res.status(400).json({ error: `${key} doit être un entier entre 0 et 10 (ou noté par ses points d'évaluation).` });
     }
     scores[key] = value;
   }
+  const player = await req.db.player.findUnique({ where: { id: req.params.id }, select: { id: true } });
+  if (!player) return res.status(404).json({ error: "Joueur introuvable." });
   const evaluation = await req.db.evaluation.create({
-    data: { playerId: req.params.id, coachId: req.user.coachId ?? null, note, ...scores },
+    data: { playerId: req.params.id, coachId: req.user.coachId ?? null, note, ...scores, itemScores: { create: itemScores } },
+    include: { itemScores: true },
   });
   res.status(201).json({ evaluation });
 });

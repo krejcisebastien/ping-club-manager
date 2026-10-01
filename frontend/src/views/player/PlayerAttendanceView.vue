@@ -21,7 +21,7 @@ const { attendances, campAttendances, stats } = usePlayerSpace();
       </div>
     </div>
 
-    <div class="grid gap-4 lg:grid-cols-2">
+    <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
       <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
         <p class="text-sm font-medium text-slate-600 mb-2">Entrainements</p>
         <ul class="divide-y divide-slate-100 text-sm">

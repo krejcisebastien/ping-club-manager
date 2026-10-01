@@ -1,16 +1,8 @@
 import { ref, computed, provide, inject } from "vue";
 import { api } from "../lib/api.js";
+import { EVALUATION_CRITERIA } from "../lib/evaluation.js";
 
-export const EVALUATION_CRITERIA = [
-  { key: "service", label: "Service", color: "#0ea5e9" },
-  { key: "remise", label: "Remise", color: "#8b5cf6" },
-  { key: "coupDroit", label: "Coup droit", color: "#f97316" },
-  { key: "revers", label: "Revers", color: "#22c55e" },
-  { key: "deplacements", label: "Déplacements", color: "#ef4444" },
-  { key: "tactique", label: "Tactique", color: "#eab308" },
-  { key: "mental", label: "Mental", color: "#14b8a6" },
-  { key: "physique", label: "Physique", color: "#6366f1" },
-];
+export { EVALUATION_CRITERIA, formatScore } from "../lib/evaluation.js";
 
 export const POINT_STATUS = {
   OPEN: { label: "à faire", severity: "warn" },

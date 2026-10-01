@@ -132,7 +132,7 @@ async function onCreate() {
     </DataTable>
 
     <Dialog v-model:visible="dialogVisible" header="Nouveau stage" modal style="width: 28rem" class="mx-4">
-      <form class="grid gap-3 sm:grid-cols-2" @submit.prevent="onCreate">
+      <form class="grid grid-cols-1 gap-3 sm:grid-cols-2" @submit.prevent="onCreate">
         <InputText v-model="form.name" placeholder="Nom" required class="sm:col-span-2 w-full" />
         <InputText v-model="form.location" placeholder="Lieu (optionnel)" class="sm:col-span-2 w-full" />
         <Calendar v-model="form.startDate" date-format="dd/mm/yy" show-icon placeholder="Début" required class="w-full" input-class="w-full" />

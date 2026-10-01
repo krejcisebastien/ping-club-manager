@@ -91,7 +91,7 @@ function formatDate(d) {
 
 <template>
   <AppLayout title="Espace administrateur" :nav-links="navLinks">
-    <div class="grid gap-4 sm:grid-cols-3 mb-6">
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-3 mb-6">
       <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
         <p class="text-sm text-slate-500">Saisons</p>
         <p class="text-2xl font-semibold">{{ seasons.length }}</p>
@@ -149,7 +149,7 @@ function formatDate(d) {
     </DataTable>
 
     <Dialog v-model:visible="dialogVisible" :header="editingId ? 'Modifier la saison' : 'Nouvelle saison'" modal style="width: 26rem" class="mx-4">
-      <form class="grid gap-3 pt-2" @submit.prevent="onSave">
+      <form class="grid grid-cols-1 gap-3 pt-2" @submit.prevent="onSave">
         <div>
           <label class="text-xs text-slate-500 block mb-1">Nom</label>
           <InputText v-model="form.name" required class="w-full" />

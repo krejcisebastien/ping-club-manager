@@ -103,7 +103,7 @@ export const HELP_CHAPTERS = [
         id: "player-evaluation",
         title: "Mon évaluation",
         body: `
-<p>Ton entraineur t'évalue sur 8 critères notés sur 10 : service, remise, coup droit, revers, déplacements, tactique, mental et physique.</p>
+<p>Ton entraineur t'évalue sur 8 critères notés sur 10 : service, remise, coup droit, revers, déplacements, tactique, mental et physique. Quand un critère est découpé en points (ex. placement, effet), chaque point est noté de 1 à 5 et leur détail s'affiche sous le critère.</p>
 <ul>
   <li>Les flèches <strong>▲ / ▼</strong> montrent ta progression depuis l'évaluation précédente.</li>
   <li>Le <strong>radar</strong> compare ta dernière évaluation (trait plein) à la précédente (pointillés).</li>
@@ -195,7 +195,8 @@ export const HELP_CHAPTERS = [
   <li><strong>Signalétique</strong> : coordonnées, n° de licence, main dominante, style de jeu, contact d'urgence.</li>
   <li><strong>Statistiques</strong> de présence par saison.</li>
   <li><strong>Classement</strong> : choisis la saison et le classement, puis <strong>Ajouter</strong>.</li>
-  <li><strong>Évaluation sportive</strong> : règle les 8 curseurs (0 à 10), ajoute un commentaire puis <strong>Enregistrer l'évaluation</strong>. Le joueur la voit dans son espace.</li>
+  <li><strong>Évaluation sportive</strong> : note chaque critère, ajoute un commentaire puis <strong>Enregistrer l'évaluation</strong>. Le joueur la voit dans son espace. Un critère qui a des points dans la <strong>Grille d'évaluation</strong> se note point par point (1 à 5) : sa note sur 10 est la moyenne des points notés x 2. Sans point noté, le curseur (0 à 10) donne la note directe.</li>
+  <li><strong>Grille d'évaluation</strong> (menu) : pour chaque critère, ajoute, renomme ou supprime les points d'évaluation du club. Les évaluations déjà enregistrées gardent leurs points.</li>
   <li><strong>Matériel</strong> : ajoute une raquette ou un revêtement ; <strong>clôturer</strong> le retire du matériel actuel en gardant l'historique.</li>
   <li><strong>Points forts / défauts</strong>, <strong>Points à travailler</strong> (avec leur état) et <strong>Notes d'évolution</strong>.</li>
 </ul>`,

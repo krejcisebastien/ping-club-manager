@@ -251,7 +251,7 @@ const calendarOptions = computed(() => ({
     <div v-if="camp" class="space-y-4">
       <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
         <p class="text-sm font-medium text-slate-600 mb-3">Informations</p>
-        <form class="grid gap-3 sm:grid-cols-2" @submit.prevent="onSaveInfo">
+        <form class="grid grid-cols-1 gap-3 sm:grid-cols-2" @submit.prevent="onSaveInfo">
           <InputText v-model="editForm.name" placeholder="Nom" required class="w-full" />
           <InputText v-model="editForm.location" placeholder="Lieu" class="w-full" />
           <Calendar v-model="editForm.startDate" date-format="dd/mm/yy" show-icon required class="w-full" input-class="w-full" />
@@ -261,9 +261,9 @@ const calendarOptions = computed(() => ({
       </div>
 
       <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-        <div class="flex items-center justify-between mb-3">
-          <p class="text-sm font-medium text-slate-600">Groupes du stage (initiation, perfectionnement…)</p>
-          <Button label="Ajouter" icon="pi pi-plus" size="small" @click="openCreateGroup" />
+        <div class="flex items-center justify-between gap-3 mb-3">
+          <p class="text-sm font-medium text-slate-600 min-w-0">Groupes du stage (initiation, perfectionnement…)</p>
+          <Button label="Ajouter" icon="pi pi-plus" size="small" class="shrink-0" @click="openCreateGroup" />
         </div>
         <ul class="divide-y divide-slate-100">
           <li v-for="g in camp.groups" :key="g.id" class="py-2 flex items-center justify-between gap-2">
@@ -353,7 +353,7 @@ const calendarOptions = computed(() => ({
     </div>
 
     <Dialog v-model:visible="groupDialogVisible" header="Nouveau groupe" modal style="width: 24rem" class="mx-4">
-      <form class="grid gap-3" @submit.prevent="onSaveGroup">
+      <form class="grid grid-cols-1 gap-3" @submit.prevent="onSaveGroup">
         <InputText v-model="groupForm.name" placeholder="Nom du groupe" required class="w-full" />
         <div class="flex justify-end gap-2">
           <Button type="button" label="Annuler" severity="secondary" outlined @click="groupDialogVisible = false" />
@@ -363,7 +363,7 @@ const calendarOptions = computed(() => ({
     </Dialog>
 
     <Dialog v-model:visible="dayDialogVisible" header="Ajouter des journées" modal style="width: 28rem" class="mx-4">
-      <form class="grid gap-3 sm:grid-cols-2" @submit.prevent="onAddDay">
+      <form class="grid grid-cols-1 gap-3 sm:grid-cols-2" @submit.prevent="onAddDay">
         <Calendar v-model="newDayRange.startDate" date-format="dd/mm/yy" show-icon placeholder="Du" required class="w-full" input-class="w-full" />
         <Calendar v-model="newDayRange.endDate" date-format="dd/mm/yy" show-icon placeholder="Au" required class="w-full" input-class="w-full" />
         <p class="text-xs text-slate-400 sm:col-span-2 -mt-1">Une seule journée ? Choisis la même date pour "Du" et "Au".</p>
@@ -379,7 +379,7 @@ const calendarOptions = computed(() => ({
     </Dialog>
 
     <Dialog v-model:visible="generatePeriodDialogVisible" header="Générer une période" modal style="width: 28rem" class="mx-4">
-      <form class="grid gap-3 sm:grid-cols-2" @submit.prevent="onGeneratePeriod">
+      <form class="grid grid-cols-1 gap-3 sm:grid-cols-2" @submit.prevent="onGeneratePeriod">
         <InputText v-model="generatePeriodForm.label" placeholder="Matinée, après-midi, soirée…" required class="sm:col-span-2 w-full" />
         <Calendar v-model="generatePeriodForm.startTime" time-only hour-format="24" placeholder="Début" required class="w-full" input-class="w-full" />
         <Calendar v-model="generatePeriodForm.endTime" time-only hour-format="24" placeholder="Fin" required class="w-full" input-class="w-full" />
@@ -394,7 +394,7 @@ const calendarOptions = computed(() => ({
     </Dialog>
 
     <Dialog v-model:visible="periodDialogVisible" :header="periodForm.id ? 'Modifier la période' : 'Nouvelle période'" modal style="width: 26rem" class="mx-4">
-      <form class="grid gap-3 sm:grid-cols-2" @submit.prevent="onSavePeriod">
+      <form class="grid grid-cols-1 gap-3 sm:grid-cols-2" @submit.prevent="onSavePeriod">
         <InputText v-model="periodForm.label" placeholder="Matinée, après-midi…" required class="sm:col-span-2 w-full" />
         <Calendar v-model="periodForm.startTime" time-only hour-format="24" placeholder="Début" class="w-full" input-class="w-full" />
         <Calendar v-model="periodForm.endTime" time-only hour-format="24" placeholder="Fin" class="w-full" input-class="w-full" />

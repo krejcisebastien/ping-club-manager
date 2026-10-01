@@ -16,9 +16,11 @@ const PATHS = {
   HourlyRate: [],
   VolunteerCap: [],
   Exercise: [],
+  EvaluationItem: [],
   PlayerSeason: ["player"],
   RankingHistory: ["player"],
   Evaluation: ["player"],
+  EvaluationItemScore: ["evaluation", "player"],
   Equipment: ["player"],
   PlayerTrait: ["player"],
   PointToWork: ["player"],
@@ -67,6 +69,8 @@ const FK_MODEL = {
   campPeriodGroupId: "CampPeriodGroup",
   userId: "User",
   createdById: "Coach",
+  evaluationId: "Evaluation",
+  evaluationItemId: "EvaluationItem",
 };
 
 // Champs Json libres : on n'y cherche pas de clés étrangères.

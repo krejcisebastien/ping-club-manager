@@ -149,7 +149,7 @@ function weekdayLabel(w) {
     </DataTable>
 
     <Dialog v-model:visible="dialogVisible" header="Nouvel entrainement" modal style="width: 28rem" class="mx-4">
-      <form class="grid gap-3 sm:grid-cols-2" @submit.prevent="onCreate">
+      <form class="grid grid-cols-1 gap-3 sm:grid-cols-2" @submit.prevent="onCreate">
         <InputText v-model="form.name" placeholder="Nom" required class="sm:col-span-2 w-full" />
         <Dropdown v-model="form.groupId" :options="groups" option-label="name" option-value="id" placeholder="Groupe…" required class="sm:col-span-2 w-full" />
         <Dropdown v-model="form.weekday" :options="weekdayOptions" option-label="label" option-value="value" placeholder="Jour de semaine…" class="sm:col-span-2 w-full" />

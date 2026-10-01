@@ -36,6 +36,12 @@ const routes = [
     meta: { roles: ["ADMIN", "COACH"] },
   },
   {
+    path: "/admin/evaluation-grid",
+    name: "admin-evaluation-grid",
+    component: () => import("../views/admin/EvaluationGridView.vue"),
+    meta: { roles: ["ADMIN", "COACH"] },
+  },
+  {
     path: "/admin/coaches",
     name: "admin-coaches",
     component: () => import("../views/admin/CoachesView.vue"),

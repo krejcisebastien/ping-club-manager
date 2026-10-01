@@ -359,6 +359,48 @@ try {
   });
   expect("un score hors 0-10 est refusé", evalBadScore.status === 400, `status ${evalBadScore.status}`);
 
+  // ---------- Grille d'évaluation (points notés de 1 à 5 par critère) ----------
+  const itemA1 = (await post(A.token, "/evaluation-items", { criterion: "SERVICE", label: "Placement" })).item;
+  const itemA2 = (await post(A.token, "/evaluation-items", { criterion: "SERVICE", label: "Effet" })).item;
+  const itemA3 = (await post(A.token, "/evaluation-items", { criterion: "SERVICE", label: "Variété" })).item;
+  const itemB = (await post(B.token, "/evaluation-items", { criterion: "MENTAL", label: "Concentration" })).item;
+  expect("A crée des points d'évaluation", itemA1?.id && itemA2?.id && itemA3?.id && itemA2.position === itemA1.position + 1);
+  expect("critère inconnu refusé", (await call(A.token, "POST", "/evaluation-items", { criterion: "PIRATE", label: "x" })).status === 400);
+  const gridA = (await call(A.token, "GET", "/evaluation-items")).json.items;
+  const gridB = (await call(B.token, "GET", "/evaluation-items")).json.items;
+  expect("A ne voit que sa grille", gridA.length === 3 && !gridA.some((i) => i.id === itemB.id));
+  expect("B ne voit que sa grille", gridB.length === 1 && gridB[0].id === itemB.id);
+  expect("B ne renomme pas un point de A", (await call(B.token, "PUT", `/evaluation-items/${itemA1.id}`, { label: "PIRATE" })).status === 404);
+  expect("B ne supprime pas un point de A", (await call(B.token, "DELETE", `/evaluation-items/${itemA1.id}`)).status === 404);
+  const playerA = await login(`joueur-a-${run}@test.local`);
+  expect("un joueur ne gère pas la grille", (await call(playerA.token, "GET", "/evaluation-items")).status === 403);
+
+  const direct = { remise: 6, coupDroit: 8, revers: 5, deplacements: 4, tactique: 7, mental: 7, physique: 6 };
+  const byItems = await call(A.token, "POST", `/players/${player.id}/evaluations`, {
+    ...direct,
+    items: [{ evaluationItemId: itemA1.id, score: 4 }, { evaluationItemId: itemA2.id, score: 4 }, { evaluationItemId: itemA3.id, score: 3 }],
+  });
+  expect("note du critère = moyenne des points x 2 (4, 4, 3 -> 7,3)", byItems.status === 201 && byItems.json.evaluation.service === 7.3, JSON.stringify(byItems.json));
+  expect("les notes des points sont enregistrées", byItems.json.evaluation?.itemScores?.length === 3);
+  const partial = await call(A.token, "POST", `/players/${player.id}/evaluations`, { ...direct, items: [{ evaluationItemId: itemA1.id, score: 5 }] });
+  expect("un point non noté est ignoré (5 seul -> 10)", partial.json.evaluation?.service === 10, JSON.stringify(partial.json));
+  const missingDirect = await call(A.token, "POST", `/players/${player.id}/evaluations`, { ...direct });
+  expect("sans point noté, la note directe du critère est exigée", missingDirect.status === 400, `status ${missingDirect.status}`);
+  const badItemScore = await call(A.token, "POST", `/players/${player.id}/evaluations`, { ...direct, items: [{ evaluationItemId: itemA1.id, score: 6 }] });
+  expect("un point noté hors 1-5 est refusé", badItemScore.status === 400, `status ${badItemScore.status}`);
+  const foreignItem = await call(A.token, "POST", `/players/${player.id}/evaluations`, { ...direct, service: 5, items: [{ evaluationItemId: itemB.id, score: 3 }] });
+  expect("A ne peut pas noter un point de la grille de B", foreignItem.status === 404, `status ${foreignItem.status}`);
+  await call(A.token, "PUT", `/evaluation-items/${itemA2.id}`, { label: "Effet renommé" });
+  await call(A.token, "DELETE", `/evaluation-items/${itemA3.id}`);
+  const history = (await call(A.token, "GET", `/players/${player.id}/evaluations`)).json.evaluations.find((e) => e.id === byItems.json.evaluation.id);
+  expect(
+    "renommer ou supprimer un point ne change pas l'historique",
+    history?.itemScores.map((i) => i.label).join(",") === "Placement,Effet,Variété" && history.service === 7.3,
+    JSON.stringify(history?.itemScores)
+  );
+  const playerView = (await call(playerA.token, "GET", `/players/${player.id}/evaluations`)).json.evaluations;
+  expect("le joueur voit le détail des points de son évaluation", playerView.some((e) => e.itemScores.length === 3));
+
   // ---------- Plafonds du volontariat : isolation ----------
   const putCapsA = await call(A.token, "PUT", "/rates/caps", { caps: [{ year: 2026, perDay: 40, perYear: 3000 }] });
   expect("A enregistre ses plafonds", putCapsA.status === 204, `status ${putCapsA.status}`);

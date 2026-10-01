@@ -187,7 +187,7 @@ async function onRemovePlayer(playerId) {
     </div>
 
     <Dialog v-model:visible="groupDialogVisible" :header="editingGroupId ? 'Modifier le groupe' : 'Nouveau groupe'" modal style="width: 26rem" class="mx-4">
-      <form class="grid gap-3 pt-2" @submit.prevent="onSaveGroup">
+      <form class="grid grid-cols-1 gap-3 pt-2" @submit.prevent="onSaveGroup">
         <div>
           <label class="text-xs text-slate-500 block mb-1">Nom</label>
           <InputText v-model="groupForm.name" required class="w-full" />

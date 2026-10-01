@@ -174,7 +174,7 @@ function onDelete(sparring) {
     </DataTable>
 
     <Dialog v-model:visible="dialogVisible" :header="editingId ? 'Modifier le sparring' : 'Nouveau sparring'" modal style="width: 28rem" class="mx-4">
-      <form class="grid gap-3 pt-2" @submit.prevent="onSave">
+      <form class="grid grid-cols-1 gap-3 pt-2" @submit.prevent="onSave">
         <div class="flex items-center gap-2">
           <Checkbox v-model="form.isClubMember" binary input-id="isClubMember" />
           <label for="isClubMember" class="text-sm text-slate-600">Joueur du club</label>

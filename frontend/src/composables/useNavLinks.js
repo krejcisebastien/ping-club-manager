@@ -13,6 +13,7 @@ const ADMIN_LINKS = [
   { to: "/admin/camps", label: "Stages", icon: "pi pi-calendar" },
   { to: "/coach/exercises", label: "Exercices", icon: "pi pi-book" },
   { to: "/coach/training-plans", label: "Plans d'entrainement", icon: "pi pi-clipboard" },
+  { to: "/admin/evaluation-grid", label: "Grille d'évaluation", icon: "pi pi-list-check" },
   { to: "/admin/rates", label: "Tarifs", icon: "pi pi-euro" },
   { to: "/admin/volunteering", label: "Fiches bénévolat", icon: "pi pi-file-excel" },
   { to: "/license", label: "Licence", icon: "pi pi-credit-card" },
@@ -27,6 +28,7 @@ const COACH_LINKS = [
   { to: "/coach/camps", label: "Présences stages", icon: "pi pi-check-circle" },
   { to: "/coach/exercises", label: "Exercices", icon: "pi pi-book" },
   { to: "/coach/training-plans", label: "Plans d'entrainement", icon: "pi pi-clipboard" },
+  { to: "/admin/evaluation-grid", label: "Grille d'évaluation", icon: "pi pi-list-check" },
 ];
 
 // Menu de l'espace joueur : les liens dépendent du joueur affiché (un compte

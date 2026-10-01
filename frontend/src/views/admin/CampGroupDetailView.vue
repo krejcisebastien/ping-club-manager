@@ -69,7 +69,7 @@ async function onRemoveCoach(assignmentId) {
     <div v-if="group" class="space-y-4">
       <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
         <p class="text-sm font-medium text-slate-600 mb-3">Informations</p>
-        <form class="grid gap-3 sm:grid-cols-2" @submit.prevent="onSaveInfo">
+        <form class="grid grid-cols-1 gap-3 sm:grid-cols-2" @submit.prevent="onSaveInfo">
           <InputText v-model="editForm.name" placeholder="Nom" required class="w-full" />
           <Dropdown v-model="editForm.trainingPlanId" :options="trainingPlans" option-label="title" option-value="id" show-clear placeholder="Plan d'entrainement…" class="w-full" />
           <Button type="submit" label="Enregistrer" :loading="savingInfo" class="sm:col-span-2 w-fit" />

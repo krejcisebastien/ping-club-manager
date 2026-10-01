@@ -65,7 +65,7 @@ async function onRemovePlayer(playerId) {
         <Button label="Présences de la journée" icon="pi pi-check-square" size="small" @click="router.push(`/coach/camp-attendance/day/${periodGroup.period.campDay.id}`)" />
       </div>
 
-      <div class="grid gap-4 md:grid-cols-2">
+      <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
           <p class="text-sm font-medium text-slate-600 mb-1">Encadrants</p>
           <p class="text-xs text-slate-400 mb-3">Repris par défaut du groupe, modifiable ici pour cette période uniquement.</p>

@@ -61,7 +61,7 @@ watch(selectedCampId, () => loadCamp());
 
 <template>
   <AppLayout title="Présences — stages" :nav-links="navLinks">
-    <div class="grid gap-3 sm:grid-cols-2 mb-4">
+    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 mb-4">
       <div>
         <label class="text-xs text-slate-500 block mb-1">Saison</label>
         <Dropdown v-model="selectedSeasonId" :options="seasons" option-label="name" option-value="id" class="w-full" />
@@ -78,7 +78,7 @@ watch(selectedCampId, () => loadCamp());
       <CampRegistrations :camp-id="camp.id" :registrations="camp.players" @changed="loadCamp(true)" />
     </div>
 
-    <div class="grid gap-3">
+    <div class="grid grid-cols-1 gap-3">
       <div v-for="day in days" :key="day.id" class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
         <div class="flex items-center justify-between flex-wrap gap-2">
           <p class="font-medium text-slate-700 capitalize">{{ day.date }}</p>

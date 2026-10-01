@@ -195,7 +195,7 @@ async function onAiConfirm() {
     </DataTable>
 
     <Dialog v-model:visible="dialogVisible" header="Nouveau plan" modal style="width: 42rem" class="mx-4">
-      <form class="grid gap-3 pt-2" @submit.prevent="onCreate">
+      <form class="grid grid-cols-1 gap-3 pt-2" @submit.prevent="onCreate">
         <div>
           <label class="text-xs text-slate-500 block mb-1">Titre</label>
           <InputText v-model="form.title" required class="w-full" />
@@ -222,7 +222,7 @@ async function onAiConfirm() {
     </Dialog>
 
     <Dialog v-model:visible="aiDialogVisible" header="Générer un plan avec l'IA" modal style="width: 34rem" class="mx-4">
-      <form v-if="aiStep === 'criteria'" class="grid gap-3 pt-2" @submit.prevent="onAiGenerateDraft">
+      <form v-if="aiStep === 'criteria'" class="grid grid-cols-1 gap-3 pt-2" @submit.prevent="onAiGenerateDraft">
         <div>
           <label class="text-xs text-slate-500 block mb-1">Thème de la séance (optionnel)</label>
           <InputText v-model="aiForm.theme" class="w-full" placeholder="ex. Topspin pour intermédiaires, 1h30" />
@@ -241,7 +241,7 @@ async function onAiConfirm() {
         </div>
       </form>
 
-      <div v-else-if="aiDraft" class="grid gap-3 pt-2">
+      <div v-else-if="aiDraft" class="grid grid-cols-1 gap-3 pt-2">
         <div>
           <label class="text-xs text-slate-500 block mb-1">Titre</label>
           <InputText v-model="aiDraft.title" class="w-full" />

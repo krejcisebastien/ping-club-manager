@@ -106,7 +106,7 @@ async function download() {
         Prépare la note de défraiement d'un entraineur ou d'un sparring : une ligne par séance d'entrainement ou période de stage où il est
         affecté et qui a eu lieu (séances annulées ou à venir exclues), valorisée selon son tarif (à l'heure ou à la séance).
       </p>
-      <div class="grid gap-3 sm:grid-cols-3">
+      <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <div>
           <label class="text-xs text-slate-500 block mb-1">Bénévole</label>
           <SelectButton v-model="type" :options="typeOptions" option-label="label" option-value="value" :allow-empty="false" class="w-full flex" />

@@ -382,3 +382,27 @@
 .p-selectbutton .p-button.p-highlight {
   flex: 1;
 }
+
+/* Points de la grille d'évaluation (1 à 5) : étoiles à la couleur du critère. */
+.eval-rating {
+  gap: 0.35rem;
+}
+.eval-rating .p-rating-item {
+  cursor: pointer;
+}
+.eval-rating .p-rating-icon {
+  font-size: 1.15rem;
+  color: #cbd5e1;
+}
+.eval-rating .p-rating-item.p-rating-item-active .p-rating-icon {
+  color: var(--rating-color, #0284c7);
+}
+.eval-rating .p-rating-cancel {
+  color: #94a3b8;
+}
+
+/* Onglets (Liste / Calendrier) déjà placés dans une carte : pas de marge
+   latérale supplémentaire, qui écrasait les tableaux en mobile. */
+.p-tabview .p-tabview-panels {
+  padding: 1rem 0 0;
+}

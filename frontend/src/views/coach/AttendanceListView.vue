@@ -53,7 +53,7 @@ watch(selectedTrainingId, loadOccurrences);
 
 <template>
   <AppLayout title="Prise de présence" :nav-links="navLinks">
-    <div class="grid gap-3 sm:grid-cols-2 mb-4">
+    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 mb-4">
       <div>
         <label class="text-xs text-slate-500 block mb-1">Saison</label>
         <Dropdown v-model="selectedSeasonId" :options="seasons" option-label="name" option-value="id" class="w-full" />

@@ -2,13 +2,16 @@
 import Tag from "primevue/tag";
 import Chart from "primevue/chart";
 import {
-  usePlayerSpace, EVALUATION_CRITERIA, formatDate, average,
+  usePlayerSpace, EVALUATION_CRITERIA, formatDate, formatScore, average,
 } from "../../composables/usePlayerSpace.js";
 
 const {
   evaluations, latest, previous, latestAverage, delta,
   radarData, radarOptions, evolutionData, evolutionOptions,
 } = usePlayerSpace();
+
+// Détail des points de la grille notés lors de la dernière évaluation.
+const pointsOf = (c) => (latest.value?.itemScores ?? []).filter((i) => i.criterion === c.criterion);
 </script>
 
 <template>
@@ -20,24 +23,30 @@ const {
       </div>
       <p v-if="latest.note" class="text-sm text-slate-700 bg-slate-50 rounded-lg p-3 mb-4">« {{ latest.note }} »</p>
 
-      <ul class="grid gap-3 sm:grid-cols-2 mb-6">
+      <ul class="grid grid-cols-1 gap-3 sm:grid-cols-2 mb-6">
         <li v-for="c in EVALUATION_CRITERIA" :key="c.key">
           <div class="flex items-baseline justify-between text-sm mb-1">
             <span class="text-slate-600">{{ c.label }}</span>
             <span class="tabular-nums">
-              <strong :style="{ color: c.color }">{{ latest[c.key] }}</strong><span class="text-xs text-slate-400">/10</span>
+              <strong :style="{ color: c.color }">{{ formatScore(latest[c.key]) }}</strong><span class="text-xs text-slate-400">/10</span>
               <span v-if="delta(c.key)" class="ml-2 text-xs" :class="delta(c.key) > 0 ? 'text-green-600' : 'text-red-500'">
-                {{ delta(c.key) > 0 ? "▲" : "▼" }} {{ Math.abs(delta(c.key)) }}
+                {{ delta(c.key) > 0 ? "▲" : "▼" }} {{ formatScore(Math.abs(delta(c.key))) }}
               </span>
             </span>
           </div>
           <div class="h-2 rounded-full bg-slate-100 overflow-hidden">
             <div class="h-full rounded-full" :style="{ width: `${latest[c.key] * 10}%`, backgroundColor: c.color }"></div>
           </div>
+          <ul v-if="pointsOf(c).length" class="mt-1.5 space-y-0.5">
+            <li v-for="p in pointsOf(c)" :key="p.id" class="flex items-baseline justify-between gap-2 text-xs text-slate-500">
+              <span class="min-w-0">{{ p.label }}</span>
+              <span class="tabular-nums whitespace-nowrap">{{ p.score }}<span class="text-slate-400">/5</span></span>
+            </li>
+          </ul>
         </li>
       </ul>
 
-      <div class="grid gap-4 lg:grid-cols-2">
+      <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <div>
           <p class="text-sm font-medium text-slate-600 mb-2">Profil{{ previous ? " (pointillés : évaluation précédente)" : "" }}</p>
           <div class="h-72"><Chart type="radar" :data="radarData" :options="radarOptions" class="h-full" /></div>

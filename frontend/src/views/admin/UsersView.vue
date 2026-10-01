@@ -209,7 +209,7 @@ function roleSeverity(role) {
     </DataTable>
 
     <Dialog v-model:visible="createDialogVisible" header="Nouveau compte" modal style="width: 28rem" class="mx-4">
-      <form class="grid gap-3 pt-2" @submit.prevent="onCreate">
+      <form class="grid grid-cols-1 gap-3 pt-2" @submit.prevent="onCreate">
         <div>
           <label class="text-xs text-slate-500 block mb-1">Email</label>
           <InputText v-model="form.email" type="email" required class="w-full" />
@@ -240,7 +240,7 @@ function roleSeverity(role) {
     </Dialog>
 
     <Dialog v-model:visible="editDialogVisible" header="Modifier le compte" modal style="width: 28rem" class="mx-4">
-      <div class="grid gap-3 pt-2">
+      <div class="grid grid-cols-1 gap-3 pt-2">
         <div>
           <label class="text-xs text-slate-500 block mb-1">Rôle(s)</label>
           <MultiSelect v-model="editForm.roles" :options="roleOptions" option-label="label" option-value="value" placeholder="Choisir un ou plusieurs rôles…" class="w-full" display="chip" />

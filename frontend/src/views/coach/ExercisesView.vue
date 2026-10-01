@@ -240,7 +240,7 @@ async function onAiConfirm() {
     </DataTable>
 
     <Dialog v-model:visible="dialogVisible" header="Nouvel exercice" modal style="width: 42rem" class="mx-4">
-      <form class="grid gap-3 pt-2" @submit.prevent="onCreate">
+      <form class="grid grid-cols-1 gap-3 pt-2" @submit.prevent="onCreate">
         <div>
           <label class="text-xs text-slate-500 block mb-1">Titre</label>
           <InputText v-model="form.title" required class="w-full" />
@@ -275,7 +275,7 @@ async function onAiConfirm() {
     </Dialog>
 
     <Dialog v-model:visible="aiDialogVisible" header="Générer un exercice avec l'IA" modal style="width: 44rem" class="mx-4">
-      <form v-if="aiStep === 'criteria'" class="grid gap-3 pt-2" @submit.prevent="onAiGenerateDraft">
+      <form v-if="aiStep === 'criteria'" class="grid grid-cols-1 gap-3 pt-2" @submit.prevent="onAiGenerateDraft">
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="text-xs text-slate-500 block mb-1">Catégorie (optionnel)</label>
@@ -308,7 +308,7 @@ async function onAiConfirm() {
         </div>
       </form>
 
-      <form v-else-if="aiDraft" class="grid gap-3 pt-2" @submit.prevent="onAiConfirm">
+      <form v-else-if="aiDraft" class="grid grid-cols-1 gap-3 pt-2" @submit.prevent="onAiConfirm">
         <div>
           <label class="text-xs text-slate-500 block mb-1">Titre</label>
           <InputText v-model="aiDraft.title" required class="w-full" />
@@ -335,7 +335,7 @@ async function onAiConfirm() {
           <label class="text-xs text-slate-500 block mb-1">Qualités travaillées (une par ligne)</label>
           <Textarea v-model="aiDraft.skills" class="w-full" rows="2" auto-resize />
         </div>
-        <div class="grid sm:grid-cols-2 gap-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label class="text-xs text-slate-500 block mb-1">Consignes (une par ligne)</label>
             <Textarea v-model="aiDraft.instructions" class="w-full" rows="4" auto-resize />
@@ -345,7 +345,7 @@ async function onAiConfirm() {
             <Textarea v-model="aiDraft.successCriteria" class="w-full" rows="4" auto-resize />
           </div>
         </div>
-        <div class="grid sm:grid-cols-3 gap-3">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div>
             <label class="text-xs text-slate-500 block mb-1">Variante facile</label>
             <Textarea v-model="aiDraft.easierVariant" class="w-full" rows="2" auto-resize />
