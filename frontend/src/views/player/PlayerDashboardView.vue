@@ -56,7 +56,7 @@ const {
       </div>
     </div>
 
-    <div class="grid gap-4 lg:grid-cols-2">
+    <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
       <div v-if="latest" class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
         <div class="flex items-center justify-between mb-2">
           <p class="text-sm font-medium text-slate-600">Mon profil de jeu</p>

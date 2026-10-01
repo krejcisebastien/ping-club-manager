@@ -76,14 +76,14 @@ async function onSave() {
       d'entrainement et chaque période de stage compte pour un forfait ; à l'heure, on multiplie la durée par le tarif horaire.
     </p>
 
-    <div class="grid gap-4 lg:grid-cols-2 max-w-5xl">
+    <div class="grid grid-cols-1 gap-4 lg:grid-cols-2 max-w-5xl">
       <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
         <p class="text-sm font-medium text-slate-600 mb-1">Entraineurs — niveau Adeps</p>
         <p class="text-xs text-slate-400 mb-3">Selon le niveau attribué à chaque entraineur.</p>
-        <ul class="grid gap-4">
-          <li v-for="r in coachRates" :key="r.code" class="grid gap-2">
+        <ul class="grid grid-cols-1 gap-4">
+          <li v-for="r in coachRates" :key="r.code" class="grid grid-cols-1 gap-2">
             <span class="text-sm font-medium text-slate-700">{{ COACH_LEVEL_LABELS[r.code] }}</span>
-            <div class="grid gap-2 sm:grid-cols-[10rem_1fr] sm:items-center">
+            <div class="grid grid-cols-1 gap-2 sm:grid-cols-[10rem_1fr] sm:items-center">
               <InputNumber v-model="r.amount" mode="currency" currency="EUR" locale="fr-BE" :min="0" :max-fraction-digits="2" placeholder="—" :aria-label="`Montant ${r.basis === 'SESSION' ? 'par séance' : 'par heure'}`" class="w-full" input-class="w-full text-right" />
               <SelectButton v-model="r.basis" :options="basisOptions" option-label="label" option-value="value" :allow-empty="false" class="w-full flex" />
             </div>
@@ -94,10 +94,10 @@ async function onSave() {
       <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
         <p class="text-sm font-medium text-slate-600 mb-1">Sparrings — série</p>
         <p class="text-xs text-slate-400 mb-3">Déduite du classement du sparring (NC compte dans la série E).</p>
-        <ul class="grid gap-4">
-          <li v-for="r in sparringRates" :key="r.code" class="grid gap-2">
+        <ul class="grid grid-cols-1 gap-4">
+          <li v-for="r in sparringRates" :key="r.code" class="grid grid-cols-1 gap-2">
             <span class="text-sm font-medium text-slate-700">{{ SERIES_LABELS[r.code] }}</span>
-            <div class="grid gap-2 sm:grid-cols-[10rem_1fr] sm:items-center">
+            <div class="grid grid-cols-1 gap-2 sm:grid-cols-[10rem_1fr] sm:items-center">
               <InputNumber v-model="r.amount" mode="currency" currency="EUR" locale="fr-BE" :min="0" :max-fraction-digits="2" placeholder="—" :aria-label="`Montant ${r.basis === 'SESSION' ? 'par séance' : 'par heure'}`" class="w-full" input-class="w-full text-right" />
               <SelectButton v-model="r.basis" :options="basisOptions" option-label="label" option-value="value" :allow-empty="false" class="w-full flex" />
             </div>
@@ -112,7 +112,7 @@ async function onSave() {
         Par année civile, identiques pour les entraineurs et les sparrings. Une année sans ligne reprend les plafonds de la plus récente
         année précédente.
       </p>
-      <div class="grid gap-3">
+      <div class="grid grid-cols-1 gap-3">
         <div class="hidden sm:grid grid-cols-[6rem_1fr_1fr_2.5rem] gap-2 text-xs text-slate-400">
           <span>Année</span><span>€ / jour</span><span>€ / an</span><span></span>
         </div>

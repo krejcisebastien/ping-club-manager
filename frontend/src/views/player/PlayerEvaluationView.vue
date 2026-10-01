@@ -23,7 +23,7 @@ const pointsOf = (c) => (latest.value?.itemScores ?? []).filter((i) => i.criteri
       </div>
       <p v-if="latest.note" class="text-sm text-slate-700 bg-slate-50 rounded-lg p-3 mb-4">« {{ latest.note }} »</p>
 
-      <ul class="grid gap-3 sm:grid-cols-2 mb-6">
+      <ul class="grid grid-cols-1 gap-3 sm:grid-cols-2 mb-6">
         <li v-for="c in EVALUATION_CRITERIA" :key="c.key">
           <div class="flex items-baseline justify-between text-sm mb-1">
             <span class="text-slate-600">{{ c.label }}</span>
@@ -46,7 +46,7 @@ const pointsOf = (c) => (latest.value?.itemScores ?? []).filter((i) => i.criteri
         </li>
       </ul>
 
-      <div class="grid gap-4 lg:grid-cols-2">
+      <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <div>
           <p class="text-sm font-medium text-slate-600 mb-2">Profil{{ previous ? " (pointillés : évaluation précédente)" : "" }}</p>
           <div class="h-72"><Chart type="radar" :data="radarData" :options="radarOptions" class="h-full" /></div>

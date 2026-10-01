@@ -53,14 +53,14 @@ async function onSave() {
 </script>
 
 <template>
-  <form class="grid gap-4 max-w-3xl" @submit.prevent="onSave">
-    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 grid gap-3">
+  <form class="grid grid-cols-1 gap-4 max-w-3xl" @submit.prevent="onSave">
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 grid grid-cols-1 gap-3">
       <p class="text-sm font-medium text-slate-600">Identité</p>
       <div>
         <label class="text-xs text-slate-500 block mb-1">Photo</label>
         <ImageUpload v-model="form.photoUrl" :max-size-mb="1" />
       </div>
-      <div class="grid sm:grid-cols-2 gap-3">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <label class="text-xs text-slate-500 block mb-1">Nom</label>
           <InputText v-model="form.lastName" required class="w-full" />
@@ -81,13 +81,13 @@ async function onSave() {
       </div>
     </div>
 
-    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 grid gap-3">
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 grid grid-cols-1 gap-3">
       <p class="text-sm font-medium text-slate-600">Coordonnées</p>
       <div>
         <label class="text-xs text-slate-500 block mb-1">Téléphone</label>
         <InputText v-model="form.phone" type="tel" class="w-full" />
       </div>
-      <div class="grid sm:grid-cols-2 gap-3">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <label class="text-xs text-slate-500 block mb-1">Contact d'urgence</label>
           <InputText v-model="form.emergencyContactName" placeholder="Nom" class="w-full" />
@@ -99,9 +99,9 @@ async function onSave() {
       </div>
     </div>
 
-    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 grid gap-3">
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 grid grid-cols-1 gap-3">
       <p class="text-sm font-medium text-slate-600">Mon jeu</p>
-      <div class="grid sm:grid-cols-2 gap-3">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <label class="text-xs text-slate-500 block mb-1">Main</label>
           <Dropdown v-model="form.dominantHand" :options="handOptions" option-label="label" option-value="value" placeholder="Choisir…" show-clear class="w-full" />

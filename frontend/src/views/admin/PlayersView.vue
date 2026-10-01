@@ -140,7 +140,7 @@ function formatDate(d) {
     </DataTable>
 
     <Dialog v-model:visible="dialogVisible" header="Nouveau joueur" modal style="width: 26rem" class="mx-4">
-      <form class="grid gap-3 pt-2" @submit.prevent="onCreate">
+      <form class="grid grid-cols-1 gap-3 pt-2" @submit.prevent="onCreate">
         <div>
           <label class="text-xs text-slate-500 block mb-1">Prénom</label>
           <InputText v-model="form.firstName" required class="w-full" />

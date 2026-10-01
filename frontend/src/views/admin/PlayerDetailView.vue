@@ -287,7 +287,7 @@ function pointStatusSeverity(status) {
     <div v-if="player" class="space-y-4">
       <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
         <p class="text-sm font-medium text-slate-600 mb-3">Signalétique</p>
-        <form class="grid gap-3 sm:grid-cols-2" @submit.prevent="onSaveInfo">
+        <form class="grid grid-cols-1 gap-3 sm:grid-cols-2" @submit.prevent="onSaveInfo">
           <div class="sm:col-span-2">
             <label class="text-xs text-slate-500 block mb-1">Photo</label>
             <ImageUpload v-model="editForm.photoUrl" :max-size-mb="1" />
@@ -395,7 +395,7 @@ function pointStatusSeverity(status) {
       <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
         <p class="text-sm font-medium text-slate-600 mb-3">Évaluation sportive</p>
 
-        <div v-if="latestEvaluation" class="grid gap-4 sm:grid-cols-2 mb-4">
+        <div v-if="latestEvaluation" class="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
           <div>
             <p class="text-xs text-slate-400 mb-1">
               Radar — dernière évaluation ({{ new Date(latestEvaluation.date).toLocaleDateString("fr-FR") }})
@@ -429,12 +429,12 @@ function pointStatusSeverity(status) {
           </li>
         </ul>
 
-        <form class="grid gap-3" @submit.prevent="onAddEvaluation">
+        <form class="grid grid-cols-1 gap-3" @submit.prevent="onAddEvaluation">
           <p class="text-xs text-slate-400">
             Les critères dotés de points d'évaluation se notent point par point (1 à 5, moyenne x 2) ; sans point noté, le curseur
             donne la note directe. <RouterLink to="/admin/evaluation-grid" class="text-sky-600 hover:underline">Gérer la grille</RouterLink>
           </p>
-          <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <div v-for="c in EVALUATION_CRITERIA" :key="c.key" :class="gridByCriterion[c.criterion].length ? 'rounded-lg border border-slate-200 p-3 sm:col-span-2' : ''">
               <div class="flex items-baseline justify-between mb-2">
                 <label class="text-xs text-slate-500">{{ c.label }}</label>

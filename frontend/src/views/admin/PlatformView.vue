@@ -160,7 +160,7 @@ async function saveCreate() {
     </DataTable>
 
     <Dialog v-model:visible="editVisible" header="Modifier le club" modal style="width: 26rem" class="mx-4">
-      <form class="grid gap-3 pt-2" @submit.prevent="saveEdit">
+      <form class="grid grid-cols-1 gap-3 pt-2" @submit.prevent="saveEdit">
         <div>
           <label class="text-xs text-slate-500 block mb-1">Nom du club</label>
           <InputText v-model="editForm.name" required class="w-full" />
@@ -178,7 +178,7 @@ async function saveCreate() {
     </Dialog>
 
     <Dialog v-model:visible="createVisible" header="Nouveau club" modal style="width: 28rem" class="mx-4">
-      <form class="grid gap-3 pt-2" @submit.prevent="saveCreate">
+      <form class="grid grid-cols-1 gap-3 pt-2" @submit.prevent="saveCreate">
         <div>
           <label class="text-xs text-slate-500 block mb-1">Nom du club</label>
           <InputText v-model="createForm.name" required class="w-full" />

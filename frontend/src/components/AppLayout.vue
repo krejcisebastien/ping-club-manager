@@ -195,7 +195,7 @@ async function onChangePassword() {
     </div>
 
     <Dialog v-model:visible="passwordDialogVisible" header="Changer le mot de passe" modal style="width: 26rem" class="mx-4">
-      <form class="grid gap-3 pt-2" @submit.prevent="onChangePassword">
+      <form class="grid grid-cols-1 gap-3 pt-2" @submit.prevent="onChangePassword">
         <div>
           <label class="text-xs text-slate-500 block mb-1">Mot de passe actuel</label>
           <Password v-model="passwordForm.currentPassword" required toggle-mask :feedback="false" class="w-full" input-class="w-full" />

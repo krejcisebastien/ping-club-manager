@@ -206,7 +206,7 @@ const calendarOptions = computed(() => ({
     <div v-if="training" class="space-y-4">
       <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
         <p class="text-sm font-medium text-slate-600 mb-3">Informations</p>
-        <form class="grid gap-3 sm:grid-cols-2" @submit.prevent="onSaveInfo">
+        <form class="grid grid-cols-1 gap-3 sm:grid-cols-2" @submit.prevent="onSaveInfo">
           <InputText v-model="editForm.name" placeholder="Nom" required class="w-full" />
           <Dropdown v-model="editForm.groupId" :options="groups" option-label="name" option-value="id" required class="w-full" />
           <Dropdown v-model="editForm.weekday" :options="weekdayOptions" option-label="label" option-value="value" placeholder="Jour de semaine…" class="sm:col-span-2 w-full" />
@@ -231,7 +231,7 @@ const calendarOptions = computed(() => ({
 
       <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
         <p class="text-sm font-medium text-slate-600 mb-3">Générer les séances de la période</p>
-        <form class="grid gap-3 sm:grid-cols-3 sm:items-end" @submit.prevent="onGenerate">
+        <form class="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:items-end" @submit.prevent="onGenerate">
           <Calendar v-model="generateForm.startDate" date-format="dd/mm/yy" show-icon placeholder="Du" required class="w-full" input-class="w-full" />
           <Calendar v-model="generateForm.endDate" date-format="dd/mm/yy" show-icon placeholder="Au" required class="w-full" input-class="w-full" />
           <Button type="submit" label="Générer" :loading="generating" />
@@ -255,9 +255,9 @@ const calendarOptions = computed(() => ({
               <Column header="Statut">
                 <template #body="{ data }"><Tag :severity="occurrenceState(data).severity" :value="occurrenceState(data).label" /></template>
               </Column>
-              <Column header="" style="width: 20rem">
+              <Column header="">
                 <template #body="{ data }">
-                  <div class="flex gap-1 justify-end">
+                  <div class="flex flex-wrap gap-1 justify-end">
                     <Button label="Encadrants" icon="pi pi-users" size="small" text @click="openAssignDialog(data)" />
                     <Button label="Présences" icon="pi pi-check-square" size="small" text :disabled="data.status === 'CANCELLED'" @click="router.push(`/coach/attendance/${data.id}`)" />
                     <Button

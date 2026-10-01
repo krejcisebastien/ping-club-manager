@@ -400,3 +400,9 @@
 .eval-rating .p-rating-cancel {
   color: #94a3b8;
 }
+
+/* Onglets (Liste / Calendrier) déjà placés dans une carte : pas de marge
+   latérale supplémentaire, qui écrasait les tableaux en mobile. */
+.p-tabview .p-tabview-panels {
+  padding: 1rem 0 0;
+}

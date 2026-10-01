@@ -134,7 +134,7 @@ function onDelete(coach) {
     </DataTable>
 
     <Dialog v-model:visible="dialogVisible" :header="editingId ? 'Modifier l\'entraineur' : 'Nouvel entraineur'" modal style="width: 26rem" class="mx-4">
-      <form class="grid gap-3 pt-2" @submit.prevent="onSave">
+      <form class="grid grid-cols-1 gap-3 pt-2" @submit.prevent="onSave">
         <div>
           <label class="text-xs text-slate-500 block mb-1">Prénom</label>
           <InputText v-model="form.firstName" required class="w-full" />

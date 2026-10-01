@@ -86,7 +86,7 @@ async function onRemoveExercise(exerciseId) {
 
     <div v-if="plan" class="space-y-4">
       <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-        <form v-if="editing" class="grid gap-3 sm:grid-cols-2" @submit.prevent="onSaveInfo">
+        <form v-if="editing" class="grid grid-cols-1 gap-3 sm:grid-cols-2" @submit.prevent="onSaveInfo">
           <div class="sm:col-span-2">
             <label class="text-xs text-slate-500 block mb-1">Titre</label>
             <InputText v-model="editForm.title" required class="w-full" />
@@ -142,9 +142,9 @@ async function onRemoveExercise(exerciseId) {
             filter
             reset-filter-on-hide
             placeholder="Ajouter un exercice…"
-            class="flex-1"
+            class="flex-1 min-w-0"
           />
-          <Button label="Ajouter" @click="onAddExercise" />
+          <Button label="Ajouter" class="shrink-0" @click="onAddExercise" />
         </div>
       </div>
     </div>

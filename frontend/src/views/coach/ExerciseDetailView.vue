@@ -112,7 +112,7 @@ function onDelete() {
     <Button label="Retour" icon="pi pi-arrow-left" text class="mb-3 -ml-2" @click="router.push('/coach/exercises')" />
 
     <div v-if="exercise" class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-      <form v-if="editing" class="grid gap-3" @submit.prevent="onSave">
+      <form v-if="editing" class="grid grid-cols-1 gap-3" @submit.prevent="onSave">
         <div>
           <label class="text-xs text-slate-500 block mb-1">Titre</label>
           <InputText v-model="form.title" required class="w-full" />
@@ -147,7 +147,7 @@ function onDelete() {
           <label class="text-xs text-slate-500 block mb-1">Qualités travaillées (une par ligne)</label>
           <Textarea v-model="form.skills" class="w-full" rows="2" auto-resize />
         </div>
-        <div class="grid sm:grid-cols-2 gap-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label class="text-xs text-slate-500 block mb-1">Consignes (une par ligne)</label>
             <Textarea v-model="form.instructions" class="w-full" rows="4" auto-resize />
@@ -157,7 +157,7 @@ function onDelete() {
             <Textarea v-model="form.successCriteria" class="w-full" rows="4" auto-resize />
           </div>
         </div>
-        <div class="grid sm:grid-cols-3 gap-3">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div>
             <label class="text-xs text-slate-500 block mb-1">Variante facile (une par ligne)</label>
             <Textarea v-model="form.easierVariant" class="w-full" rows="3" auto-resize />
@@ -226,7 +226,7 @@ function onDelete() {
         </div>
 
         <div v-if="exercise.easierVariant?.length || exercise.harderVariant?.length || exercise.competitionVariant?.length"
-             class="grid sm:grid-cols-3 gap-3 mb-3">
+             class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
           <div v-if="exercise.easierVariant?.length">
             <p class="text-xs font-medium text-slate-500 mb-1">Variante facile</p>
             <ul class="list-disc list-inside text-sm text-slate-700 space-y-0.5">
