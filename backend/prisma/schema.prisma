@@ -108,14 +108,14 @@ model Club {
   stripeCustomerId     String?   @unique
   stripeSubscriptionId String?
 
-  seasons       Season[]
-  users         User[]
-  players       Player[]
-  coaches       Coach[]
-  sparrings     Sparring[]
-  exercises     Exercise[]
-  hourlyRates   HourlyRate[]
-  volunteerCaps VolunteerCap[]
+  seasons         Season[]
+  users           User[]
+  players         Player[]
+  coaches         Coach[]
+  sparrings       Sparring[]
+  exercises       Exercise[]
+  hourlyRates     HourlyRate[]
+  volunteerCaps   VolunteerCap[]
   evaluationItems EvaluationItem[]
 }
 
@@ -361,13 +361,14 @@ model Evaluation {
 // notés de 1 à 5 ; la note du critère (sur 10) = moyenne des points x 2.
 // Un critère sans point défini se note directement sur 10.
 model EvaluationItem {
-  id        String              @id @default(cuid())
-  clubId    String
-  club      Club                @relation(fields: [clubId], references: [id], onDelete: Cascade)
-  criterion EvaluationCriterion
-  label     String
-  position  Int                 @default(0)
-  createdAt DateTime            @default(now())
+  id          String              @id @default(cuid())
+  clubId      String
+  club        Club                @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  criterion   EvaluationCriterion
+  label       String
+  description String?
+  position    Int                 @default(0)
+  createdAt   DateTime            @default(now())
 
   scores EvaluationItemScore[]
 

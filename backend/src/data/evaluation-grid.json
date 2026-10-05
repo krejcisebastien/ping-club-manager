@@ -1,0 +1,338 @@
+{
+  "SERVICE": [
+    {
+      "label": "Rotation",
+      "description": "Capacité à imprimer de l'effet dans la balle et à varier l'intensité des rotations."
+    },
+    {
+      "label": "Service coupé",
+      "description": "Maîtrise des services avec effet coupé, qualité de la coupe et régularité."
+    },
+    {
+      "label": "Service lifté",
+      "description": "Capacité à réaliser un service lifté efficace et difficile à lire pour l'adversaire."
+    },
+    {
+      "label": "Service latéral",
+      "description": "Utilisation et maîtrise des effets latéraux pour perturber l'adversaire."
+    },
+    {
+      "label": "Service court",
+      "description": "Capacité à servir court, proche du filet, empêchant l'adversaire d'attaquer facilement."
+    },
+    {
+      "label": "Service long",
+      "description": "Capacité à servir long et rapide avec précision pour surprendre l'adversaire."
+    },
+    {
+      "label": "Placement du service",
+      "description": "Capacité à varier les zones visées sur la table."
+    },
+    {
+      "label": "Variété des services",
+      "description": "Nombre de services différents maîtrisés et utilisés en match."
+    },
+    {
+      "label": "Dissimulation des effets",
+      "description": "Capacité à masquer l'effet réel produit lors de l'exécution du service."
+    },
+    {
+      "label": "Efficacité du service",
+      "description": "Aptitude à obtenir un avantage ou un point directement grâce au service."
+    }
+  ],
+  "REMISE": [
+    {
+      "label": "Lecture des effets",
+      "description": "Capacité à identifier correctement les effets imprimés par l'adversaire."
+    },
+    {
+      "label": "Poussette",
+      "description": "Maîtrise de la remise coupée en situation de jeu court ou de contrôle."
+    },
+    {
+      "label": "Remise courte",
+      "description": "Capacité à maintenir la balle courte après le service adverse."
+    },
+    {
+      "label": "Remise longue",
+      "description": "Qualité et précision des remises longues."
+    },
+    {
+      "label": "Flip coup droit",
+      "description": "Capacité à attaquer une balle courte avec le coup droit."
+    },
+    {
+      "label": "Flip revers",
+      "description": "Capacité à attaquer une balle courte avec le revers."
+    },
+    {
+      "label": "Remise active",
+      "description": "Aptitude à prendre l'initiative dès la remise plutôt qu'à simplement contrôler."
+    },
+    {
+      "label": "Placement de la remise",
+      "description": "Précision des zones visées lors de la remise."
+    },
+    {
+      "label": "Sécurité en remise",
+      "description": "Faible taux de fautes directes en remise."
+    },
+    {
+      "label": "Efficacité de la remise",
+      "description": "Capacité à neutraliser ou mettre en difficulté le serveur."
+    }
+  ],
+  "COUP_DROIT": [
+    {
+      "label": "Régularité",
+      "description": "Capacité à enchaîner les coups droits avec peu de fautes."
+    },
+    {
+      "label": "Contrôle",
+      "description": "Précision et maîtrise de la trajectoire des balles."
+    },
+    {
+      "label": "Topspin rotation",
+      "description": "Qualité de l'effet produit lors d'un topspin coup droit."
+    },
+    {
+      "label": "Topspin vitesse",
+      "description": "Capacité à produire des topspins rapides et efficaces."
+    },
+    {
+      "label": "Topspin sur balle coupée",
+      "description": "Capacité à démarrer l'échange contre une balle coupée."
+    },
+    {
+      "label": "Contre-topspin",
+      "description": "Capacité à répondre à un topspin adverse par un topspin offensif."
+    },
+    {
+      "label": "Bloc coup droit",
+      "description": "Maîtrise du bloc passif ou actif en coup droit."
+    },
+    {
+      "label": "Frappe coup droit",
+      "description": "Capacité à terminer le point par une frappe puissante."
+    },
+    {
+      "label": "Placement de balle",
+      "description": "Précision dans le choix des zones visées."
+    },
+    {
+      "label": "Puissance",
+      "description": "Force et vitesse générées lors des frappes."
+    }
+  ],
+  "REVERS": [
+    {
+      "label": "Régularité",
+      "description": "Capacité à enchaîner des revers avec peu de fautes."
+    },
+    {
+      "label": "Contrôle",
+      "description": "Maîtrise de la trajectoire et de la précision."
+    },
+    {
+      "label": "Topspin revers",
+      "description": "Qualité du démarrage et de l'attaque en revers."
+    },
+    {
+      "label": "Bloc passif",
+      "description": "Capacité à contrôler l'attaque adverse sans prise de risque."
+    },
+    {
+      "label": "Bloc actif",
+      "description": "Capacité à mettre la pression sur l'adversaire en bloc."
+    },
+    {
+      "label": "Contre-topspin revers",
+      "description": "Aptitude à répondre à une attaque par une contre-attaque revers."
+    },
+    {
+      "label": "Frappe revers",
+      "description": "Capacité à conclure le point avec le revers."
+    },
+    {
+      "label": "Placement de balle",
+      "description": "Qualité du placement lors des coups revers."
+    },
+    {
+      "label": "Puissance",
+      "description": "Vitesse et force produites avec le revers."
+    },
+    {
+      "label": "Polyvalence",
+      "description": "Variété des solutions techniques utilisées en revers."
+    }
+  ],
+  "DEPLACEMENTS": [
+    {
+      "label": "Reprise d'appuis",
+      "description": "Capacité à retrouver une position d'équilibre après chaque coup."
+    },
+    {
+      "label": "Déplacement latéral",
+      "description": "Rapidité et efficacité des déplacements gauche-droite."
+    },
+    {
+      "label": "Déplacement avant-arrière",
+      "description": "Gestion des variations de profondeur de balle."
+    },
+    {
+      "label": "Pivot",
+      "description": "Utilisation du coup droit à partir de la diagonale revers."
+    },
+    {
+      "label": "Enchaînement des déplacements",
+      "description": "Fluidité des mouvements pendant l'échange."
+    },
+    {
+      "label": "Vitesse",
+      "description": "Rapidité générale des déplacements."
+    },
+    {
+      "label": "Équilibre",
+      "description": "Stabilité corporelle pendant les déplacements et les frappes."
+    },
+    {
+      "label": "Anticipation",
+      "description": "Capacité à prévoir les intentions adverses."
+    },
+    {
+      "label": "Placement par rapport à la balle",
+      "description": "Qualité du positionnement avant l'exécution du coup."
+    },
+    {
+      "label": "Endurance spécifique",
+      "description": "Maintien de la qualité des déplacements dans la durée."
+    }
+  ],
+  "TACTIQUE": [
+    {
+      "label": "Construction du point",
+      "description": "Capacité à élaborer une stratégie d'échange cohérente."
+    },
+    {
+      "label": "Schéma service + troisième balle",
+      "description": "Utilisation efficace du service pour préparer l'attaque."
+    },
+    {
+      "label": "Schéma remise + quatrième balle",
+      "description": "Capacité à exploiter la remise pour prendre l'avantage."
+    },
+    {
+      "label": "Adaptation à l'adversaire",
+      "description": "Ajustement du jeu en fonction du style adverse."
+    },
+    {
+      "label": "Exploitation des faiblesses adverses",
+      "description": "Capacité à identifier et cibler les points faibles."
+    },
+    {
+      "label": "Variation du jeu",
+      "description": "Utilisation de changements de rythme, d'effets ou de placements."
+    },
+    {
+      "label": "Gestion du score",
+      "description": "Comportement tactique en fonction du contexte du match."
+    },
+    {
+      "label": "Placement tactique",
+      "description": "Choix pertinent des zones de jeu."
+    },
+    {
+      "label": "Choix de coup",
+      "description": "Sélection du coup le plus efficace selon la situation."
+    },
+    {
+      "label": "Gestion des moments clés",
+      "description": "Capacité à prendre les bonnes décisions lors des points importants."
+    }
+  ],
+  "MENTAL": [
+    {
+      "label": "Concentration",
+      "description": "Maintien de l'attention tout au long du match."
+    },
+    {
+      "label": "Motivation",
+      "description": "Volonté de progresser et de s'investir."
+    },
+    {
+      "label": "Combativité",
+      "description": "Détermination à se battre sur chaque point."
+    },
+    {
+      "label": "Gestion des émotions",
+      "description": "Contrôle de la frustration, de la colère ou de l'excitation."
+    },
+    {
+      "label": "Confiance en soi",
+      "description": "Croyance dans ses capacités techniques et tactiques."
+    },
+    {
+      "label": "Résilience après une erreur",
+      "description": "Capacité à rebondir rapidement après une faute."
+    },
+    {
+      "label": "Gestion du stress",
+      "description": "Maîtrise de la pression en compétition."
+    },
+    {
+      "label": "Écoute des consignes",
+      "description": "Aptitude à appliquer les conseils de l'entraîneur."
+    },
+    {
+      "label": "Autonomie",
+      "description": "Capacité à analyser et ajuster son propre jeu."
+    },
+    {
+      "label": "Esprit d'équipe",
+      "description": "Attitude positive envers les partenaires, entraîneurs et club."
+    }
+  ],
+  "PHYSIQUE": [
+    {
+      "label": "Explosivité",
+      "description": "Capacité à produire un effort intense en un minimum de temps."
+    },
+    {
+      "label": "Vitesse",
+      "description": "Rapidité d'exécution et de déplacement."
+    },
+    {
+      "label": "Endurance",
+      "description": "Capacité à maintenir un niveau de performance élevé sur la durée."
+    },
+    {
+      "label": "Coordination",
+      "description": "Maîtrise des mouvements complexes et synchronisés."
+    },
+    {
+      "label": "Agilité",
+      "description": "Facilité à changer rapidement de direction."
+    },
+    {
+      "label": "Gainage",
+      "description": "Stabilité du tronc lors des déplacements et frappes."
+    },
+    {
+      "label": "Puissance des jambes",
+      "description": "Force développée dans les appuis et déplacements."
+    },
+    {
+      "label": "Temps de réaction",
+      "description": "Rapidité de réponse face à une sollicitation."
+    },
+    {
+      "label": "Souplesse",
+      "description": "Amplitude des mouvements et mobilité articulaire."
+    },
+    {
+      "label": "Récupération",
+      "description": "Capacité à retrouver rapidement un état physique optimal après l'effort."
+    }
+  ]
+}

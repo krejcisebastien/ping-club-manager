@@ -18,6 +18,7 @@ import { toDateOnly } from "../../lib/date.js";
 import { useNavLinks } from "../../composables/useNavLinks.js";
 import { fullName } from "../../lib/name.js";
 import { RANKING_OPTIONS } from "../../lib/ranking.js";
+import { EVALUATION_SCALE } from "../../lib/evaluationScale.js";
 import { EVALUATION_CRITERIA, criterionScore, formatScore } from "../../lib/evaluation.js";
 
 const navLinks = useNavLinks();
@@ -434,6 +435,9 @@ function pointStatusSeverity(status) {
             Les critères dotés de points d'évaluation se notent point par point (1 à 5, moyenne x 2) ; sans point noté, le curseur
             donne la note directe. <RouterLink to="/admin/evaluation-grid" class="text-sky-600 hover:underline">Gérer la grille</RouterLink>
           </p>
+<p class="text-xs text-slate-400 flex flex-wrap gap-x-3 gap-y-0.5">
+            <span v-for="s in EVALUATION_SCALE" :key="s.value"><strong class="font-semibold text-slate-500">{{ s.value }}</strong> = {{ s.label }}</span>
+          </p>
           <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <div v-for="c in EVALUATION_CRITERIA" :key="c.key" :class="gridByCriterion[c.criterion].length ? 'rounded-lg border border-slate-200 p-3 sm:col-span-2' : ''">
               <div class="flex items-baseline justify-between mb-2">
@@ -444,7 +448,10 @@ function pointStatusSeverity(status) {
               </div>
               <ul v-if="gridByCriterion[c.criterion].length" class="space-y-1.5 mb-2">
                 <li v-for="item in gridByCriterion[c.criterion]" :key="item.id" class="flex flex-wrap items-center gap-x-3 gap-y-0.5">
-                  <span class="flex-1 min-w-[9rem] text-sm text-slate-700">{{ item.label }}</span>
+                  <span class="flex-1 min-w-[9rem]">
+                    <span class="block text-sm text-slate-700">{{ item.label }}</span>
+                    <span v-if="item.description" class="block text-xs text-slate-400 leading-snug">{{ item.description }}</span>
+                  </span>
                   <Rating v-model="itemScores[item.id]" :stars="5" class="eval-rating ml-auto" :style="{ '--rating-color': c.color }" />
                 </li>
               </ul>

@@ -11,6 +11,8 @@
     "migrate:deploy": "prisma migrate deploy",
     "seed": "node prisma/seed.js",
     "seed:exercises": "node scripts/seed-exercises.js",
+    "seed:evaluation": "node scripts/seed-evaluation.js",
+    "evaluations:reset": "node scripts/evaluations-reset.js",
     "club": "node scripts/clubs.js",
     "tabt:test": "node scripts/tabt-test.js",
     "tabt:sync": "node scripts/tabt-sync.js",

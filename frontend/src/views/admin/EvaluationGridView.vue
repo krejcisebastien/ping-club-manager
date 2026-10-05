@@ -7,6 +7,7 @@ import { useToast } from "primevue/usetoast";
 import { useConfirm } from "primevue/useconfirm";
 import AppLayout from "../../components/AppLayout.vue";
 import { api } from "../../lib/api.js";
+import { EVALUATION_SCALE } from "../../lib/evaluationScale.js";
 import { useNavLinks } from "../../composables/useNavLinks.js";
 import { EVALUATION_CRITERIA } from "../../lib/evaluation.js";
 
@@ -25,6 +26,7 @@ const adding = ref(false);
 const addInput = ref(null);
 const editingId = ref(null);
 const editingLabel = ref("");
+const editingDescription = ref("");
 
 const current = computed(() => EVALUATION_CRITERIA.find((c) => c.criterion === selected.value));
 const countOf = (criterion) => items.value.filter((i) => i.criterion === criterion).length;
@@ -73,16 +75,18 @@ function onAddKeydown(event) {
 function startEdit(item) {
   editingId.value = item.id;
   editingLabel.value = item.label;
+  editingDescription.value = item.description ?? "";
 }
 
 async function saveEdit(item) {
   const label = editingLabel.value.trim();
-  if (!label || label === item.label) {
+  const description = editingDescription.value.trim();
+  if (!label || (label === item.label && description === (item.description ?? ""))) {
     editingId.value = null;
     return;
   }
   try {
-    await api.put(`/evaluation-items/${item.id}`, { label });
+    await api.put(`/evaluation-items/${item.id}`, { label, description });
     editingId.value = null;
     await load();
   } catch (err) {
@@ -120,6 +124,9 @@ onMounted(load);
       Choisis un critère et liste les points que les entraineurs notent de 1 à 5. La note du critère sur 10 est la moyenne
       des points notés × 2 ; un critère sans point se note directement sur 10.
     </p>
+    <p class="text-xs text-slate-400 flex flex-wrap gap-x-3 gap-y-0.5 mb-4 -mt-2">
+      <span v-for="s in EVALUATION_SCALE" :key="s.value"><strong class="font-semibold text-slate-500">{{ s.value }}</strong> = {{ s.label }}</span>
+    </p>
 
     <div class="grid grid-cols-1 gap-4 md:grid-cols-[15rem_minmax(0,1fr)] md:items-start">
       <!-- Critères : pastilles en mobile, liste verticale sur grand écran -->
@@ -152,19 +159,30 @@ onMounted(load);
           <li v-for="(item, index) in currentItems" :key="item.id" class="py-1.5 flex items-center gap-2 min-h-[2.75rem]">
             <span class="w-5 text-xs text-slate-400 tabular-nums shrink-0">{{ index + 1 }}.</span>
             <template v-if="editingId === item.id">
-              <InputText
-                v-model="editingLabel"
-                class="flex-1 min-w-0 w-full"
-                autofocus
-                @keydown.enter.prevent="saveEdit(item)"
-                @keydown.esc="editingId = null"
-              />
+              <div class="flex-1 min-w-0 grid gap-1.5">
+                <InputText
+                  v-model="editingLabel"
+                  class="w-full"
+                  autofocus
+                  placeholder="Libellé"
+                  @keydown.enter.prevent="saveEdit(item)"
+                  @keydown.esc="editingId = null"
+                />
+                <InputText
+                  v-model="editingDescription"
+                  class="w-full"
+                  placeholder="Description (aide à la notation, facultative)"
+                  @keydown.enter.prevent="saveEdit(item)"
+                  @keydown.esc="editingId = null"
+                />
+              </div>
               <Button icon="pi pi-check" text rounded aria-label="Enregistrer" class="shrink-0" @click="saveEdit(item)" />
               <Button icon="pi pi-times" text rounded severity="secondary" aria-label="Annuler" class="shrink-0" @click="editingId = null" />
             </template>
             <template v-else>
               <button type="button" class="flex-1 min-w-0 text-left text-slate-700 py-1" title="Modifier" @click="startEdit(item)">
                 {{ item.label }}
+                <span v-if="item.description" class="block text-xs text-slate-400 leading-snug mt-0.5">{{ item.description }}</span>
               </button>
               <Button icon="pi pi-pencil" text rounded severity="secondary" aria-label="Modifier" class="shrink-0" @click="startEdit(item)" />
               <Button icon="pi pi-trash" text rounded severity="danger" aria-label="Supprimer" class="shrink-0" @click="remove(item)" />

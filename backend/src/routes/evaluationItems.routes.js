@@ -10,7 +10,10 @@ const router = Router();
 router.use(requireAuth, requireRole("ADMIN", "COACH"));
 
 const MAX_LABEL = 200;
+const MAX_DESCRIPTION = 500;
 const cleanLabel = (label) => (typeof label === "string" ? label.trim() : "");
+// Description facultative : texte nettoyé, vide -> null, undefined = non fournie.
+const cleanDescription = (d) => (d === undefined ? undefined : typeof d === "string" && d.trim() ? d.trim() : null);
 
 router.get("/", async (req, res) => {
   const items = await req.db.evaluationItem.findMany({ orderBy: [{ criterion: "asc" }, { position: "asc" }, { createdAt: "asc" }] });
@@ -20,18 +23,25 @@ router.get("/", async (req, res) => {
 router.post("/", async (req, res) => {
   const { criterion } = req.body ?? {};
   const label = cleanLabel(req.body?.label);
+  const description = cleanDescription(req.body?.description);
   if (!CRITERION_VALUES.includes(criterion)) return res.status(400).json({ error: "Critère inconnu." });
   if (!label || label.length > MAX_LABEL) return res.status(400).json({ error: `Le libellé est requis (${MAX_LABEL} caractères max).` });
+  if (description && description.length > MAX_DESCRIPTION) return res.status(400).json({ error: `La description est limitée à ${MAX_DESCRIPTION} caractères.` });
   const last = await req.db.evaluationItem.findFirst({ where: { criterion }, orderBy: { position: "desc" } });
-  const item = await req.db.evaluationItem.create({ data: { criterion, label, position: (last?.position ?? -1) + 1 } });
+  const item = await req.db.evaluationItem.create({ data: { criterion, label, description: description ?? null, position: (last?.position ?? -1) + 1 } });
   res.status(201).json({ item });
 });
 
 router.put("/:id", async (req, res) => {
   const label = cleanLabel(req.body?.label);
+  const description = cleanDescription(req.body?.description);
   if (!label || label.length > MAX_LABEL) return res.status(400).json({ error: `Le libellé est requis (${MAX_LABEL} caractères max).` });
+  if (description && description.length > MAX_DESCRIPTION) return res.status(400).json({ error: `La description est limitée à ${MAX_DESCRIPTION} caractères.` });
   try {
-    const item = await req.db.evaluationItem.update({ where: { id: req.params.id }, data: { label } });
+    const item = await req.db.evaluationItem.update({
+      where: { id: req.params.id },
+      data: { label, ...(description !== undefined && { description }) },
+    });
     res.json({ item });
   } catch {
     res.status(404).json({ error: "Point d'évaluation introuvable." });
