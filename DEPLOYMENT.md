@@ -12,6 +12,15 @@ L'application est **multi-tenant** : un seul déploiement (site + API + base Pos
 5. Les migrations s'appliquent automatiquement au déploiement (`prisma migrate deploy`). La migration multi-tenant rattache les données déjà présentes à un club par défaut (slug `default`).
 6. Dans le Shell Render du service API : `npm run seed` crée le compte admin du club par défaut (`admin@ping-club-manager.local` / `changeme123`, modifiables via `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD`).
 
+### Scalingo (hébergement en France)
+
+Le dépôt contient aussi la configuration Scalingo, en vue de quitter Render. Deux apps sur le même dépôt, chacune avec sa variable `PROJECT_DIR` :
+
+- **API** (`PROJECT_DIR=backend`) : `backend/Procfile` lance le serveur et applique les migrations (`postdeploy`, avant la mise en ligne de la nouvelle version) ; `backend/cron.json` remplace le cron Render de l'import TabT (4 h UTC). Ajouter l'addon PostgreSQL et l'alias `DATABASE_URL=$SCALINGO_POSTGRESQL_URL`, puis les mêmes variables que sur Render (même `JWT_SECRET`), avec `CORS_ORIGIN` = URL du site Scalingo.
+- **Site** (`PROJECT_DIR=frontend`) : `frontend/.buildpacks` (Node.js pour le build, puis nginx) et `frontend/nginx.conf` (repli vers `index.html`). Variables `VITE_API_URL` et `VITE_CLUB_NAME` (lues au build).
+
+`prisma` est dans `dependencies` (et non `devDependencies`) car Scalingo retire les dépendances de développement après le build, alors que les migrations tournent au déploiement.
+
 ## Gérer les clubs
 
 Dans le Shell Render du service API (ou en local dans `backend/`) :
