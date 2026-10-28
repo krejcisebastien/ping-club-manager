@@ -175,6 +175,48 @@ function onToggleCancel(occurrence) {
   });
 }
 
+// Décaler une séance à venir (autre jour ou autre horaire).
+const moveDialogVisible = ref(false);
+const moveForm = ref({ occurrence: null, date: null, startTime: null, endTime: null, reason: "" });
+const moving = ref(false);
+const today = new Date(new Date().setHours(0, 0, 0, 0));
+
+function isUpcoming(occurrence) {
+  return occurrence.date.slice(0, 10) >= toDateOnly(today);
+}
+
+function openMoveDialog(occurrence) {
+  const [y, m, d] = occurrence.date.slice(0, 10).split("-").map(Number);
+  moveForm.value = {
+    occurrence,
+    date: new Date(y, m - 1, d),
+    startTime: stringToTime(occurrence.startTime),
+    endTime: stringToTime(occurrence.endTime),
+    reason: "",
+  };
+  moveDialogVisible.value = true;
+}
+
+async function onMove() {
+  const { occurrence, date, startTime, endTime, reason } = moveForm.value;
+  moving.value = true;
+  try {
+    await api.put(`/occurrences/${occurrence.id}`, {
+      date: toDateOnly(date),
+      startTime: timeToString(startTime),
+      endTime: timeToString(endTime),
+      reason: reason.trim() || undefined,
+    });
+    moveDialogVisible.value = false;
+    toast.add({ severity: "success", summary: "Séance décalée", detail: "Les joueurs et encadrants sont prévenus.", life: 3000 });
+    await loadOccurrences();
+  } catch (err) {
+    toast.add({ severity: "error", summary: "Erreur", detail: err.response?.data?.error ?? "Une erreur est survenue.", life: 5000 });
+  } finally {
+    moving.value = false;
+  }
+}
+
 const calendarEvents = computed(() =>
   occurrences.value.map((o) => ({
     id: o.id,
@@ -247,7 +289,10 @@ const calendarOptions = computed(() => ({
                 <p class="text-slate-400 text-sm py-4">Aucune séance générée.</p>
               </template>
               <Column header="Date">
-                <template #body="{ data }">{{ new Date(data.date).toLocaleDateString("fr-FR") }}</template>
+                <template #body="{ data }">
+                  {{ new Date(data.date).toLocaleDateString("fr-FR") }}
+                  <span v-if="data.originalDate" class="block text-xs text-slate-400">prévue le {{ new Date(data.originalDate).toLocaleDateString("fr-FR") }}</span>
+                </template>
               </Column>
               <Column header="Horaire">
                 <template #body="{ data }">{{ data.startTime }}–{{ data.endTime }}</template>
@@ -260,6 +305,14 @@ const calendarOptions = computed(() => ({
                   <div class="flex flex-wrap gap-1 justify-end">
                     <Button label="Encadrants" icon="pi pi-users" size="small" text @click="openAssignDialog(data)" />
                     <Button label="Présences" icon="pi pi-check-square" size="small" text :disabled="data.status === 'CANCELLED'" @click="router.push(`/coach/attendance/${data.id}`)" />
+                    <Button
+                      v-if="data.status !== 'CANCELLED' && isUpcoming(data)"
+                      label="Décaler"
+                      icon="pi pi-calendar"
+                      size="small"
+                      text
+                      @click="openMoveDialog(data)"
+                    />
                     <Button
                       v-if="auth.isAdmin"
                       :label="data.status === 'CANCELLED' ? 'Rétablir' : 'Annuler'"
@@ -288,6 +341,37 @@ const calendarOptions = computed(() => ({
         </p>
         <CoachAssignmentList :assignments="occurrenceCoaches" :coaches="coaches" :sparrings="sparrings" @add="onAssign" @remove="onUnassign" />
       </div>
+    </Dialog>
+
+    <Dialog v-model:visible="moveDialogVisible" header="Décaler la séance" modal style="width: 28rem" class="mx-4">
+      <form v-if="moveForm.occurrence" class="pt-2 space-y-3" @submit.prevent="onMove">
+        <p class="text-sm text-slate-500">
+          Actuellement le {{ new Date(moveForm.occurrence.date).toLocaleDateString("fr-FR") }} · {{ moveForm.occurrence.startTime }}–{{ moveForm.occurrence.endTime }}
+        </p>
+        <div>
+          <label class="block text-sm text-slate-600 mb-1" for="move-date">Nouveau jour</label>
+          <Calendar v-model="moveForm.date" input-id="move-date" date-format="dd/mm/yy" show-icon :show-on-focus="false" :min-date="today" required class="w-full" input-class="w-full" />
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-sm text-slate-600 mb-1" for="move-start">Début</label>
+            <Calendar v-model="moveForm.startTime" input-id="move-start" time-only hour-format="24" required class="w-full" input-class="w-full" />
+          </div>
+          <div>
+            <label class="block text-sm text-slate-600 mb-1" for="move-end">Fin</label>
+            <Calendar v-model="moveForm.endTime" input-id="move-end" time-only hour-format="24" required class="w-full" input-class="w-full" />
+          </div>
+        </div>
+        <div>
+          <label class="block text-sm text-slate-600 mb-1" for="move-reason">Motif (facultatif)</label>
+          <InputText id="move-reason" v-model="moveForm.reason" maxlength="200" placeholder="Ex. salle occupée" class="w-full" />
+        </div>
+        <p class="text-xs text-slate-400">Les joueurs et les encadrants de la séance recevront une notification avec le nouvel horaire et le motif.</p>
+        <div class="flex justify-end gap-2">
+          <Button type="button" label="Retour" severity="secondary" outlined @click="moveDialogVisible = false" />
+          <Button type="submit" label="Décaler" :loading="moving" />
+        </div>
+      </form>
     </Dialog>
   </AppLayout>
 </template>

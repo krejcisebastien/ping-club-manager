@@ -20,8 +20,20 @@ router.get("/:id", async (req, res) => {
 
 const OCCURRENCE_STATUSES = ["PLANNED", "CANCELLED"];
 
+const TIME = /^([01]\d|2[0-3]):[0-5]\d$/;
+const DATE = /^\d{4}-\d{2}-\d{2}$/;
+
 router.put("/:id", requireRole("ADMIN", "COACH"), async (req, res) => {
   const { date, startTime, endTime, status } = req.body ?? {};
+  // Motif facultatif d'un décalage, repris dans la notification.
+  const reason = typeof req.body?.reason === "string" ? req.body.reason.trim().slice(0, 200) : "";
+
+  if (date !== undefined && (!DATE.test(date) || Number.isNaN(new Date(date).getTime()))) {
+    return res.status(400).json({ error: "date doit être au format AAAA-MM-JJ." });
+  }
+  for (const [name, value] of [["startTime", startTime], ["endTime", endTime]]) {
+    if (value !== undefined && !TIME.test(value)) return res.status(400).json({ error: `${name} doit être au format HH:MM.` });
+  }
 
   // Annuler / rétablir une séance est réservé aux administrateurs.
   if (status !== undefined) {
@@ -42,10 +54,23 @@ router.put("/:id", requireRole("ADMIN", "COACH"), async (req, res) => {
   const before = await req.db.trainingOccurrence.findUnique({ where: { id: req.params.id }, include: { training: true } });
   if (!before) return res.status(404).json({ error: "Séance introuvable." });
 
+  const newDate = date !== undefined ? new Date(`${date}T00:00:00Z`) : before.date;
+  if ((startTime ?? before.startTime) >= (endTime ?? before.endTime)) {
+    return res.status(400).json({ error: "L'heure de fin doit être après l'heure de début." });
+  }
+  if (newDate.getTime() !== before.date.getTime()) {
+    if (isPast(newDate)) return res.status(400).json({ error: "Impossible de décaler une séance à une date passée." });
+    const encoded = await req.db.attendance.count({ where: { occurrenceId: before.id } });
+    if (encoded > 0) {
+      return res.status(409).json({ error: "Des présences sont déjà encodées : annule d'abord l'encodage avant de décaler la séance." });
+    }
+  }
+
   const occurrence = await req.db.trainingOccurrence.update({
     where: { id: req.params.id },
     data: {
-      ...(date !== undefined && { date: new Date(date) }),
+      ...(date !== undefined && { date: newDate }),
+      ...(newDate.getTime() !== before.date.getTime() && !before.originalDate && { originalDate: before.date }),
       ...(startTime !== undefined && { startTime }),
       ...(endTime !== undefined && { endTime }),
       ...(status !== undefined && { status }),
@@ -53,7 +78,7 @@ router.put("/:id", requireRole("ADMIN", "COACH"), async (req, res) => {
   });
   res.json({ occurrence });
 
-  const message = changeMessage(before, occurrence);
+  const message = changeMessage(before, occurrence, reason);
   if (message) notifyInBackground(req.db, occurrenceUserIds(req.db, occurrence.id, req.user.sub), message);
 });
 
@@ -61,7 +86,7 @@ const when = (occ) => `${formatDay(occ.date)}, ${occ.startTime}–${occ.endTime}
 
 // Notification à envoyer aux joueurs et encadrants pour ce changement (rien
 // pour une séance passée, ou si rien de visible n'a changé).
-function changeMessage(before, after) {
+function changeMessage(before, after, reason = "") {
   const name = before.training.name;
   if (before.status !== after.status) {
     if (isPast(after.date)) return null;
@@ -71,7 +96,11 @@ function changeMessage(before, after) {
   }
   const moved = before.date.getTime() !== after.date.getTime() || before.startTime !== after.startTime || before.endTime !== after.endTime;
   if (!moved || after.status === "CANCELLED" || (isPast(before.date) && isPast(after.date))) return null;
-  return { type: "sessions", title: "Séance déplacée", body: `${name} : désormais le ${when(after)} (au lieu du ${when(before)}).` };
+  return {
+    type: "sessions",
+    title: "Séance déplacée",
+    body: `${name} : désormais le ${when(after)} (au lieu du ${when(before)}).${reason ? ` Motif : ${reason}.` : ""}`,
+  };
 }
 
 router.delete("/:id", requireRole("ADMIN"), async (req, res) => {

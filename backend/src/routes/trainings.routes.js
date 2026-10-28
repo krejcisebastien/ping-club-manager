@@ -145,11 +145,12 @@ router.post("/:id/generate-occurrences", requireRole("ADMIN"), async (req, res) 
   }
 
   const dates = datesForWeekday(new Date(startDate), new Date(endDate), training.weekday);
+  // Une séance décalée à un autre jour compte pour sa date d'origine.
   const existing = await req.db.trainingOccurrence.findMany({
-    where: { trainingId: training.id, date: { in: dates } },
-    select: { date: true },
+    where: { trainingId: training.id, OR: [{ date: { in: dates } }, { originalDate: { in: dates } }] },
+    select: { date: true, originalDate: true },
   });
-  const existingTimes = new Set(existing.map((o) => o.date.getTime()));
+  const existingTimes = new Set(existing.flatMap((o) => [o.date.getTime(), o.originalDate?.getTime()]));
   const toCreate = dates.filter((d) => !existingTimes.has(d.getTime()));
 
   if (toCreate.length > 0) {

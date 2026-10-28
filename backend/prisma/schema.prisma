@@ -624,12 +624,15 @@ model TrainingCoach {
 }
 
 model TrainingOccurrence {
-  id         String           @id @default(cuid())
-  trainingId String
-  date       DateTime
-  startTime  String
-  endTime    String
-  status     OccurrenceStatus @default(PLANNED)
+  id           String           @id @default(cuid())
+  trainingId   String
+  date         DateTime
+  startTime    String
+  endTime      String
+  status       OccurrenceStatus @default(PLANNED)
+  // Date prévue à la génération, renseignée quand la séance est décalée à un
+  // autre jour : la régénération de la période ne la recrée pas.
+  originalDate DateTime?
 
   training    Training                  @relation(fields: [trainingId], references: [id], onDelete: Cascade)
   coaches     TrainingOccurrenceCoach[]

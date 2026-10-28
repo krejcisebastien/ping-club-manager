@@ -131,6 +131,23 @@ try {
   const same = await sends(() => call(A, "PUT", `/occurrences/${occ.id}`, { startTime: "19:00" }));
   expect("rien de changé : aucun envoi", same.result.status === 200 && same.sent.length === 0);
 
+  // ---------- Décalage à un autre jour ----------
+  const target = occurrences[2];
+  const originalDay = target.date.slice(0, 10);
+  const shifted = new Date(new Date(target.date).getTime() + 86400000).toISOString().slice(0, 10);
+  expect("décalage : date mal formée refusée", (await call(A, "PUT", `/occurrences/${target.id}`, { date: "demain" })).status === 400);
+  expect("décalage : fin avant début refusée", (await call(A, "PUT", `/occurrences/${target.id}`, { startTime: "20:00", endTime: "19:00" })).status === 400);
+  expect("décalage : date passée refusée", (await call(A, "PUT", `/occurrences/${target.id}`, { date: day(-2) })).status === 400);
+  const shift = await sends(() => call(A, "PUT", `/occurrences/${target.id}`, { date: shifted, reason: "Salle occupée" }));
+  expect("décalage : réponse OK et date d'origine gardée", shift.result.status === 200 && shift.result.json.occurrence.date.slice(0, 10) === shifted && shift.result.json.occurrence.originalDate?.slice(0, 10) === originalDay, JSON.stringify(shift.result.json));
+  expect("décalage : motif dans la notification", shift.sent[0]?.message.title === "Séance déplacée" && shift.sent[0].message.body.endsWith("Motif : Salle occupée."), shift.sent[0]?.message.body);
+  await post(A, `/trainings/${training.id}/generate-occurrences`, { startDate: day(1), endDate: day(28) });
+  const regenerated = (await call(A, "GET", `/trainings/${training.id}/occurrences`)).json.occurrences;
+  expect("décalage : la régénération ne recrée pas la date d'origine", regenerated.length === occurrences.length && !regenerated.some((o) => o.date.slice(0, 10) === originalDay), regenerated.map((o) => o.date.slice(0, 10)).join(","));
+  await prisma.attendance.create({ data: { occurrenceId: target.id, playerId: alice.id, status: "PRESENT" } });
+  expect("décalage : refusé si les présences sont encodées", (await call(A, "PUT", `/occurrences/${target.id}`, { date: originalDay })).status === 409);
+  await prisma.attendance.deleteMany({ where: { occurrenceId: target.id } });
+
   // ---------- Séance passée : aucun envoi ----------
   await prisma.trainingOccurrence.update({ where: { id: occurrences[1].id }, data: { date: new Date(`${day(-3)}T00:00:00Z`) } });
   const past = await sends(() => call(A, "PUT", `/occurrences/${occurrences[1].id}`, { status: "CANCELLED" }));
@@ -154,7 +171,7 @@ try {
   // ---------- Boîte de notifications dans l'app ----------
   const aliceTok = await login(`notif-alice-${run}@test.local`);
   const inbox = (await call(aliceTok, "GET", "/notifications")).json;
-  expect("boîte : toutes les notifications de la joueuse, récentes d'abord", inbox.notifications.length === 4 && inbox.unread === 4 && inbox.notifications[0].title === "Séance annulée" && inbox.notifications[3].title === "Séance annulée", JSON.stringify(inbox.notifications.map((n) => n.title)));
+  expect("boîte : toutes les notifications de la joueuse, récentes d'abord", inbox.notifications.length === 5 && inbox.unread === 5 && inbox.notifications[0].title === "Séance annulée" && inbox.notifications[4].title === "Séance annulée", JSON.stringify(inbox.notifications.map((n) => n.title)));
   expect("boîte : ajout du sparring absent chez la joueuse", !inbox.notifications.some((n) => n.title.includes("encadres")));
   await prisma.pushToken.deleteMany({ where: { token: tokenOf.coach } });
   await sends(() => call(A, "PUT", `/occurrences/${occ.id}`, { status: "PLANNED" }));
@@ -162,7 +179,7 @@ try {
   expect("boîte : gardée même sans appareil enregistré", coachInbox.notifications[0]?.title === "Séance rétablie", JSON.stringify(coachInbox.notifications.map((n) => n.title)));
   const first = inbox.notifications[0];
   expect("lire : une autre personne ne peut pas", (await call(coachTok, "POST", `/notifications/${first.id}/read`)).status === 404);
-  expect("lire une notification", (await call(aliceTok, "POST", `/notifications/${first.id}/read`)).status === 204 && (await call(aliceTok, "GET", "/notifications/unread-count")).json.unread === 4);
+  expect("lire une notification", (await call(aliceTok, "POST", `/notifications/${first.id}/read`)).status === 204 && (await call(aliceTok, "GET", "/notifications/unread-count")).json.unread === 5);
   expect("tout marquer comme lu", (await call(aliceTok, "POST", "/notifications/read-all")).status === 204 && (await call(aliceTok, "GET", "/notifications/unread-count")).json.unread === 0);
   expect("boîte : sans connexion refusée", (await call(null, "GET", "/notifications")).status === 401);
   await prisma.notification.updateMany({ where: { id: first.id }, data: { createdAt: new Date(Date.now() - 61 * 86400000) } });

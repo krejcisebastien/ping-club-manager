@@ -309,6 +309,7 @@ export const HELP_CHAPTERS = [
 <ul>
   <li><strong>Encadrants</strong> : modifier les encadrants de cette séance uniquement (remplacement, renfort…).</li>
   <li><strong>Présences</strong> : ouvrir la feuille de présence.</li>
+  <li><strong>Décaler</strong> : change le jour ou l'horaire d'une séance à venir, avec un motif facultatif. Les joueurs et encadrants sont prévenus. La date d'origine reste affichée (« prévue le … ») et la régénération de la période ne recrée pas la séance à cette date.</li>
   <li><strong>Annuler</strong> / <strong>Rétablir</strong> : une séance annulée n'est plus proposée au pointage et n'est pas défrayée. L'annulation est refusée si des présences sont déjà encodées : utilise d'abord <strong>Annuler l'encodage</strong>.</li>
 </ul>`,
       },
