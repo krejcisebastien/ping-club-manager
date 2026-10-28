@@ -1,11 +1,12 @@
 <script setup>
 // Paramètres du compte connecté (tous rôles) : mot de passe et notifications
 // push de cet appareil, regroupés ici plutôt qu'en icônes au bas du menu.
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
 import Button from "primevue/button";
 import Password from "primevue/password";
 import { useToast } from "primevue/usetoast";
+import { useConfirm } from "primevue/useconfirm";
 import AppLayout from "../components/AppLayout.vue";
 import { useNavLinks } from "../composables/useNavLinks.js";
 import { useAuthStore } from "../stores/auth.js";
@@ -18,6 +19,7 @@ const navLinks = useNavLinks();
 const auth = useAuthStore();
 const router = useRouter();
 const toast = useToast();
+const confirm = useConfirm();
 
 const passwordForm = ref({ currentPassword: "", newPassword: "", confirmPassword: "" });
 const passwordSaving = ref(false);
@@ -88,6 +90,54 @@ async function onSendReminder() {
   }
 }
 
+// Abonnement calendrier : flux iCal des séances et stages du compte (comme
+// entraineur, sparring ou joueur), mis à jour automatiquement par l'agenda.
+const hasCalendar = computed(() => !!auth.user?.coachId || auth.user?.playerIds?.length > 0);
+const calendarToken = ref(null);
+const loadingCalendar = ref(false);
+const calendarUrl = computed(() => (calendarToken.value ? `${api.defaults.baseURL}/calendar/${calendarToken.value}.ics` : ""));
+const webcalUrl = computed(() => calendarUrl.value.replace(/^https?:\/\//, "webcal://"));
+const googleUrl = computed(() => `https://calendar.google.com/calendar/render?cid=${encodeURIComponent(webcalUrl.value)}`);
+
+async function onShowCalendar() {
+  loadingCalendar.value = true;
+  try {
+    calendarToken.value = (await api.get("/calendar/link")).data.token;
+  } catch (err) {
+    toast.add({ severity: "error", summary: "Erreur", detail: err.response?.data?.error ?? "Une erreur est survenue.", life: 5000 });
+  } finally {
+    loadingCalendar.value = false;
+  }
+}
+
+async function onCopyCalendarUrl() {
+  try {
+    await navigator.clipboard.writeText(calendarUrl.value);
+    toast.add({ severity: "success", summary: "Lien copié", life: 3000 });
+  } catch {
+    toast.add({ severity: "warn", summary: "Copie impossible", detail: "Sélectionne le lien et copie-le manuellement.", life: 5000 });
+  }
+}
+
+function onResetCalendar() {
+  confirm.require({
+    message: "L'ancien lien cessera de fonctionner : il faudra réabonner tes agendas avec le nouveau. Continuer ?",
+    header: "Nouveau lien de calendrier",
+    icon: "pi pi-exclamation-triangle",
+    acceptLabel: "Générer un nouveau lien",
+    rejectLabel: "Annuler",
+    rejectClass: "p-button-secondary p-button-outlined",
+    accept: async () => {
+      try {
+        calendarToken.value = (await api.post("/calendar/link/reset")).data.token;
+        toast.add({ severity: "success", summary: "Nouveau lien généré", life: 3000 });
+      } catch (err) {
+        toast.add({ severity: "error", summary: "Erreur", detail: err.response?.data?.error ?? "Une erreur est survenue.", life: 5000 });
+      }
+    },
+  });
+}
+
 function onLogout() {
   auth.logout();
   router.push("/login");
@@ -134,6 +184,36 @@ function onLogout() {
             @click="onSendReminder"
           />
         </div>
+      </div>
+
+      <div v-if="hasCalendar && auth.licenseActive" class="bg-white rounded-xl shadow border border-slate-200 p-5 space-y-3">
+        <h2 class="font-medium text-slate-800">Calendrier</h2>
+        <p class="text-sm text-slate-600">
+          Retrouve tes séances d'entrainement et tes stages dans ton agenda (Google, iPhone, Outlook). Ils se mettent à jour
+          automatiquement, annulations comprises.
+        </p>
+        <Button v-if="!calendarToken" label="Ajouter à mon agenda" icon="pi pi-calendar-plus" :loading="loadingCalendar" @click="onShowCalendar" />
+        <template v-else>
+          <div class="flex flex-wrap gap-2">
+            <a :href="googleUrl" target="_blank" rel="noopener" class="p-button p-component no-underline">
+              <i class="pi pi-google mr-2"></i>Google Agenda
+            </a>
+            <a :href="webcalUrl" class="p-button p-component p-button-outlined no-underline">
+              <i class="pi pi-apple mr-2"></i>iPhone / Mac / Outlook
+            </a>
+          </div>
+          <div>
+            <label class="text-xs text-slate-500 block mb-1">Ou copie ce lien dans ton agenda (« S'abonner à un calendrier »)</label>
+            <div class="flex gap-2">
+              <input :value="calendarUrl" readonly class="flex-1 min-w-0 text-xs border border-slate-300 rounded-md px-2 py-2 text-slate-600 bg-slate-50" @focus="$event.target.select()" />
+              <Button icon="pi pi-copy" severity="secondary" outlined aria-label="Copier le lien" @click="onCopyCalendarUrl" />
+            </div>
+            <p class="text-xs text-slate-500 mt-1">
+              Ce lien est personnel : ne le partage pas.
+              <button type="button" class="text-sky-700 underline" @click="onResetCalendar">Générer un nouveau lien</button>
+            </p>
+          </div>
+        </template>
       </div>
 
       <form class="bg-white rounded-xl shadow border border-slate-200 p-5 space-y-3" @submit.prevent="onChangePassword">

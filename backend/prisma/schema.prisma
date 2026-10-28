@@ -157,6 +157,10 @@ model User {
   resetTokenHash      String?
   resetTokenExpiresAt DateTime?
 
+  // Jeton secret de l'abonnement calendrier (flux iCal des séances et stages
+  // du compte, lisible sans connexion par Google/Apple/Outlook).
+  calendarToken String? @unique
+
   players    UserPlayer[]
   pushTokens PushToken[]
 
