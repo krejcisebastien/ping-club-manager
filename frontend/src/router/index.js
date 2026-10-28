@@ -8,6 +8,8 @@ const routes = [
   { path: "/license", name: "license", component: () => import("../views/LicenseView.vue") },
   // Manuel utilisateur : ouvert à tout utilisateur connecté (contenu filtré par rôle dans la page).
   { path: "/help", name: "help", component: () => import("../views/HelpView.vue") },
+  // Paramètres du compte (mot de passe, notifications) : tout utilisateur connecté.
+  { path: "/account", name: "account", component: () => import("../views/AccountView.vue") },
   {
     path: "/platform",
     name: "platform",
@@ -215,8 +217,8 @@ router.beforeEach(async (to) => {
 
   if (!auth.isAuthenticated) return "/login";
 
-  // Sans licence valide, seule la page Licence est accessible.
-  if (!auth.licenseActive) return to.name === "license" ? true : "/license";
+  // Sans licence valide, seules les pages Licence et Mon compte sont accessibles.
+  if (!auth.licenseActive) return to.name === "license" || to.name === "account" ? true : "/license";
 
   if (to.meta.platform && !auth.user?.isPlatformAdmin) return roleHome(auth.activeRole);
 

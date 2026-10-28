@@ -40,8 +40,8 @@ export const HELP_CHAPTERS = [
         title: "Changer mon mot de passe",
         body: `
 <ol>
-  <li>En bas du menu, à côté de ton adresse email, clique sur l'icône <strong>cadenas</strong>.</li>
-  <li>Saisis ton mot de passe actuel, puis deux fois le nouveau.</li>
+  <li>En bas du menu, clique sur ton adresse email pour ouvrir <strong>Mon compte</strong>.</li>
+  <li>Dans le bloc <strong>Mot de passe</strong>, saisis ton mot de passe actuel, puis deux fois le nouveau.</li>
   <li>Clique sur <strong>Enregistrer</strong>.</li>
 </ol>`,
       },
@@ -75,6 +75,7 @@ export const HELP_CHAPTERS = [
   <li><strong>Android :</strong> ouvre le site dans <strong>Chrome</strong>, menu <strong>⋮</strong> puis <strong>Installer l'application</strong> (ou <strong>Ajouter à l'écran d'accueil</strong>).</li>
   <li><strong>Ordinateur :</strong> dans Chrome ou Edge, clique sur l'icône d'installation au bout de la barre d'adresse.</li>
 </ul>
+<p>Pour recevoir les rappels du club, ouvre <strong>Mon compte</strong> (ton adresse email en bas du menu) puis <strong>Activer les notifications</strong>. Sur iPhone, fais-le depuis l'app ajoutée à l'écran d'accueil.</p>
 <p>Quand une nouvelle version est publiée, un bandeau <strong>Nouvelle version disponible</strong> apparaît : clique sur <strong>Mettre à jour</strong>.</p>`,
       },
     ],

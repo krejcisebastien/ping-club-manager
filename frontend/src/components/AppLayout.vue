@@ -4,14 +4,9 @@ import { useRouter, RouterLink } from "vue-router";
 import Avatar from "primevue/avatar";
 import Button from "primevue/button";
 import Sidebar from "primevue/sidebar";
-import Dialog from "primevue/dialog";
-import Password from "primevue/password";
-import { useToast } from "primevue/usetoast";
 import { useAuthStore } from "../stores/auth.js";
 import { CLUB_NAME, CLUB_ICON } from "../lib/config.js";
 import { ROLE_LABELS, roleHome } from "../lib/roles.js";
-import { api } from "../lib/api.js";
-import { isWebPushAvailable, webPushPermission, enableWebPush } from "../lib/push.js";
 
 defineProps({
   title: { type: String, required: true },
@@ -22,7 +17,6 @@ const ACTIVE_LINK_CLASS = "!bg-sky-50 !text-sky-700 font-medium";
 
 const auth = useAuthStore();
 const router = useRouter();
-const toast = useToast();
 const drawerOpen = ref(false);
 
 const expiringSoon = computed(() => {
@@ -44,75 +38,6 @@ function onSwitchRole(role) {
 function onLogout() {
   auth.logout();
   router.push("/login");
-}
-
-// Phase de test des notifications push, réservée à ce compte (vérifié aussi
-// côté serveur : masquer le bouton ne suffit pas à restreindre l'accès).
-const PUSH_TEST_EMAIL = "seb.krejci@live.com";
-const sendingReminder = ref(false);
-async function onSendReminder() {
-  sendingReminder.value = true;
-  try {
-    const { data } = await api.post("/push/reminder", { message: "Rappel depuis PingDesk" });
-    toast.add({ severity: "success", summary: `Notification envoyée (${data.sent} appareil(s))`, life: 3000 });
-  } catch (err) {
-    toast.add({ severity: "error", summary: "Erreur", detail: err.response?.data?.error ?? "Une erreur est survenue.", life: 5000 });
-  } finally {
-    sendingReminder.value = false;
-  }
-}
-
-// PWA : l'abonnement aux notifications doit partir d'un clic (exigé par
-// Safari/iOS), d'où ce bouton tant que la permission n'est pas accordée.
-const webPushOffered = ref(isWebPushAvailable() && webPushPermission() === "default");
-const enablingPush = ref(false);
-async function onEnableWebPush() {
-  enablingPush.value = true;
-  try {
-    if (await enableWebPush()) {
-      toast.add({ severity: "success", summary: "Notifications activées", life: 3000 });
-    } else {
-      toast.add({ severity: "warn", summary: "Notifications non activées", detail: "Autorisez-les dans les réglages du navigateur.", life: 5000 });
-    }
-  } catch (err) {
-    toast.add({ severity: "error", summary: "Erreur", detail: err.response?.data?.error ?? "Une erreur est survenue.", life: 5000 });
-  } finally {
-    enablingPush.value = false;
-    webPushOffered.value = webPushPermission() === "default";
-  }
-}
-
-const passwordDialogVisible = ref(false);
-const passwordForm = ref({ currentPassword: "", newPassword: "", confirmPassword: "" });
-const passwordSaving = ref(false);
-const passwordError = ref("");
-
-function openPasswordDialog() {
-  passwordForm.value = { currentPassword: "", newPassword: "", confirmPassword: "" };
-  passwordError.value = "";
-  passwordDialogVisible.value = true;
-  drawerOpen.value = false;
-}
-
-async function onChangePassword() {
-  passwordError.value = "";
-  if (passwordForm.value.newPassword !== passwordForm.value.confirmPassword) {
-    passwordError.value = "Les deux mots de passe ne correspondent pas.";
-    return;
-  }
-  passwordSaving.value = true;
-  try {
-    await api.put("/auth/change-password", {
-      currentPassword: passwordForm.value.currentPassword,
-      newPassword: passwordForm.value.newPassword,
-    });
-    passwordDialogVisible.value = false;
-    toast.add({ severity: "success", summary: "Mot de passe mis à jour", life: 3000 });
-  } catch (err) {
-    passwordError.value = err.response?.data?.error ?? "Une erreur est survenue.";
-  } finally {
-    passwordSaving.value = false;
-  }
 }
 </script>
 
@@ -154,32 +79,17 @@ async function onChangePassword() {
             {{ ROLE_LABELS[r] }}
           </button>
         </div>
-        <div class="flex items-center gap-2">
-          <Avatar :label="initials(auth.user?.email)" shape="circle" class="bg-sky-100 text-sky-700 shrink-0" />
-          <span class="text-sm text-slate-600 truncate flex-1">{{ auth.user?.email }}</span>
-          <Button
-            v-if="webPushOffered"
-            icon="pi pi-bell-slash"
-            severity="secondary"
-            text
-            rounded
-            :loading="enablingPush"
-            aria-label="Activer les notifications"
-            title="Activer les notifications"
-            @click="onEnableWebPush"
-          />
-          <Button
-            v-if="auth.user?.email === PUSH_TEST_EMAIL"
-            icon="pi pi-bell"
-            severity="secondary"
-            text
-            rounded
-            :loading="sendingReminder"
-            aria-label="Envoyer un rappel (test)"
-            title="Envoyer un rappel (test)"
-            @click="onSendReminder"
-          />
-          <Button icon="pi pi-lock" severity="secondary" text rounded aria-label="Changer le mot de passe" @click="openPasswordDialog" />
+        <div class="flex items-center gap-1">
+          <RouterLink
+            to="/account"
+            class="flex items-center gap-2 flex-1 min-w-0 rounded-lg px-1 py-1 hover:bg-slate-100"
+            title="Mon compte"
+            @click="drawerOpen = false"
+          >
+            <Avatar :label="initials(auth.user?.email)" shape="circle" class="bg-sky-100 text-sky-700 shrink-0" />
+            <span class="text-sm text-slate-600 truncate flex-1">{{ auth.user?.email }}</span>
+            <i class="pi pi-cog text-slate-400" aria-hidden="true"></i>
+          </RouterLink>
           <Button icon="pi pi-sign-out" severity="secondary" text rounded aria-label="Déconnexion" @click="onLogout" />
         </div>
       </div>
@@ -218,32 +128,17 @@ async function onChangePassword() {
             {{ ROLE_LABELS[r] }}
           </button>
         </div>
-        <div class="flex items-center gap-2">
-          <Avatar :label="initials(auth.user?.email)" shape="circle" class="bg-sky-100 text-sky-700 shrink-0" />
-          <span class="text-sm text-slate-600 truncate flex-1">{{ auth.user?.email }}</span>
-          <Button
-            v-if="webPushOffered"
-            icon="pi pi-bell-slash"
-            severity="secondary"
-            text
-            rounded
-            :loading="enablingPush"
-            aria-label="Activer les notifications"
-            title="Activer les notifications"
-            @click="onEnableWebPush"
-          />
-          <Button
-            v-if="auth.user?.email === PUSH_TEST_EMAIL"
-            icon="pi pi-bell"
-            severity="secondary"
-            text
-            rounded
-            :loading="sendingReminder"
-            aria-label="Envoyer un rappel (test)"
-            title="Envoyer un rappel (test)"
-            @click="onSendReminder"
-          />
-          <Button icon="pi pi-lock" severity="secondary" text rounded aria-label="Changer le mot de passe" @click="openPasswordDialog" />
+        <div class="flex items-center gap-1">
+          <RouterLink
+            to="/account"
+            class="flex items-center gap-2 flex-1 min-w-0 rounded-lg px-1 py-1 hover:bg-slate-100"
+            title="Mon compte"
+            @click="drawerOpen = false"
+          >
+            <Avatar :label="initials(auth.user?.email)" shape="circle" class="bg-sky-100 text-sky-700 shrink-0" />
+            <span class="text-sm text-slate-600 truncate flex-1">{{ auth.user?.email }}</span>
+            <i class="pi pi-cog text-slate-400" aria-hidden="true"></i>
+          </RouterLink>
           <Button icon="pi pi-sign-out" severity="secondary" text rounded aria-label="Déconnexion" @click="onLogout" />
         </div>
       </div>
@@ -274,27 +169,5 @@ async function onChangePassword() {
         <slot />
       </main>
     </div>
-
-    <Dialog v-model:visible="passwordDialogVisible" header="Changer le mot de passe" modal style="width: 26rem" class="mx-4">
-      <form class="grid grid-cols-1 gap-3 pt-2" @submit.prevent="onChangePassword">
-        <div>
-          <label class="text-xs text-slate-500 block mb-1">Mot de passe actuel</label>
-          <Password v-model="passwordForm.currentPassword" required toggle-mask :feedback="false" class="w-full" input-class="w-full" />
-        </div>
-        <div>
-          <label class="text-xs text-slate-500 block mb-1">Nouveau mot de passe</label>
-          <Password v-model="passwordForm.newPassword" required toggle-mask :feedback="false" class="w-full" input-class="w-full" />
-        </div>
-        <div>
-          <label class="text-xs text-slate-500 block mb-1">Confirmer le nouveau mot de passe</label>
-          <Password v-model="passwordForm.confirmPassword" required toggle-mask :feedback="false" class="w-full" input-class="w-full" />
-        </div>
-        <p v-if="passwordError" class="text-sm text-red-600">{{ passwordError }}</p>
-        <div class="flex justify-end gap-2 mt-2">
-          <Button type="button" label="Annuler" severity="secondary" outlined @click="passwordDialogVisible = false" />
-          <Button type="submit" label="Enregistrer" :loading="passwordSaving" />
-        </div>
-      </form>
-    </Dialog>
   </div>
 </template>
