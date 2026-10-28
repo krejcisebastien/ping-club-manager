@@ -1,10 +1,11 @@
 <script setup>
 // Paramètres du compte connecté (tous rôles) : mot de passe et notifications
 // push de cet appareil, regroupés ici plutôt qu'en icônes au bas du menu.
-import { computed, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import Button from "primevue/button";
 import Password from "primevue/password";
+import InputSwitch from "primevue/inputswitch";
 import { useToast } from "primevue/usetoast";
 import { useConfirm } from "primevue/useconfirm";
 import AppLayout from "../components/AppLayout.vue";
@@ -73,6 +74,40 @@ async function onEnableWebPush() {
     notifState.value = pushState();
   }
 }
+
+// Types de notifications reçus sur les appareils (coupés = seulement dans la
+// boîte de notifications de l'app). Liste fournie par l'API selon les rôles.
+const notifTypes = ref([]);
+const mutedTypes = ref([]);
+const savingTypes = ref(false);
+onMounted(async () => {
+  if (!auth.licenseActive) return;
+  try {
+    const { data } = await api.get("/notifications/settings");
+    notifTypes.value = data.types;
+    mutedTypes.value = data.muted;
+  } catch {
+    // Réglages indisponibles : le bloc reste masqué.
+  }
+});
+async function onToggleType(key, enabled) {
+  const previous = mutedTypes.value;
+  mutedTypes.value = enabled ? previous.filter((k) => k !== key) : [...previous, key];
+  savingTypes.value = true;
+  try {
+    mutedTypes.value = (await api.put("/notifications/settings", { muted: mutedTypes.value })).data.muted;
+  } catch (err) {
+    mutedTypes.value = previous;
+    toast.add({ severity: "error", summary: "Erreur", detail: err.response?.data?.error ?? "Une erreur est survenue.", life: 5000 });
+  } finally {
+    savingTypes.value = false;
+  }
+}
+const TYPE_HINTS = {
+  sessions: "Séance annulée, rétablie ou déplacée, encadrement",
+  reminders: "Séance du lendemain, présences à encoder, stage qui approche",
+  license: "Fin de la licence dans 30 et 7 jours",
+};
 
 // Phase de test des notifications push, réservée à ce compte (vérifié aussi
 // côté serveur : masquer le bouton ne suffit pas à restreindre l'accès).
@@ -173,6 +208,21 @@ function onLogout() {
           <p class="text-sm text-slate-600">Sois prévenu sur cet appareil quand une de tes séances est annulée ou déplacée.</p>
           <Button label="Activer les notifications" icon="pi pi-bell" :loading="enablingPush" @click="onEnableWebPush" />
         </template>
+        <div v-if="notifTypes.length" class="pt-3 border-t border-slate-100 space-y-3">
+          <p class="text-xs text-slate-500">Sur le téléphone. Tout reste consultable dans l'app, via la cloche.</p>
+          <div v-for="t in notifTypes" :key="t.key" class="flex items-center gap-3">
+            <label :for="`notif-${t.key}`" class="flex-1 min-w-0 cursor-pointer">
+              <span class="block text-sm text-slate-700">{{ t.label }}</span>
+              <span v-if="TYPE_HINTS[t.key]" class="block text-xs text-slate-500">{{ TYPE_HINTS[t.key] }}</span>
+            </label>
+            <InputSwitch
+              :input-id="`notif-${t.key}`"
+              :model-value="!mutedTypes.includes(t.key)"
+              :disabled="savingTypes"
+              @update:model-value="onToggleType(t.key, $event)"
+            />
+          </div>
+        </div>
         <div v-if="auth.user?.email === PUSH_TEST_EMAIL" class="pt-2 border-t border-slate-100">
           <Button
             label="Envoyer un rappel (test)"

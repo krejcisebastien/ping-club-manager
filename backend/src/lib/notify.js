@@ -5,6 +5,14 @@ import { sendPushToTokens } from "./push.js";
 // de la modification). Gardées dans la boîte de notifications de chaque compte
 // concerné, et poussées sur les appareils de ceux qui les ont activées.
 
+// Types de notifications, réglables dans Mon compte (push sur les appareils).
+// `roles` : types proposés seulement à ces rôles.
+export const NOTIFICATION_TYPES = {
+  sessions: { label: "Changements de séance" },
+  reminders: { label: "Rappels" },
+  license: { label: "Licence du club", roles: ["ADMIN"] },
+};
+
 // Durée de conservation dans la boîte de notifications.
 export const NOTIFICATION_RETENTION_DAYS = 60;
 
@@ -16,10 +24,12 @@ export function setPushSender(fn) {
 
 // `onceWithinHours` : ne renvoie pas une notification identique déjà reçue
 // dans ce délai (rappels planifiés relancés deux fois le même jour).
+// `message` : { type (clé de NOTIFICATION_TYPES), title, body }.
 export async function notifyUsers(db, userIds, message, { onceWithinHours } = {}) {
+  if (!NOTIFICATION_TYPES[message.type]) throw new Error(`Type de notification inconnu : ${message.type}`);
   const ids = [...new Set(userIds)];
   if (!ids.length) return;
-  let users = await db.user.findMany({ where: { id: { in: ids }, isActive: true }, select: { id: true } });
+  let users = await db.user.findMany({ where: { id: { in: ids }, isActive: true }, select: { id: true, mutedNotifications: true } });
   if (onceWithinHours) {
     const already = await db.notification.findMany({
       where: { userId: { in: users.map((u) => u.id) }, title: message.title, body: message.body, createdAt: { gte: new Date(Date.now() - onceWithinHours * 3600000) } },
@@ -28,11 +38,13 @@ export async function notifyUsers(db, userIds, message, { onceWithinHours } = {}
     users = users.filter((u) => !already.some((a) => a.userId === u.id));
   }
   if (!users.length) return;
-  await db.notification.createMany({ data: users.map((u) => ({ userId: u.id, title: message.title, body: message.body })) });
+  await db.notification.createMany({ data: users.map((u) => ({ userId: u.id, type: message.type, title: message.title, body: message.body })) });
   await db.notification.deleteMany({
     where: { userId: { in: users.map((u) => u.id) }, createdAt: { lt: new Date(Date.now() - NOTIFICATION_RETENTION_DAYS * 86400000) } },
   });
-  const tokens = await db.pushToken.findMany({ where: { userId: { in: users.map((u) => u.id) } } });
+  const pushUserIds = users.filter((u) => !u.mutedNotifications.includes(message.type)).map((u) => u.id);
+  if (!pushUserIds.length) return;
+  const tokens = await db.pushToken.findMany({ where: { userId: { in: pushUserIds } } });
   if (!tokens.length) return;
   try {
     const { invalidTokens } = await sender(

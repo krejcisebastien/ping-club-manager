@@ -66,12 +66,12 @@ function changeMessage(before, after) {
   if (before.status !== after.status) {
     if (isPast(after.date)) return null;
     return after.status === "CANCELLED"
-      ? { title: "Séance annulée", body: `${name} du ${when(after)} est annulé.` }
-      : { title: "Séance rétablie", body: `${name} du ${when(after)} a bien lieu.` };
+      ? { type: "sessions", title: "Séance annulée", body: `${name} du ${when(after)} est annulé.` }
+      : { type: "sessions", title: "Séance rétablie", body: `${name} du ${when(after)} a bien lieu.` };
   }
   const moved = before.date.getTime() !== after.date.getTime() || before.startTime !== after.startTime || before.endTime !== after.endTime;
   if (!moved || after.status === "CANCELLED" || (isPast(before.date) && isPast(after.date))) return null;
-  return { title: "Séance déplacée", body: `${name} : désormais le ${when(after)} (au lieu du ${when(before)}).` };
+  return { type: "sessions", title: "Séance déplacée", body: `${name} : désormais le ${when(after)} (au lieu du ${when(before)}).` };
 }
 
 router.delete("/:id", requireRole("ADMIN"), async (req, res) => {
@@ -120,8 +120,8 @@ function notifyStaffChange(req, assignment, occurrence, change) {
     req.db,
     userIds,
     change === "added"
-      ? { title: "Tu encadres une séance", body: `${label}.` }
-      : { title: "Tu n'encadres plus une séance", body: `${label} : tu as été retiré de l'encadrement.` },
+      ? { type: "sessions", title: "Tu encadres une séance", body: `${label}.` }
+      : { type: "sessions", title: "Tu n'encadres plus une séance", body: `${label} : tu as été retiré de l'encadrement.` },
   );
 }
 

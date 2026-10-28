@@ -44,7 +44,7 @@ export async function runReminders({ now = new Date() } = {}) {
       await notifyUsers(
         db,
         userIds,
-        { title: "Séance demain", body: `${occ.training.name}, ${formatDay(occ.date)}, ${occ.startTime}–${occ.endTime}${at(occ.training.location)}.` },
+        { type: "reminders", title: "Séance demain", body: `${occ.training.name}, ${formatDay(occ.date)}, ${occ.startTime}–${occ.endTime}${at(occ.training.location)}.` },
         ONCE,
       );
       counts.sessions++;
@@ -61,7 +61,7 @@ export async function runReminders({ now = new Date() } = {}) {
       await notifyUsers(
         db,
         userIds,
-        { title: "Présences à encoder", body: `${occ.training.name} du ${formatDay(occ.date)} : les présences ne sont pas encore encodées.` },
+        { type: "reminders", title: "Présences à encoder", body: `${occ.training.name} du ${formatDay(occ.date)} : les présences ne sont pas encore encodées.` },
         ONCE,
       );
       counts.attendance++;
@@ -84,7 +84,7 @@ export async function runReminders({ now = new Date() } = {}) {
       ]);
       const userIds = [...staff, ...players.map((u) => u.id)];
       if (!userIds.length) continue;
-      await notifyUsers(db, userIds, { title: "Stage dans 2 jours", body: `${camp.name} commence ${formatDay(camp.startDate)}${at(camp.location)}.` }, ONCE);
+      await notifyUsers(db, userIds, { type: "reminders", title: "Stage dans 2 jours", body: `${camp.name} commence ${formatDay(camp.startDate)}${at(camp.location)}.` }, ONCE);
       counts.camps++;
     }
 
@@ -98,6 +98,7 @@ export async function runReminders({ now = new Date() } = {}) {
           db,
           admins.map((u) => u.id),
           {
+            type: "license",
             title: "Licence bientôt échue",
             body: `La licence de ${club.name} se termine dans ${daysLeft} jours (${formatDay(endDay)}). Renouvelle-la depuis la page Licence.`,
           },

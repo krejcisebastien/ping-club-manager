@@ -169,6 +169,19 @@ try {
   await sends(() => call(A, "PUT", `/occurrences/${occ.id}`, { status: "CANCELLED" }));
   expect("boîte : plus de 60 jours supprimées", !(await prisma.notification.findUnique({ where: { id: first.id } })));
 
+  // ---------- Réglages par type ----------
+  const aliceSettings = (await call(aliceTok, "GET", "/notifications/settings")).json;
+  expect("réglages joueuse : séances et rappels, pas la licence", JSON.stringify(aliceSettings.types.map((t) => t.key)) === JSON.stringify(["sessions", "reminders"]) && aliceSettings.muted.length === 0, JSON.stringify(aliceSettings));
+  expect("réglages admin : licence proposée", (await call(A, "GET", "/notifications/settings")).json.types.some((t) => t.key === "license"));
+  expect("réglage inconnu refusé", (await call(aliceTok, "PUT", "/notifications/settings", { muted: ["inconnu"] })).status === 400);
+  const muted = await call(aliceTok, "PUT", "/notifications/settings", { muted: ["sessions"] });
+  expect("couper les changements de séance", muted.status === 200 && JSON.stringify(muted.json.muted) === JSON.stringify(["sessions"]));
+  const quiet = await sends(() => call(A, "PUT", `/occurrences/${occ.id}`, { status: "PLANNED" }));
+  expect("type coupé : pas de push pour la joueuse", !quiet.tokens.includes(tokenOf.alice), JSON.stringify(quiet.tokens));
+  const aliceLatest = (await call(aliceTok, "GET", "/notifications")).json.notifications[0];
+  expect("type coupé : toujours dans la boîte", aliceLatest?.title === "Séance rétablie" && aliceLatest.type === "sessions");
+  await call(aliceTok, "PUT", "/notifications/settings", { muted: [] });
+
   // ---------- Isolation : le club B ne peut ni modifier ni être prévenu ----------
   const B = await login(`notif-admin-b-${run}@test.local`);
   const cross = await sends(() => call(B, "PUT", `/occurrences/${occ.id}`, { status: "PLANNED" }));
