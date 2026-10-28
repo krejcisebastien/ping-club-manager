@@ -38,14 +38,15 @@ services:
       # l'URL réelle différera — corrige alors cette valeur après le premier déploiement.
       - key: CORS_ORIGIN
         value: https://ping-club-manager-web.onrender.com
-      # Clé API Resend (resend.com) pour l'envoi des emails de
-      # réinitialisation de mot de passe — à renseigner manuellement dans le
-      # dashboard Render après le premier déploiement (pas de valeur par
-      # défaut ici, c'est une clé secrète).
-      - key: RESEND_API_KEY
+      # Envoi des emails de réinitialisation de mot de passe par SMTP (boîte
+      # mail OVH du domaine). Mot de passe à renseigner manuellement dans le
+      # dashboard (secret, pas de valeur ici).
+      - key: SMTP_USER
+        value: noreply@pingdesk.app
+      - key: SMTP_PASSWORD
         sync: false
-      - key: RESEND_FROM
-        value: onboarding@resend.dev
+      - key: MAIL_FROM
+        value: PingDesk <noreply@pingdesk.app>
       # Création de club en libre-service (/signup). Laisser "false" tant que
       # tu ne veux pas accepter d'inscriptions publiques (voir DEPLOYMENT.md).
       - key: ALLOW_CLUB_SIGNUP
