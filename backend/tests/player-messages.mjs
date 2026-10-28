@@ -119,8 +119,8 @@ try {
     tokenOf[key] = `tok-${key}-${run}`;
     await prisma.pushToken.create({ data: { userId: u.id, token: tokenOf[key], platform: "web" } });
   }
-  const thread = (tok, player = alice) => call(tok, "GET", `/players/${player.id}/messages`);
-  const write = (tok, body, player = alice) => sends(() => call(tok, "POST", `/players/${player.id}/messages`, { body }));
+  const thread = (tok, player = alice, side) => call(tok, "GET", `/players/${player.id}/messages${side ? `?side=${side}` : ""}`);
+  const write = (tok, body, player = alice, side) => sends(() => call(tok, "POST", `/players/${player.id}/messages`, { body, side }));
 
   // ---------- Qui lit le fil d'Alice ----------
   expect("joueuse : son fil", (await thread(aliceTok)).status === 200);
@@ -188,6 +188,30 @@ try {
   expect("un seul responsable à la fois", coaches.filter((c) => c.isTrainingManager).map((c) => c.id).join() === dan.id);
   expect("ancienne responsable : plus d'accès", (await thread(miaTok)).status === 403 && (await thread(danTok)).status === 200);
   expect("responsable du club B inchangé", (await prisma.coach.findUnique({ where: { id: coachB.id } })).isTrainingManager === true);
+
+  // ---------- Compte à la fois parent et entraineur ----------
+  const eve = (await post(A, "/coaches", { firstName: "Eve", lastName: "Parent" })).coach;
+  await post(A, `/trainings/${t1.id}/coaches`, { coachId: eve.id });
+  const eveTok = await account("eve", { roles: ["COACH", "PLAYER"], coachId: eve.id, playerIds: [alice.id] });
+  const eveUser = await prisma.user.findUnique({ where: { email: `msg-eve-${run}@test.local` } });
+  tokenOf.eve = `tok-eve-${run}`;
+  await prisma.pushToken.create({ data: { userId: eveUser.id, token: tokenOf.eve, platform: "web" } });
+  const asFamily = await write(eveTok, "Message écrit pour Alice", alice, "PLAYER");
+  expect("parent-entraineur, espace joueur : au nom de la joueuse", asFamily.result.json.message.author.name === "Alice Joueuse" && asFamily.result.json.message.author.side === "player", JSON.stringify(asFamily.result.json));
+  expect("parent-entraineur, espace joueur : notification « Message de » aux entraineurs", asFamily.sent[0]?.message.title === "Message de Alice Joueuse" && asFamily.tokens.includes(tokenOf.carla) && !asFamily.tokens.includes(tokenOf.eve), JSON.stringify(asFamily.tokens));
+  const asStaff = await write(eveTok, "Réponse de l'entraineuse", alice, "STAFF");
+  expect("parent-entraineur, espace entraineur : à son nom", asStaff.result.json.message.author.name === "Eve Parent" && asStaff.result.json.message.author.side === "staff");
+  expect("parent-entraineur, espace entraineur : famille prévenue, pas lui-même", asStaff.tokens.includes(tokenOf.alice) && asStaff.tokens.includes(tokenOf.parent) && !asStaff.tokens.includes(tokenOf.eve), JSON.stringify(asStaff.tokens));
+  const familyView = (await thread(eveTok, alice, "PLAYER")).json.messages;
+  const staffView = (await thread(eveTok, alice, "STAFF")).json.messages;
+  const find = (list, body) => list.find((m) => m.body === body);
+  expect("« Moi » côté joueur : les messages de la joueuse, pas ceux de l'entraineuse", find(familyView, "Message écrit pour Alice").author.isMe && !find(familyView, "Réponse de l'entraineuse").author.isMe);
+  expect("« Moi » côté entraineur : ses réponses seulement", find(staffView, "Réponse de l'entraineuse").author.isMe && !find(staffView, "Message écrit pour Alice").author.isMe);
+  const familyMsg = find(familyView, "Message écrit pour Alice");
+  expect("le message écrit pour Alice lui appartient", find((await thread(aliceTok)).json.messages, "Message écrit pour Alice").author.isMe);
+  expect("côté entraineur : ne supprime pas un message de la joueuse", (await call(eveTok, "DELETE", `/players/${alice.id}/messages/${familyMsg.id}?side=STAFF`)).status === 403);
+  expect("la joueuse supprime le message écrit pour elle", (await call(aliceTok, "DELETE", `/players/${alice.id}/messages/${familyMsg.id}`)).status === 204);
+  expect("côté non autorisé : un joueur ne lit pas en entraineur", (await thread(aliceTok, alice, "STAFF")).status === 403);
 
   // ---------- Réglage ----------
   const settings = (await call(aliceTok, "GET", "/notifications/settings")).json;

@@ -14,16 +14,31 @@ const shorten = (text, max = 140) => {
   return line.length > max ? `${line.slice(0, max - 1)}…` : line;
 };
 
-const AUTHOR_INCLUDE = { coach: { select: { firstName: true, lastName: true } }, players: { select: { playerId: true } } };
+const AUTHOR_INCLUDE = { coach: { select: { firstName: true, lastName: true } } };
+const SIDES = ["PLAYER", "STAFF"];
+// Écran d'où vient la requête (espace joueur ou entraineur).
+const sideOf = (req) => {
+  const side = req.query.side ?? req.body?.side;
+  return SIDES.includes(side) ? side : undefined;
+};
+const sideOfAccess = (access) => (access === "player" ? "PLAYER" : "STAFF");
+
+// "Moi" seulement pour les messages écrits dans le rôle de l'écran ouvert. Un
+// message côté joueur se supprime depuis tout compte rattaché au joueur ; côté
+// entraineur, par son auteur ou le responsable de cellule.
+function isMine(message, req, access) {
+  const mySide = sideOfAccess(access);
+  return message.authorSide === "PLAYER" ? mySide === "PLAYER" : message.authorId === req.user.sub && mySide === "STAFF";
+}
 
 function present(message, player, req, access) {
-  const fromPlayer = message.author.players.some((p) => p.playerId === player.id) && !message.author.coach;
+  const mine = isMine(message, req, access);
   return {
     id: message.id,
     body: message.body,
     createdAt: message.createdAt,
-    author: { name: authorName(message.author, player), side: fromPlayer ? "player" : "staff", isMe: message.authorId === req.user.sub },
-    canDelete: message.authorId === req.user.sub || access === "manager",
+    author: { name: authorName(message, player), side: message.authorSide === "PLAYER" ? "player" : "staff", isMe: mine },
+    canDelete: mine || access === "manager",
   };
 }
 
@@ -48,7 +63,7 @@ router.get("/player-messages", requireAuth, async (req, res) => {
 });
 
 router.get("/players/:id/messages", requireAuth, async (req, res) => {
-  const access = await messageAccess(req, req.params.id);
+  const access = await messageAccess(req, req.params.id, sideOf(req));
   if (!access) return res.status(403).json({ error: "Accès refusé." });
   const player = await req.db.player.findUnique({ where: { id: req.params.id }, select: { id: true, firstName: true, lastName: true } });
   if (!player) return res.status(404).json({ error: "Joueur introuvable." });
@@ -61,7 +76,7 @@ router.get("/players/:id/messages", requireAuth, async (req, res) => {
 });
 
 router.post("/players/:id/messages", requireAuth, async (req, res) => {
-  const access = await messageAccess(req, req.params.id);
+  const access = await messageAccess(req, req.params.id, sideOf(req));
   if (!access) return res.status(403).json({ error: "Accès refusé." });
   const body = typeof req.body?.body === "string" ? req.body.body.trim() : "";
   if (!body) return res.status(400).json({ error: "Le message est vide." });
@@ -70,7 +85,7 @@ router.post("/players/:id/messages", requireAuth, async (req, res) => {
   if (!player) return res.status(404).json({ error: "Joueur introuvable." });
 
   const message = await req.db.playerMessage.create({
-    data: { playerId: player.id, authorId: req.user.sub, body },
+    data: { playerId: player.id, authorId: req.user.sub, authorSide: sideOfAccess(access), body },
     include: { author: { include: AUTHOR_INCLUDE } },
   });
   const shown = present(message, player, req, access);
@@ -83,7 +98,7 @@ router.post("/players/:id/messages", requireAuth, async (req, res) => {
     if (access === "player") return staffUserIdsForPlayer(req.db, player.id);
     const [family, previous] = await Promise.all([
       playerUserIds(req.db, [player.id]),
-      req.db.playerMessage.findMany({ where: { playerId: player.id }, distinct: ["authorId"], select: { authorId: true } }),
+      req.db.playerMessage.findMany({ where: { playerId: player.id, authorSide: "STAFF" }, distinct: ["authorId"], select: { authorId: true } }),
     ]);
     const staff = new Set(await staffUserIdsForPlayer(req.db, player.id));
     return [...family, ...previous.map((p) => p.authorId).filter((id) => staff.has(id))];
@@ -93,11 +108,11 @@ router.post("/players/:id/messages", requireAuth, async (req, res) => {
 });
 
 router.delete("/players/:id/messages/:messageId", requireAuth, async (req, res) => {
-  const access = await messageAccess(req, req.params.id);
+  const access = await messageAccess(req, req.params.id, sideOf(req));
   if (!access) return res.status(403).json({ error: "Accès refusé." });
   const message = await req.db.playerMessage.findFirst({ where: { id: req.params.messageId, playerId: req.params.id } });
   if (!message) return res.status(404).json({ error: "Message introuvable." });
-  if (message.authorId !== req.user.sub && access !== "manager") {
+  if (!isMine(message, req, access) && access !== "manager") {
     return res.status(403).json({ error: "Seul l'auteur ou le responsable de la cellule entrainement peut supprimer ce message." });
   }
   await req.db.playerMessage.delete({ where: { id: message.id } });

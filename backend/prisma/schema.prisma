@@ -210,11 +210,15 @@ model Notification {
 // un match…). Lu et écrit par le joueur (ou ses parents), les entraineurs de
 // ses groupes et le responsable de la cellule entrainement.
 model PlayerMessage {
-  id        String   @id @default(cuid())
-  playerId  String
-  authorId  String
-  body      String
-  createdAt DateTime @default(now())
+  id         String   @id @default(cuid())
+  playerId   String
+  authorId   String
+  // Au nom de qui le message est écrit : "PLAYER" (le joueur, ou un parent
+  // pour lui) ou "STAFF" (l'entraineur). Un même compte peut être parent et
+  // entraineur : c'est l'écran d'envoi qui décide.
+  authorSide String
+  body       String
+  createdAt  DateTime @default(now())
 
   player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
   author User   @relation(fields: [authorId], references: [id], onDelete: Cascade)

@@ -18,13 +18,15 @@ export async function playerCoachIds(db, playerId) {
   return [...new Set(links.map((l) => l.coachId))];
 }
 
-// Place du compte connecté dans le fil de ce joueur : "player" (le joueur ou
+// Rôle du compte connecté dans le fil de ce joueur : "player" (le joueur ou
 // un parent), "manager" (responsable de cellule), "coach" (entraineur du
-// joueur), ou null (pas d'accès).
-export async function messageAccess(req, playerId) {
+// joueur), ou null (pas d'accès). `side` ("PLAYER" ou "STAFF") : l'écran
+// d'où vient la requête, pour un compte à la fois parent et entraineur.
+export async function messageAccess(req, playerId, side) {
   const { user } = req;
-  if (user.roles?.includes("PLAYER") && user.playerIds?.includes(playerId)) return "player";
-  if (!user.coachId || !user.roles?.includes("COACH")) return null;
+  const isFamily = user.roles?.includes("PLAYER") && user.playerIds?.includes(playerId);
+  if (side !== "STAFF" && isFamily) return "player";
+  if (side === "PLAYER" || !user.coachId || !user.roles?.includes("COACH")) return null;
   const coach = await req.db.coach.findUnique({ where: { id: user.coachId }, select: { isTrainingManager: true } });
   if (!coach) return null;
   if (coach.isTrainingManager) return "manager";
@@ -41,9 +43,11 @@ export async function staffUserIdsForPlayer(db, playerId) {
   return users.map((u) => u.id);
 }
 
-// Nom affiché pour l'auteur d'un message : l'entraineur, sinon le joueur
-// (ou un parent, qui écrit au nom du joueur).
-export function authorName(author, player) {
-  if (author.coach) return `${author.coach.firstName} ${author.coach.lastName}`;
-  return `${player.firstName} ${player.lastName}`;
+// Nom affiché pour l'auteur d'un message : côté joueur, toujours le joueur
+// (même écrit par un parent : le message lui appartient et le suit quand il a
+// son propre compte) ; côté entraineur, l'entraineur.
+export function authorName(message, player) {
+  if (message.authorSide === "PLAYER") return `${player.firstName} ${player.lastName}`;
+  const coach = message.author.coach;
+  return coach ? `${coach.firstName} ${coach.lastName}` : "Entraineur";
 }

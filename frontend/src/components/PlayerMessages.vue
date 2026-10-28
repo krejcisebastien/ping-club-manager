@@ -14,6 +14,9 @@ const props = defineProps({
   asPlayer: { type: Boolean, default: false },
 });
 const emit = defineEmits(["loaded"]);
+// Écran d'envoi : un compte à la fois parent et entraineur écrit au nom du
+// joueur depuis l'espace joueur, et en son nom d'entraineur ailleurs.
+const side = props.asPlayer ? "PLAYER" : "STAFF";
 
 const MAX_LENGTH = 2000;
 const toast = useToast();
@@ -34,7 +37,7 @@ async function load() {
   loaded.value = false;
   denied.value = false;
   try {
-    const { data } = await api.get(`/players/${props.playerId}/messages`);
+    const { data } = await api.get(`/players/${props.playerId}/messages`, { params: { side } });
     messages.value = data.messages;
     emit("loaded", data);
     scrollToEnd();
@@ -52,7 +55,7 @@ async function send() {
   if (!body) return;
   sending.value = true;
   try {
-    const { data } = await api.post(`/players/${props.playerId}/messages`, { body });
+    const { data } = await api.post(`/players/${props.playerId}/messages`, { body, side });
     messages.value.push(data.message);
     draft.value = "";
     scrollToEnd();
@@ -78,7 +81,7 @@ function remove(message) {
     rejectLabel: "Retour",
     rejectClass: "p-button-secondary p-button-outlined",
     accept: async () => {
-      await api.delete(`/players/${props.playerId}/messages/${message.id}`);
+      await api.delete(`/players/${props.playerId}/messages/${message.id}`, { params: { side } });
       messages.value = messages.value.filter((m) => m.id !== message.id);
     },
   });
