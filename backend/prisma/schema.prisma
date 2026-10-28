@@ -166,9 +166,10 @@ model User {
   // boîte de notifications de l'app.
   mutedNotifications String[] @default([])
 
-  players       UserPlayer[]
-  pushTokens    PushToken[]
-  notifications Notification[]
+  players        UserPlayer[]
+  pushTokens     PushToken[]
+  notifications  Notification[]
+  playerMessages PlayerMessage[]
 
   coachId String? @unique
   coach   Coach?  @relation(fields: [coachId], references: [id])
@@ -203,6 +204,22 @@ model Notification {
   createdAt DateTime  @default(now())
 
   @@index([userId, createdAt])
+}
+
+// Fil d'échanges d'un joueur avec ses entraineurs (questions, conseils après
+// un match…). Lu et écrit par le joueur (ou ses parents), les entraineurs de
+// ses groupes et le responsable de la cellule entrainement.
+model PlayerMessage {
+  id        String   @id @default(cuid())
+  playerId  String
+  authorId  String
+  body      String
+  createdAt DateTime @default(now())
+
+  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  author User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([playerId, createdAt])
 }
 
 // Association many-to-many : un compte (ex. parent) peut voir la fiche de
@@ -253,6 +270,7 @@ model Player {
   pointsToWork       PointToWork[]
   evolutionNotes     EvolutionNote[]
   media              PlayerMedia[]
+  messages           PlayerMessage[]
   groupAssignments   PlayerGroupAssignment[]
   attendances        Attendance[]
   campEnrollments    CampPeriodGroupPlayer[]
@@ -553,6 +571,10 @@ model Coach {
   address   String?
   iban      String?
   createdAt DateTime    @default(now())
+
+  // Responsable de la cellule entrainement (un seul par club) : lit et répond
+  // dans le fil d'échanges de tous les joueurs.
+  isTrainingManager Boolean @default(false)
 
   user                User?
   trainingOccurrences TrainingOccurrenceCoach[]

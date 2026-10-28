@@ -21,6 +21,7 @@ import evaluationItemsRoutes from "./evaluationItems.routes.js";
 import pushRoutes from "./push.routes.js";
 import calendarRoutes from "./calendar.routes.js";
 import notificationsRoutes from "./notifications.routes.js";
+import playerMessagesRoutes from "./playerMessages.routes.js";
 
 const router = Router();
 
@@ -29,6 +30,9 @@ router.use("/clubs", clubsRoutes);
 router.use("/billing", billingRoutes);
 router.use("/platform", platformRoutes);
 router.use("/seasons", seasonsRoutes);
+// Avant /players : ses routes /players/:id/messages ne repassent pas par
+// l'authentification du router des joueurs.
+router.use(playerMessagesRoutes);
 router.use("/players", playersRoutes);
 router.use("/coaches", coachesRoutes);
 router.use("/sparrings", sparringsRoutes);

@@ -22,6 +22,7 @@ const ADMIN_LINKS = [
 const COACH_LINKS = [
   { to: "/coach", label: "Tableau de bord", icon: "pi pi-home" },
   { to: "/admin/players", label: "Joueurs", icon: "pi pi-users" },
+  { to: "/coach/messages", label: "Échanges joueurs", icon: "pi pi-comments" },
   { to: "/admin/sparrings", label: "Sparrings", icon: "pi pi-bolt" },
   { to: "/admin/groups", label: "Groupes", icon: "pi pi-sitemap" },
   { to: "/coach/attendance", label: "Présences entrainements", icon: "pi pi-check-square" },
@@ -40,6 +41,7 @@ function playerLinks(playerId, hasSeveralPlayers) {
         { to: `/player/${playerId}`, label: "Tableau de bord", icon: "pi pi-home", exact: true },
         { to: `/player/${playerId}/evaluation`, label: "Mon évaluation", icon: "pi pi-chart-bar" },
         { to: `/player/${playerId}/follow-up`, label: "Mon suivi", icon: "pi pi-flag" },
+        { to: `/player/${playerId}/messages`, label: "Mes échanges", icon: "pi pi-comments" },
         { to: `/player/${playerId}/results`, label: "Mes résultats", icon: "pi pi-trophy" },
         { to: `/player/${playerId}/attendance`, label: "Mes présences", icon: "pi pi-check-square" },
         { to: `/player/${playerId}/profile`, label: "Ma fiche", icon: "pi pi-id-card" },

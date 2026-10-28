@@ -18,11 +18,15 @@ router.get("/:id", async (req, res) => {
   res.json({ coach });
 });
 
+// Un seul responsable de la cellule entrainement par club.
+const unsetOtherManagers = (db, coachId) =>
+  db.coach.updateMany({ where: { id: { not: coachId }, isTrainingManager: true }, data: { isTrainingManager: false } });
+
 const invalidIban = (iban) => !!iban && !isValidIban(iban);
 const invalidLevel = (level) => level !== undefined && level !== null && !COACH_LEVELS.includes(level);
 
 router.post("/", requireRole("ADMIN"), async (req, res) => {
-  const { firstName, lastName, email, phone, level, address, iban } = req.body ?? {};
+  const { firstName, lastName, email, phone, level, address, iban, isTrainingManager } = req.body ?? {};
   if (!firstName || !lastName) {
     return res.status(400).json({ error: "firstName et lastName sont requis." });
   }
@@ -31,7 +35,8 @@ router.post("/", requireRole("ADMIN"), async (req, res) => {
   try {
     // Chaîne vide -> null : Postgres n'applique la contrainte unique qu'entre valeurs
     // non nulles, donc plusieurs entraineurs sans email ne doivent pas être bloqués.
-    const coach = await req.db.coach.create({ data: { firstName, lastName, email: email || null, phone, level: level ?? null, address: address || null, iban: iban ? normalizeIban(iban) : null } });
+    const coach = await req.db.coach.create({ data: { firstName, lastName, email: email || null, phone, level: level ?? null, address: address || null, iban: iban ? normalizeIban(iban) : null, isTrainingManager: isTrainingManager === true } });
+    if (coach.isTrainingManager) await unsetOtherManagers(req.db, coach.id);
     res.status(201).json({ coach });
   } catch (err) {
     if (err.code === "P2002") {
@@ -42,7 +47,7 @@ router.post("/", requireRole("ADMIN"), async (req, res) => {
 });
 
 router.put("/:id", requireRole("ADMIN"), async (req, res) => {
-  const { firstName, lastName, email, phone, level, address, iban } = req.body ?? {};
+  const { firstName, lastName, email, phone, level, address, iban, isTrainingManager } = req.body ?? {};
   if (invalidLevel(level)) return res.status(400).json({ error: `level doit être l'un de : ${COACH_LEVELS.join(", ")}.` });
   if (invalidIban(iban)) return res.status(400).json({ error: "IBAN invalide." });
   try {
@@ -56,8 +61,10 @@ router.put("/:id", requireRole("ADMIN"), async (req, res) => {
         ...(level !== undefined && { level }),
         ...(address !== undefined && { address: address || null }),
         ...(iban !== undefined && { iban: iban ? normalizeIban(iban) : null }),
+        ...(typeof isTrainingManager === "boolean" && { isTrainingManager }),
       },
     });
+    if (isTrainingManager === true) await unsetOtherManagers(req.db, coach.id);
     res.json({ coach });
   } catch (err) {
     if (err.code === "P2002") {

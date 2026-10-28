@@ -124,6 +124,18 @@ const routes = [
     meta: { roles: ["ADMIN", "COACH"] },
   },
   {
+    path: "/coach/messages",
+    name: "coach-messages",
+    component: () => import("../views/coach/MessagesView.vue"),
+    meta: { roles: ["ADMIN", "COACH"] },
+  },
+  {
+    path: "/coach/messages/:playerId",
+    name: "coach-messages-thread",
+    component: () => import("../views/coach/MessageThreadView.vue"),
+    meta: { roles: ["ADMIN", "COACH"] },
+  },
+  {
     path: "/coach/attendance",
     name: "coach-attendance-list",
     component: () => import("../views/coach/AttendanceListView.vue"),
@@ -191,6 +203,7 @@ const routes = [
       { path: "", name: "player-dashboard", component: () => import("../views/player/PlayerDashboardView.vue"), meta: { title: "Tableau de bord" } },
       { path: "evaluation", name: "player-evaluation", component: () => import("../views/player/PlayerEvaluationView.vue"), meta: { title: "Mon évaluation" } },
       { path: "follow-up", name: "player-follow-up", component: () => import("../views/player/PlayerFollowUpView.vue"), meta: { title: "Mon suivi" } },
+      { path: "messages", name: "player-messages", component: () => import("../views/player/PlayerMessagesView.vue"), meta: { title: "Mes échanges" } },
       { path: "results", name: "player-competition", component: () => import("../views/player/PlayerCompetitionView.vue"), meta: { title: "Mes résultats" } },
       { path: "attendance", name: "player-attendance", component: () => import("../views/player/PlayerAttendanceView.vue"), meta: { title: "Mes présences" } },
       { path: "profile", name: "player-profile", component: () => import("../views/player/PlayerProfileView.vue"), meta: { title: "Ma fiche" } },

@@ -126,6 +126,17 @@ export const HELP_CHAPTERS = [
 <p>Ces informations sont tenues à jour par les entraineurs ; tu peux les consulter mais pas les modifier.</p>`,
       },
       {
+        id: "player-messages",
+        title: "Mes échanges",
+        body: `
+<p>Pose tes questions à tes entraineurs : un conseil après un match ou un tournoi, un geste à travailler, ton matériel… Écris ton message puis touche <strong>Envoyer</strong> (ou Ctrl + Entrée sur ordinateur).</p>
+<ul>
+  <li>Le fil est lu par les entraineurs de tes groupes et par le responsable de la cellule entrainement. Tes parents, s'ils ont un compte relié à ta fiche, le voient aussi.</li>
+  <li>Tu reçois une notification quand quelqu'un te répond.</li>
+  <li>Tu peux supprimer tes propres messages.</li>
+</ul>`,
+      },
+      {
         id: "player-attendance",
         title: "Mes présences",
         body: `
@@ -201,7 +212,9 @@ export const HELP_CHAPTERS = [
   <li><strong>Grille d'évaluation</strong> (menu) : pour chaque critère, ajoute, renomme ou supprime les points d'évaluation du club. Les évaluations déjà enregistrées gardent leurs points.</li>
   <li><strong>Matériel</strong> : ajoute une raquette ou un revêtement ; <strong>clôturer</strong> le retire du matériel actuel en gardant l'historique.</li>
   <li><strong>Points forts / défauts</strong>, <strong>Points à travailler</strong> (avec leur état) et <strong>Notes d'évolution</strong>.</li>
-</ul>`,
+  <li><strong>Échanges avec le joueur</strong> : le fil où le joueur (ou ses parents) pose ses questions. Visible seulement pour les entraineurs de ses groupes et le responsable de la cellule entrainement.</li>
+</ul>
+<p>Le menu <strong>Échanges joueurs</strong> liste les fils de tes joueurs, le plus récent d'abord ; « À répondre » signale ceux dont le dernier message vient du joueur. Chaque nouveau message te prévient par notification.</p>`,
       },
       {
         id: "coach-groups",
@@ -273,6 +286,7 @@ export const HELP_CHAPTERS = [
 <ul>
   <li><strong>Joueurs</strong> : <strong>Nouveau joueur</strong> (prénom, nom, date de naissance, n° de licence facultatif). La fiche complète s'ouvre en cliquant sur le joueur (voir « Suivre un joueur »).</li>
   <li><strong>Entraineurs</strong> : nom, <strong>niveau Adeps</strong> (Animateur, MSIN, MSED, MSEN), coordonnées, <strong>adresse</strong> et <strong>IBAN</strong>. Le niveau détermine le tarif ; l'adresse et l'IBAN sont repris sur la note de défraiement.</li>
+  <li><strong>Responsable de la cellule entrainement</strong> : coche la case sur la fiche d'un entraineur. Il lit et répond aux échanges de tous les joueurs et peut supprimer n'importe quel message. Un seul à la fois : en désigner un autre lui retire ce rôle.</li>
   <li><strong>Sparrings</strong> : coche <strong>Joueur du club</strong> pour choisir un joueur existant (son nom et son classement sont alors repris de sa fiche), sinon saisis le nom, le classement et le club extérieur. La <strong>série</strong> (E, D, C, B) est déduite du classement ; un NC compte en série E.</li>
 </ul>
 <p>L'IBAN est vérifié à l'enregistrement : un numéro mal recopié est refusé.</p>`,

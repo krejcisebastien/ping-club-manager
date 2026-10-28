@@ -11,6 +11,7 @@ export const NOTIFICATION_TYPES = {
   sessions: { label: "Changements de séance" },
   reminders: { label: "Rappels" },
   followup: { label: "Suivi du joueur", roles: ["PLAYER"] },
+  messages: { label: "Échanges joueur–entraineurs", roles: ["PLAYER", "COACH"] },
   license: { label: "Licence du club", roles: ["ADMIN"] },
 };
 

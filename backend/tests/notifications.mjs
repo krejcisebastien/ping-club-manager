@@ -188,7 +188,7 @@ try {
 
   // ---------- Réglages par type ----------
   const aliceSettings = (await call(aliceTok, "GET", "/notifications/settings")).json;
-  expect("réglages joueuse : séances, rappels, suivi, pas la licence", JSON.stringify(aliceSettings.types.map((t) => t.key)) === JSON.stringify(["sessions", "reminders", "followup"]) && aliceSettings.muted.length === 0, JSON.stringify(aliceSettings));
+  expect("réglages joueuse : séances, rappels, suivi, échanges, pas la licence", JSON.stringify(aliceSettings.types.map((t) => t.key)) === JSON.stringify(["sessions", "reminders", "followup", "messages"]) && aliceSettings.muted.length === 0, JSON.stringify(aliceSettings));
   expect("réglages admin : licence proposée", (await call(A, "GET", "/notifications/settings")).json.types.some((t) => t.key === "license"));
   expect("réglage inconnu refusé", (await call(aliceTok, "PUT", "/notifications/settings", { muted: ["inconnu"] })).status === 400);
   const muted = await call(aliceTok, "PUT", "/notifications/settings", { muted: ["sessions"] });

@@ -18,6 +18,7 @@ import { api } from "../../lib/api.js";
 import { toDateOnly } from "../../lib/date.js";
 import { useNavLinks } from "../../composables/useNavLinks.js";
 import { fullName } from "../../lib/name.js";
+import PlayerMessages from "../../components/PlayerMessages.vue";
 import { RANKING_OPTIONS } from "../../lib/ranking.js";
 import { EVALUATION_SCALE } from "../../lib/evaluationScale.js";
 import { EVALUATION_CRITERIA, criterionScore, formatScore, evaluationAverage } from "../../lib/evaluation.js";
@@ -54,6 +55,9 @@ const emptyEvaluation = () => ({
 });
 
 const player = ref(null);
+// Fil d'échanges : visible seulement pour les entraineurs du joueur et le
+// responsable de la cellule (null tant que l'accès n'est pas connu).
+const messagesAccess = ref(null);
 const editForm = ref({
   firstName: "",
   lastName: "",
@@ -581,6 +585,11 @@ function pointStatusSeverity(status) {
           <InputText v-model="newNote.note" placeholder="Nouvelle note" class="flex-1 min-w-[10rem]" />
           <Button label="Ajouter" @click="onAddNote" />
         </div>
+      </div>
+
+      <div v-show="messagesAccess" class="space-y-2">
+        <p class="text-sm font-medium text-slate-600">Échanges avec le joueur</p>
+        <PlayerMessages :player-id="player.id" @loaded="(data) => (messagesAccess = !!data)" />
       </div>
 
       <CompetitionResults

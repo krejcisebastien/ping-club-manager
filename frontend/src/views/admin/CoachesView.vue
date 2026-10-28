@@ -7,6 +7,7 @@ import Button from "primevue/button";
 import Dropdown from "primevue/dropdown";
 import Tag from "primevue/tag";
 import InputText from "primevue/inputtext";
+import Checkbox from "primevue/checkbox";
 import { useToast } from "primevue/usetoast";
 import { useConfirm } from "primevue/useconfirm";
 import AppLayout from "../../components/AppLayout.vue";
@@ -21,7 +22,7 @@ const toast = useToast();
 const confirm = useConfirm();
 const { filters } = useTableFilter();
 
-const emptyForm = () => ({ firstName: "", lastName: "", email: "", phone: "", level: null, address: "", iban: "" });
+const emptyForm = () => ({ firstName: "", lastName: "", email: "", phone: "", level: null, address: "", iban: "", isTrainingManager: false });
 
 const coaches = ref([]);
 const loading = ref(true);
@@ -47,7 +48,7 @@ function openCreate() {
 
 function openEdit(coach) {
   editingId.value = coach.id;
-  form.value = { firstName: coach.firstName, lastName: coach.lastName, email: coach.email ?? "", phone: coach.phone ?? "", level: coach.level ?? null, address: coach.address ?? "", iban: coach.iban ?? "" };
+  form.value = { firstName: coach.firstName, lastName: coach.lastName, email: coach.email ?? "", phone: coach.phone ?? "", level: coach.level ?? null, address: coach.address ?? "", iban: coach.iban ?? "", isTrainingManager: coach.isTrainingManager };
   dialogVisible.value = true;
 }
 
@@ -116,7 +117,10 @@ function onDelete(coach) {
         <p class="text-slate-400 text-sm py-4">{{ filters.global.value ? "Aucun résultat." : "Aucun entraineur." }}</p>
       </template>
       <Column field="lastName" header="Nom" sortable>
-        <template #body="{ data }">{{ fullName(data) }}</template>
+        <template #body="{ data }">
+          {{ fullName(data) }}
+          <Tag v-if="data.isTrainingManager" value="Responsable cellule" severity="success" class="ml-1" />
+        </template>
       </Column>
       <Column header="Niveau Adeps">
         <template #body="{ data }"><Tag v-if="data.level" severity="info" :value="COACH_LEVEL_LABELS[data.level]" /></template>
@@ -164,6 +168,13 @@ function onDelete(coach) {
           <InputText v-model="form.iban" placeholder="BE68 5390 0754 7034" class="w-full" />
           <p class="text-xs text-slate-400 mt-1">Contrôlé à l'enregistrement ; repris sur la note de défraiement.</p>
         </div>
+        <label class="flex items-start gap-2 cursor-pointer">
+          <Checkbox v-model="form.isTrainingManager" binary input-id="training-manager" class="mt-0.5" />
+          <span>
+            <span class="block text-sm text-slate-700">Responsable de la cellule entrainement</span>
+            <span class="block text-xs text-slate-400">Lit et répond aux échanges de tous les joueurs. Un seul à la fois : le précédent perd ce rôle.</span>
+          </span>
+        </label>
         <div class="flex justify-end gap-2 mt-2">
           <Button type="button" label="Annuler" severity="secondary" outlined @click="dialogVisible = false" />
           <Button type="submit" label="Enregistrer" :loading="saving" />
