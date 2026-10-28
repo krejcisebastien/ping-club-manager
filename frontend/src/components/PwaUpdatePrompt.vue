@@ -17,9 +17,20 @@ onMounted(async () => {
     onNeedRefresh() {
       needRefresh.value = true;
     },
-    // Vérifie une nouvelle version toutes les heures (app laissée ouverte).
+    // Vérifie une nouvelle version toutes les heures (app laissée ouverte), et
+    // à chaque retour sur l'app : sur iPhone, l'app installée est mise en pause
+    // en arrière-plan (minuteries suspendues) et rouverte sans rechargement.
     onRegisteredSW(url, registration) {
-      if (registration) setInterval(() => registration.update(), 60 * 60 * 1000);
+      if (!registration) return;
+      let lastCheck = Date.now();
+      const check = () => {
+        lastCheck = Date.now();
+        registration.update().catch(() => {});
+      };
+      setInterval(check, 60 * 60 * 1000);
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible" && Date.now() - lastCheck > 60 * 1000) check();
+      });
     },
   });
 });
