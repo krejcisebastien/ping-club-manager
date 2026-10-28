@@ -11,6 +11,7 @@ import { useAuthStore } from "../stores/auth.js";
 import { CLUB_NAME, CLUB_ICON } from "../lib/config.js";
 import { ROLE_LABELS, roleHome } from "../lib/roles.js";
 import { api } from "../lib/api.js";
+import { isWebPushAvailable, webPushPermission, enableWebPush } from "../lib/push.js";
 
 defineProps({
   title: { type: String, required: true },
@@ -58,6 +59,26 @@ async function onSendReminder() {
     toast.add({ severity: "error", summary: "Erreur", detail: err.response?.data?.error ?? "Une erreur est survenue.", life: 5000 });
   } finally {
     sendingReminder.value = false;
+  }
+}
+
+// PWA : l'abonnement aux notifications doit partir d'un clic (exigé par
+// Safari/iOS), d'où ce bouton tant que la permission n'est pas accordée.
+const webPushOffered = ref(isWebPushAvailable() && webPushPermission() === "default");
+const enablingPush = ref(false);
+async function onEnableWebPush() {
+  enablingPush.value = true;
+  try {
+    if (await enableWebPush()) {
+      toast.add({ severity: "success", summary: "Notifications activées", life: 3000 });
+    } else {
+      toast.add({ severity: "warn", summary: "Notifications non activées", detail: "Autorisez-les dans les réglages du navigateur.", life: 5000 });
+    }
+  } catch (err) {
+    toast.add({ severity: "error", summary: "Erreur", detail: err.response?.data?.error ?? "Une erreur est survenue.", life: 5000 });
+  } finally {
+    enablingPush.value = false;
+    webPushOffered.value = webPushPermission() === "default";
   }
 }
 
@@ -137,6 +158,17 @@ async function onChangePassword() {
           <Avatar :label="initials(auth.user?.email)" shape="circle" class="bg-sky-100 text-sky-700 shrink-0" />
           <span class="text-sm text-slate-600 truncate flex-1">{{ auth.user?.email }}</span>
           <Button
+            v-if="webPushOffered"
+            icon="pi pi-bell-slash"
+            severity="secondary"
+            text
+            rounded
+            :loading="enablingPush"
+            aria-label="Activer les notifications"
+            title="Activer les notifications"
+            @click="onEnableWebPush"
+          />
+          <Button
             v-if="auth.user?.email === PUSH_TEST_EMAIL"
             icon="pi pi-bell"
             severity="secondary"
@@ -189,6 +221,17 @@ async function onChangePassword() {
         <div class="flex items-center gap-2">
           <Avatar :label="initials(auth.user?.email)" shape="circle" class="bg-sky-100 text-sky-700 shrink-0" />
           <span class="text-sm text-slate-600 truncate flex-1">{{ auth.user?.email }}</span>
+          <Button
+            v-if="webPushOffered"
+            icon="pi pi-bell-slash"
+            severity="secondary"
+            text
+            rounded
+            :loading="enablingPush"
+            aria-label="Activer les notifications"
+            title="Activer les notifications"
+            @click="onEnableWebPush"
+          />
           <Button
             v-if="auth.user?.email === PUSH_TEST_EMAIL"
             icon="pi pi-bell"

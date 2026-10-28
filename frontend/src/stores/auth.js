@@ -34,9 +34,9 @@ export const useAuthStore = defineStore("auth", {
       this.user = data.user;
       this.syncActiveRole();
       await this.fetchLicense();
-      // Best-effort : une app native enregistre son appareil pour les
-      // notifications push. Jamais bloquant pour la connexion (web, PWA,
-      // permission refusée, FCM indisponible...).
+      // Best-effort : enregistre l'appareil pour les notifications push (app
+      // native, ou PWA déjà autorisée). Jamais bloquant pour la connexion
+      // (navigateur incompatible, permission refusée, FCM indisponible...).
       registerPushToken().catch(() => {});
       return data.user;
     },

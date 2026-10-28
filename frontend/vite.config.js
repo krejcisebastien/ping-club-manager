@@ -48,6 +48,8 @@ function pwa(mode) {
     },
     workbox: {
       globPatterns: ["**/*.{js,css,html,ico,png,svg,woff,woff2,ttf,eot}"],
+      // Réception des notifications push web (voir public/push-sw.js).
+      importScripts: ["push-sw.js"],
       maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
       navigateFallback: "/index.html",
       navigateFallbackDenylist: [/^\/api\//],

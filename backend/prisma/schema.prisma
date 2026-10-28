@@ -174,7 +174,7 @@ model PushToken {
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   token     String   @unique
-  platform  String // "ios" | "android"
+  platform  String // "ios" | "android" | "web"
   createdAt DateTime @default(now())
 
   @@index([userId])

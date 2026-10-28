@@ -103,6 +103,12 @@ Rien à faire au déploiement : le build produit le manifest et le service worke
 Le service worker ne met en cache que l'interface, jamais les réponses de l'API.
 Après un déploiement, l'app propose « Mettre à jour ».
 
+Notifications push : renseigner les variables `VITE_FIREBASE_*` du service site
+(voir `frontend/.env.example`, même projet Firebase que `FIREBASE_SERVICE_ACCOUNT`
+côté API), puis redéployer. Une icône cloche apparaît alors dans le menu tant que
+l'appareil n'est pas abonné. Sur iPhone (iOS 16.4+), l'app doit d'abord être
+ajoutée à l'écran d'accueil, puis ouverte depuis l'icône.
+
 Icônes : remplacer `frontend/public/logo.svg` par le logo, puis `npm run icons`
 (PWA) et `npm run icons:mobile` (iOS/Android), dans `frontend/`.
 

@@ -10,7 +10,7 @@ const ALLOWED_SENDERS = ["seb.krejci@live.com"];
 
 router.use(requireAuth);
 
-const PLATFORMS = ["ios", "android"];
+const PLATFORMS = ["ios", "android", "web"];
 
 // Enregistre le jeton de l'appareil courant pour ce compte (idempotent : un même
 // jeton réenregistré, y compris par un autre compte après réinstallation, est
