@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { requireAuth, requireRole } from "../middleware/auth.js";
+import { notifyInBackground, occurrenceUserIds, staffUserIds, formatDay, isPast } from "../lib/notify.js";
 
 const router = Router();
 
@@ -38,21 +39,40 @@ router.put("/:id", requireRole("ADMIN", "COACH"), async (req, res) => {
     }
   }
 
-  try {
-    const occurrence = await req.db.trainingOccurrence.update({
-      where: { id: req.params.id },
-      data: {
-        ...(date !== undefined && { date: new Date(date) }),
-        ...(startTime !== undefined && { startTime }),
-        ...(endTime !== undefined && { endTime }),
-        ...(status !== undefined && { status }),
-      },
-    });
-    res.json({ occurrence });
-  } catch {
-    res.status(404).json({ error: "Séance introuvable." });
-  }
+  const before = await req.db.trainingOccurrence.findUnique({ where: { id: req.params.id }, include: { training: true } });
+  if (!before) return res.status(404).json({ error: "Séance introuvable." });
+
+  const occurrence = await req.db.trainingOccurrence.update({
+    where: { id: req.params.id },
+    data: {
+      ...(date !== undefined && { date: new Date(date) }),
+      ...(startTime !== undefined && { startTime }),
+      ...(endTime !== undefined && { endTime }),
+      ...(status !== undefined && { status }),
+    },
+  });
+  res.json({ occurrence });
+
+  const message = changeMessage(before, occurrence);
+  if (message) notifyInBackground(req.db, occurrenceUserIds(req.db, occurrence.id, req.user.sub), message);
 });
+
+const when = (occ) => `${formatDay(occ.date)}, ${occ.startTime}–${occ.endTime}`;
+
+// Notification à envoyer aux joueurs et encadrants pour ce changement (rien
+// pour une séance passée, ou si rien de visible n'a changé).
+function changeMessage(before, after) {
+  const name = before.training.name;
+  if (before.status !== after.status) {
+    if (isPast(after.date)) return null;
+    return after.status === "CANCELLED"
+      ? { title: "Séance annulée", body: `${name} du ${when(after)} est annulé.` }
+      : { title: "Séance rétablie", body: `${name} du ${when(after)} a bien lieu.` };
+  }
+  const moved = before.date.getTime() !== after.date.getTime() || before.startTime !== after.startTime || before.endTime !== after.endTime;
+  if (!moved || after.status === "CANCELLED" || (isPast(before.date) && isPast(after.date))) return null;
+  return { title: "Séance déplacée", body: `${name} : désormais le ${when(after)} (au lieu du ${when(before)}).` };
+}
 
 router.delete("/:id", requireRole("ADMIN"), async (req, res) => {
   try {
@@ -72,19 +92,38 @@ router.post("/:id/coaches", requireRole("ADMIN"), async (req, res) => {
   }
   const assignment = await req.db.trainingOccurrenceCoach.create({
     data: { occurrenceId: req.params.id, coachId: coachId ?? null, sparringId: sparringId ?? null },
-    include: { coach: true, sparring: true },
+    include: { coach: true, sparring: true, occurrence: { include: { training: true } } },
   });
-  res.status(201).json({ assignment });
+  const { occurrence, ...rest } = assignment;
+  res.status(201).json({ assignment: rest });
+  notifyStaffChange(req, assignment, occurrence, "added");
 });
 
 router.delete("/:id/coaches/:assignmentId", requireRole("ADMIN"), async (req, res) => {
-  try {
-    await req.db.trainingOccurrenceCoach.delete({ where: { id: req.params.assignmentId } });
-    res.status(204).end();
-  } catch {
-    res.status(404).json({ error: "Affectation introuvable." });
-  }
+  const assignment = await req.db.trainingOccurrenceCoach.findUnique({
+    where: { id: req.params.assignmentId },
+    include: { occurrence: { include: { training: true } } },
+  });
+  if (!assignment) return res.status(404).json({ error: "Affectation introuvable." });
+  await req.db.trainingOccurrenceCoach.delete({ where: { id: assignment.id } });
+  res.status(204).end();
+  notifyStaffChange(req, assignment, assignment.occurrence, "removed");
 });
+
+// Prévient l'entraineur ou le sparring ajouté à / retiré d'une séance à venir.
+function notifyStaffChange(req, assignment, occurrence, change) {
+  if (occurrence.status === "CANCELLED" || isPast(occurrence.date)) return;
+  const target = { coachIds: [assignment.coachId].filter(Boolean), sparringIds: [assignment.sparringId].filter(Boolean) };
+  const userIds = staffUserIds(req.db, target).then((ids) => ids.filter((id) => id !== req.user.sub));
+  const label = `${occurrence.training.name} du ${when(occurrence)}`;
+  notifyInBackground(
+    req.db,
+    userIds,
+    change === "added"
+      ? { title: "Tu encadres une séance", body: `${label}.` }
+      : { title: "Tu n'encadres plus une séance", body: `${label} : tu as été retiré de l'encadrement.` },
+  );
+}
 
 // ---------- Présences ----------
 

@@ -170,7 +170,7 @@ function onLogout() {
           Non disponibles dans ce navigateur. Sur iPhone, ajoute d'abord l'application à l'écran d'accueil, puis ouvre-la depuis son icône.
         </p>
         <template v-else>
-          <p class="text-sm text-slate-600">Reçois les rappels du club sur cet appareil.</p>
+          <p class="text-sm text-slate-600">Sois prévenu sur cet appareil quand une de tes séances est annulée ou déplacée.</p>
           <Button label="Activer les notifications" icon="pi pi-bell" :loading="enablingPush" @click="onEnableWebPush" />
         </template>
         <div v-if="auth.user?.email === PUSH_TEST_EMAIL" class="pt-2 border-t border-slate-100">

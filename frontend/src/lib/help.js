@@ -76,7 +76,7 @@ export const HELP_CHAPTERS = [
   <li><strong>Ordinateur :</strong> dans Chrome ou Edge, clique sur l'icône d'installation au bout de la barre d'adresse.</li>
 </ul>
 <p>Pour voir tes séances et stages dans ton agenda (Google, iPhone, Outlook), ouvre <strong>Mon compte</strong> puis <strong>Ajouter à mon agenda</strong>. Les changements (annulations, nouvelles séances) y apparaissent automatiquement après quelques heures.</p>
-<p>Pour recevoir les rappels du club, ouvre <strong>Mon compte</strong> (ton adresse email en bas du menu) puis <strong>Activer les notifications</strong>. Sur iPhone, fais-le depuis l'app ajoutée à l'écran d'accueil.</p>
+<p>Tu es prévenu quand une de tes séances est annulée, rétablie ou déplacée, et quand tu es ajouté à (ou retiré de) l'encadrement d'une séance. Pour les recevoir, ouvre <strong>Mon compte</strong> (ton adresse email en bas du menu) puis <strong>Activer les notifications</strong>. Sur iPhone, fais-le depuis l'app ajoutée à l'écran d'accueil.</p>
 <p>Quand une nouvelle version est publiée, un bandeau <strong>Nouvelle version disponible</strong> apparaît : clique sur <strong>Mettre à jour</strong>.</p>`,
       },
     ],
