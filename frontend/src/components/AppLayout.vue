@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useRouter, RouterLink } from "vue-router";
 import Avatar from "primevue/avatar";
 import Button from "primevue/button";
@@ -7,6 +7,7 @@ import Sidebar from "primevue/sidebar";
 import { useAuthStore } from "../stores/auth.js";
 import { CLUB_NAME, CLUB_ICON } from "../lib/config.js";
 import { ROLE_LABELS, roleHome } from "../lib/roles.js";
+import { useNotifications } from "../composables/useNotifications.js";
 
 defineProps({
   title: { type: String, required: true },
@@ -18,6 +19,13 @@ const ACTIVE_LINK_CLASS = "!bg-sky-50 !text-sky-700 font-medium";
 const auth = useAuthStore();
 const router = useRouter();
 const drawerOpen = ref(false);
+
+// Cloche : visible avec une licence active (la boîte en dépend).
+const { unread, refreshUnread } = useNotifications();
+onMounted(() => {
+  if (auth.licenseActive) refreshUnread();
+});
+const unreadLabel = computed(() => (unread.value > 9 ? "9+" : String(unread.value)));
 
 const expiringSoon = computed(() => {
   const license = auth.license;
@@ -149,11 +157,35 @@ function onLogout() {
       <header class="md:hidden sticky top-0 z-10 bg-white border-b border-slate-200 h-14 flex items-center gap-2 px-3">
         <Button icon="pi pi-bars" severity="secondary" text rounded aria-label="Menu" @click="drawerOpen = true" />
         <span class="font-semibold text-slate-800 truncate">{{ title }}</span>
+        <RouterLink
+          v-if="auth.licenseActive"
+          to="/notifications"
+          class="relative ml-auto inline-flex h-10 w-10 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100"
+          :aria-label="unread ? `Notifications (${unread} non lues)` : 'Notifications'"
+        >
+          <i class="pi pi-bell text-lg" aria-hidden="true"></i>
+          <span
+            v-if="unread"
+            class="absolute right-0.5 top-0.5 min-w-[1.1rem] rounded-full bg-red-600 px-1 text-center text-[0.65rem] font-semibold leading-[1.1rem] text-white"
+          >{{ unreadLabel }}</span>
+        </RouterLink>
       </header>
 
       <!-- Top bar desktop -->
       <header class="hidden md:flex items-center h-16 px-6 border-b border-slate-200 bg-white">
         <h1 class="text-lg font-semibold text-slate-800">{{ title }}</h1>
+        <RouterLink
+          v-if="auth.licenseActive"
+          to="/notifications"
+          class="relative ml-auto inline-flex h-10 w-10 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100"
+          :aria-label="unread ? `Notifications (${unread} non lues)` : 'Notifications'"
+        >
+          <i class="pi pi-bell text-lg" aria-hidden="true"></i>
+          <span
+            v-if="unread"
+            class="absolute right-0.5 top-0.5 min-w-[1.1rem] rounded-full bg-red-600 px-1 text-center text-[0.65rem] font-semibold leading-[1.1rem] text-white"
+          >{{ unreadLabel }}</span>
+        </RouterLink>
       </header>
 
       <main class="p-4 md:p-6 max-w-5xl mx-auto">

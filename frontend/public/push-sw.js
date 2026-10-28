@@ -10,21 +10,27 @@ self.addEventListener("push", (event) => {
   const notification = payload.notification ?? payload.data ?? {};
   const title = notification.title || "PingDesk";
   event.waitUntil(
-    self.registration.showNotification(title, {
-      body: notification.body || "",
-      icon: "/pwa-192x192.png",
-      badge: "/pwa-64x64.png",
-    }),
+    Promise.all([
+      self.registration.showNotification(title, {
+        body: notification.body || "",
+        icon: "/pwa-192x192.png",
+        badge: "/pwa-64x64.png",
+      }),
+      // App ouverte : met à jour le badge de la cloche.
+      self.clients.matchAll({ type: "window" }).then((clients) => clients.forEach((c) => c.postMessage({ type: "notification" }))),
+    ]),
   );
 });
 
-// Un clic sur la notification ramène sur l'app (onglet existant si possible).
+// Un clic sur la notification ouvre la boîte de notifications de l'app
+// (onglet existant si possible).
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
   event.waitUntil(
     self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {
       const existing = clients.find((c) => "focus" in c);
-      return existing ? existing.focus() : self.clients.openWindow("/");
+      if (!existing) return self.clients.openWindow("/notifications");
+      return existing.focus().then((client) => client.navigate?.("/notifications")).catch(() => {});
     }),
   );
 });

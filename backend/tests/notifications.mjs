@@ -151,11 +151,31 @@ try {
   await sends(() => call(A, "PUT", `/occurrences/${occ.id}`, { status: "CANCELLED" }));
   expect("jeton invalide supprimé", !(await prisma.pushToken.findUnique({ where: { token: `invalide-${run}` } })));
 
+  // ---------- Boîte de notifications dans l'app ----------
+  const aliceTok = await login(`notif-alice-${run}@test.local`);
+  const inbox = (await call(aliceTok, "GET", "/notifications")).json;
+  expect("boîte : toutes les notifications de la joueuse, récentes d'abord", inbox.notifications.length === 4 && inbox.unread === 4 && inbox.notifications[0].title === "Séance annulée" && inbox.notifications[3].title === "Séance annulée", JSON.stringify(inbox.notifications.map((n) => n.title)));
+  expect("boîte : ajout du sparring absent chez la joueuse", !inbox.notifications.some((n) => n.title.includes("encadres")));
+  await prisma.pushToken.deleteMany({ where: { token: tokenOf.coach } });
+  await sends(() => call(A, "PUT", `/occurrences/${occ.id}`, { status: "PLANNED" }));
+  const coachInbox = (await call(coachTok, "GET", "/notifications")).json;
+  expect("boîte : gardée même sans appareil enregistré", coachInbox.notifications[0]?.title === "Séance rétablie", JSON.stringify(coachInbox.notifications.map((n) => n.title)));
+  const first = inbox.notifications[0];
+  expect("lire : une autre personne ne peut pas", (await call(coachTok, "POST", `/notifications/${first.id}/read`)).status === 404);
+  expect("lire une notification", (await call(aliceTok, "POST", `/notifications/${first.id}/read`)).status === 204 && (await call(aliceTok, "GET", "/notifications/unread-count")).json.unread === 4);
+  expect("tout marquer comme lu", (await call(aliceTok, "POST", "/notifications/read-all")).status === 204 && (await call(aliceTok, "GET", "/notifications/unread-count")).json.unread === 0);
+  expect("boîte : sans connexion refusée", (await call(null, "GET", "/notifications")).status === 401);
+  await prisma.notification.updateMany({ where: { id: first.id }, data: { createdAt: new Date(Date.now() - 61 * 86400000) } });
+  await sends(() => call(A, "PUT", `/occurrences/${occ.id}`, { status: "CANCELLED" }));
+  expect("boîte : plus de 60 jours supprimées", !(await prisma.notification.findUnique({ where: { id: first.id } })));
+
   // ---------- Isolation : le club B ne peut ni modifier ni être prévenu ----------
   const B = await login(`notif-admin-b-${run}@test.local`);
   const cross = await sends(() => call(B, "PUT", `/occurrences/${occ.id}`, { status: "PLANNED" }));
   expect("club B : séance de A introuvable, aucun envoi", cross.result.status === 404 && cross.sent.length === 0, `${cross.result.status}`);
   expect("club B : jamais destinataire", !sent.some((s) => s.tokens.includes(tokenOf["admin-b"])));
+  expect("club B : boîte vide", (await call(B, "GET", "/notifications")).json.notifications.length === 0);
+  expect("club B : ne lit pas une notification de A", (await call(B, "POST", `/notifications/${inbox.notifications[1].id}/read`)).status === 404);
 } finally {
   setPushSender(null);
   await prisma.club.deleteMany({ where: { id: { in: [clubA.id, clubB.id] } } });

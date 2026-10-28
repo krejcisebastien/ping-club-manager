@@ -2,7 +2,11 @@ import { sendPushToTokens } from "./push.js";
 
 // Notifications automatiques liées aux séances d'entrainement : envoyées en
 // arrière-plan après la réponse (jamais bloquantes ni en erreur pour l'auteur
-// de la modification), uniquement aux comptes ayant activé les notifications.
+// de la modification). Gardées dans la boîte de notifications de chaque compte
+// concerné, et poussées sur les appareils de ceux qui les ont activées.
+
+// Durée de conservation dans la boîte de notifications.
+export const NOTIFICATION_RETENTION_DAYS = 60;
 
 let sender = sendPushToTokens;
 // Tests : remplace l'envoi FCM par un enregistreur.
@@ -13,7 +17,13 @@ export function setPushSender(fn) {
 export async function notifyUsers(db, userIds, message) {
   const ids = [...new Set(userIds)];
   if (!ids.length) return;
-  const tokens = await db.pushToken.findMany({ where: { userId: { in: ids }, user: { isActive: true } } });
+  const users = await db.user.findMany({ where: { id: { in: ids }, isActive: true }, select: { id: true } });
+  if (!users.length) return;
+  await db.notification.createMany({ data: users.map((u) => ({ userId: u.id, title: message.title, body: message.body })) });
+  await db.notification.deleteMany({
+    where: { userId: { in: users.map((u) => u.id) }, createdAt: { lt: new Date(Date.now() - NOTIFICATION_RETENTION_DAYS * 86400000) } },
+  });
+  const tokens = await db.pushToken.findMany({ where: { userId: { in: users.map((u) => u.id) } } });
   if (!tokens.length) return;
   try {
     const { invalidTokens } = await sender(

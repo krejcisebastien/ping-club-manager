@@ -20,6 +20,7 @@ import volunteeringRoutes from "./volunteering.routes.js";
 import evaluationItemsRoutes from "./evaluationItems.routes.js";
 import pushRoutes from "./push.routes.js";
 import calendarRoutes from "./calendar.routes.js";
+import notificationsRoutes from "./notifications.routes.js";
 
 const router = Router();
 
@@ -43,6 +44,7 @@ router.use("/rates", ratesRoutes);
 router.use("/volunteering", volunteeringRoutes);
 router.use("/push", pushRoutes);
 router.use("/calendar", calendarRoutes);
+router.use("/notifications", notificationsRoutes);
 router.use("/evaluation-items", evaluationItemsRoutes);
 
 export default router;

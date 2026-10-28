@@ -10,6 +10,7 @@ const PATHS = {
   Season: [],
   User: [],
   PushToken: ["user"],
+  Notification: ["user"],
   Player: [],
   Coach: [],
   Sparring: [],

@@ -10,6 +10,8 @@ const routes = [
   { path: "/help", name: "help", component: () => import("../views/HelpView.vue") },
   // Paramètres du compte (mot de passe, notifications) : tout utilisateur connecté.
   { path: "/account", name: "account", component: () => import("../views/AccountView.vue") },
+  // Boîte de notifications du compte : tout utilisateur connecté.
+  { path: "/notifications", name: "notifications", component: () => import("../views/NotificationsView.vue") },
   {
     path: "/platform",
     name: "platform",
