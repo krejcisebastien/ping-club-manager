@@ -19,3 +19,25 @@ export const criterionScore = (scores) =>
 
 // 7 -> "7", 7.3 -> "7,3"
 export const formatScore = (v) => (v == null ? "—" : Number(v).toLocaleString("fr-FR", { maximumFractionDigits: 1 }));
+
+export const evaluationAverage = (e) => EVALUATION_CRITERIA.reduce((sum, c) => sum + e[c.key], 0) / EVALUATION_CRITERIA.length;
+
+// Points forts et points à améliorer d'une évaluation : les points de la grille
+// notés 4-5 (forts) et 1-2 (à améliorer) ; sans point de grille noté, les
+// critères à 7/10 ou plus et à 4/10 ou moins.
+export function strengthsAndWeaknesses(evaluation) {
+  const criterionOf = new Map(EVALUATION_CRITERIA.map((c) => [c.criterion, c]));
+  const items = evaluation?.itemScores ?? [];
+  if (items.length) {
+    const toEntry = (i) => ({ id: i.id, label: i.label, criterion: criterionOf.get(i.criterion), score: i.score, max: 5 });
+    return {
+      strengths: items.filter((i) => i.score >= 4).sort((a, b) => b.score - a.score).map(toEntry),
+      weaknesses: items.filter((i) => i.score <= 2).sort((a, b) => a.score - b.score).map(toEntry),
+    };
+  }
+  const toEntry = (c) => ({ id: c.key, label: c.label, criterion: c, score: evaluation[c.key], max: 10 });
+  return {
+    strengths: EVALUATION_CRITERIA.filter((c) => evaluation[c.key] >= 7).sort((a, b) => evaluation[b.key] - evaluation[a.key]).map(toEntry),
+    weaknesses: EVALUATION_CRITERIA.filter((c) => evaluation[c.key] <= 4).sort((a, b) => evaluation[a.key] - evaluation[b.key]).map(toEntry),
+  };
+}

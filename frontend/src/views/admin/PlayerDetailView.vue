@@ -13,13 +13,14 @@ import { useToast } from "primevue/usetoast";
 import AppLayout from "../../components/AppLayout.vue";
 import ImageUpload from "../../components/ImageUpload.vue";
 import CompetitionResults from "../../components/CompetitionResults.vue";
+import EvaluationDetail from "../../components/EvaluationDetail.vue";
 import { api } from "../../lib/api.js";
 import { toDateOnly } from "../../lib/date.js";
 import { useNavLinks } from "../../composables/useNavLinks.js";
 import { fullName } from "../../lib/name.js";
 import { RANKING_OPTIONS } from "../../lib/ranking.js";
 import { EVALUATION_SCALE } from "../../lib/evaluationScale.js";
-import { EVALUATION_CRITERIA, criterionScore, formatScore } from "../../lib/evaluation.js";
+import { EVALUATION_CRITERIA, criterionScore, formatScore, evaluationAverage } from "../../lib/evaluation.js";
 
 const navLinks = useNavLinks();
 const route = useRoute();
@@ -89,6 +90,15 @@ const newEvaluation = ref(emptyEvaluation());
 const savingEvaluation = ref(false);
 
 const latestEvaluation = computed(() => evaluations.value[0] ?? null);
+// Évaluation affichée en détail (la dernière par défaut) et formulaire de
+// nouvelle évaluation, replié tant qu'on ne l'ouvre pas.
+const selectedEvaluationId = ref(null);
+const selectedEvaluationIndex = computed(() => {
+  const i = evaluations.value.findIndex((e) => e.id === selectedEvaluationId.value);
+  return i >= 0 ? i : 0;
+});
+const selectedEvaluation = computed(() => evaluations.value[selectedEvaluationIndex.value] ?? null);
+const showEvaluationForm = ref(false);
 
 const radarChartData = computed(() => {
   if (!latestEvaluation.value) return null;
@@ -229,6 +239,8 @@ async function onAddEvaluation() {
     await api.post(`/players/${playerId}/evaluations`, { ...newEvaluation.value, items });
     newEvaluation.value = emptyEvaluation();
     itemScores.value = {};
+    showEvaluationForm.value = false;
+    selectedEvaluationId.value = null;
     toast.add({ severity: "success", summary: "Évaluation enregistrée", life: 3000 });
     await loadAll();
   } catch (err) {
@@ -417,20 +429,46 @@ function pointStatusSeverity(status) {
         </div>
         <p v-else class="text-slate-400 text-sm mb-4">Aucune évaluation enregistrée.</p>
 
-        <ul v-if="evaluations.length" class="divide-y divide-slate-100 mb-3 text-sm">
-          <li v-for="e in evaluations" :key="e.id" class="py-1.5 flex items-center justify-between gap-2">
-            <span>
-              {{ new Date(e.date).toLocaleDateString("fr-FR") }}
-              <span v-if="e.note" class="text-slate-400">— {{ e.note }}</span>
-            </span>
-            <Tag
-              severity="info"
-              :value="`moy. ${(EVALUATION_CRITERIA.reduce((sum, c) => sum + e[c.key], 0) / EVALUATION_CRITERIA.length).toFixed(1)}/10`"
-            />
-          </li>
-        </ul>
+        <EvaluationDetail
+          v-if="selectedEvaluation"
+          :evaluation="selectedEvaluation"
+          :previous="evaluations[selectedEvaluationIndex + 1] ?? null"
+          class="mb-4"
+        />
 
-        <form class="grid grid-cols-1 gap-3" @submit.prevent="onAddEvaluation">
+        <div v-if="evaluations.length > 1" class="mb-4">
+          <p class="text-xs text-slate-400 mb-1">Historique : clique une évaluation pour en voir le détail.</p>
+          <ul class="divide-y divide-slate-100 text-sm">
+            <li v-for="e in evaluations" :key="e.id">
+              <button
+                type="button"
+                class="w-full py-1.5 px-2 -mx-2 rounded-md flex items-center justify-between gap-2 text-left hover:bg-slate-50"
+                :class="e.id === selectedEvaluation?.id ? 'bg-sky-50' : ''"
+                @click="selectedEvaluationId = e.id"
+              >
+                <span class="min-w-0">
+                  {{ new Date(e.date).toLocaleDateString("fr-FR") }}
+                  <span v-if="e.note" class="text-slate-400">— {{ e.note }}</span>
+                </span>
+                <Tag severity="info" :value="`moy. ${formatScore(evaluationAverage(e))}/10`" />
+              </button>
+            </li>
+          </ul>
+        </div>
+
+        <Button
+          v-if="!showEvaluationForm"
+          label="Nouvelle évaluation"
+          icon="pi pi-plus"
+          outlined
+          size="small"
+          @click="showEvaluationForm = true"
+        />
+        <form v-else class="grid grid-cols-1 gap-3 border-t border-slate-100 pt-4" @submit.prevent="onAddEvaluation">
+          <div class="flex items-center justify-between gap-2">
+            <p class="text-sm font-medium text-slate-700">Nouvelle évaluation</p>
+            <Button label="Fermer" text size="small" severity="secondary" @click="showEvaluationForm = false" />
+          </div>
           <p class="text-xs text-slate-400">
             Les critères dotés de points d'évaluation se notent point par point (1 à 5, moyenne x 2) ; sans point noté, le curseur
             donne la note directe. <RouterLink to="/admin/evaluation-grid" class="text-sky-600 hover:underline">Gérer la grille</RouterLink>

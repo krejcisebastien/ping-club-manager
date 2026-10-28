@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { notifyPlayer, formatDay } from "../lib/notify.js";
 import { requireAuth, requireRole } from "../middleware/auth.js";
 import { datesInRange } from "../utils/occurrences.js";
 
@@ -156,9 +157,10 @@ router.post("/:campId/players", requireRole("ADMIN", "COACH"), async (req, res) 
   const ids = Array.isArray(playerIds) ? playerIds : playerId ? [playerId] : [];
   if (!ids.length) return res.status(400).json({ error: "playerId ou playerIds est requis." });
 
-  const camp = await req.db.camp.findUnique({ where: { id: req.params.campId }, select: { id: true } });
+  const camp = await req.db.camp.findUnique({ where: { id: req.params.campId } });
   if (!camp) return res.status(404).json({ error: "Stage introuvable." });
 
+  const already = await req.db.campPlayer.findMany({ where: { campId: camp.id, playerId: { in: ids } }, select: { playerId: true } });
   await req.db.campPlayer.createMany({ data: ids.map((id) => ({ campId: camp.id, playerId: id })), skipDuplicates: true });
   const players = await req.db.campPlayer.findMany({
     where: { campId: camp.id },
@@ -166,6 +168,13 @@ router.post("/:campId/players", requireRole("ADMIN", "COACH"), async (req, res) 
     orderBy: { player: { lastName: "asc" } },
   });
   res.status(201).json({ players });
+
+  // Prévient les nouveaux inscrits d'un stage à venir.
+  if (camp.endDate.toISOString().slice(0, 10) < new Date().toISOString().slice(0, 10)) return;
+  const dates = camp.startDate.getTime() === camp.endDate.getTime() ? `le ${formatDay(camp.startDate)}` : `du ${formatDay(camp.startDate)} au ${formatDay(camp.endDate)}`;
+  for (const { player } of players.filter((p) => ids.includes(p.playerId) && !already.some((a) => a.playerId === p.playerId))) {
+    notifyPlayer(req, player.id, { title: "Inscription au stage", body: `${player.firstName} est inscrit au stage ${camp.name}, ${dates}.` });
+  }
 });
 
 // Désinscrit un joueur : ses affectations aux groupes et ses présences du stage sont supprimées.

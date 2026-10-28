@@ -171,7 +171,7 @@ try {
 
   // ---------- Réglages par type ----------
   const aliceSettings = (await call(aliceTok, "GET", "/notifications/settings")).json;
-  expect("réglages joueuse : séances et rappels, pas la licence", JSON.stringify(aliceSettings.types.map((t) => t.key)) === JSON.stringify(["sessions", "reminders"]) && aliceSettings.muted.length === 0, JSON.stringify(aliceSettings));
+  expect("réglages joueuse : séances, rappels, suivi, pas la licence", JSON.stringify(aliceSettings.types.map((t) => t.key)) === JSON.stringify(["sessions", "reminders", "followup"]) && aliceSettings.muted.length === 0, JSON.stringify(aliceSettings));
   expect("réglages admin : licence proposée", (await call(A, "GET", "/notifications/settings")).json.types.some((t) => t.key === "license"));
   expect("réglage inconnu refusé", (await call(aliceTok, "PUT", "/notifications/settings", { muted: ["inconnu"] })).status === 400);
   const muted = await call(aliceTok, "PUT", "/notifications/settings", { muted: ["sessions"] });
@@ -181,6 +181,25 @@ try {
   const aliceLatest = (await call(aliceTok, "GET", "/notifications")).json.notifications[0];
   expect("type coupé : toujours dans la boîte", aliceLatest?.title === "Séance rétablie" && aliceLatest.type === "sessions");
   await call(aliceTok, "PUT", "/notifications/settings", { muted: [] });
+
+  // ---------- Suivi du joueur ----------
+  const followTitles = (r) => r.sent.map((x) => x.message.title);
+  const evalBody = { service: 6, remise: 5, coupDroit: 7, revers: 4, deplacements: 6, tactique: 5, mental: 8, physique: 6, note: "Bien" };
+  const ev = await sends(() => call(A, "POST", `/players/${alice.id}/evaluations`, evalBody));
+  expect("évaluation : prévient la joueuse", ev.result.status === 201 && JSON.stringify(ev.tokens) === JSON.stringify([tokenOf.alice]) && followTitles(ev)[0] === "Nouvelle évaluation", JSON.stringify(ev.tokens));
+  const pt = await sends(() => call(A, "POST", `/players/${alice.id}/points-to-work`, { description: "Revers   en\nbout de table" }));
+  expect("point à travailler : texte sur une ligne", pt.result.status === 201 && !pt.result.json.pointToWork.player && pt.sent[0]?.message.body === "Alice : Revers en bout de table", pt.sent[0]?.message.body);
+  const note = await sends(() => call(A, "POST", `/players/${alice.id}/evolution-notes`, { note: "x".repeat(300) }));
+  expect("note d'évolution : tronquée", note.result.status === 201 && note.sent[0]?.message.body.length === 8 + 140 && note.sent[0].message.body.endsWith("…"), `${note.sent[0]?.message.body.length}`);
+  const grp = await sends(() => call(A, "POST", `/groups/${other.id}/players`, { playerId: alice.id }));
+  expect("nouveau groupe : prévient la joueuse", grp.result.status === 201 && grp.sent[0]?.message.body === "Alice fait désormais partie du groupe Groupe 2.", grp.sent[0]?.message.body);
+  const campN = (await call(A, "POST", "/camps", { seasonId: season.id, name: "Stage de Noël", startDate: day(40), endDate: day(42) })).json.camp;
+  const reg = await sends(() => call(A, "POST", `/camps/${campN.id}/players`, { playerIds: [alice.id, zoe.id] }));
+  expect("inscription au stage : chaque nouvel inscrit", JSON.stringify(reg.tokens) === JSON.stringify([tokenOf.alice, tokenOf.zoe].sort()) && reg.sent.some((x) => x.message.body.startsWith("Alice est inscrit au stage Stage de Noël, du ")), JSON.stringify(reg.sent.map((x) => x.message.body)));
+  const again = await sends(() => call(A, "POST", `/camps/${campN.id}/players`, { playerId: alice.id }));
+  expect("déjà inscrite : pas de nouvelle notification", again.result.status === 201 && again.sent.length === 0);
+  expect("réglages joueuse : suivi proposé", (await call(aliceTok, "GET", "/notifications/settings")).json.types.some((t) => t.key === "followup"));
+  expect("boîte : type suivi", (await call(aliceTok, "GET", "/notifications")).json.notifications[0]?.type === "followup");
 
   // ---------- Isolation : le club B ne peut ni modifier ni être prévenu ----------
   const B = await login(`notif-admin-b-${run}@test.local`);

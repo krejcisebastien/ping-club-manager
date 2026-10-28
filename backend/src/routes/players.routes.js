@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { notifyPlayer } from "../lib/notify.js";
 import { requireAuth, requireRole, requireSelfPlayerOrRole } from "../middleware/auth.js";
 import { hoursBetween } from "../utils/occurrences.js";
 import { isRanking, RANKINGS } from "../lib/rankings.js";
@@ -232,13 +233,17 @@ router.post("/:id/evaluations", requireRole("ADMIN", "COACH"), async (req, res) 
     }
     scores[key] = value;
   }
-  const player = await req.db.player.findUnique({ where: { id: req.params.id }, select: { id: true } });
+  const player = await req.db.player.findUnique({ where: { id: req.params.id }, select: { id: true, firstName: true } });
   if (!player) return res.status(404).json({ error: "Joueur introuvable." });
   const evaluation = await req.db.evaluation.create({
     data: { playerId: req.params.id, coachId: req.user.coachId ?? null, note, ...scores, itemScores: { create: itemScores } },
     include: { itemScores: true },
   });
   res.status(201).json({ evaluation });
+  notifyPlayer(req, player.id, {
+    title: "Nouvelle évaluation",
+    body: `L'évaluation de ${player.firstName} est disponible : points forts et points à améliorer dans sa fiche.`,
+  });
 });
 
 // ---------- Matériel ----------
@@ -296,6 +301,12 @@ router.post("/:id/traits", requireRole("ADMIN", "COACH"), async (req, res) => {
   res.status(201).json({ trait });
 });
 
+// Texte libre repris dans une notification : une ligne courte.
+const shorten = (text, max = 140) => {
+  const line = String(text).replace(/\s+/g, " ").trim();
+  return line.length > max ? `${line.slice(0, max - 1)}…` : line;
+};
+
 // ---------- Points à travailler ----------
 
 router.get("/:id/points-to-work", requireSelfPlayerOrRole("id", "ADMIN", "COACH"), async (req, res) => {
@@ -311,8 +322,11 @@ router.post("/:id/points-to-work", requireRole("ADMIN", "COACH"), async (req, re
   if (!description) return res.status(400).json({ error: "description est requise." });
   const point = await req.db.pointToWork.create({
     data: { playerId: req.params.id, description, createdById: req.user.coachId ?? null },
+    include: { player: { select: { firstName: true } } },
   });
-  res.status(201).json({ pointToWork: point });
+  const { player, ...pointToWork } = point;
+  res.status(201).json({ pointToWork });
+  notifyPlayer(req, pointToWork.playerId, { title: "Nouveau point à travailler", body: `${player.firstName} : ${shorten(description)}` });
 });
 
 router.put("/:id/points-to-work/:pointId", requireRole("ADMIN", "COACH"), async (req, res) => {
@@ -351,8 +365,11 @@ router.post("/:id/evolution-notes", requireRole("ADMIN", "COACH"), async (req, r
       note,
       date: date ? new Date(date) : new Date(),
     },
+    include: { player: { select: { firstName: true } } },
   });
-  res.status(201).json({ evolutionNote: created });
+  const { player, ...evolutionNote } = created;
+  res.status(201).json({ evolutionNote });
+  notifyPlayer(req, evolutionNote.playerId, { title: "Nouvelle note de l'entraineur", body: `${player.firstName} : ${shorten(note)}` });
 });
 
 // ---------- Participation aux entrainements ----------

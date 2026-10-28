@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { notifyPlayer } from "../lib/notify.js";
 import { requireAuth, requireRole } from "../middleware/auth.js";
 
 const router = Router();
@@ -104,6 +105,10 @@ router.post("/:id/players", requireRole("ADMIN", "COACH"), async (req, res) => {
     include: { player: true },
   });
   res.status(201).json({ assignment });
+  notifyPlayer(req, playerId, {
+    title: "Nouveau groupe d'entrainement",
+    body: `${assignment.player.firstName} fait désormais partie du groupe ${group.name}.`,
+  });
 });
 
 // Retire un joueur de ce groupe (clôt l'affectation, sans la supprimer, pour garder l'historique).

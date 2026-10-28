@@ -106,6 +106,7 @@ async function onToggleType(key, enabled) {
 const TYPE_HINTS = {
   sessions: "Séance annulée, rétablie ou déplacée, encadrement",
   reminders: "Séance du lendemain, présences à encoder, stage qui approche",
+  followup: "Nouvelle évaluation, point à travailler, note, groupe, stage",
   license: "Fin de la licence dans 30 et 7 jours",
 };
 

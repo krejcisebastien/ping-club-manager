@@ -10,6 +10,7 @@ import { sendPushToTokens } from "./push.js";
 export const NOTIFICATION_TYPES = {
   sessions: { label: "Changements de séance" },
   reminders: { label: "Rappels" },
+  followup: { label: "Suivi du joueur", roles: ["PLAYER"] },
   license: { label: "Licence du club", roles: ["ADMIN"] },
 };
 
@@ -114,4 +115,16 @@ export async function occurrenceUserIds(db, occurrenceId, exceptUserId) {
       : [],
   ]);
   return [...staff, ...players.map((u) => u.id)].filter((id) => id !== exceptUserId);
+}
+
+// Comptes rattachés à ces joueurs (le joueur lui-même ou ses parents).
+export async function playerUserIds(db, playerIds, exceptUserId) {
+  if (!playerIds.length) return [];
+  const users = await db.user.findMany({ where: { players: { some: { playerId: { in: playerIds } } } }, select: { id: true } });
+  return users.map((u) => u.id).filter((id) => id !== exceptUserId);
+}
+
+// Notification de suivi pour un joueur, envoyée en arrière-plan à ses comptes.
+export function notifyPlayer(req, playerId, message) {
+  notifyInBackground(req.db, playerUserIds(req.db, [playerId], req.user.sub), { type: "followup", ...message });
 }

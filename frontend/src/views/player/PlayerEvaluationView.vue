@@ -1,50 +1,26 @@
 <script setup>
+import { computed, ref } from "vue";
 import Tag from "primevue/tag";
 import Chart from "primevue/chart";
-import {
-  usePlayerSpace, EVALUATION_CRITERIA, formatDate, formatScore, average,
-} from "../../composables/usePlayerSpace.js";
+import EvaluationDetail from "../../components/EvaluationDetail.vue";
+import { usePlayerSpace, formatDate, average } from "../../composables/usePlayerSpace.js";
 
-const {
-  evaluations, latest, previous, latestAverage, delta,
-  radarData, radarOptions, evolutionData, evolutionOptions,
-} = usePlayerSpace();
+const { evaluations, latest, previous, radarData, radarOptions, evolutionData, evolutionOptions } = usePlayerSpace();
 
-// Détail des points de la grille notés lors de la dernière évaluation.
-const pointsOf = (c) => (latest.value?.itemScores ?? []).filter((i) => i.criterion === c.criterion);
+// Évaluation affichée en détail : la dernière, ou celle choisie dans l'historique.
+const selectedId = ref(null);
+const selectedIndex = computed(() => {
+  const i = evaluations.value.findIndex((e) => e.id === selectedId.value);
+  return i >= 0 ? i : 0;
+});
+const selected = computed(() => evaluations.value[selectedIndex.value] ?? null);
+const selectedPrevious = computed(() => evaluations.value[selectedIndex.value + 1] ?? null);
 </script>
 
 <template>
   <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
     <div v-if="latest">
-      <div class="flex items-baseline justify-between mb-3 flex-wrap gap-2">
-        <p class="text-sm text-slate-500">Dernier rapport du {{ formatDate(latest.date) }}</p>
-        <Tag severity="info" :value="`moyenne ${latestAverage.toFixed(1)}/10`" />
-      </div>
-      <p v-if="latest.note" class="text-sm text-slate-700 bg-slate-50 rounded-lg p-3 mb-4">« {{ latest.note }} »</p>
-
-      <ul class="grid grid-cols-1 gap-3 sm:grid-cols-2 mb-6">
-        <li v-for="c in EVALUATION_CRITERIA" :key="c.key">
-          <div class="flex items-baseline justify-between text-sm mb-1">
-            <span class="text-slate-600">{{ c.label }}</span>
-            <span class="tabular-nums">
-              <strong :style="{ color: c.color }">{{ formatScore(latest[c.key]) }}</strong><span class="text-xs text-slate-400">/10</span>
-              <span v-if="delta(c.key)" class="ml-2 text-xs" :class="delta(c.key) > 0 ? 'text-green-600' : 'text-red-500'">
-                {{ delta(c.key) > 0 ? "▲" : "▼" }} {{ formatScore(Math.abs(delta(c.key))) }}
-              </span>
-            </span>
-          </div>
-          <div class="h-2 rounded-full bg-slate-100 overflow-hidden">
-            <div class="h-full rounded-full" :style="{ width: `${latest[c.key] * 10}%`, backgroundColor: c.color }"></div>
-          </div>
-          <ul v-if="pointsOf(c).length" class="mt-1.5 space-y-0.5">
-            <li v-for="p in pointsOf(c)" :key="p.id" class="flex items-baseline justify-between gap-2 text-xs text-slate-500">
-              <span class="min-w-0">{{ p.label }}</span>
-              <span class="tabular-nums whitespace-nowrap">{{ p.score }}<span class="text-slate-400">/5</span></span>
-            </li>
-          </ul>
-        </li>
-      </ul>
+      <EvaluationDetail :evaluation="selected" :previous="selectedPrevious" class="mb-6" />
 
       <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <div>
@@ -58,11 +34,19 @@ const pointsOf = (c) => (latest.value?.itemScores ?? []).filter((i) => i.criteri
         </div>
       </div>
 
-      <p class="text-sm font-medium text-slate-600 mt-6 mb-2">Historique</p>
+      <p class="text-sm font-medium text-slate-600 mt-6 mb-1">Historique</p>
+      <p v-if="evaluations.length > 1" class="text-xs text-slate-400 mb-2">Touche une évaluation pour en voir le détail.</p>
       <ul class="divide-y divide-slate-100 text-sm">
-        <li v-for="e in evaluations" :key="e.id" class="py-2 flex items-center justify-between gap-2">
-          <span>{{ formatDate(e.date) }}<span v-if="e.note" class="text-slate-400"> — {{ e.note }}</span></span>
-          <Tag severity="info" :value="`${average(e).toFixed(1)}/10`" />
+        <li v-for="e in evaluations" :key="e.id">
+          <button
+            type="button"
+            class="w-full py-2 px-2 -mx-2 rounded-md flex items-center justify-between gap-2 text-left hover:bg-slate-50"
+            :class="e.id === selected?.id ? 'bg-sky-50' : ''"
+            @click="selectedId = e.id"
+          >
+            <span class="min-w-0">{{ formatDate(e.date) }}<span v-if="e.note" class="text-slate-400"> — {{ e.note }}</span></span>
+            <Tag severity="info" :value="`${average(e).toFixed(1)}/10`" />
+          </button>
         </li>
       </ul>
     </div>
