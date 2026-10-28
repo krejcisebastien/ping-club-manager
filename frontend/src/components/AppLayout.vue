@@ -52,7 +52,7 @@ const sendingReminder = ref(false);
 async function onSendReminder() {
   sendingReminder.value = true;
   try {
-    const { data } = await api.post("/push/reminder", { message: "Rappel depuis Ping Club Manager" });
+    const { data } = await api.post("/push/reminder", { message: "Rappel depuis PingDesk" });
     toast.add({ severity: "success", summary: `Notification envoyée (${data.sent} appareil(s))`, life: 3000 });
   } catch (err) {
     toast.add({ severity: "error", summary: "Erreur", detail: err.response?.data?.error ?? "Une erreur est survenue.", life: 5000 });

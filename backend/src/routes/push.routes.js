@@ -51,7 +51,7 @@ router.post("/reminder", async (req, res) => {
   try {
     const { successCount, invalidTokens } = await sendPushToTokens(
       tokens.map((t) => t.token),
-      { title: "Ping Club Manager", body: req.body?.message || "Rappel" }
+      { title: "PingDesk", body: req.body?.message || "Rappel" }
     );
     if (invalidTokens.length) {
       await req.db.pushToken.deleteMany({ where: { token: { in: invalidTokens } } });

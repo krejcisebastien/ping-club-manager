@@ -1,6 +1,6 @@
 {
   "appId": "be.gckconsulting.pingdesk",
-  "appName": "Ping Club Manager",
+  "appName": "PingDesk",
   "webDir": "dist",
   "ios": {
     "contentInset": "always"
