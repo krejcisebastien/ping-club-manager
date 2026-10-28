@@ -14,10 +14,19 @@ export function setPushSender(fn) {
   sender = fn ?? sendPushToTokens;
 }
 
-export async function notifyUsers(db, userIds, message) {
+// `onceWithinHours` : ne renvoie pas une notification identique déjà reçue
+// dans ce délai (rappels planifiés relancés deux fois le même jour).
+export async function notifyUsers(db, userIds, message, { onceWithinHours } = {}) {
   const ids = [...new Set(userIds)];
   if (!ids.length) return;
-  const users = await db.user.findMany({ where: { id: { in: ids }, isActive: true }, select: { id: true } });
+  let users = await db.user.findMany({ where: { id: { in: ids }, isActive: true }, select: { id: true } });
+  if (onceWithinHours) {
+    const already = await db.notification.findMany({
+      where: { userId: { in: users.map((u) => u.id) }, title: message.title, body: message.body, createdAt: { gte: new Date(Date.now() - onceWithinHours * 3600000) } },
+      select: { userId: true },
+    });
+    users = users.filter((u) => !already.some((a) => a.userId === u.id));
+  }
   if (!users.length) return;
   await db.notification.createMany({ data: users.map((u) => ({ userId: u.id, title: message.title, body: message.body })) });
   await db.notification.deleteMany({

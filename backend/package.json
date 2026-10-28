@@ -16,6 +16,7 @@
     "club": "node scripts/clubs.js",
     "tabt:test": "node scripts/tabt-test.js",
     "tabt:sync": "node scripts/tabt-sync.js",
+    "reminders": "node scripts/reminders.js",
     "test:isolation": "node tests/tenant-isolation.mjs",
     "test:signup": "node tests/club-signup.mjs",
     "test:licensing": "node tests/licensing.mjs",
@@ -23,7 +24,8 @@
     "test:aftt-sheet": "node tests/aftt-sheet.mjs",
     "test:calendar": "node tests/calendar.mjs",
     "test:notifications": "node tests/notifications.mjs",
-    "test": "node tests/tenant-isolation.mjs && node tests/club-signup.mjs && node tests/licensing.mjs && node tests/platform.mjs && node tests/aftt-sheet.mjs && node tests/calendar.mjs && node tests/notifications.mjs"
+    "test:reminders": "node tests/reminders.mjs",
+    "test": "node tests/tenant-isolation.mjs && node tests/club-signup.mjs && node tests/licensing.mjs && node tests/platform.mjs && node tests/aftt-sheet.mjs && node tests/calendar.mjs && node tests/notifications.mjs && node tests/reminders.mjs"
   },
   "dependencies": {
     "@google/genai": "^2.24.0",

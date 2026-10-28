@@ -16,7 +16,7 @@ L'application est **multi-tenant** : un seul déploiement (site + API + base Pos
 
 Le dépôt contient aussi la configuration Scalingo, en vue de quitter Render. Deux apps sur le même dépôt, chacune avec sa variable `PROJECT_DIR` :
 
-- **API** (`PROJECT_DIR=backend`) : `backend/Procfile` lance le serveur et applique les migrations (`postdeploy`, avant la mise en ligne de la nouvelle version) ; `backend/cron.json` remplace le cron Render de l'import TabT (4 h UTC). Ajouter l'addon PostgreSQL et l'alias `DATABASE_URL=$SCALINGO_POSTGRESQL_URL`, puis les mêmes variables que sur Render (même `JWT_SECRET`, plus `SMTP_USER`, `SMTP_PASSWORD` et `MAIL_FROM` pour les emails), avec `CORS_ORIGIN` = URL du site Scalingo.
+- **API** (`PROJECT_DIR=backend`) : `backend/Procfile` lance le serveur et applique les migrations (`postdeploy`, avant la mise en ligne de la nouvelle version) ; `backend/cron.json` remplace le cron Render de l'import TabT (4 h UTC) et lance les rappels quotidiens (6 h UTC : séance du lendemain, présences à encoder, stage dans 2 jours, licence à 30 et 7 jours). Ajouter l'addon PostgreSQL et l'alias `DATABASE_URL=$SCALINGO_POSTGRESQL_URL`, puis les mêmes variables que sur Render (même `JWT_SECRET`, plus `SMTP_USER`, `SMTP_PASSWORD` et `MAIL_FROM` pour les emails), avec `CORS_ORIGIN` = URL du site Scalingo.
 - **Site** (`PROJECT_DIR=frontend`) : `frontend/.buildpacks` (Node.js pour le build, puis nginx) et `frontend/nginx.conf` (repli vers `index.html`). Variables `VITE_API_URL` et `VITE_CLUB_NAME` (lues au build).
 
 `prisma` est dans `dependencies` (et non `devDependencies`) car Scalingo retire les dépendances de développement après le build, alors que les migrations tournent au déploiement.

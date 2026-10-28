@@ -76,7 +76,7 @@ export const HELP_CHAPTERS = [
   <li><strong>Ordinateur :</strong> dans Chrome ou Edge, clique sur l'icône d'installation au bout de la barre d'adresse.</li>
 </ul>
 <p>Pour voir tes séances et stages dans ton agenda (Google, iPhone, Outlook), ouvre <strong>Mon compte</strong> puis <strong>Ajouter à mon agenda</strong>. Les changements (annulations, nouvelles séances) y apparaissent automatiquement après quelques heures.</p>
-<p>Tu es prévenu quand une de tes séances est annulée, rétablie ou déplacée, et quand tu es ajouté à (ou retiré de) l'encadrement d'une séance. Elles sont aussi gardées 60 jours dans l'app : touche la cloche en haut à droite. Pour les recevoir sur ton téléphone, ouvre <strong>Mon compte</strong> (ton adresse email en bas du menu) puis <strong>Activer les notifications</strong>. Sur iPhone, fais-le depuis l'app ajoutée à l'écran d'accueil.</p>
+<p>Tu es prévenu quand une de tes séances est annulée, rétablie ou déplacée, et quand tu es ajouté à (ou retiré de) l'encadrement d'une séance. Chaque matin, tu reçois aussi un rappel : séance à encadrer le lendemain, présences de la veille pas encore encodées, stage qui commence dans 2 jours (et, pour les administrateurs, licence qui se termine dans 30 ou 7 jours). Elles sont aussi gardées 60 jours dans l'app : touche la cloche en haut à droite. Pour les recevoir sur ton téléphone, ouvre <strong>Mon compte</strong> (ton adresse email en bas du menu) puis <strong>Activer les notifications</strong>. Sur iPhone, fais-le depuis l'app ajoutée à l'écran d'accueil.</p>
 <p>Quand une nouvelle version est publiée, un bandeau <strong>Nouvelle version disponible</strong> apparaît : clique sur <strong>Mettre à jour</strong>.</p>`,
       },
     ],
