@@ -5,6 +5,7 @@ import { hoursBetween } from "../utils/occurrences.js";
 import { isRanking, RANKINGS } from "../lib/rankings.js";
 import { parseLicence, startTournamentSync, syncPlayer, TabtError, tournamentSync } from "../lib/tabt.js";
 import { CRITERIA, CRITERION_KEYS, criterionScore } from "../lib/evaluation.js";
+import { registrationResult } from "../lib/tournamentResults.js";
 
 const router = Router();
 
@@ -478,13 +479,29 @@ router.get("/:id/competition", requireSelfPlayerOrRole("id", "ADMIN", "COACH"), 
 });
 
 // Tournois à venir où le joueur est inscrit (importés de TabT chaque nuit).
+// Inscriptions aux tournois de la saison en cours (passés compris) et à venir.
+// Les tournois passés portent le bilan du joueur dès que TabT a ses résultats.
 router.get("/:id/tournament-registrations", requireSelfPlayerOrRole("id", "ADMIN", "COACH"), async (req, res) => {
+  const today = startOfToday();
   const registrations = await req.db.tournamentRegistration.findMany({
-    where: { playerId: req.params.id, date: { gte: startOfToday() } },
+    where: { playerId: req.params.id, date: { gte: seasonStart(today) } },
     orderBy: [{ date: "asc" }, { tournamentId: "asc" }, { serieName: "asc" }],
   });
-  res.json({ registrations, sync: { running: tournamentSync.running, finishedAt: tournamentSync.finishedAt, error: tournamentSync.error } });
+  const past = registrations.filter((r) => r.date < today);
+  const results = past.length
+    ? await req.db.competitionResult.findMany({
+        where: { playerId: req.params.id, competition: "TOURNAMENT", date: { gte: past[0].date } },
+        select: { date: true, eventName: true, won: true, walkover: true },
+      })
+    : [];
+  res.json({
+    registrations: registrations.map((r) => (r.date < today ? { ...r, result: registrationResult(r, results) } : r)),
+    sync: { running: tournamentSync.running, finishedAt: tournamentSync.finishedAt, error: tournamentSync.error },
+  });
 });
+
+// Début de la saison sportive (1er juillet), comme les saisons AFTT.
+const seasonStart = (day) => new Date(Date.UTC(day.getUTCMonth() >= 6 ? day.getUTCFullYear() : day.getUTCFullYear() - 1, 6, 1));
 
 const startOfToday = () => new Date(new Date().toISOString().slice(0, 10));
 

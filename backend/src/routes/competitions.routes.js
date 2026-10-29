@@ -1,25 +1,12 @@
 import { Router } from "express";
 import { requireAuth, requireRole } from "../middleware/auth.js";
+import { bilan, splitEventName } from "../lib/tournamentResults.js";
 
 // Vue club des compétitions importées de TabT : les tournois d'une saison et,
 // pour chacun, les joueurs du club qui y ont joué, avec leurs séries et leur bilan.
 const router = Router();
 
 router.use(requireAuth, requireRole("ADMIN", "COACH"));
-
-// L'import enregistre « Tournoi — Série » (voir toResult dans lib/tabt.js).
-export function splitEventName(eventName) {
-  const name = eventName ?? "";
-  const at = name.lastIndexOf(" — ");
-  if (at < 0) return { tournament: name || "Tournoi", serie: null };
-  return { tournament: name.slice(0, at), serie: name.slice(at + 3) };
-}
-
-const bilan = (matches) => {
-  const played = matches.filter((m) => !m.walkover);
-  const wins = played.filter((m) => m.won).length;
-  return { played: played.length, wins, losses: played.length - wins, walkovers: matches.length - played.length };
-};
 
 router.get("/tournaments", async (req, res) => {
   const seasonRows = await req.db.competitionResult.findMany({

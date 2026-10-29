@@ -231,16 +231,16 @@ export async function syncPlayer(player, { delayMs = 0 } = {}) {
   }
 }
 
-// ---------- Inscriptions aux tournois à venir ----------
+// ---------- Inscriptions aux tournois de la saison ----------
 
 const toArray = (v) => (v == null ? [] : Array.isArray(v) ? v : [v]);
 const startOfToday = () => new Date(new Date().toISOString().slice(0, 10));
 
-// Tournois à venir avec leurs inscriptions. TabT ne donne les inscriptions
-// que tournoi par tournoi (~12 unités de quota chacun, ~70 pour la liste
-// d'une saison) : la saison courante et la suivante si elle existe déjà (les
-// tournois de septembre y sont publiés dès l'été).
-export async function fetchUpcomingTournaments({ delayMs }) {
+// Tournois de la saison courante (passés compris) et tournois à venir de la
+// suivante si elle existe déjà (ceux de septembre y sont publiés dès l'été),
+// avec leurs inscriptions. TabT ne donne les inscriptions que tournoi par
+// tournoi (~12 unités de quota chacun, ~70 pour la liste d'une saison).
+export async function fetchSeasonTournaments({ delayMs }) {
   const { current, names } = await getSeasons();
   const seasons = [current, ...(names.has(current + 1) ? [current + 1] : [])];
   const today = startOfToday();
@@ -248,7 +248,7 @@ export async function fetchUpcomingTournaments({ delayMs }) {
   for (const season of seasons) {
     const list = await call("GetTournaments", { Season: season });
     for (const t of toArray(list.TournamentEntries)) {
-      if (new Date(t.DateFrom) < today) continue;
+      if (season !== current && new Date(t.DateFrom) < today) continue;
       if (delayMs) await sleep(delayMs);
       const detail = await call("GetTournaments", { Season: season, TournamentUniqueIndex: t.UniqueIndex, WithRegistrations: true });
       const entry = toArray(detail.TournamentEntries)[0];
@@ -286,7 +286,7 @@ export function registrationRows(tournaments, playerIdsByLicence) {
 
 // Remplace toutes les inscriptions connues par celles lues dans TabT. En cas
 // d'échec (quota, réseau), rien n'est modifié : les anciennes restent.
-export async function syncTournamentRegistrations({ delayMs = 100, fetchTournaments = fetchUpcomingTournaments } = {}) {
+export async function syncTournamentRegistrations({ delayMs = 100, fetchTournaments = fetchSeasonTournaments } = {}) {
   const players = await prisma.player.findMany({ where: { licenseNumber: { not: null } }, select: { id: true, licenseNumber: true } });
   const byLicence = new Map();
   for (const p of players) {

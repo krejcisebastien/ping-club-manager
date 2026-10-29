@@ -141,7 +141,7 @@ export const HELP_CHAPTERS = [
         id: "player-competitions",
         title: "Ma fiche : résultats et compétitions",
         body: `
-<p>Menu <strong>Ma fiche</strong>, onglet <strong>Résultats et compétitions</strong> : en haut, les <strong>tournois à venir</strong> où tu es inscrit auprès de l'AFTT (date, séries, lieu), puis tes résultats.</p>
+<p>Menu <strong>Ma fiche</strong>, onglet <strong>Résultats et compétitions</strong> : en haut, les <strong>tournois de la saison</strong> où tu es inscrit auprès de l'AFTT : ceux à venir (date, séries, lieu), puis ceux déjà joués avec ton bilan dans chaque série. En dessous, tes résultats.</p>
 <p>Les inscriptions sont relues chaque nuit : un tournoi auquel tu viens de t'inscrire apparaît le lendemain, ou tout de suite avec <strong>Actualiser depuis TabT</strong>.</p>`,
       },
       {
@@ -222,7 +222,7 @@ export const HELP_CHAPTERS = [
   <li><strong>Matériel</strong> : ajoute une raquette ou un revêtement ; <strong>clôturer</strong> le retire du matériel actuel en gardant l'historique.</li>
   <li><strong>Points forts / défauts</strong>, <strong>Points à travailler</strong> (avec leur état) et <strong>Notes d'évolution</strong>.</li>
   <li><strong>Échanges avec le joueur</strong> : le fil où le joueur (ou ses parents) pose ses questions. Visible seulement pour les entraineurs de ses groupes et le responsable de la cellule entrainement.</li>
-  <li><strong>Résultats et compétitions</strong> : les tournois à venir où il est inscrit, puis ses résultats. <strong>Actualiser depuis TabT</strong> réimporte ses résultats tout de suite et relit les inscriptions aux tournois en arrière-plan (une fois toutes les 10 minutes au plus).</li>
+  <li><strong>Résultats et compétitions</strong> : les tournois de la saison où il est inscrit (à venir, puis déjà joués avec son bilan), puis ses résultats. <strong>Actualiser depuis TabT</strong> réimporte ses résultats tout de suite et relit les inscriptions aux tournois en arrière-plan (une fois toutes les 10 minutes au plus).</li>
 </ul>
 <p>Le menu <strong>Échanges joueurs</strong> liste les fils de tes joueurs, le plus récent d'abord ; « À répondre » signale ceux dont le dernier message vient du joueur. Chaque nouveau message te prévient par notification.</p>`,
       },
