@@ -357,3 +357,42 @@ export function startTournamentSync(run = syncTournamentRegistrations) {
     });
   return "started";
 }
+
+// Resynchronisation de tout un club à la demande (bouton admin), sans attendre
+// la tâche de la nuit : inscriptions aux tournois puis résultats de chaque
+// joueur, en arrière-plan et espacés comme la tâche (~500 unités de quota par
+// appel). Une seule à la fois pour toute l'app, et une par heure par club.
+export const clubSyncs = new Map();
+const CLUB_SYNC_COOLDOWN_MS = 60 * 60 * 1000;
+export const CLUB_SYNC_DELAY_MS = 3000;
+
+export function startClubSync(clubId, players, { delayMs = CLUB_SYNC_DELAY_MS, syncOne = syncPlayer, syncTournaments = startTournamentSync } = {}) {
+  const previous = clubSyncs.get(clubId);
+  if ([...clubSyncs.values()].some((s) => s.running)) return previous?.running ? "running" : "busy";
+  if (previous?.finishedAt && Date.now() - previous.finishedAt.getTime() < CLUB_SYNC_COOLDOWN_MS) return "recent";
+  const state = { running: true, startedAt: new Date(), finishedAt: null, total: players.length, done: 0, failed: 0, error: null };
+  clubSyncs.set(clubId, state);
+  syncTournaments();
+  (async () => {
+    for (const [i, player] of players.entries()) {
+      if (i > 0 && delayMs) await sleep(delayMs);
+      try {
+        await syncOne(player, { delayMs });
+      } catch (err) {
+        state.failed++;
+        if (err instanceof TabtError && err.quota) {
+          state.error = "Quota TabT atteint : les joueurs restants passeront cette nuit.";
+          break;
+        }
+      } finally {
+        state.done++;
+      }
+    }
+  })()
+    .catch((err) => (state.error = err.message))
+    .finally(() => {
+      state.running = false;
+      state.finishedAt = new Date();
+    });
+  return "started";
+}

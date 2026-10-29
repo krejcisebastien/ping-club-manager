@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { requireAuth, requireRole } from "../middleware/auth.js";
 import { bilan, splitEventName } from "../lib/tournamentResults.js";
+import { clubSyncs, isTabtConfigured, startClubSync } from "../lib/tabt.js";
 
 // Vue club des compétitions importées de TabT : les tournois d'une saison et,
 // pour chacun, les joueurs du club qui y ont joué, avec leurs séries et leur bilan.
@@ -85,6 +86,32 @@ router.get("/upcoming-tournaments", async (req, res) => {
     include: { player: { select: { id: true, firstName: true, lastName: true } } },
   });
   res.json({ registrations });
+});
+
+// Resynchronisation TabT de tous les joueurs du club (admin), sans attendre
+// la tâche de la nuit. Elle tourne en arrière-plan : l'écran suit son état.
+const syncStatus = (clubId) => {
+  const s = clubSyncs.get(clubId);
+  return s ? { running: s.running, startedAt: s.startedAt, finishedAt: s.finishedAt, total: s.total, done: s.done, failed: s.failed, error: s.error } : null;
+};
+
+router.get("/sync", (req, res) => res.json({ sync: syncStatus(req.user.clubId) }));
+
+router.post("/sync", requireRole("ADMIN"), async (req, res) => {
+  if (!isTabtConfigured()) return res.status(400).json({ error: "TabT n'est pas configuré." });
+  const players = await req.db.player.findMany({
+    where: { licenseNumber: { not: null } },
+    orderBy: [{ competitionSyncedAt: { sort: "asc", nulls: "first" } }],
+    select: { id: true, licenseNumber: true },
+  });
+  const status = startClubSync(req.user.clubId, players.filter((p) => p.licenseNumber.trim()));
+  const messages = {
+    running: "Une resynchronisation est déjà en cours.",
+    busy: "Un autre club resynchronise ses joueurs : réessaie dans quelques minutes.",
+    recent: "Le club a déjà été resynchronisé il y a moins d'une heure.",
+  };
+  if (status !== "started") return res.status(409).json({ error: messages[status], sync: syncStatus(req.user.clubId) });
+  res.json({ sync: syncStatus(req.user.clubId) });
 });
 
 export default router;

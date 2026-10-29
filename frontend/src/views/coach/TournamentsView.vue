@@ -3,6 +3,8 @@ import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import Dropdown from "primevue/dropdown";
 import AppLayout from "../../components/AppLayout.vue";
+import ClubSyncPanel from "../../components/ClubSyncPanel.vue";
+import { useAuthStore } from "../../stores/auth.js";
 import { api } from "../../lib/api.js";
 import { useNavLinks } from "../../composables/useNavLinks.js";
 import { opponentName } from "../../lib/competition.js";
@@ -13,6 +15,7 @@ import { groupByTournament, formatTournamentDay, playersOf, venueLabel } from ".
 // y ont participé : séries jouées, bilan et détail des matchs.
 const navLinks = useNavLinks();
 const router = useRouter();
+const auth = useAuthStore();
 const data = ref(null);
 const season = ref(null);
 const open = ref(new Set());
@@ -25,10 +28,12 @@ async function load() {
   season.value = d.season;
   open.value = new Set();
 }
-onMounted(async () => {
-  const [, up] = await Promise.all([load(), api.get("/competitions/upcoming-tournaments")]);
-  upcoming.value = up.data.registrations;
-});
+async function loadUpcoming() {
+  const { data: up } = await api.get("/competitions/upcoming-tournaments");
+  upcoming.value = up.registrations;
+}
+const reloadAll = () => Promise.all([load(), loadUpcoming()]);
+onMounted(reloadAll);
 
 const seasonOptions = computed(() => (data.value?.seasons ?? []).map((s) => ({ label: `Saison ${s.name}`, value: s.season })));
 const totals = computed(() => {
@@ -56,6 +61,7 @@ const record = (b) => `${b.wins} V – ${b.losses} D${b.walkovers ? ` (+${b.walk
 <template>
   <AppLayout title="Tournois" :nav-links="navLinks">
     <div class="max-w-3xl space-y-4">
+      <ClubSyncPanel v-if="auth.isAdmin" @finished="reloadAll" />
       <section class="bg-white rounded-xl shadow-sm border border-slate-200">
         <header class="p-4 border-b border-slate-100">
           <h2 class="font-medium text-slate-800">À venir</h2>

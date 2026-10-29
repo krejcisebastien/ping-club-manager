@@ -8,7 +8,7 @@ import { PrismaClient } from "@prisma/client";
 import { createApp } from "../src/app.js";
 import { hashPassword } from "../src/utils/password.js";
 import { registrationResult, splitEventName } from "../src/lib/tournamentResults.js";
-import { currentSeason, doubleSeries, isMealSerie, registrationRows, startTournamentSync, syncPlayer, syncTournamentRegistrations, tournamentSync } from "../src/lib/tabt.js";
+import { clubSyncs, currentSeason, doubleSeries, startClubSync, isMealSerie, registrationRows, startTournamentSync, syncPlayer, syncTournamentRegistrations, tournamentSync } from "../src/lib/tabt.js";
 
 const prisma = new PrismaClient();
 const server = createApp().listen(0);
@@ -246,6 +246,34 @@ try {
   expect("joueur : pas de classement dames", otherSeason?.ranking === "D0" && otherSeason.ladiesRanking === null);
   const comp = (await call(aliceTok, "GET", `/players/${alice.id}/competition`)).json;
   expect("fiche : classement dames et matchs marqués", comp?.seasons?.find((x) => x.season === 27)?.ladiesRanking === "B2" && comp.results.filter((r) => r.season === 27 && r.ladies).length === 2);
+
+  // ---------- Resynchronisation de tout le club ----------
+  const seen = [];
+  let releaseOne;
+  const slowOne = (p) => new Promise((resolve, reject) => { seen.push(p.id); releaseOne = () => (p.id === "x2" ? reject(new Error("licence")) : resolve()); });
+  let tournamentsStarted = 0;
+  const opts = { delayMs: 0, syncOne: slowOne, syncTournaments: () => tournamentsStarted++ };
+  expect("resynchro du club lancée", startClubSync("club-x", [{ id: "x1" }, { id: "x2" }], opts) === "started" && tournamentsStarted === 1);
+  expect("une seule à la fois pour le club", startClubSync("club-x", [], opts) === "running");
+  expect("une seule à la fois pour toute l'app", startClubSync("club-y", [], opts) === "busy");
+  await new Promise((r) => setTimeout(r, 10)); releaseOne();
+  await new Promise((r) => setTimeout(r, 10)); releaseOne();
+  await new Promise((r) => setTimeout(r, 20));
+  const st = clubSyncs.get("club-x");
+  expect("tous les joueurs passés, échec compté", !st.running && st.done === 2 && st.failed === 1 && seen.join() === "x1,x2", JSON.stringify(st));
+  expect("pas plus d'une par heure", startClubSync("club-x", [], opts) === "recent");
+  clubSyncs.clear();
+
+  const coach = (await post(A, "/coaches", { firstName: "Carl", lastName: "Coach" })).coach;
+  await post(A, "/auth/users", { email: `cmp-coach-${run}@test.local`, password: PASSWORD, roles: ["COACH"], coachId: coach?.id });
+  const coachTok = await login(`cmp-coach-${run}@test.local`);
+  expect("bouton réservé aux admins", (await call(coachTok, "POST", "/competitions/sync")).status === 403);
+  const started = await call(A, "POST", "/competitions/sync");
+  expect("admin : resynchro lancée", started.status === 200 && started.json.sync.total >= 1, JSON.stringify(started.json));
+  expect("admin : seconde demande refusée", (await call(A, "POST", "/competitions/sync")).status === 409);
+  expect("état visible des entraineurs", (await call(coachTok, "GET", "/competitions/sync")).json.sync?.total >= 1);
+  expect("autre club : aucun état", (await call(B, "GET", "/competitions/sync")).json.sync === null);
+  for (let i = 0; i < 100 && [...clubSyncs.values()].some((x) => x.running); i++) await new Promise((r) => setTimeout(r, 100));
 } finally {
   await prisma.club.deleteMany({ where: { id: { in: [clubA.id, clubB.id] } } });
   await prisma.$disconnect();

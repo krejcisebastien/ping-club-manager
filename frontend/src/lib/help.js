@@ -244,7 +244,8 @@ export const HELP_CHAPTERS = [
         body: `
 <p>Menu <strong>Tournois</strong>, en haut : les tournois à venir où des joueurs du club sont inscrits auprès de l'AFTT, avec leur série. Clique sur un joueur pour ouvrir sa fiche.</p>
 <p>En dessous, <strong>Tournois joués</strong> : les tournois joués par les joueurs du club pendant la saison choisie, le plus récent en haut, avec le bilan de chacun.</p>
-<p>Clique sur un joueur pour voir ses séries et ses matchs (adversaire, classement, score). Les résultats viennent de l'AFTT et sont mis à jour chaque nuit, pour les joueurs dont le n° de licence est renseigné.</p>`,
+<p>Clique sur un joueur pour voir ses séries et ses matchs (adversaire, classement, score). Les résultats viennent de l'AFTT et sont mis à jour chaque nuit, pour les joueurs dont le n° de licence est renseigné.</p>
+<p>Administrateur : <strong>Tout resynchroniser</strong>, en haut de la page, relit tout de suite les inscriptions aux tournois et les résultats de tous les joueurs du club, sans attendre la nuit. Ça tourne en arrière-plan (environ 3 secondes par joueur) et tu peux quitter la page ; possible une fois par heure.</p>`,
       },
       {
         id: "coach-exercises",
