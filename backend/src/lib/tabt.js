@@ -230,3 +230,71 @@ export async function syncPlayer(player, { delayMs = 0 } = {}) {
     throw err;
   }
 }
+
+// ---------- Inscriptions aux tournois à venir ----------
+
+const toArray = (v) => (v == null ? [] : Array.isArray(v) ? v : [v]);
+const startOfToday = () => new Date(new Date().toISOString().slice(0, 10));
+
+// Tournois à venir avec leurs inscriptions. TabT ne donne les inscriptions
+// que tournoi par tournoi (~12 unités de quota chacun, ~70 pour la liste
+// d'une saison) : la saison courante et la suivante si elle existe déjà (les
+// tournois de septembre y sont publiés dès l'été).
+async function fetchUpcomingTournaments({ delayMs }) {
+  const { current, names } = await getSeasons();
+  const seasons = [current, ...(names.has(current + 1) ? [current + 1] : [])];
+  const today = startOfToday();
+  const tournaments = [];
+  for (const season of seasons) {
+    const list = await call("GetTournaments", { Season: season });
+    for (const t of toArray(list.TournamentEntries)) {
+      if (new Date(t.DateFrom) < today) continue;
+      if (delayMs) await sleep(delayMs);
+      const detail = await call("GetTournaments", { Season: season, TournamentUniqueIndex: t.UniqueIndex, WithRegistrations: true });
+      const entry = toArray(detail.TournamentEntries)[0];
+      if (entry) tournaments.push({ season, ...entry });
+    }
+  }
+  return tournaments;
+}
+
+// Lignes à enregistrer : une par joueur inscrit et par série, rapprochées par
+// n° de licence (un même n° peut exister dans plusieurs clubs de l'app).
+export function registrationRows(tournaments, playerIdsByLicence) {
+  const rows = [];
+  for (const t of tournaments) {
+    for (const serie of toArray(t.SerieEntries)) {
+      for (const r of toArray(serie.RegistrationEntries)) {
+        for (const playerId of playerIdsByLicence.get(Number(r.Member?.UniqueIndex)) ?? []) {
+          rows.push({
+            playerId,
+            season: t.season,
+            tournamentId: t.UniqueIndex,
+            serieId: serie.UniqueIndex,
+            name: t.Name ?? "Tournoi",
+            serieName: serie.Name ?? null,
+            date: new Date(t.DateFrom),
+            venue: t.Venue?.Name || null,
+            town: t.Venue?.Town || null,
+          });
+        }
+      }
+    }
+  }
+  return rows;
+}
+
+// Remplace toutes les inscriptions connues par celles lues dans TabT. En cas
+// d'échec (quota, réseau), rien n'est modifié : les anciennes restent.
+export async function syncTournamentRegistrations({ delayMs = 100, fetchTournaments = fetchUpcomingTournaments } = {}) {
+  const players = await prisma.player.findMany({ where: { licenseNumber: { not: null } }, select: { id: true, licenseNumber: true } });
+  const byLicence = new Map();
+  for (const p of players) {
+    const licence = parseLicence(p.licenseNumber);
+    if (licence) byLicence.set(licence, [...(byLicence.get(licence) ?? []), p.id]);
+  }
+  const tournaments = await fetchTournaments({ delayMs });
+  const rows = registrationRows(tournaments, byLicence);
+  await prisma.$transaction([prisma.tournamentRegistration.deleteMany({}), prisma.tournamentRegistration.createMany({ data: rows, skipDuplicates: true })]);
+  return { tournaments: tournaments.length, registrations: rows.length };
+}

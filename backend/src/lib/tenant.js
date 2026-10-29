@@ -36,6 +36,7 @@ const PATHS = {
   CompetitionSeason: ["player"],
   CompetitionResult: ["player"],
   CompetitionPoints: ["player"],
+  TournamentRegistration: ["player"],
   UserPlayer: ["user"],
   TrainingGroup: ["season"],
   Training: ["season"],

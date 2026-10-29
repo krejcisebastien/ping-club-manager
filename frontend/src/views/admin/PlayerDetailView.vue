@@ -13,6 +13,7 @@ import { useToast } from "primevue/usetoast";
 import AppLayout from "../../components/AppLayout.vue";
 import ImageUpload from "../../components/ImageUpload.vue";
 import CompetitionResults from "../../components/CompetitionResults.vue";
+import UpcomingTournaments from "../../components/UpcomingTournaments.vue";
 import EvaluationDetail from "../../components/EvaluationDetail.vue";
 import { api } from "../../lib/api.js";
 import { toDateOnly } from "../../lib/date.js";
@@ -591,6 +592,8 @@ function pointStatusSeverity(status) {
         <p class="text-sm font-medium text-slate-600">Échanges avec le joueur</p>
         <PlayerMessages :player-id="player.id" @loaded="(data) => (messagesAccess = !!data)" />
       </div>
+
+      <UpcomingTournaments :player-id="player.id" />
 
       <CompetitionResults
         :key="player.licenseNumber ?? ''"

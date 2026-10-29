@@ -90,4 +90,14 @@ router.get("/tournaments", async (req, res) => {
   });
 });
 
+// Inscriptions des joueurs du club aux tournois à venir, la plus proche d'abord.
+router.get("/upcoming-tournaments", async (req, res) => {
+  const registrations = await req.db.tournamentRegistration.findMany({
+    where: { date: { gte: new Date(new Date().toISOString().slice(0, 10)) } },
+    orderBy: [{ date: "asc" }, { tournamentId: "asc" }],
+    include: { player: { select: { id: true, firstName: true, lastName: true } } },
+  });
+  res.json({ registrations });
+});
+
 export default router;

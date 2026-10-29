@@ -1,12 +1,13 @@
 // Test de la vue club des tournois : regroupement par tournoi, joueur et
 // série, bilans (forfaits à part), choix de la saison, droits et isolation
-// entre clubs. Autonome : crée ses données, puis nettoie.
+// entre clubs, saison courante TabT et inscriptions aux tournois à venir. Autonome : crée ses données, puis nettoie.
 // Lancer : npm run test:competitions
 import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
 import { createApp } from "../src/app.js";
 import { hashPassword } from "../src/utils/password.js";
 import { splitEventName } from "../src/routes/competitions.routes.js";
+import { currentSeason, registrationRows, syncTournamentRegistrations } from "../src/lib/tabt.js";
 
 const prisma = new PrismaClient();
 const server = createApp().listen(0);
@@ -127,6 +128,50 @@ try {
   const aliceTok = await login(`cmp-alice-${run}@test.local`);
   expect("un joueur n'a pas accès à la vue club", (await call(aliceTok, "GET", "/competitions/tournaments")).status === 403);
   expect("sans connexion : 401", (await call(null, "GET", "/competitions/tournaments")).status === 401);
+
+  // ---------- Saison courante TabT ----------
+  const names = new Map([[25, "2024-2025"], [26, "2025-2026"], [27, "2026-2027"]]);
+  expect("saison commencée retenue même si TabT annonce la précédente", currentSeason(26, names, new Date("2026-10-29")) === 27);
+  expect("saison suivante pas encore commencée ignorée", currentSeason(26, names, new Date("2026-06-15")) === 26);
+  expect("saison annoncée par TabT conservée", currentSeason(27, names, new Date("2026-06-15")) === 27);
+
+  // ---------- Inscriptions aux tournois à venir ----------
+  const day = (offset) => new Date(Date.now() + offset * 86400000).toISOString().slice(0, 10);
+  const lic = (n) => 900000 + n;
+  await call(A, "PUT", `/players/${alice.id}`, { firstName: "Alice", lastName: "Zeta", birthDate: "2010-01-01", licenseNumber: String(lic(1)) });
+  await call(B, "PUT", `/players/${other.id}`, { firstName: "Olga", lastName: "Autre", birthDate: "2010-01-01", licenseNumber: String(lic(2)) });
+  const reg = (n) => ({ Member: { UniqueIndex: lic(n), FirstName: "X", LastName: "Y" } });
+  const fake = [
+    { season: 27, UniqueIndex: 7001, Name: "Open de Ciney", DateFrom: new Date(`${day(10)}T00:00:00Z`), Venue: { Name: "Hall", Town: "5590 Ciney" },
+      SerieEntries: [{ UniqueIndex: 1, Name: "Série E", RegistrationEntries: [reg(1), reg(2), reg(99)] }, { UniqueIndex: 2, Name: "Série D", RegistrationEntries: reg(1) }] },
+    { season: 27, UniqueIndex: 7002, Name: "Critérium", DateFrom: new Date(`${day(3)}T00:00:00Z`), SerieEntries: { UniqueIndex: 3, Name: "Serie unique" } },
+  ];
+  const rows = registrationRows(fake, new Map([[lic(1), ["p1", "p1bis"]], [lic(2), ["p2"]]]));
+  expect("une ligne par joueur et par série, licences inconnues ignorées", rows.length === 5, String(rows.length));
+  expect("même licence dans deux clubs : les deux joueurs", rows.filter((r) => r.serieId === 1).map((r) => r.playerId).sort().join() === "p1,p1bis,p2");
+  expect("série unique sans tableau et sans inscrits", !rows.some((r) => r.serieId === 3));
+  expect("lieu repris", rows[0].venue === "Hall" && rows[0].town === "5590 Ciney");
+
+  await prisma.tournamentRegistration.create({ data: { playerId: bob.id, season: 27, tournamentId: 1, serieId: 1, name: "Ancien", date: new Date(day(5)) } });
+  const sync = await syncTournamentRegistrations({ fetchTournaments: async () => fake });
+  expect("synchronisation : inscriptions des joueurs de l'app", sync.tournaments === 2 && sync.registrations >= 3, JSON.stringify(sync));
+  expect("anciennes inscriptions remplacées", (await prisma.tournamentRegistration.count({ where: { playerId: bob.id } })) === 0);
+  const failing = await syncTournamentRegistrations({ fetchTournaments: async () => { throw new Error("quota"); } }).catch((e) => e);
+  expect("échec de TabT : erreur remontée", failing instanceof Error);
+  expect("échec de TabT : inscriptions conservées", (await prisma.tournamentRegistration.count({ where: { playerId: alice.id } })) === 2);
+
+  const mine = await call(aliceTok, "GET", `/players/${alice.id}/tournament-registrations`);
+  expect("la joueuse voit ses inscriptions", mine.status === 200 && mine.json.registrations.map((r) => r.serieName).sort().join() === "Série D,Série E", JSON.stringify(mine.json));
+  expect("un joueur ne voit pas celles d'un autre", (await call(aliceTok, "GET", `/players/${bob.id}/tournament-registrations`)).status === 403);
+  const foreign = await call(B, "GET", `/players/${alice.id}/tournament-registrations`);
+  expect("l'autre club ne voit rien", foreign.status === 200 && foreign.json.registrations.length === 0);
+  await prisma.tournamentRegistration.create({ data: { playerId: alice.id, season: 26, tournamentId: 2, serieId: 99, name: "Passé", date: new Date(day(-3)) } });
+  expect("tournois passés masqués", (await call(aliceTok, "GET", `/players/${alice.id}/tournament-registrations`)).json.registrations.length === 2);
+  const clubUp = (await call(A, "GET", "/competitions/upcoming-tournaments")).json.registrations;
+  expect("vue club : inscriptions du club seulement", clubUp.length === 2 && clubUp.every((r) => r.player.id === alice.id));
+  const clubUpB = (await call(B, "GET", "/competitions/upcoming-tournaments")).json.registrations;
+  expect("vue club de l'autre club : ses joueurs", clubUpB.length === 1 && clubUpB[0].player.id === other.id);
+  expect("vue club refusée à un joueur", (await call(aliceTok, "GET", "/competitions/upcoming-tournaments")).status === 403);
 } finally {
   await prisma.club.deleteMany({ where: { id: { in: [clubA.id, clubB.id] } } });
   await prisma.$disconnect();

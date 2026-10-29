@@ -477,6 +477,17 @@ router.get("/:id/competition", requireSelfPlayerOrRole("id", "ADMIN", "COACH"), 
   });
 });
 
+// Tournois à venir où le joueur est inscrit (importés de TabT chaque nuit).
+router.get("/:id/tournament-registrations", requireSelfPlayerOrRole("id", "ADMIN", "COACH"), async (req, res) => {
+  const registrations = await req.db.tournamentRegistration.findMany({
+    where: { playerId: req.params.id, date: { gte: startOfToday() } },
+    orderBy: [{ date: "asc" }, { tournamentId: "asc" }, { serieName: "asc" }],
+  });
+  res.json({ registrations });
+});
+
+const startOfToday = () => new Date(new Date().toISOString().slice(0, 10));
+
 // Décimaux Prisma -> nombres JSON (null conservé).
 const toNumber = (v) => (v == null ? null : Number(v));
 

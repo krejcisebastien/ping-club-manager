@@ -265,25 +265,26 @@ model Player {
   competitionSyncedAt  DateTime?
   competitionSyncError String?
 
-  users              UserPlayer[]
-  playerSeasons      PlayerSeason[]
-  rankingHistories   RankingHistory[]
-  evaluations        Evaluation[]
-  equipment          Equipment[]
-  traits             PlayerTrait[]
-  pointsToWork       PointToWork[]
-  evolutionNotes     EvolutionNote[]
-  media              PlayerMedia[]
-  messages           PlayerMessage[]
-  groupAssignments   PlayerGroupAssignment[]
-  attendances        Attendance[]
-  campEnrollments    CampPeriodGroupPlayer[]
-  campAttendances    CampAttendance[]
-  sparringProfile    Sparring?
-  campRegistrations  CampPlayer[]
-  competitionSeasons CompetitionSeason[]
-  competitionResults CompetitionResult[]
-  competitionPoints  CompetitionPoints[]
+  users                   UserPlayer[]
+  playerSeasons           PlayerSeason[]
+  rankingHistories        RankingHistory[]
+  evaluations             Evaluation[]
+  equipment               Equipment[]
+  traits                  PlayerTrait[]
+  pointsToWork            PointToWork[]
+  evolutionNotes          EvolutionNote[]
+  media                   PlayerMedia[]
+  messages                PlayerMessage[]
+  groupAssignments        PlayerGroupAssignment[]
+  attendances             Attendance[]
+  campEnrollments         CampPeriodGroupPlayer[]
+  campAttendances         CampAttendance[]
+  sparringProfile         Sparring?
+  campRegistrations       CampPlayer[]
+  competitionSeasons      CompetitionSeason[]
+  competitionResults      CompetitionResult[]
+  competitionPoints       CompetitionPoints[]
+  tournamentRegistrations TournamentRegistration[]
 
   @@index([clubId])
 }
@@ -350,6 +351,28 @@ model CompetitionResult {
   player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
 
   @@index([playerId, season])
+}
+
+// Inscription à un tournoi à venir, lue dans TabT (GetTournaments avec
+// inscriptions, rapprochées par n° de licence). Toutes les lignes sont
+// remplacées à chaque synchronisation : seuls les tournois à venir y figurent.
+model TournamentRegistration {
+  id           String   @id @default(cuid())
+  playerId     String
+  season       Int
+  tournamentId Int
+  serieId      Int
+  name         String
+  serieName    String?
+  date         DateTime
+  venue        String?
+  town         String?
+  syncedAt     DateTime @default(now())
+
+  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@unique([playerId, serieId])
+  @@index([date])
 }
 
 model PlayerSeason {

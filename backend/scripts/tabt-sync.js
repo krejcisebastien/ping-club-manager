@@ -1,11 +1,11 @@
-// Synchronisation quotidienne des résultats de compétition depuis TabT (AFTT),
-// pour tous les joueurs de tous les clubs ayant un n° de licence.
+// Synchronisation quotidienne depuis TabT (AFTT) : inscriptions aux tournois à
+// venir, puis résultats de compétition de tous les joueurs ayant un n° de licence.
 // Usage : npm run tabt:sync            (tous les joueurs)
 //         npm run tabt:sync -- <id>    (un seul joueur, id interne)
 // Sur Render : service "cron" déclaré dans render.yaml.
 import "dotenv/config";
 import { prisma } from "../src/lib/prisma.js";
-import { syncPlayer, isTabtConfigured, TabtError } from "../src/lib/tabt.js";
+import { syncPlayer, syncTournamentRegistrations, isTabtConfigured, TabtError } from "../src/lib/tabt.js";
 
 // ~500 unités de quota par appel, résorbées à 200/s : 3 s entre deux appels
 // garde le compteur bien sous la limite de 30 000.
@@ -18,6 +18,18 @@ if (!isTabtConfigured()) {
 }
 
 const onlyId = process.argv[2];
+
+// Inscriptions aux tournois à venir : une passe pour tous les clubs (TabT ne
+// filtre pas par joueur). Un échec n'empêche pas l'import des résultats.
+if (!onlyId) {
+  try {
+    const summary = await syncTournamentRegistrations();
+    console.log(`Tournois à venir : ${summary.tournaments} lu(s), ${summary.registrations} inscription(s) de joueurs de l'app.\n`);
+  } catch (err) {
+    console.log(`ECHEC  inscriptions aux tournois : ${err.message}\n`);
+  }
+  await sleep(DELAY_MS);
+}
 const players = await prisma.player.findMany({
   where: { licenseNumber: { not: null }, ...(onlyId && { id: onlyId }) },
   // Les joueurs jamais synchronisés d'abord, puis les plus anciennement à jour.

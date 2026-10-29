@@ -6,14 +6,18 @@ import AppLayout from "../../components/AppLayout.vue";
 import { api } from "../../lib/api.js";
 import { useNavLinks } from "../../composables/useNavLinks.js";
 import { opponentName } from "../../lib/competition.js";
+import { groupByTournament, formatTournamentDay, playersOf, venueLabel } from "../../lib/tournaments.js";
 
-// Tournois d'une saison (importés de TabT) et, pour chacun, les joueurs du
-// club qui y ont participé : séries jouées, bilan et détail des matchs.
+// Tournois à venir où des joueurs du club sont inscrits, puis tournois joués
+// d'une saison (importés de TabT) avec, pour chacun, les joueurs du club qui
+// y ont participé : séries jouées, bilan et détail des matchs.
 const navLinks = useNavLinks();
 const router = useRouter();
 const data = ref(null);
 const season = ref(null);
 const open = ref(new Set());
+const upcoming = ref([]);
+const upcomingTournaments = computed(() => groupByTournament(upcoming.value));
 
 async function load() {
   const { data: d } = await api.get("/competitions/tournaments", { params: season.value ? { season: season.value } : {} });
@@ -21,7 +25,10 @@ async function load() {
   season.value = d.season;
   open.value = new Set();
 }
-onMounted(load);
+onMounted(async () => {
+  const [, up] = await Promise.all([load(), api.get("/competitions/upcoming-tournaments")]);
+  upcoming.value = up.data.registrations;
+});
 
 const seasonOptions = computed(() => (data.value?.seasons ?? []).map((s) => ({ label: `Saison ${s.name}`, value: s.season })));
 const totals = computed(() => {
@@ -49,8 +56,39 @@ const record = (b) => `${b.wins} V – ${b.losses} D${b.walkovers ? ` (+${b.walk
 <template>
   <AppLayout title="Tournois" :nav-links="navLinks">
     <div class="max-w-3xl space-y-4">
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <p class="text-sm text-slate-500">Les tournois joués par les joueurs du club, d'après les résultats AFTT importés chaque nuit.</p>
+      <section class="bg-white rounded-xl shadow-sm border border-slate-200">
+        <header class="p-4 border-b border-slate-100">
+          <h2 class="font-medium text-slate-800">À venir</h2>
+          <p class="text-xs text-slate-500 mt-0.5">Inscriptions AFTT des joueurs du club, mises à jour chaque nuit.</p>
+        </header>
+        <p v-if="!upcomingTournaments.length" class="p-4 text-sm text-slate-400">Aucun joueur du club inscrit à un tournoi à venir.</p>
+        <ul v-else class="divide-y divide-slate-100">
+          <li v-for="t in upcomingTournaments" :key="t.id" class="px-4 py-3 flex items-start gap-3">
+            <span class="w-20 shrink-0 text-sm font-medium text-slate-700 capitalize">{{ formatTournamentDay(t.date) }}</span>
+            <span class="flex-1 min-w-0">
+              <span class="block font-medium text-slate-800 break-words">{{ t.name }}</span>
+              <span v-if="venueLabel(t)" class="block text-xs text-slate-500">{{ venueLabel(t) }}</span>
+              <span class="flex flex-wrap gap-x-3 gap-y-1 mt-1">
+                <button
+                  v-for="p in playersOf(t)"
+                  :key="p.player.id"
+                  type="button"
+                  class="text-sm text-sky-700 hover:underline text-left"
+                  @click="router.push(`/admin/players/${p.player.id}`)"
+                >
+                  {{ p.player.firstName }} {{ p.player.lastName }}<span v-if="p.series.length" class="text-slate-500"> ({{ p.series.join(", ") }})</span>
+                </button>
+              </span>
+            </span>
+          </li>
+        </ul>
+      </section>
+
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-2">
+        <div>
+          <h2 class="font-medium text-slate-800">Tournois joués</h2>
+          <p class="text-sm text-slate-500">D'après les résultats AFTT importés chaque nuit.</p>
+        </div>
         <Dropdown
           v-if="seasonOptions.length > 1"
           v-model="season"

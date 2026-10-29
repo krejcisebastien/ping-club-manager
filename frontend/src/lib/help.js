@@ -137,6 +137,13 @@ export const HELP_CHAPTERS = [
 </ul>`,
       },
       {
+        id: "player-competitions",
+        title: "Mes compétitions",
+        body: `
+<p>Menu <strong>Mes compétitions</strong> : en haut, les <strong>tournois à venir</strong> où tu es inscrit auprès de l'AFTT (date, séries, lieu), puis tes résultats.</p>
+<p>Les inscriptions sont relues chaque nuit : un tournoi auquel tu viens de t'inscrire apparaît le lendemain.</p>`,
+      },
+      {
         id: "player-attendance",
         title: "Mes présences",
         body: `
@@ -231,7 +238,8 @@ export const HELP_CHAPTERS = [
         id: "coach-tournaments",
         title: "Tournois du club",
         body: `
-<p>Menu <strong>Tournois</strong> : les tournois joués par les joueurs du club pendant la saison choisie, le plus récent en haut, avec le bilan de chacun.</p>
+<p>Menu <strong>Tournois</strong>, en haut : les tournois à venir où des joueurs du club sont inscrits auprès de l'AFTT, avec leur série. Clique sur un joueur pour ouvrir sa fiche.</p>
+<p>En dessous, <strong>Tournois joués</strong> : les tournois joués par les joueurs du club pendant la saison choisie, le plus récent en haut, avec le bilan de chacun.</p>
 <p>Clique sur un joueur pour voir ses séries et ses matchs (adversaire, classement, score). Les résultats viennent de l'AFTT et sont mis à jour chaque nuit, pour les joueurs dont le n° de licence est renseigné.</p>`,
       },
       {

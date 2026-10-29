@@ -44,7 +44,7 @@ function playerLinks(playerId, hasSeveralPlayers) {
         { to: `/player/${playerId}/evaluation`, label: "Mon évaluation", icon: "pi pi-chart-bar" },
         { to: `/player/${playerId}/follow-up`, label: "Mon suivi", icon: "pi pi-flag" },
         { to: `/player/${playerId}/messages`, label: "Mes échanges", icon: "pi pi-comments" },
-        { to: `/player/${playerId}/results`, label: "Mes résultats", icon: "pi pi-trophy" },
+        { to: `/player/${playerId}/results`, label: "Mes compétitions", icon: "pi pi-trophy" },
         { to: `/player/${playerId}/attendance`, label: "Mes présences", icon: "pi pi-check-square" },
         { to: `/player/${playerId}/profile`, label: "Ma fiche", icon: "pi pi-id-card" },
       ]
