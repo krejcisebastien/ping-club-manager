@@ -153,6 +153,9 @@ router.post("/users", requireAuth, requireRole("ADMIN"), async (req, res) => {
   if (isPlatformAdmin(email)) {
     return res.status(409).json({ error: "Un compte existe déjà avec cet email, ou un joueur est déjà rattaché à ce compte." });
   }
+  if (password.length < 8) {
+    return res.status(400).json({ error: "Le mot de passe doit contenir au moins 8 caractères." });
+  }
 
   const passwordHash = await hashPassword(password);
   try {
@@ -187,6 +190,11 @@ router.post("/users", requireAuth, requireRole("ADMIN"), async (req, res) => {
 
 router.put("/users/:id", requireAuth, requireRole("ADMIN"), async (req, res) => {
   const { isActive, password, roles, playerIds, coachId } = req.body ?? {};
+  // L'admin peut donner un nouveau mot de passe, par exemple quand l'email de
+  // réinitialisation ne peut pas partir. Vide : mot de passe inchangé.
+  if (password !== undefined && password !== "" && (typeof password !== "string" || password.length < 8)) {
+    return res.status(400).json({ error: "Le mot de passe doit contenir au moins 8 caractères." });
+  }
   if (roles !== undefined) {
     if (!Array.isArray(roles) || !roles.length || roles.some((r) => !["ADMIN", "COACH", "PLAYER"].includes(r))) {
       return res.status(400).json({ error: "Au moins un rôle valide est requis." });

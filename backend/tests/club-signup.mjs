@@ -84,6 +84,31 @@ try {
   const isolated = await call(same.json.token, "GET", "/auth/users");
   expect("les deux clubs sont isolés", isolated.json.users.length === 1 && isolated.json.users[0].email === emails[1]);
 
+  // ---------- L'admin donne un nouveau mot de passe ----------
+  const member = `signup-membre-${run}@test.local`;
+  const A1 = ok.json.token;
+  const shortCreate = await call(A1, "POST", "/auth/users", { email: member, password: "court", roles: ["ADMIN"] });
+  expect("création d'un compte avec un mot de passe trop court refusée (400)", shortCreate.status === 400, `status ${shortCreate.status}`);
+  const memberRes = await call(A1, "POST", "/auth/users", { email: member, password: "AncienMotDePasse1", roles: ["ADMIN"] });
+  expect("l'admin crée un compte", memberRes.status === 201, `status ${memberRes.status}`);
+  const memberId = memberRes.json.user.id;
+  const shortReset = await call(A1, "PUT", `/auth/users/${memberId}`, { password: "court" });
+  expect("nouveau mot de passe trop court refusé (400)", shortReset.status === 400, `status ${shortReset.status}`);
+  const foreign = await call(same.json.token, "PUT", `/auth/users/${memberId}`, { password: "PirateMotDePasse1" });
+  expect("l'admin d'un autre club ne peut pas changer le mot de passe (404)", foreign.status === 404, `status ${foreign.status}`);
+  const reset = await call(A1, "PUT", `/auth/users/${memberId}`, { password: "NouveauMotDePasse1" });
+  expect("l'admin donne un nouveau mot de passe", reset.status === 200, `status ${reset.status}`);
+  const loginNew = await call(null, "POST", "/auth/login", { email: member, password: "NouveauMotDePasse1" });
+  expect("connexion avec le nouveau mot de passe", loginNew.status === 200);
+  const loginOld = await call(null, "POST", "/auth/login", { email: member, password: "AncienMotDePasse1" });
+  expect("l'ancien mot de passe ne marche plus", loginOld.status === 401, `status ${loginOld.status}`);
+  const loginPirate = await call(null, "POST", "/auth/login", { email: member, password: "PirateMotDePasse1" });
+  expect("le mot de passe de l'autre club n'a pas été appliqué", loginPirate.status === 401, `status ${loginPirate.status}`);
+  const rolesOnly = await call(A1, "PUT", `/auth/users/${memberId}`, { roles: ["ADMIN"], password: "" });
+  expect("mot de passe vide : modification acceptée", rolesOnly.status === 200, `status ${rolesOnly.status}`);
+  const stillNew = await call(null, "POST", "/auth/login", { email: member, password: "NouveauMotDePasse1" });
+  expect("mot de passe vide : mot de passe inchangé", stillNew.status === 200);
+
   // ---------- Validation ----------
   const dup = await call(null, "POST", "/clubs/signup", { clubName: "Autre", email: emails[0], password: "MotDePasse123!" });
   expect("email déjà utilisé refusé (409)", dup.status === 409, `status ${dup.status}`);

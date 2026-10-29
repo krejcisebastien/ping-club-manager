@@ -124,9 +124,15 @@ async function onSaveEdit() {
       roles: editForm.value.roles,
       playerIds: editForm.value.playerIds,
       coachId: editForm.value.coachId,
+      ...(editForm.value.password ? { password: editForm.value.password } : {}),
     });
     editDialogVisible.value = false;
-    toast.add({ severity: "success", summary: "Compte mis à jour", life: 3000 });
+    toast.add({
+      severity: "success",
+      summary: "Compte mis à jour",
+      detail: editForm.value.password ? "Nouveau mot de passe enregistré : communique-le à l'utilisateur." : undefined,
+      life: 4000,
+    });
     await loadUsers();
   } catch (err) {
     toast.add({ severity: "error", summary: "Erreur", detail: err.response?.data?.error ?? "Une erreur est survenue.", life: 4000 });
@@ -216,7 +222,7 @@ function roleSeverity(role) {
         </div>
         <div>
           <label class="text-xs text-slate-500 block mb-1">Mot de passe</label>
-          <Password v-model="form.password" required toggle-mask :feedback="false" class="w-full" input-class="w-full" />
+          <Password v-model="form.password" required toggle-mask autocomplete="new-password" :feedback="false" class="w-full" input-class="w-full" />
         </div>
         <div>
           <label class="text-xs text-slate-500 block mb-1">Rôle(s)</label>
@@ -241,6 +247,12 @@ function roleSeverity(role) {
 
     <Dialog v-model:visible="editDialogVisible" header="Modifier le compte" modal style="width: 28rem" class="mx-4">
       <div class="grid grid-cols-1 gap-3 pt-2">
+        <p class="text-sm text-slate-600 break-all">{{ editingUser?.email }}</p>
+        <div>
+          <label class="text-xs text-slate-500 block mb-1" for="edit-password">Nouveau mot de passe</label>
+          <Password v-model="editForm.password" input-id="edit-password" toggle-mask :feedback="false" autocomplete="new-password" placeholder="Laisser vide pour ne pas changer" class="w-full" input-class="w-full" />
+          <p class="text-xs text-slate-400 mt-1">8 caractères minimum. L'utilisateur pourra le changer ensuite dans « Mon compte ».</p>
+        </div>
         <div>
           <label class="text-xs text-slate-500 block mb-1">Rôle(s)</label>
           <MultiSelect v-model="editForm.roles" :options="roleOptions" option-label="label" option-value="value" placeholder="Choisir un ou plusieurs rôles…" class="w-full" display="chip" />

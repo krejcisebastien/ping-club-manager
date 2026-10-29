@@ -33,7 +33,7 @@ export const HELP_CHAPTERS = [
   <li>Indique ton email puis clique sur <strong>Envoyer le lien</strong>.</li>
   <li>Ouvre l'email reçu (pense à vérifier tes spams) et choisis un nouveau mot de passe.</li>
 </ol>
-<p>Le lien n'est valable qu'<strong>une heure</strong>. Passé ce délai, recommence la demande.</p>`,
+<p>Le lien n'est valable qu'<strong>une heure</strong>. Passé ce délai, recommence la demande. Si l'email n'arrive pas, demande à un administrateur du club de te donner un nouveau mot de passe.</p>`,
       },
       {
         id: "change-password",
@@ -301,6 +301,7 @@ export const HELP_CHAPTERS = [
   <li>Rôle <strong>Joueur</strong> : rattache un ou plusieurs joueurs (plusieurs = compte familial). Rôle <strong>Entraineur</strong> : rattache la fiche entraineur correspondante.</li>
   <li>Communique l'email et le mot de passe à la personne ; elle pourra le changer (icône cadenas) ou utiliser <strong>Mot de passe oublié ?</strong>.</li>
 </ol>
+<p>Mot de passe perdu ? Clique sur le compte, saisis un <strong>Nouveau mot de passe</strong> (8 caractères minimum) puis <strong>Enregistrer</strong>, et communique-le à la personne. Laissé vide, le mot de passe ne change pas.</p>
 <p>L'icône <strong>interdit</strong> désactive un compte sans le supprimer : la personne ne peut plus se connecter. La même icône (coche) le réactive.</p>`,
       },
       {
