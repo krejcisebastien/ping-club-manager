@@ -228,6 +228,13 @@ export const HELP_CHAPTERS = [
 <p>La création et le renommage des groupes sont réservés aux administrateurs.</p>`,
       },
       {
+        id: "coach-tournaments",
+        title: "Tournois du club",
+        body: `
+<p>Menu <strong>Tournois</strong> : les tournois joués par les joueurs du club pendant la saison choisie, le plus récent en haut, avec le bilan de chacun.</p>
+<p>Clique sur un joueur pour voir ses séries et ses matchs (adversaire, classement, score). Les résultats viennent de l'AFTT et sont mis à jour chaque nuit, pour les joueurs dont le n° de licence est renseigné.</p>`,
+      },
+      {
         id: "coach-exercises",
         title: "Bibliothèque d'exercices",
         body: `

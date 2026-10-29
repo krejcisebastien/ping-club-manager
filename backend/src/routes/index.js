@@ -22,6 +22,7 @@ import pushRoutes from "./push.routes.js";
 import calendarRoutes from "./calendar.routes.js";
 import notificationsRoutes from "./notifications.routes.js";
 import playerMessagesRoutes from "./playerMessages.routes.js";
+import competitionsRoutes from "./competitions.routes.js";
 
 const router = Router();
 
@@ -50,5 +51,6 @@ router.use("/push", pushRoutes);
 router.use("/calendar", calendarRoutes);
 router.use("/notifications", notificationsRoutes);
 router.use("/evaluation-items", evaluationItemsRoutes);
+router.use("/competitions", competitionsRoutes);
 
 export default router;

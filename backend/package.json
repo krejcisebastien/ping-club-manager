@@ -26,7 +26,8 @@
     "test:notifications": "node tests/notifications.mjs",
     "test:reminders": "node tests/reminders.mjs",
     "test:messages": "node tests/player-messages.mjs",
-    "test": "node tests/tenant-isolation.mjs && node tests/club-signup.mjs && node tests/licensing.mjs && node tests/platform.mjs && node tests/aftt-sheet.mjs && node tests/calendar.mjs && node tests/notifications.mjs && node tests/reminders.mjs && node tests/player-messages.mjs"
+    "test:competitions": "node tests/competitions.mjs",
+    "test": "node tests/tenant-isolation.mjs && node tests/club-signup.mjs && node tests/licensing.mjs && node tests/platform.mjs && node tests/aftt-sheet.mjs && node tests/calendar.mjs && node tests/notifications.mjs && node tests/reminders.mjs && node tests/player-messages.mjs && node tests/competitions.mjs"
   },
   "dependencies": {
     "@google/genai": "^2.24.0",
