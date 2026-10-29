@@ -7,7 +7,7 @@ import { PrismaClient } from "@prisma/client";
 import { createApp } from "../src/app.js";
 import { hashPassword } from "../src/utils/password.js";
 import { splitEventName } from "../src/routes/competitions.routes.js";
-import { currentSeason, registrationRows, syncTournamentRegistrations } from "../src/lib/tabt.js";
+import { currentSeason, registrationRows, startTournamentSync, syncTournamentRegistrations, tournamentSync } from "../src/lib/tabt.js";
 
 const prisma = new PrismaClient();
 const server = createApp().listen(0);
@@ -172,6 +172,22 @@ try {
   const clubUpB = (await call(B, "GET", "/competitions/upcoming-tournaments")).json.registrations;
   expect("vue club de l'autre club : ses joueurs", clubUpB.length === 1 && clubUpB[0].player.id === other.id);
   expect("vue club refusée à un joueur", (await call(aliceTok, "GET", "/competitions/upcoming-tournaments")).status === 403);
+
+  // ---------- Relecture à la demande ----------
+  let release;
+  const slow = () => new Promise((resolve) => (release = resolve));
+  expect("relecture lancée", startTournamentSync(slow) === "started" && tournamentSync.running);
+  expect("pas de seconde relecture en parallèle", startTournamentSync(slow) === "running");
+  const during = (await call(aliceTok, "GET", `/players/${alice.id}/tournament-registrations`)).json;
+  expect("l'écran voit la relecture en cours", during.sync.running === true);
+  release();
+  await new Promise((r) => setTimeout(r, 50));
+  expect("relecture terminée", !tournamentSync.running && tournamentSync.finishedAt instanceof Date && tournamentSync.error === null);
+  expect("pas plus d'une relecture toutes les 10 minutes", startTournamentSync(slow) === "recent");
+  tournamentSync.finishedAt = new Date(Date.now() - 11 * 60 * 1000);
+  expect("échec de relecture signalé", startTournamentSync(async () => { throw new Error("quota TabT"); }) === "started");
+  await new Promise((r) => setTimeout(r, 50));
+  expect("erreur gardée pour l'écran", tournamentSync.error === "quota TabT" && !tournamentSync.running);
 } finally {
   await prisma.club.deleteMany({ where: { id: { in: [clubA.id, clubB.id] } } });
   await prisma.$disconnect();

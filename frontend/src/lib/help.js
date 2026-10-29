@@ -141,7 +141,7 @@ export const HELP_CHAPTERS = [
         title: "Mes compétitions",
         body: `
 <p>Menu <strong>Mes compétitions</strong> : en haut, les <strong>tournois à venir</strong> où tu es inscrit auprès de l'AFTT (date, séries, lieu), puis tes résultats.</p>
-<p>Les inscriptions sont relues chaque nuit : un tournoi auquel tu viens de t'inscrire apparaît le lendemain.</p>`,
+<p>Les inscriptions sont relues chaque nuit : un tournoi auquel tu viens de t'inscrire apparaît le lendemain, ou tout de suite avec <strong>Actualiser depuis TabT</strong>.</p>`,
       },
       {
         id: "player-attendance",
@@ -210,7 +210,7 @@ export const HELP_CHAPTERS = [
         id: "coach-players",
         title: "Suivre un joueur",
         body: `
-<p>Menu <strong>Joueurs</strong>, puis clique sur un joueur pour ouvrir sa fiche :</p>
+<p>Menu <strong>Joueurs</strong>, puis clique sur un joueur pour ouvrir sa fiche, découpée en trois onglets : <strong>Fiche informative</strong>, <strong>Évaluations</strong> et <strong>Résultats et compétitions</strong>.</p>
 <ul>
   <li><strong>Signalétique</strong> : coordonnées, n° de licence, main dominante, style de jeu, contact d'urgence.</li>
   <li><strong>Statistiques</strong> de présence par saison.</li>
@@ -220,6 +220,7 @@ export const HELP_CHAPTERS = [
   <li><strong>Matériel</strong> : ajoute une raquette ou un revêtement ; <strong>clôturer</strong> le retire du matériel actuel en gardant l'historique.</li>
   <li><strong>Points forts / défauts</strong>, <strong>Points à travailler</strong> (avec leur état) et <strong>Notes d'évolution</strong>.</li>
   <li><strong>Échanges avec le joueur</strong> : le fil où le joueur (ou ses parents) pose ses questions. Visible seulement pour les entraineurs de ses groupes et le responsable de la cellule entrainement.</li>
+  <li><strong>Résultats et compétitions</strong> : les tournois à venir où il est inscrit, puis ses résultats. <strong>Actualiser depuis TabT</strong> réimporte ses résultats tout de suite et relit les inscriptions aux tournois en arrière-plan (une fois toutes les 10 minutes au plus).</li>
 </ul>
 <p>Le menu <strong>Échanges joueurs</strong> liste les fils de tes joueurs, le plus récent d'abord ; « À répondre » signale ceux dont le dernier message vient du joueur. Chaque nouveau message te prévient par notification.</p>`,
       },

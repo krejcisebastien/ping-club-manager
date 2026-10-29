@@ -30,6 +30,18 @@ const router = useRouter();
 const toast = useToast();
 const playerId = route.params.id;
 
+// Onglet ouvert, gardé dans l'adresse (?onglet=) pour y revenir après un retour arrière.
+const TABS = [
+  { key: "fiche", label: "Fiche informative", short: "Fiche" },
+  { key: "evaluations", label: "Évaluations", short: "Évaluations" },
+  { key: "resultats", label: "Résultats et compétitions", short: "Résultats" },
+];
+const activeTab = computed({
+  get: () => (TABS.some((t) => t.key === route.query.onglet) ? route.query.onglet : "fiche"),
+  set: (key) => router.replace({ query: { ...route.query, onglet: key } }),
+});
+const upcoming = ref(null);
+
 const traitOptions = [
   { label: "Point fort", value: "STRENGTH" },
   { label: "Défaut", value: "WEAKNESS" },
@@ -302,304 +314,331 @@ function pointStatusSeverity(status) {
   <AppLayout :title="player ? fullName(player) : 'Joueur'" :nav-links="navLinks">
     <Button label="Retour" icon="pi pi-arrow-left" text class="mb-3 -ml-2" @click="router.push('/admin/players')" />
 
-    <div v-if="player" class="space-y-4">
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-        <p class="text-sm font-medium text-slate-600 mb-3">Signalétique</p>
-        <form class="grid grid-cols-1 gap-3 sm:grid-cols-2" @submit.prevent="onSaveInfo">
-          <div class="sm:col-span-2">
-            <label class="text-xs text-slate-500 block mb-1">Photo</label>
-            <ImageUpload v-model="editForm.photoUrl" :max-size-mb="1" />
-          </div>
-          <div>
-            <label class="text-xs text-slate-500 block mb-1">Prénom</label>
-            <InputText v-model="editForm.firstName" required class="w-full" />
-          </div>
-          <div>
-            <label class="text-xs text-slate-500 block mb-1">Nom</label>
-            <InputText v-model="editForm.lastName" required class="w-full" />
-          </div>
-          <div>
-            <label class="text-xs text-slate-500 block mb-1">Date de naissance</label>
-            <Calendar v-model="editForm.birthDate" date-format="dd/mm/yy" show-icon required class="w-full" input-class="w-full" />
-          </div>
-          <div>
-            <label class="text-xs text-slate-500 block mb-1">N° de licence</label>
-            <InputText v-model="editForm.licenseNumber" class="w-full" />
-          </div>
-          <div>
-            <label class="text-xs text-slate-500 block mb-1">Téléphone du joueur</label>
-            <InputText v-model="editForm.phone" class="w-full" />
-          </div>
-          <div>
-            <label class="text-xs text-slate-500 block mb-1">Main dominante</label>
-            <Dropdown
-              v-model="editForm.dominantHand"
-              :options="dominantHandOptions"
-              option-label="label"
-              option-value="value"
-              show-clear
-              placeholder="Non renseigné"
-              class="w-full"
-            />
-          </div>
-          <div class="sm:col-span-2">
-            <label class="text-xs text-slate-500 block mb-1">Style de jeu</label>
-            <InputText v-model="editForm.playStyle" placeholder="ex. offensif, pivot appuyé..." class="w-full" />
-          </div>
-          <div>
-            <label class="text-xs text-slate-500 block mb-1">Contact d'urgence — nom</label>
-            <InputText v-model="editForm.emergencyContactName" class="w-full" />
-          </div>
-          <div>
-            <label class="text-xs text-slate-500 block mb-1">Contact d'urgence — téléphone</label>
-            <InputText v-model="editForm.emergencyContactPhone" class="w-full" />
-          </div>
-          <Button type="submit" label="Enregistrer" :loading="savingInfo" class="sm:col-span-2 w-fit" />
-        </form>
-      </div>
-
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-        <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
-          <p class="text-sm font-medium text-slate-600">Statistiques</p>
-          <Dropdown
-            v-model="statsSeasonId"
-            :options="seasons"
-            option-label="name"
-            option-value="id"
-            placeholder="Saison…"
-            class="w-48"
-            @change="loadStats"
-          />
-        </div>
-        <div v-if="stats" class="grid grid-cols-2 gap-3">
-          <div>
-            <p class="text-xs text-slate-500 mb-1">Présence entrainements</p>
-            <p class="text-2xl font-semibold text-slate-800">{{ formatRate(stats.training.attendanceRate) }}</p>
-            <p class="text-xs text-slate-400">{{ stats.training.hours }} h cumulées</p>
-            <p class="text-xs text-slate-400">
-              {{ stats.training.counts.PRESENT }} présent(s) · {{ stats.training.counts.ABSENT }} absent(s) · {{ stats.training.counts.LATE }}
-              retard(s) · {{ stats.training.counts.EXCUSED }} excusé(s)
-            </p>
-          </div>
-          <div>
-            <p class="text-xs text-slate-500 mb-1">Présence stages</p>
-            <p class="text-2xl font-semibold text-slate-800">{{ formatRate(stats.camp.attendanceRate) }}</p>
-            <p class="text-xs text-slate-400">{{ stats.camp.hours }} h cumulées</p>
-            <p class="text-xs text-slate-400">
-              {{ stats.camp.counts.PRESENT }} présent(s) · {{ stats.camp.counts.ABSENT }} absent(s) · {{ stats.camp.counts.LATE }} retard(s) ·
-              {{ stats.camp.counts.EXCUSED }} excusé(s)
-            </p>
-          </div>
-        </div>
-        <p v-else class="text-slate-400 text-sm">Aucune saison disponible.</p>
-      </div>
-
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-        <p class="text-sm font-medium text-slate-600 mb-3">Classement</p>
-        <ul class="divide-y divide-slate-100 mb-3 text-sm">
-          <li v-for="r in rankings" :key="r.id" class="py-1.5 flex items-center justify-between">
-            <span class="font-medium">{{ r.rankingValue }}</span>
-            <span class="text-xs text-slate-400">{{ new Date(r.effectiveDate).toLocaleDateString("fr-FR") }}</span>
-          </li>
-          <li v-if="!rankings.length" class="py-1.5 text-slate-400 text-sm">Aucun classement enregistré.</li>
-        </ul>
-        <div class="flex flex-wrap gap-2">
-          <Dropdown v-model="newRanking.seasonId" :options="seasons" option-label="name" option-value="id" placeholder="Saison…" class="w-40" />
-          <Dropdown v-model="newRanking.rankingValue" :options="RANKING_OPTIONS" option-label="label" option-value="value" placeholder="Classement…" class="flex-1 min-w-[10rem]" />
-          <Button label="Ajouter" @click="onAddRanking" />
-        </div>
-      </div>
-
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-        <p class="text-sm font-medium text-slate-600 mb-3">Évaluation sportive</p>
-
-        <div v-if="latestEvaluation" class="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
-          <div>
-            <p class="text-xs text-slate-400 mb-1">
-              Radar — dernière évaluation ({{ new Date(latestEvaluation.date).toLocaleDateString("fr-FR") }})
-            </p>
-            <div style="height: 260px">
-              <Chart type="radar" :data="radarChartData" :options="radarChartOptions" class="h-full" />
-            </div>
-          </div>
-          <div v-if="evolutionChartData">
-            <p class="text-xs text-slate-400 mb-1">Évolution</p>
-            <div style="height: 260px">
-              <Chart type="line" :data="evolutionChartData" :options="evolutionChartOptions" class="h-full" />
-            </div>
-          </div>
-          <div v-else class="flex items-center justify-center text-sm text-slate-400 border border-dashed border-slate-200 rounded-lg">
-            Une 2<sup>e</sup> évaluation fera apparaître la courbe d'évolution.
-          </div>
-        </div>
-        <p v-else class="text-slate-400 text-sm mb-4">Aucune évaluation enregistrée.</p>
-
-        <EvaluationDetail
-          v-if="selectedEvaluation"
-          :evaluation="selectedEvaluation"
-          :previous="evaluations[selectedEvaluationIndex + 1] ?? null"
-          class="mb-4"
-        />
-
-        <div v-if="evaluations.length > 1" class="mb-4">
-          <p class="text-xs text-slate-400 mb-1">Historique : clique une évaluation pour en voir le détail.</p>
-          <ul class="divide-y divide-slate-100 text-sm">
-            <li v-for="e in evaluations" :key="e.id">
-              <button
-                type="button"
-                class="w-full py-1.5 px-2 -mx-2 rounded-md flex items-center justify-between gap-2 text-left hover:bg-slate-50"
-                :class="e.id === selectedEvaluation?.id ? 'bg-sky-50' : ''"
-                @click="selectedEvaluationId = e.id"
-              >
-                <span class="min-w-0">
-                  {{ new Date(e.date).toLocaleDateString("fr-FR") }}
-                  <span v-if="e.note" class="text-slate-400">— {{ e.note }}</span>
-                </span>
-                <Tag severity="info" :value="`moy. ${formatScore(evaluationAverage(e))}/10`" />
-              </button>
-            </li>
-          </ul>
-        </div>
-
-        <Button
-          v-if="!showEvaluationForm"
-          label="Nouvelle évaluation"
-          icon="pi pi-plus"
-          outlined
-          size="small"
-          @click="showEvaluationForm = true"
-        />
-        <form v-else class="grid grid-cols-1 gap-3 border-t border-slate-100 pt-4" @submit.prevent="onAddEvaluation">
-          <div class="flex items-center justify-between gap-2">
-            <p class="text-sm font-medium text-slate-700">Nouvelle évaluation</p>
-            <Button label="Fermer" text size="small" severity="secondary" @click="showEvaluationForm = false" />
-          </div>
-          <p class="text-xs text-slate-400">
-            Les critères dotés de points d'évaluation se notent point par point (1 à 5, moyenne x 2) ; sans point noté, le curseur
-            donne la note directe. <RouterLink to="/admin/evaluation-grid" class="text-sky-600 hover:underline">Gérer la grille</RouterLink>
-          </p>
-<p class="text-xs text-slate-400 flex flex-wrap gap-x-3 gap-y-0.5">
-            <span v-for="s in EVALUATION_SCALE" :key="s.value"><strong class="font-semibold text-slate-500">{{ s.value }}</strong> = {{ s.label }}</span>
-          </p>
-          <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <div v-for="c in EVALUATION_CRITERIA" :key="c.key" :class="gridByCriterion[c.criterion].length ? 'rounded-lg border border-slate-200 p-3 sm:col-span-2' : ''">
-              <div class="flex items-baseline justify-between mb-2">
-                <label class="text-xs text-slate-500">{{ c.label }}</label>
-                <span class="text-sm font-semibold tabular-nums" :style="{ color: c.color }">
-                  {{ formatScore(computedScore(c) ?? newEvaluation[c.key]) }}<span class="text-xs font-normal text-slate-400">/10</span>
-                </span>
+    <div v-if="player">
+      <nav class="flex gap-1 border-b border-slate-200 mb-4" role="tablist" aria-label="Volets de la fiche joueur">
+        <button
+          v-for="t in TABS"
+          :key="t.key"
+          type="button"
+          role="tab"
+          :aria-selected="activeTab === t.key"
+          class="px-3 py-2 -mb-px text-sm font-medium border-b-2 whitespace-nowrap"
+          :class="activeTab === t.key ? 'border-sky-600 text-sky-700' : 'border-transparent text-slate-500 hover:text-slate-700'"
+          @click="activeTab = t.key"
+        >
+          <span class="hidden sm:inline">{{ t.label }}</span><span class="sm:hidden">{{ t.short }}</span>
+        </button>
+      </nav>
+      <div v-show="activeTab === 'fiche'" role="tabpanel">
+          <div class="space-y-4">
+          <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+            <p class="text-sm font-medium text-slate-600 mb-3">Signalétique</p>
+            <form class="grid grid-cols-1 gap-3 sm:grid-cols-2" @submit.prevent="onSaveInfo">
+              <div class="sm:col-span-2">
+                <label class="text-xs text-slate-500 block mb-1">Photo</label>
+                <ImageUpload v-model="editForm.photoUrl" :max-size-mb="1" />
               </div>
-              <ul v-if="gridByCriterion[c.criterion].length" class="space-y-1.5 mb-2">
-                <li v-for="item in gridByCriterion[c.criterion]" :key="item.id" class="flex flex-wrap items-center gap-x-3 gap-y-0.5">
-                  <span class="flex-1 min-w-[9rem]">
-                    <span class="block text-sm text-slate-700">{{ item.label }}</span>
-                    <span v-if="item.description" class="block text-xs text-slate-400 leading-snug">{{ item.description }}</span>
-                  </span>
-                  <Rating v-model="itemScores[item.id]" :stars="5" class="eval-rating ml-auto" :style="{ '--rating-color': c.color }" />
+              <div>
+                <label class="text-xs text-slate-500 block mb-1">Prénom</label>
+                <InputText v-model="editForm.firstName" required class="w-full" />
+              </div>
+              <div>
+                <label class="text-xs text-slate-500 block mb-1">Nom</label>
+                <InputText v-model="editForm.lastName" required class="w-full" />
+              </div>
+              <div>
+                <label class="text-xs text-slate-500 block mb-1">Date de naissance</label>
+                <Calendar v-model="editForm.birthDate" date-format="dd/mm/yy" show-icon required class="w-full" input-class="w-full" />
+              </div>
+              <div>
+                <label class="text-xs text-slate-500 block mb-1">N° de licence</label>
+                <InputText v-model="editForm.licenseNumber" class="w-full" />
+              </div>
+              <div>
+                <label class="text-xs text-slate-500 block mb-1">Téléphone du joueur</label>
+                <InputText v-model="editForm.phone" class="w-full" />
+              </div>
+              <div>
+                <label class="text-xs text-slate-500 block mb-1">Main dominante</label>
+                <Dropdown
+                  v-model="editForm.dominantHand"
+                  :options="dominantHandOptions"
+                  option-label="label"
+                  option-value="value"
+                  show-clear
+                  placeholder="Non renseigné"
+                  class="w-full"
+                />
+              </div>
+              <div class="sm:col-span-2">
+                <label class="text-xs text-slate-500 block mb-1">Style de jeu</label>
+                <InputText v-model="editForm.playStyle" placeholder="ex. offensif, pivot appuyé..." class="w-full" />
+              </div>
+              <div>
+                <label class="text-xs text-slate-500 block mb-1">Contact d'urgence — nom</label>
+                <InputText v-model="editForm.emergencyContactName" class="w-full" />
+              </div>
+              <div>
+                <label class="text-xs text-slate-500 block mb-1">Contact d'urgence — téléphone</label>
+                <InputText v-model="editForm.emergencyContactPhone" class="w-full" />
+              </div>
+              <Button type="submit" label="Enregistrer" :loading="savingInfo" class="sm:col-span-2 w-fit" />
+            </form>
+          </div>
+
+          <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+            <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
+              <p class="text-sm font-medium text-slate-600">Statistiques</p>
+              <Dropdown
+                v-model="statsSeasonId"
+                :options="seasons"
+                option-label="name"
+                option-value="id"
+                placeholder="Saison…"
+                class="w-48"
+                @change="loadStats"
+              />
+            </div>
+            <div v-if="stats" class="grid grid-cols-2 gap-3">
+              <div>
+                <p class="text-xs text-slate-500 mb-1">Présence entrainements</p>
+                <p class="text-2xl font-semibold text-slate-800">{{ formatRate(stats.training.attendanceRate) }}</p>
+                <p class="text-xs text-slate-400">{{ stats.training.hours }} h cumulées</p>
+                <p class="text-xs text-slate-400">
+                  {{ stats.training.counts.PRESENT }} présent(s) · {{ stats.training.counts.ABSENT }} absent(s) · {{ stats.training.counts.LATE }}
+                  retard(s) · {{ stats.training.counts.EXCUSED }} excusé(s)
+                </p>
+              </div>
+              <div>
+                <p class="text-xs text-slate-500 mb-1">Présence stages</p>
+                <p class="text-2xl font-semibold text-slate-800">{{ formatRate(stats.camp.attendanceRate) }}</p>
+                <p class="text-xs text-slate-400">{{ stats.camp.hours }} h cumulées</p>
+                <p class="text-xs text-slate-400">
+                  {{ stats.camp.counts.PRESENT }} présent(s) · {{ stats.camp.counts.ABSENT }} absent(s) · {{ stats.camp.counts.LATE }} retard(s) ·
+                  {{ stats.camp.counts.EXCUSED }} excusé(s)
+                </p>
+              </div>
+            </div>
+            <p v-else class="text-slate-400 text-sm">Aucune saison disponible.</p>
+          </div>
+
+          <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+            <p class="text-sm font-medium text-slate-600 mb-3">Classement</p>
+            <ul class="divide-y divide-slate-100 mb-3 text-sm">
+              <li v-for="r in rankings" :key="r.id" class="py-1.5 flex items-center justify-between">
+                <span class="font-medium">{{ r.rankingValue }}</span>
+                <span class="text-xs text-slate-400">{{ new Date(r.effectiveDate).toLocaleDateString("fr-FR") }}</span>
+              </li>
+              <li v-if="!rankings.length" class="py-1.5 text-slate-400 text-sm">Aucun classement enregistré.</li>
+            </ul>
+            <div class="flex flex-wrap gap-2">
+              <Dropdown v-model="newRanking.seasonId" :options="seasons" option-label="name" option-value="id" placeholder="Saison…" class="w-40" />
+              <Dropdown v-model="newRanking.rankingValue" :options="RANKING_OPTIONS" option-label="label" option-value="value" placeholder="Classement…" class="flex-1 min-w-[10rem]" />
+              <Button label="Ajouter" @click="onAddRanking" />
+            </div>
+          </div>
+
+          <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+            <p class="text-sm font-medium text-slate-600 mb-3">Matériel</p>
+            <ul class="divide-y divide-slate-100 mb-3 text-sm">
+              <li v-for="e in equipment" :key="e.id" class="py-1.5 flex items-center justify-between">
+                <span>{{ e.type }} <span class="text-slate-400">{{ e.brand }} {{ e.model }}</span></span>
+                <Button v-if="!e.effectiveTo" label="clôturer" text size="small" severity="danger" @click="onCloseEquipment(e.id)" />
+                <Tag v-else severity="secondary" value="terminé" />
+              </li>
+              <li v-if="!equipment.length" class="py-1.5 text-slate-400 text-sm">Aucun matériel enregistré.</li>
+            </ul>
+            <div class="flex flex-wrap gap-2">
+              <InputText v-model="newEquipment.type" placeholder="Type (raquette, revêtement...)" class="flex-1 min-w-[10rem]" />
+              <InputText v-model="newEquipment.brand" placeholder="Marque" class="w-28" />
+              <InputText v-model="newEquipment.model" placeholder="Modèle" class="w-28" />
+              <Button label="Ajouter" @click="onAddEquipment" />
+            </div>
+          </div>
+
+          <div v-show="messagesAccess" class="space-y-2">
+            <p class="text-sm font-medium text-slate-600">Échanges avec le joueur</p>
+            <PlayerMessages :player-id="player.id" @loaded="(data) => (messagesAccess = !!data)" />
+          </div>
+
+          </div>
+      </div>
+      <div v-show="activeTab === 'evaluations'" role="tabpanel">
+          <div class="space-y-4">
+          <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+            <p class="text-sm font-medium text-slate-600 mb-3">Évaluation sportive</p>
+
+            <div v-if="latestEvaluation" class="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
+              <div>
+                <p class="text-xs text-slate-400 mb-1">
+                  Radar — dernière évaluation ({{ new Date(latestEvaluation.date).toLocaleDateString("fr-FR") }})
+                </p>
+                <div style="height: 260px">
+                  <Chart type="radar" :data="radarChartData" :options="radarChartOptions" class="h-full" />
+                </div>
+              </div>
+              <div v-if="evolutionChartData">
+                <p class="text-xs text-slate-400 mb-1">Évolution</p>
+                <div style="height: 260px">
+                  <Chart type="line" :data="evolutionChartData" :options="evolutionChartOptions" class="h-full" />
+                </div>
+              </div>
+              <div v-else class="flex items-center justify-center text-sm text-slate-400 border border-dashed border-slate-200 rounded-lg">
+                Une 2<sup>e</sup> évaluation fera apparaître la courbe d'évolution.
+              </div>
+            </div>
+            <p v-else class="text-slate-400 text-sm mb-4">Aucune évaluation enregistrée.</p>
+
+            <EvaluationDetail
+              v-if="selectedEvaluation"
+              :evaluation="selectedEvaluation"
+              :previous="evaluations[selectedEvaluationIndex + 1] ?? null"
+              class="mb-4"
+            />
+
+            <div v-if="evaluations.length > 1" class="mb-4">
+              <p class="text-xs text-slate-400 mb-1">Historique : clique une évaluation pour en voir le détail.</p>
+              <ul class="divide-y divide-slate-100 text-sm">
+                <li v-for="e in evaluations" :key="e.id">
+                  <button
+                    type="button"
+                    class="w-full py-1.5 px-2 -mx-2 rounded-md flex items-center justify-between gap-2 text-left hover:bg-slate-50"
+                    :class="e.id === selectedEvaluation?.id ? 'bg-sky-50' : ''"
+                    @click="selectedEvaluationId = e.id"
+                  >
+                    <span class="min-w-0">
+                      {{ new Date(e.date).toLocaleDateString("fr-FR") }}
+                      <span v-if="e.note" class="text-slate-400">— {{ e.note }}</span>
+                    </span>
+                    <Tag severity="info" :value="`moy. ${formatScore(evaluationAverage(e))}/10`" />
+                  </button>
                 </li>
               </ul>
-              <Slider
-                v-if="computedScore(c) == null"
-                v-model="newEvaluation[c.key]"
-                :min="0"
-                :max="10"
-                :step="1"
-                class="eval-slider"
-                :style="{ '--slider-color': c.color }"
-              />
-              <p v-if="gridByCriterion[c.criterion].length && computedScore(c) == null" class="text-xs text-slate-400 mt-2">Aucun point noté : note directe.</p>
+            </div>
+
+            <Button
+              v-if="!showEvaluationForm"
+              label="Nouvelle évaluation"
+              icon="pi pi-plus"
+              outlined
+              size="small"
+              @click="showEvaluationForm = true"
+            />
+            <form v-else class="grid grid-cols-1 gap-3 border-t border-slate-100 pt-4" @submit.prevent="onAddEvaluation">
+              <div class="flex items-center justify-between gap-2">
+                <p class="text-sm font-medium text-slate-700">Nouvelle évaluation</p>
+                <Button label="Fermer" text size="small" severity="secondary" @click="showEvaluationForm = false" />
+              </div>
+              <p class="text-xs text-slate-400">
+                Les critères dotés de points d'évaluation se notent point par point (1 à 5, moyenne x 2) ; sans point noté, le curseur
+                donne la note directe. <RouterLink to="/admin/evaluation-grid" class="text-sky-600 hover:underline">Gérer la grille</RouterLink>
+              </p>
+    <p class="text-xs text-slate-400 flex flex-wrap gap-x-3 gap-y-0.5">
+                <span v-for="s in EVALUATION_SCALE" :key="s.value"><strong class="font-semibold text-slate-500">{{ s.value }}</strong> = {{ s.label }}</span>
+              </p>
+              <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                <div v-for="c in EVALUATION_CRITERIA" :key="c.key" :class="gridByCriterion[c.criterion].length ? 'rounded-lg border border-slate-200 p-3 sm:col-span-2' : ''">
+                  <div class="flex items-baseline justify-between mb-2">
+                    <label class="text-xs text-slate-500">{{ c.label }}</label>
+                    <span class="text-sm font-semibold tabular-nums" :style="{ color: c.color }">
+                      {{ formatScore(computedScore(c) ?? newEvaluation[c.key]) }}<span class="text-xs font-normal text-slate-400">/10</span>
+                    </span>
+                  </div>
+                  <ul v-if="gridByCriterion[c.criterion].length" class="space-y-1.5 mb-2">
+                    <li v-for="item in gridByCriterion[c.criterion]" :key="item.id" class="flex flex-wrap items-center gap-x-3 gap-y-0.5">
+                      <span class="flex-1 min-w-[9rem]">
+                        <span class="block text-sm text-slate-700">{{ item.label }}</span>
+                        <span v-if="item.description" class="block text-xs text-slate-400 leading-snug">{{ item.description }}</span>
+                      </span>
+                      <Rating v-model="itemScores[item.id]" :stars="5" class="eval-rating ml-auto" :style="{ '--rating-color': c.color }" />
+                    </li>
+                  </ul>
+                  <Slider
+                    v-if="computedScore(c) == null"
+                    v-model="newEvaluation[c.key]"
+                    :min="0"
+                    :max="10"
+                    :step="1"
+                    class="eval-slider"
+                    :style="{ '--slider-color': c.color }"
+                  />
+                  <p v-if="gridByCriterion[c.criterion].length && computedScore(c) == null" class="text-xs text-slate-400 mt-2">Aucun point noté : note directe.</p>
+                </div>
+              </div>
+              <InputText v-model="newEvaluation.note" placeholder="Commentaire (optionnel)" class="w-full" />
+              <Button type="submit" label="Enregistrer l'évaluation" :loading="savingEvaluation" class="w-fit" />
+            </form>
+          </div>
+
+          <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+            <p class="text-sm font-medium text-slate-600 mb-3">Points forts / défauts</p>
+            <ul class="divide-y divide-slate-100 mb-3 text-sm">
+              <li v-for="t in traits" :key="t.id" class="py-1.5 flex items-center gap-2">
+                <Tag :severity="t.category === 'STRENGTH' ? 'success' : 'danger'" :value="t.category === 'STRENGTH' ? '+' : '−'" />
+                {{ t.description }}
+              </li>
+              <li v-if="!traits.length" class="py-1.5 text-slate-400 text-sm">Aucun point renseigné.</li>
+            </ul>
+            <div class="flex flex-wrap gap-2">
+              <Dropdown v-model="newTrait.category" :options="traitOptions" option-label="label" option-value="value" class="w-40" />
+              <InputText v-model="newTrait.description" placeholder="Description" class="flex-1 min-w-[10rem]" />
+              <Button label="Ajouter" @click="onAddTrait" />
             </div>
           </div>
-          <InputText v-model="newEvaluation.note" placeholder="Commentaire (optionnel)" class="w-full" />
-          <Button type="submit" label="Enregistrer l'évaluation" :loading="savingEvaluation" class="w-fit" />
-        </form>
+
+          <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+            <p class="text-sm font-medium text-slate-600 mb-3">Points à travailler</p>
+            <ul class="divide-y divide-slate-100 mb-3 text-sm">
+              <li v-for="pt in pointsToWork" :key="pt.id" class="py-1.5 flex items-center justify-between gap-2">
+                <span>{{ pt.description }}</span>
+                <Dropdown
+                  :model-value="pt.status"
+                  :options="statusOptions"
+                  option-label="label"
+                  option-value="value"
+                  class="w-36"
+                  @update:model-value="onUpdatePointStatus(pt, $event)"
+                >
+                  <template #value="{ value }"><Tag :severity="pointStatusSeverity(value)" :value="statusOptions.find((o) => o.value === value)?.label" /></template>
+                </Dropdown>
+              </li>
+              <li v-if="!pointsToWork.length" class="py-1.5 text-slate-400 text-sm">Aucun point enregistré.</li>
+            </ul>
+            <div class="flex flex-wrap gap-2">
+              <InputText v-model="newPoint.description" placeholder="Nouveau point à travailler" class="flex-1 min-w-[10rem]" />
+              <Button label="Ajouter" @click="onAddPoint" />
+            </div>
+          </div>
+
+          <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+            <p class="text-sm font-medium text-slate-600 mb-3">Notes d'évolution</p>
+            <ul class="divide-y divide-slate-100 mb-3 text-sm">
+              <li v-for="n in evolutionNotes" :key="n.id" class="py-1.5">
+                <span class="text-xs text-slate-400">{{ new Date(n.date).toLocaleDateString("fr-FR") }}</span>
+                — {{ n.note }}
+              </li>
+              <li v-if="!evolutionNotes.length" class="py-1.5 text-slate-400 text-sm">Aucune note.</li>
+            </ul>
+            <div class="flex flex-wrap gap-2">
+              <InputText v-model="newNote.note" placeholder="Nouvelle note" class="flex-1 min-w-[10rem]" />
+              <Button label="Ajouter" @click="onAddNote" />
+            </div>
+          </div>
+
+          </div>
       </div>
+      <div v-show="activeTab === 'resultats'" role="tabpanel">
+          <div class="space-y-4">
+          <UpcomingTournaments ref="upcoming" :player-id="player.id" />
 
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-        <p class="text-sm font-medium text-slate-600 mb-3">Matériel</p>
-        <ul class="divide-y divide-slate-100 mb-3 text-sm">
-          <li v-for="e in equipment" :key="e.id" class="py-1.5 flex items-center justify-between">
-            <span>{{ e.type }} <span class="text-slate-400">{{ e.brand }} {{ e.model }}</span></span>
-            <Button v-if="!e.effectiveTo" label="clôturer" text size="small" severity="danger" @click="onCloseEquipment(e.id)" />
-            <Tag v-else severity="secondary" value="terminé" />
-          </li>
-          <li v-if="!equipment.length" class="py-1.5 text-slate-400 text-sm">Aucun matériel enregistré.</li>
-        </ul>
-        <div class="flex flex-wrap gap-2">
-          <InputText v-model="newEquipment.type" placeholder="Type (raquette, revêtement...)" class="flex-1 min-w-[10rem]" />
-          <InputText v-model="newEquipment.brand" placeholder="Marque" class="w-28" />
-          <InputText v-model="newEquipment.model" placeholder="Modèle" class="w-28" />
-          <Button label="Ajouter" @click="onAddEquipment" />
-        </div>
+          <CompetitionResults
+            :key="player.licenseNumber ?? ''"
+            :player-id="player.id"
+            @refreshed="upcoming?.load()"
+            missing-licence-hint="renseigne-le dans l'onglet Fiche informative pour importer ses résultats depuis TabT."
+          />
+          </div>
       </div>
-
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-        <p class="text-sm font-medium text-slate-600 mb-3">Points forts / défauts</p>
-        <ul class="divide-y divide-slate-100 mb-3 text-sm">
-          <li v-for="t in traits" :key="t.id" class="py-1.5 flex items-center gap-2">
-            <Tag :severity="t.category === 'STRENGTH' ? 'success' : 'danger'" :value="t.category === 'STRENGTH' ? '+' : '−'" />
-            {{ t.description }}
-          </li>
-          <li v-if="!traits.length" class="py-1.5 text-slate-400 text-sm">Aucun point renseigné.</li>
-        </ul>
-        <div class="flex flex-wrap gap-2">
-          <Dropdown v-model="newTrait.category" :options="traitOptions" option-label="label" option-value="value" class="w-40" />
-          <InputText v-model="newTrait.description" placeholder="Description" class="flex-1 min-w-[10rem]" />
-          <Button label="Ajouter" @click="onAddTrait" />
-        </div>
-      </div>
-
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-        <p class="text-sm font-medium text-slate-600 mb-3">Points à travailler</p>
-        <ul class="divide-y divide-slate-100 mb-3 text-sm">
-          <li v-for="pt in pointsToWork" :key="pt.id" class="py-1.5 flex items-center justify-between gap-2">
-            <span>{{ pt.description }}</span>
-            <Dropdown
-              :model-value="pt.status"
-              :options="statusOptions"
-              option-label="label"
-              option-value="value"
-              class="w-36"
-              @update:model-value="onUpdatePointStatus(pt, $event)"
-            >
-              <template #value="{ value }"><Tag :severity="pointStatusSeverity(value)" :value="statusOptions.find((o) => o.value === value)?.label" /></template>
-            </Dropdown>
-          </li>
-          <li v-if="!pointsToWork.length" class="py-1.5 text-slate-400 text-sm">Aucun point enregistré.</li>
-        </ul>
-        <div class="flex flex-wrap gap-2">
-          <InputText v-model="newPoint.description" placeholder="Nouveau point à travailler" class="flex-1 min-w-[10rem]" />
-          <Button label="Ajouter" @click="onAddPoint" />
-        </div>
-      </div>
-
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-        <p class="text-sm font-medium text-slate-600 mb-3">Notes d'évolution</p>
-        <ul class="divide-y divide-slate-100 mb-3 text-sm">
-          <li v-for="n in evolutionNotes" :key="n.id" class="py-1.5">
-            <span class="text-xs text-slate-400">{{ new Date(n.date).toLocaleDateString("fr-FR") }}</span>
-            — {{ n.note }}
-          </li>
-          <li v-if="!evolutionNotes.length" class="py-1.5 text-slate-400 text-sm">Aucune note.</li>
-        </ul>
-        <div class="flex flex-wrap gap-2">
-          <InputText v-model="newNote.note" placeholder="Nouvelle note" class="flex-1 min-w-[10rem]" />
-          <Button label="Ajouter" @click="onAddNote" />
-        </div>
-      </div>
-
-      <div v-show="messagesAccess" class="space-y-2">
-        <p class="text-sm font-medium text-slate-600">Échanges avec le joueur</p>
-        <PlayerMessages :player-id="player.id" @loaded="(data) => (messagesAccess = !!data)" />
-      </div>
-
-      <UpcomingTournaments :player-id="player.id" />
-
-      <CompetitionResults
-        :key="player.licenseNumber ?? ''"
-        :player-id="player.id"
-        missing-licence-hint="renseigne-le dans la signalétique ci-dessus pour importer ses résultats depuis TabT."
-      />
     </div>
   </AppLayout>
 </template>

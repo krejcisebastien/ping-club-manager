@@ -19,6 +19,7 @@ const props = defineProps({
   missingLicenceHint: { type: String, default: "Demande à un entraineur de renseigner ton n° de licence AFTT." },
 });
 
+const emit = defineEmits(["refreshed"]);
 const toast = useToast();
 const data = ref(null);
 const refreshing = ref(false);
@@ -34,9 +35,11 @@ async function load() {
 async function refresh() {
   refreshing.value = true;
   try {
-    const { summary } = (await api.post(`/players/${props.playerId}/competition/refresh`)).data;
+    const { summary, tournaments } = (await api.post(`/players/${props.playerId}/competition/refresh`)).data;
     await load();
-    toast.add({ severity: "success", summary: "Résultats actualisés", detail: `${summary.matches} match(s) importé(s).`, life: 3000 });
+    emit("refreshed");
+    const tournamentsNote = tournaments === "recent" ? " Tournois à venir déjà relus il y a moins de 10 minutes." : " Tournois à venir en cours de relecture.";
+    toast.add({ severity: "success", summary: "Données TabT actualisées", detail: `${summary.matches} match(s) importé(s).${tournamentsNote}`, life: 4000 });
   } catch (err) {
     await load().catch(() => {});
     toast.add({ severity: "error", summary: "Actualisation impossible", detail: err.response?.data?.error ?? "Une erreur est survenue.", life: 5000 });
@@ -165,7 +168,7 @@ const chartOptions = {
         </div>
         <Button
           v-if="data.licenseNumber"
-          label="Actualiser"
+          label="Actualiser depuis TabT"
           icon="pi pi-refresh"
           outlined
           size="small"

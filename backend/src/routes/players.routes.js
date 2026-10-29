@@ -3,7 +3,7 @@ import { notifyPlayer } from "../lib/notify.js";
 import { requireAuth, requireRole, requireSelfPlayerOrRole } from "../middleware/auth.js";
 import { hoursBetween } from "../utils/occurrences.js";
 import { isRanking, RANKINGS } from "../lib/rankings.js";
-import { parseLicence, syncPlayer, TabtError } from "../lib/tabt.js";
+import { parseLicence, startTournamentSync, syncPlayer, TabtError, tournamentSync } from "../lib/tabt.js";
 import { CRITERIA, CRITERION_KEYS, criterionScore } from "../lib/evaluation.js";
 
 const router = Router();
@@ -483,7 +483,7 @@ router.get("/:id/tournament-registrations", requireSelfPlayerOrRole("id", "ADMIN
     where: { playerId: req.params.id, date: { gte: startOfToday() } },
     orderBy: [{ date: "asc" }, { tournamentId: "asc" }, { serieName: "asc" }],
   });
-  res.json({ registrations });
+  res.json({ registrations, sync: { running: tournamentSync.running, finishedAt: tournamentSync.finishedAt, error: tournamentSync.error } });
 });
 
 const startOfToday = () => new Date(new Date().toISOString().slice(0, 10));
@@ -506,7 +506,9 @@ router.post("/:id/competition/refresh", requireSelfPlayerOrRole("id", "ADMIN", "
   }
   try {
     const summary = await syncPlayer(player);
-    res.json({ summary });
+    // Les inscriptions aux tournois se relisent pour tout le monde (TabT ne
+    // filtre pas par joueur) : en arrière-plan, l'écran suit leur état.
+    res.json({ summary, tournaments: startTournamentSync() });
   } catch (err) {
     if (err instanceof TabtError) return res.status(502).json({ error: err.message });
     throw err;

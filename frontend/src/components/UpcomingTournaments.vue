@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, watch } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount, watch } from "vue";
 import { api } from "../lib/api.js";
 import { groupByTournament, formatTournamentDay, venueLabel } from "../lib/tournaments.js";
 
@@ -11,11 +11,22 @@ const props = defineProps({
 });
 
 const registrations = ref(null);
+const syncing = ref(false);
+let timer = null;
+
+// Pendant une relecture TabT (bouton « Actualiser »), on recharge toutes les
+// 5 s jusqu'à la fin.
 async function load() {
-  registrations.value = (await api.get(`/players/${props.playerId}/tournament-registrations`)).data.registrations;
+  clearTimeout(timer);
+  const { data } = await api.get(`/players/${props.playerId}/tournament-registrations`);
+  registrations.value = data.registrations;
+  syncing.value = !!data.sync?.running;
+  if (syncing.value) timer = setTimeout(load, 5000);
 }
 onMounted(load);
+onBeforeUnmount(() => clearTimeout(timer));
 watch(() => props.playerId, load);
+defineExpose({ load });
 
 const tournaments = computed(() => groupByTournament(registrations.value ?? []));
 </script>
@@ -24,10 +35,11 @@ const tournaments = computed(() => groupByTournament(registrations.value ?? []))
   <div v-if="registrations" class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
     <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
       <p class="text-sm font-medium text-slate-600">Tournois à venir</p>
-      <p class="text-xs text-slate-400">Inscriptions AFTT, mises à jour chaque nuit</p>
+      <p v-if="syncing" class="text-xs text-sky-700"><i class="pi pi-spin pi-spinner text-xs mr-1"></i>Relecture des inscriptions en cours…</p>
+      <p v-else class="text-xs text-slate-400">Inscriptions AFTT, mises à jour chaque nuit</p>
     </div>
     <p v-if="!tournaments.length" class="text-sm text-slate-400 mt-3">
-      {{ asPlayer ? "Aucune inscription à un tournoi à venir. Une fois inscrit auprès de l'AFTT, ton tournoi apparaîtra ici le lendemain." : "Aucune inscription à un tournoi à venir." }}
+      {{ asPlayer ? "Aucune inscription à un tournoi à venir. Une fois inscrit auprès de l'AFTT, ton tournoi apparaîtra ici le lendemain, ou tout de suite avec « Actualiser depuis TabT »." : "Aucune inscription à un tournoi à venir." }}
     </p>
     <ul v-else class="divide-y divide-slate-100 mt-2">
       <li v-for="t in tournaments" :key="t.id" class="py-2.5 flex items-start gap-3">

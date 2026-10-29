@@ -298,3 +298,27 @@ export async function syncTournamentRegistrations({ delayMs = 100, fetchTourname
   await prisma.$transaction([prisma.tournamentRegistration.deleteMany({}), prisma.tournamentRegistration.createMany({ data: rows, skipDuplicates: true })]);
   return { tournaments: tournaments.length, registrations: rows.length };
 }
+
+// Relecture des inscriptions à la demande (bouton « Actualiser ») : une seule
+// à la fois pour tous les clubs, et pas plus d'une toutes les 10 minutes.
+// Elle prend ~30 s : elle tourne en arrière-plan et l'écran suit son état.
+export const tournamentSync = { running: false, finishedAt: null, error: null };
+const TOURNAMENT_SYNC_COOLDOWN_MS = 10 * 60 * 1000;
+
+export function startTournamentSync(run = syncTournamentRegistrations) {
+  if (tournamentSync.running) return "running";
+  if (tournamentSync.finishedAt && Date.now() - tournamentSync.finishedAt.getTime() < TOURNAMENT_SYNC_COOLDOWN_MS) return "recent";
+  tournamentSync.running = true;
+  Promise.resolve()
+    .then(() => run())
+    .then(() => (tournamentSync.error = null))
+    .catch((err) => {
+      tournamentSync.error = err.message;
+      console.warn(`Inscriptions aux tournois non actualisées : ${err.message}`);
+    })
+    .finally(() => {
+      tournamentSync.running = false;
+      tournamentSync.finishedAt = new Date();
+    });
+  return "started";
+}
