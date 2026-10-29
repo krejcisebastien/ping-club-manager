@@ -240,7 +240,7 @@ const startOfToday = () => new Date(new Date().toISOString().slice(0, 10));
 // que tournoi par tournoi (~12 unités de quota chacun, ~70 pour la liste
 // d'une saison) : la saison courante et la suivante si elle existe déjà (les
 // tournois de septembre y sont publiés dès l'été).
-async function fetchUpcomingTournaments({ delayMs }) {
+export async function fetchUpcomingTournaments({ delayMs }) {
   const { current, names } = await getSeasons();
   const seasons = [current, ...(names.has(current + 1) ? [current + 1] : [])];
   const today = startOfToday();
