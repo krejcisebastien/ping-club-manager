@@ -103,9 +103,9 @@ export const HELP_CHAPTERS = [
       },
       {
         id: "player-evaluation",
-        title: "Mon évaluation",
+        title: "Ma fiche : évaluations",
         body: `
-<p>Ton entraineur t'évalue sur 8 critères notés sur 10 : service, remise, coup droit, revers, déplacements, tactique, mental et physique. Quand un critère est découpé en points (ex. placement, effet), chaque point est noté de 1 à 5 et leur détail s'affiche sous le critère.</p>
+<p>Menu <strong>Ma fiche</strong>, onglet <strong>Évaluations</strong>. Ton entraineur t'évalue sur 8 critères notés sur 10 : service, remise, coup droit, revers, déplacements, tactique, mental et physique. Quand un critère est découpé en points (ex. placement, effet), chaque point est noté de 1 à 5 et leur détail s'affiche sous le critère.</p>
 <ul>
   <li>Les flèches <strong>▲ / ▼</strong> montrent ta progression depuis l'évaluation précédente.</li>
   <li>Le <strong>radar</strong> compare ta dernière évaluation (trait plein) à la précédente (pointillés).</li>
@@ -115,8 +115,9 @@ export const HELP_CHAPTERS = [
       },
       {
         id: "player-follow-up",
-        title: "Mon suivi",
+        title: "Ma fiche : suivi",
         body: `
+<p>Sous tes évaluations, dans le même onglet <strong>Évaluations</strong> :</p>
 <ul>
   <li><strong>Points à travailler</strong>, avec leur état : <em>à faire</em>, <em>en cours</em> ou <em>acquis</em>.</li>
   <li><strong>Points forts et défauts</strong> relevés par tes entraineurs.</li>
@@ -138,9 +139,9 @@ export const HELP_CHAPTERS = [
       },
       {
         id: "player-competitions",
-        title: "Mes compétitions",
+        title: "Ma fiche : résultats et compétitions",
         body: `
-<p>Menu <strong>Mes compétitions</strong> : en haut, les <strong>tournois à venir</strong> où tu es inscrit auprès de l'AFTT (date, séries, lieu), puis tes résultats.</p>
+<p>Menu <strong>Ma fiche</strong>, onglet <strong>Résultats et compétitions</strong> : en haut, les <strong>tournois à venir</strong> où tu es inscrit auprès de l'AFTT (date, séries, lieu), puis tes résultats.</p>
 <p>Les inscriptions sont relues chaque nuit : un tournoi auquel tu viens de t'inscrire apparaît le lendemain, ou tout de suite avec <strong>Actualiser depuis TabT</strong>.</p>`,
       },
       {
@@ -152,9 +153,10 @@ export const HELP_CHAPTERS = [
       },
       {
         id: "player-profile",
-        title: "Ma fiche",
+        title: "Ma fiche : fiche informative",
         body: `
-<p>Tu peux mettre à jour toi-même :</p>
+<p>Menu <strong>Ma fiche</strong> : trois onglets, <strong>Fiche informative</strong>, <strong>Évaluations</strong> et <strong>Résultats et compétitions</strong>, comme la fiche que voient tes entraineurs.</p>
+<p>Dans l'onglet <strong>Fiche informative</strong>, tu peux mettre à jour toi-même :</p>
 <ul>
   <li>ta <strong>photo</strong> (1 Mo maximum), ton <strong>nom</strong>, ton <strong>prénom</strong> et ta <strong>date de naissance</strong> ;</li>
   <li>ton <strong>téléphone</strong> et ton <strong>contact d'urgence</strong> (nom et numéro) ;</li>

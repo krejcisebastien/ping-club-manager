@@ -207,12 +207,12 @@ const routes = [
     meta: { roles: ["PLAYER"] },
     children: [
       { path: "", name: "player-dashboard", component: () => import("../views/player/PlayerDashboardView.vue"), meta: { title: "Tableau de bord" } },
-      { path: "evaluation", name: "player-evaluation", component: () => import("../views/player/PlayerEvaluationView.vue"), meta: { title: "Mon évaluation" } },
-      { path: "follow-up", name: "player-follow-up", component: () => import("../views/player/PlayerFollowUpView.vue"), meta: { title: "Mon suivi" } },
+      { path: "evaluation", redirect: (to) => ({ path: `/player/${to.params.id}/profile`, query: { onglet: "evaluations" } }) },
+      { path: "follow-up", redirect: (to) => ({ path: `/player/${to.params.id}/profile`, query: { onglet: "evaluations" } }) },
       { path: "messages", name: "player-messages", component: () => import("../views/player/PlayerMessagesView.vue"), meta: { title: "Mes échanges" } },
-      { path: "results", name: "player-competition", component: () => import("../views/player/PlayerCompetitionView.vue"), meta: { title: "Mes compétitions" } },
+      { path: "results", redirect: (to) => ({ path: `/player/${to.params.id}/profile`, query: { onglet: "resultats" } }) },
       { path: "attendance", name: "player-attendance", component: () => import("../views/player/PlayerAttendanceView.vue"), meta: { title: "Mes présences" } },
-      { path: "profile", name: "player-profile", component: () => import("../views/player/PlayerProfileView.vue"), meta: { title: "Ma fiche" } },
+      { path: "profile", name: "player-profile", component: () => import("../views/player/PlayerFileView.vue"), meta: { title: "Ma fiche" } },
     ],
   },
 ];

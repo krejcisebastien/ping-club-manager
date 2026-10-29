@@ -60,7 +60,7 @@ const {
       <div v-if="latest" class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
         <div class="flex items-center justify-between mb-2">
           <p class="text-sm font-medium text-slate-600">Mon profil de jeu</p>
-          <RouterLink :to="`/player/${player.id}/evaluation`" class="text-xs text-sky-600 hover:underline">Voir le rapport</RouterLink>
+          <RouterLink :to="{ path: `/player/${player.id}/profile`, query: { onglet: 'evaluations' } }" class="text-xs text-sky-600 hover:underline">Voir le rapport</RouterLink>
         </div>
         <div class="h-64"><Chart type="radar" :data="radarData" :options="radarOptions" class="h-full" /></div>
         <p class="text-xs text-slate-500 mt-2">

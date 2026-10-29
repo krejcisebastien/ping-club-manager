@@ -1,4 +1,6 @@
 <script setup>
+import TabBar from "../../components/TabBar.vue";
+import { PLAYER_TABS, useTabQuery } from "../../lib/playerTabs.js";
 import { ref, computed, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import Button from "primevue/button";
@@ -30,16 +32,7 @@ const router = useRouter();
 const toast = useToast();
 const playerId = route.params.id;
 
-// Onglet ouvert, gardé dans l'adresse (?onglet=) pour y revenir après un retour arrière.
-const TABS = [
-  { key: "fiche", label: "Fiche informative", short: "Fiche" },
-  { key: "evaluations", label: "Évaluations", short: "Évaluations" },
-  { key: "resultats", label: "Résultats et compétitions", short: "Résultats" },
-];
-const activeTab = computed({
-  get: () => (TABS.some((t) => t.key === route.query.onglet) ? route.query.onglet : "fiche"),
-  set: (key) => router.replace({ query: { ...route.query, onglet: key } }),
-});
+const activeTab = useTabQuery(route, router);
 const upcoming = ref(null);
 
 const traitOptions = [
@@ -315,20 +308,7 @@ function pointStatusSeverity(status) {
     <Button label="Retour" icon="pi pi-arrow-left" text class="mb-3 -ml-2" @click="router.push('/admin/players')" />
 
     <div v-if="player">
-      <nav class="flex gap-1 border-b border-slate-200 mb-4" role="tablist" aria-label="Volets de la fiche joueur">
-        <button
-          v-for="t in TABS"
-          :key="t.key"
-          type="button"
-          role="tab"
-          :aria-selected="activeTab === t.key"
-          class="px-3 py-2 -mb-px text-sm font-medium border-b-2 whitespace-nowrap"
-          :class="activeTab === t.key ? 'border-sky-600 text-sky-700' : 'border-transparent text-slate-500 hover:text-slate-700'"
-          @click="activeTab = t.key"
-        >
-          <span class="hidden sm:inline">{{ t.label }}</span><span class="sm:hidden">{{ t.short }}</span>
-        </button>
-      </nav>
+      <TabBar v-model="activeTab" :tabs="PLAYER_TABS" aria-label="Volets de la fiche joueur" />
       <div v-show="activeTab === 'fiche'" role="tabpanel">
           <div class="space-y-4">
           <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
