@@ -280,13 +280,25 @@ export async function fetchSeasonTournaments({ delayMs }) {
 const MEAL_SERIE = /€|repas|reoas|souper|d[ée]jeuner|\bd[ée]j\b|d[iî]ner|buffet|bbq|barbecue|frites|boulettes|\bmenu\b|dessert|am[ée]ricain|sauce|steak|poulet|vol.au.vent|pur[ée]e|accompagnant/i;
 export const isMealSerie = (name) => MEAL_SERIE.test(name ?? "");
 
+// Doubles et mixtes : TabT ne renvoie que le joueur qui a inscrit la paire,
+// jamais son partenaire (absent de l'API). L'app ne reprend que les simples.
+// Le tri se fait série par série (un tournoi peut mêler simples et doubles) ;
+// un tournoi « Doubles - … » dont aucune série ne le précise est un double.
+const DOUBLE = /\bdoubles?\b|\bmixtes?\b/i;
+export function doubleSeries(tournament) {
+  const series = toArray(tournament.SerieEntries);
+  const flagged = series.filter((s) => DOUBLE.test(s.Name ?? ""));
+  return new Set((flagged.length || !DOUBLE.test(tournament.Name ?? "") ? flagged : series).map((s) => s.UniqueIndex));
+}
+
 // Lignes à enregistrer : une par joueur inscrit et par série, rapprochées par
 // n° de licence (un même n° peut exister dans plusieurs clubs de l'app).
 export function registrationRows(tournaments, playerIdsByLicence) {
   const rows = [];
   for (const t of tournaments) {
+    const doubles = doubleSeries(t);
     for (const serie of toArray(t.SerieEntries)) {
-      if (isMealSerie(serie.Name)) continue;
+      if (isMealSerie(serie.Name) || doubles.has(serie.UniqueIndex)) continue;
       for (const r of toArray(serie.RegistrationEntries)) {
         for (const playerId of playerIdsByLicence.get(Number(r.Member?.UniqueIndex)) ?? []) {
           rows.push({

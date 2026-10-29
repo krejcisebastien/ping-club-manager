@@ -8,7 +8,7 @@ import { PrismaClient } from "@prisma/client";
 import { createApp } from "../src/app.js";
 import { hashPassword } from "../src/utils/password.js";
 import { registrationResult, splitEventName } from "../src/lib/tournamentResults.js";
-import { currentSeason, isMealSerie, registrationRows, startTournamentSync, syncPlayer, syncTournamentRegistrations, tournamentSync } from "../src/lib/tabt.js";
+import { currentSeason, doubleSeries, isMealSerie, registrationRows, startTournamentSync, syncPlayer, syncTournamentRegistrations, tournamentSync } from "../src/lib/tabt.js";
 
 const prisma = new PrismaClient();
 const server = createApp().listen(0);
@@ -158,6 +158,12 @@ try {
   expect("vraies séries gardées", !games.some(isMealSerie), games.filter(isMealSerie).join(" | "));
   const withMeal = registrationRows([{ ...fake[0], SerieEntries: [{ UniqueIndex: 9, Name: "Repas : Boulettes frites:15€", RegistrationEntries: reg(1) }] }], new Map([[lic(1), ["p1"]]]));
   expect("inscription à un repas ignorée", withMeal.length === 0);
+  const ids = (name, ...series) => [...doubleSeries({ Name: name, SerieEntries: series.map((n, i) => ({ UniqueIndex: i, Name: n })) })].join();
+  expect("tournoi de double : toutes ses séries écartées", ids("Doubles - EXCELSIOR", "DOUBLE EXCELSIOR ERQUELINNES") === "0" && ids("Doubles - BUFFALO COUILLET", "Série unique") === "0");
+  expect("tournoi mixte : seules les séries de double et mixte écartées", ids("Championnats Provinciaux Namurois Doubles et Mixtes", "Messieurs B", "Doubles B messieurs", "Mixtes C") === "1,2");
+  expect("tournoi de simple intact", ids("Tournoi des Aînées/Vétérans de CLEO ERQUELINNES", "C0 C6", "D0 D4") === "");
+  const withDouble = registrationRows([{ ...fake[0], Name: "Doubles - EXCELSIOR", SerieEntries: [{ UniqueIndex: 10, Name: "DOUBLE EXCELSIOR ERQUELINNES", RegistrationEntries: reg(1) }] }], new Map([[lic(1), ["p1"]]]));
+  expect("inscription à un double ignorée", withDouble.length === 0);
 
   await prisma.tournamentRegistration.create({ data: { playerId: bob.id, season: 27, tournamentId: 1, serieId: 1, name: "Ancien", date: new Date(day(5)) } });
   const sync = await syncTournamentRegistrations({ fetchTournaments: async () => fake });
