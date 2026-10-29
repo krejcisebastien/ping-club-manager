@@ -3,14 +3,16 @@ import { prisma } from "./prisma.js";
 import { fetchNumericRanking, fetchPlayerSheet } from "./afttData.js";
 
 // Import des résultats de compétition depuis TabT, l'API de l'AFTT
-// (https://api.aftt.be). Identifiants : TABT_ACCOUNT / TABT_PASSWORD.
+// (https://resultats.aftt.be/api). Identifiants : TABT_ACCOUNT / TABT_PASSWORD.
 //
 // Quota TabT : chaque appel coûte son temps d'exécution serveur (en ms) ; le
 // compteur se vide de 200 par seconde et l'API refuse au-delà de 30 000
 // (erreur SOAP 34). Un GetMembers avec résultats coûte ~500 : on espace donc
 // les appels (voir DELAY_MS) et on s'arrête net en cas de dépassement.
 
-const WSDL_URL = process.env.TABT_WSDL_URL || "https://api.aftt.be/?wsdl";
+// api.aftt.be pointe vers le serveur de la VTTL (certificat api.vttl.be) : la
+// base AFTT est servie par resultats.aftt.be.
+const WSDL_URL = process.env.TABT_WSDL_URL || "https://resultats.aftt.be/api/?wsdl";
 // Saisons antérieures importées à la première synchronisation d'un joueur.
 export const HISTORY_SEASONS = 3;
 
@@ -47,12 +49,25 @@ async function call(method, args) {
   }
 }
 
+// TabT tarde à basculer sa « saison courante » (encore 2025-2026 fin octobre
+// 2026) : on prend la saison la plus récente déjà commencée, d'après son nom
+// (« 2026-2027 » commence en juillet 2026).
+export function currentSeason(tabtCurrent, names, now = new Date()) {
+  const startedYear = now.getMonth() >= 6 ? now.getFullYear() : now.getFullYear() - 1;
+  let current = tabtCurrent;
+  for (const [season, name] of names) {
+    const start = Number(/^(\d{4})/.exec(name ?? "")?.[1]);
+    if (season > current && start && start <= startedYear) current = season;
+  }
+  return current;
+}
+
 let seasonsCache = null;
 export async function getSeasons() {
   if (seasonsCache && seasonsCache.at > Date.now() - 6 * 3600 * 1000) return seasonsCache.value;
   const r = await call("GetSeasons", {});
   const names = new Map((r.SeasonEntries ?? []).map((s) => [s.Season, s.Name]));
-  seasonsCache = { at: Date.now(), value: { current: r.CurrentSeason, names } };
+  seasonsCache = { at: Date.now(), value: { current: currentSeason(r.CurrentSeason, names), names } };
   return seasonsCache.value;
 }
 

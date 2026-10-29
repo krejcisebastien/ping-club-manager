@@ -3,7 +3,7 @@
 import "dotenv/config";
 import soap from "soap";
 
-const { TABT_ACCOUNT, TABT_PASSWORD, TABT_WSDL_URL = "https://api.aftt.be/?wsdl" } = process.env;
+const { TABT_ACCOUNT, TABT_PASSWORD, TABT_WSDL_URL = "https://resultats.aftt.be/api/?wsdl" } = process.env;
 
 if (!TABT_ACCOUNT || !TABT_PASSWORD) {
   console.error("TABT_ACCOUNT et TABT_PASSWORD doivent être renseignés dans backend/.env.");
