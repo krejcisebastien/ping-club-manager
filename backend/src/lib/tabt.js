@@ -79,7 +79,7 @@ export function parseLicence(licenseNumber) {
 
 const matchKey = (date, opponentLicence) => `${new Date(date).toISOString().slice(0, 10)}|${opponentLicence}`;
 
-function toResult(playerId, season, e) {
+function toResult(playerId, season, e, ladies = false) {
   const tournament = e.CompetitionType === "T";
   const eventName = tournament
     ? [e.TournamentName, e.TournamentSerieName].filter(Boolean).join(" — ") || null
@@ -100,18 +100,33 @@ function toResult(playerId, season, e) {
     setsFor: Number(e.SetFor) || 0,
     setsAgainst: Number(e.SetAgainst) || 0,
     eventName,
+    ladies,
   };
 }
+
+// Catégorie TabT du classement dames (GetPlayerCategories : 44 = « Toutes »).
+// Les joueuses ont un classement et des résultats dames (interclubs dames…)
+// qui ne sortent qu'avec cette catégorie, à côté du classement général.
+const LADIES_CATEGORY = 44;
 
 // Importe une saison TabT d'un joueur : remplace ses matchs de la saison et
 // met à jour sa situation (classement, club). Renvoie le nombre de matchs.
 // L'« ELO » que TabT peut renvoyer n'est pas le classement numérique AFTT
 // (points affichés sur data.aftt.be) : il n'est volontairement pas importé.
 async function syncSeason(playerId, licence, season, seasonName) {
-  const r = await call("GetMembers", { UniqueIndex: licence, Season: season, WithResults: true });
+  // ExtendedInformation donne le sexe (Gender). Elle renvoie aussi des données
+  // médicales, qui ne sont ni lues ni enregistrées.
+  const r = await call("GetMembers", { UniqueIndex: licence, Season: season, WithResults: true, ExtendedInformation: true });
   const member = r.MemberEntries?.[0];
   if (!member) return null;
   const results = (member.ResultEntries ?? []).map((e) => toResult(playerId, season, e));
+  let ladiesRanking = null;
+  if (member.Gender === "F") {
+    const l = await call("GetMembers", { UniqueIndex: licence, Season: season, WithResults: true, PlayerCategory: LADIES_CATEGORY });
+    const lady = l.MemberEntries?.[0];
+    ladiesRanking = lady?.Ranking ?? null;
+    results.push(...(lady?.ResultEntries ?? []).map((e) => toResult(playerId, season, e, true)));
+  }
 
   // Les matchs sont remplacés à chaque import : on reporte l'enrichissement
   // data.aftt.be déjà connu, pour qu'un échec ultérieur de celui-ci ne fasse
@@ -126,7 +141,7 @@ async function syncSeason(playerId, licence, season, seasonName) {
     if (k) Object.assign(r, { opponentPoints: k.opponentPoints, pointsDelta: k.pointsDelta });
   }
 
-  const situation = { seasonName, ranking: member.Ranking ?? null, club: member.Club ?? null, syncedAt: new Date() };
+  const situation = { seasonName, ranking: member.Ranking ?? null, ladiesRanking, club: member.Club ?? null, syncedAt: new Date() };
 
   await prisma.$transaction([
     prisma.competitionResult.deleteMany({ where: { playerId, season } }),
@@ -258,12 +273,20 @@ export async function fetchSeasonTournaments({ delayMs }) {
   return tournaments;
 }
 
+// Les organisateurs publient aussi les repas et petits-déjeuners comme des
+// « séries » (« Repas 1 : Steak/frites:18€ », « Pti Dej », « BBQ »…) : on les
+// écarte. Relevé sur les 1 526 séries de la saison 2026-2027 sans toucher une
+// vraie série de jeu (classements, doubles, simples, dames, jeunes…).
+const MEAL_SERIE = /€|repas|reoas|souper|d[ée]jeuner|\bd[ée]j\b|d[iî]ner|buffet|bbq|barbecue|frites|boulettes|\bmenu\b|dessert|am[ée]ricain|sauce|steak|poulet|vol.au.vent|pur[ée]e|accompagnant/i;
+export const isMealSerie = (name) => MEAL_SERIE.test(name ?? "");
+
 // Lignes à enregistrer : une par joueur inscrit et par série, rapprochées par
 // n° de licence (un même n° peut exister dans plusieurs clubs de l'app).
 export function registrationRows(tournaments, playerIdsByLicence) {
   const rows = [];
   for (const t of tournaments) {
     for (const serie of toArray(t.SerieEntries)) {
+      if (isMealSerie(serie.Name)) continue;
       for (const r of toArray(serie.RegistrationEntries)) {
         for (const playerId of playerIdsByLicence.get(Number(r.Member?.UniqueIndex)) ?? []) {
           rows.push({

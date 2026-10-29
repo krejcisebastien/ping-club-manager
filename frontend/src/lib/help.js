@@ -142,6 +142,7 @@ export const HELP_CHAPTERS = [
         title: "Ma fiche : résultats et compétitions",
         body: `
 <p>Menu <strong>Ma fiche</strong>, onglet <strong>Résultats et compétitions</strong> : en haut, les <strong>tournois de la saison</strong> où tu es inscrit auprès de l'AFTT : ceux à venir (date, séries, lieu), puis ceux déjà joués avec ton bilan dans chaque série. En dessous, tes résultats.</p>
+<p>Pour une joueuse, l'AFTT tient deux classements : le général et le classement dames (interclubs dames…). Les deux s'affichent en haut, et les boutons <strong>Général</strong> / <strong>Dames</strong> choisissent les résultats analysés.</p>
 <p>Les inscriptions sont relues chaque nuit : un tournoi auquel tu viens de t'inscrire apparaît le lendemain, ou tout de suite avec <strong>Actualiser depuis TabT</strong>.</p>`,
       },
       {

@@ -3,11 +3,12 @@
 // entre clubs, saison courante TabT et inscriptions aux tournois à venir. Autonome : crée ses données, puis nettoie.
 // Lancer : npm run test:competitions
 import "dotenv/config";
+import soap from "soap";
 import { PrismaClient } from "@prisma/client";
 import { createApp } from "../src/app.js";
 import { hashPassword } from "../src/utils/password.js";
 import { registrationResult, splitEventName } from "../src/lib/tournamentResults.js";
-import { currentSeason, registrationRows, startTournamentSync, syncTournamentRegistrations, tournamentSync } from "../src/lib/tabt.js";
+import { currentSeason, isMealSerie, registrationRows, startTournamentSync, syncPlayer, syncTournamentRegistrations, tournamentSync } from "../src/lib/tabt.js";
 
 const prisma = new PrismaClient();
 const server = createApp().listen(0);
@@ -151,6 +152,12 @@ try {
   expect("même licence dans deux clubs : les deux joueurs", rows.filter((r) => r.serieId === 1).map((r) => r.playerId).sort().join() === "p1,p1bis,p2");
   expect("série unique sans tableau et sans inscrits", !rows.some((r) => r.serieId === 3));
   expect("lieu repris", rows[0].venue === "Hall" && rows[0].town === "5590 Ciney");
+  const meals = ["Repas : Boulettes, sauce tomate maison, frites et dessert:15€", "Petit-déjeuner offert pour les participants au tournoi, les autres=4€", "MENU", "BBQ, Salad Bar", "Ptt Déj (viennoiserie + café)", "Pti Dej", "Blt sce tomate, frites", "Americain, frites", "Reoas 1: Pâtes Bolognaise fromage:10€", "VOL AU VENT PUREE", "Repas 1 accompagnant : Steak/frites: 18,00€", "Boulettes Frites (SUR COMMANDE)"];
+  const games = ["C0 C6", "D6 E2", "E4 NC", "DOUBLE EXCELSIOR ERQUELINNES", "Série E", "Dames NG", "Messieurs B0-C6", "Jeunes -12 ans", "Simple Vétérans 50+", "Serie unique"];
+  expect("séries repas écartées", meals.every(isMealSerie), meals.filter((m) => !isMealSerie(m)).join(" | "));
+  expect("vraies séries gardées", !games.some(isMealSerie), games.filter(isMealSerie).join(" | "));
+  const withMeal = registrationRows([{ ...fake[0], SerieEntries: [{ UniqueIndex: 9, Name: "Repas : Boulettes frites:15€", RegistrationEntries: reg(1) }] }], new Map([[lic(1), ["p1"]]]));
+  expect("inscription à un repas ignorée", withMeal.length === 0);
 
   await prisma.tournamentRegistration.create({ data: { playerId: bob.id, season: 27, tournamentId: 1, serieId: 1, name: "Ancien", date: new Date(day(5)) } });
   const sync = await syncTournamentRegistrations({ fetchTournaments: async () => fake });
@@ -203,6 +210,36 @@ try {
   expect("échec de relecture signalé", startTournamentSync(async () => { throw new Error("quota TabT"); }) === "started");
   await new Promise((r) => setTimeout(r, 50));
   expect("erreur gardée pour l'écran", tournamentSync.error === "quota TabT" && !tournamentSync.running);
+
+  // ---------- Classement et résultats dames ----------
+  // Client TabT simulé : une joueuse (Gender F) a un classement général et un
+  // classement dames, avec des résultats distincts ; un joueur n'a que le général.
+  const tabtCalls = [];
+  const entry = (date, matchId, won) => ({ Date: date, UniqueIndex: 1234, FirstName: "Eva", LastName: "Adv", Ranking: "B4", Result: won ? "V" : "D", SetFor: won ? 3 : 0, SetAgainst: won ? 0 : 3, CompetitionType: "C", Club: "Minerois", MatchId: matchId });
+  soap.createClientAsync = async () => ({
+    GetSeasonsAsync: async () => [{ CurrentSeason: 27, SeasonEntries: [{ Season: 27, Name: "2026-2027" }] }],
+    GetMembersAsync: async (args) => {
+      tabtCalls.push(args);
+      const lady = args.UniqueIndex === lic(1);
+      if (args.PlayerCategory === 44) return [lady ? { MemberEntries: [{ UniqueIndex: lic(1), Ranking: "B2", ResultEntries: [entry("2026-10-03", "SD03/086", false), entry("2026-10-10", "SD03/090", true)] }] } : { MemberCount: 0 }];
+      return [{ MemberEntries: [{ UniqueIndex: args.UniqueIndex, Ranking: lady ? "C2" : "D0", Club: "N076", Gender: lady ? "F" : "M", MedicalAttestation: true, ResultEntries: [entry("2026-10-04", "HAI/01", true)] }] }];
+    },
+  });
+  process.env.TABT_ACCOUNT ??= "test";
+  process.env.TABT_PASSWORD ??= "test";
+  await syncPlayer({ id: alice.id, licenseNumber: String(lic(1)) }).catch(() => {});
+  const aliceSeason = await prisma.competitionSeason.findUnique({ where: { playerId_season: { playerId: alice.id, season: 27 } } });
+  expect("joueuse : classement général et dames", aliceSeason?.ranking === "C2" && aliceSeason.ladiesRanking === "B2", JSON.stringify(aliceSeason));
+  const aliceResults = await prisma.competitionResult.findMany({ where: { playerId: alice.id, season: 27 } });
+  expect("joueuse : résultats dames importés à part", aliceResults.length === 3 && aliceResults.filter((r) => r.ladies).length === 2, String(aliceResults.length));
+  expect("sexe demandé à TabT", tabtCalls.some((a) => a.ExtendedInformation === true && a.UniqueIndex === lic(1)));
+  const ownerCalls = tabtCalls.length;
+  await syncPlayer({ id: other.id, licenseNumber: String(lic(2)) }).catch(() => {});
+  expect("joueur : pas d'appel dames", !tabtCalls.slice(ownerCalls).some((a) => a.PlayerCategory === 44));
+  const otherSeason = await prisma.competitionSeason.findUnique({ where: { playerId_season: { playerId: other.id, season: 27 } } });
+  expect("joueur : pas de classement dames", otherSeason?.ranking === "D0" && otherSeason.ladiesRanking === null);
+  const comp = (await call(aliceTok, "GET", `/players/${alice.id}/competition`)).json;
+  expect("fiche : classement dames et matchs marqués", comp?.seasons?.find((x) => x.season === 27)?.ladiesRanking === "B2" && comp.results.filter((r) => r.season === 27 && r.ladies).length === 2);
 } finally {
   await prisma.club.deleteMany({ where: { id: { in: [clubA.id, clubB.id] } } });
   await prisma.$disconnect();

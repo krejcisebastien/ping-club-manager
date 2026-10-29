@@ -294,15 +294,17 @@ model Player {
 // Situation du joueur pour une saison TabT (27 = 2026-2027) : classement,
 // et club tels que renvoyés par TabT lors de la dernière synchronisation.
 model CompetitionSeason {
-  id         String   @id @default(cuid())
-  playerId   String
-  season     Int
-  seasonName String
-  ranking    String?
-  club       String?
+  id            String   @id @default(cuid())
+  playerId      String
+  season        Int
+  seasonName    String
+  ranking       String?
+  // Classement dames (joueuses uniquement), à côté du classement général.
+  ladiesRanking String?
+  club          String?
   // Points de base de la saison (après dérive), lus sur data.aftt.be.
-  basePoints Decimal? @db.Decimal(8, 2)
-  syncedAt   DateTime @default(now())
+  basePoints    Decimal? @db.Decimal(8, 2)
+  syncedAt      DateTime @default(now())
 
   player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
 
@@ -343,6 +345,8 @@ model CompetitionResult {
   setsAgainst       Int
   // Rencontre de championnat (ex. HAI_VET01/022) ou tournoi — série.
   eventName         String?
+  // Match du classement dames (interclubs dames…), importé à part pour les joueuses.
+  ladies            Boolean         @default(false)
   // Enrichissement data.aftt.be (saison en cours) : points de l'adversaire et
   // points gagnés/perdus sur ce match au classement numérique.
   opponentPoints    Decimal?        @db.Decimal(8, 2)

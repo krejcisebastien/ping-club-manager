@@ -2,6 +2,7 @@
 import { ref, computed, onMounted, watch } from "vue";
 import Button from "primevue/button";
 import Dropdown from "primevue/dropdown";
+import SelectButton from "primevue/selectbutton";
 import Tag from "primevue/tag";
 import Chart from "primevue/chart";
 import { useToast } from "primevue/usetoast";
@@ -24,6 +25,8 @@ const toast = useToast();
 const data = ref(null);
 const refreshing = ref(false);
 const seasonFilter = ref(null);
+// Classement analysé (« general » ou « ladies », voir hasLadies).
+const category = ref("general");
 const DAYS_STEP = 15;
 const visibleDays = ref(DAYS_STEP);
 
@@ -50,10 +53,20 @@ async function refresh() {
 
 onMounted(load);
 watch(() => props.playerId, load);
-watch(seasonFilter, () => (visibleDays.value = DAYS_STEP));
+watch([seasonFilter, category], () => (visibleDays.value = DAYS_STEP));
+
+// Une joueuse a deux classements (général et dames) et deux séries de
+// résultats : on choisit lequel analyser.
+const hasLadies = computed(() => (data.value?.seasons ?? []).some((s) => s.ladiesRanking) || (data.value?.results ?? []).some((r) => r.ladies));
+const CATEGORY_OPTIONS = [
+  { label: "Général", value: "general" },
+  { label: "Dames", value: "ladies" },
+];
+const ladiesView = computed(() => hasLadies.value && category.value === "ladies");
+const rankingOf = (s) => (ladiesView.value ? s?.ladiesRanking : s?.ranking) ?? null;
 
 const seasonNames = computed(() => new Map((data.value?.seasons ?? []).map((s) => [s.season, s.seasonName])));
-const rankingBySeason = computed(() => new Map((data.value?.seasons ?? []).map((s) => [s.season, s.ranking])));
+const rankingBySeason = computed(() => new Map((data.value?.seasons ?? []).map((s) => [s.season, rankingOf(s)])));
 const seasonOptions = computed(() => [
   ...(data.value?.seasons ?? []).map((s) => ({ label: `Saison ${s.seasonName}`, value: s.season })),
   ...((data.value?.seasons?.length ?? 0) > 1 ? [{ label: "Toutes les saisons", value: "ALL" }] : []),
@@ -62,7 +75,9 @@ const allSeasons = computed(() => seasonFilter.value === "ALL");
 const selectedSeason = computed(() => (allSeasons.value ? null : data.value?.seasons.find((s) => s.season === seasonFilter.value) ?? null));
 const current = computed(() => data.value?.seasons[0] ?? null);
 
-const results = computed(() => (data.value?.results ?? []).filter((r) => allSeasons.value || r.season === seasonFilter.value));
+const results = computed(() =>
+  (data.value?.results ?? []).filter((r) => (allSeasons.value || r.season === seasonFilter.value) && !!r.ladies === ladiesView.value)
+);
 const totals = computed(() => summarize(results.value));
 const walkovers = computed(() => results.value.filter((r) => r.walkover).length);
 const perRanking = computed(() => byOpponentRanking(results.value));
@@ -158,6 +173,7 @@ const chartOptions = {
           <p class="text-sm font-medium text-slate-600">Résultats AFTT</p>
           <p v-if="current" class="text-sm text-slate-700 mt-1">
             Classement <strong>{{ current.ranking ?? "—" }}</strong>
+            <template v-if="current.ladiesRanking"> · dames <strong>{{ current.ladiesRanking }}</strong></template>
             <template v-if="current.club"> · club {{ current.club }}</template>
             <span class="text-slate-400"> · licence {{ data.licenseNumber }}</span>
           </p>
@@ -214,11 +230,14 @@ const chartOptions = {
     <template v-if="data.seasons.length">
       <div class="flex flex-wrap items-center gap-3">
         <Dropdown v-model="seasonFilter" :options="seasonOptions" option-label="label" option-value="value" class="w-full sm:w-64" />
-        <span v-if="selectedSeason?.ranking" class="text-sm text-slate-500">Classé {{ selectedSeason.ranking }} cette saison</span>
+        <SelectButton v-if="hasLadies" v-model="category" :options="CATEGORY_OPTIONS" option-label="label" option-value="value" :allow-empty="false" aria-label="Classement analysé" />
+        <span v-if="rankingOf(selectedSeason)" class="text-sm text-slate-500">
+          {{ hasLadies ? "Classée" : "Classé" }} {{ rankingOf(selectedSeason) }}{{ ladiesView ? " en dames" : "" }} cette saison
+        </span>
       </div>
 
       <p v-if="!results.length" class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 text-sm text-slate-400">
-        Aucun match pour cette saison.
+        {{ ladiesView ? "Aucun match dames pour cette saison." : "Aucun match pour cette saison." }}
       </p>
 
       <template v-else>
