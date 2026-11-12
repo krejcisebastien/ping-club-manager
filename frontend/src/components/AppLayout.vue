@@ -9,12 +9,25 @@ import { CLUB_NAME } from "../lib/config.js";
 import { ROLE_LABELS, roleHome } from "../lib/roles.js";
 import { useNotifications } from "../composables/useNotifications.js";
 
-defineProps({
+const props = defineProps({
   title: { type: String, required: true },
-  navLinks: { type: Array, default: () => [] }, // [{ to, label, icon, exact? }]
+  navLinks: { type: Array, default: () => [] }, // [{ to, label, icon, exact?, section?, separate? }]
 });
 
 const ACTIVE_LINK_CLASS = "nav-link-active";
+
+// Liens regroupés par domaine : un nouveau groupe commence à chaque changement
+// de `section` (ou sur `separate`), avec la section en en-tête si elle est nommée.
+const navGroups = computed(() => {
+  const groups = [];
+  for (const link of props.navLinks) {
+    const section = link.section ?? "";
+    const last = groups[groups.length - 1];
+    if (!last || last.section !== section || link.separate) groups.push({ section, links: [link] });
+    else last.links.push(link);
+  }
+  return groups;
+});
 
 const auth = useAuthStore();
 const router = useRouter();
@@ -60,31 +73,30 @@ function onLogout() {
           <p class="text-[0.7rem] uppercase tracking-wider text-slate-400">{{ ROLE_LABELS[auth.activeRole] }}</p>
         </div>
       </div>
-      <nav class="flex-1 overflow-y-auto py-3 px-2 space-y-0.5">
-        <RouterLink
-          v-for="link in navLinks"
-          :key="link.to"
-          :to="link.to"
-          class="nav-link"
-          :active-class="link.exact ? '' : ACTIVE_LINK_CLASS"
-          :exact-active-class="ACTIVE_LINK_CLASS"
-        >
-          <i :class="link.icon" class="text-base"></i>
-          {{ link.label }}
-        </RouterLink>
+      <nav class="flex-1 overflow-y-auto py-2 px-2.5 space-y-3.5" aria-label="Menu principal">
+        <div v-for="(group, gi) in navGroups" :key="gi" class="space-y-0.5">
+          <p v-if="group.section" class="nav-section">{{ group.section }}</p>
+          <RouterLink
+            v-for="link in group.links"
+            :key="link.to"
+            :to="link.to"
+            class="nav-link"
+            :active-class="link.exact ? '' : ACTIVE_LINK_CLASS"
+            :exact-active-class="ACTIVE_LINK_CLASS"
+          >
+            <i :class="link.icon" class="text-base"></i>
+            {{ link.label }}
+          </RouterLink>
+        </div>
       </nav>
       <div class="border-t border-white/10 p-3 space-y-2">
-        <div v-if="auth.roles.length > 1" class="flex gap-1">
+        <div v-if="auth.roles.length > 1" class="flex gap-1 rounded-lg bg-white/[0.06] p-[3px]">
           <button
             v-for="r in auth.roles"
             :key="r"
             type="button"
-            class="flex-1 text-xs px-1.5 py-1 rounded-md border transition-colors"
-            :class="
-              auth.activeRole === r
-                ? 'bg-brand-600 border-brand-600 text-white font-medium'
-                : 'bg-transparent border-white/15 text-slate-300 hover:bg-white/10'
-            "
+            class="flex-1 h-[30px] text-xs font-semibold rounded-md transition-colors"
+            :class="auth.activeRole === r ? 'bg-brand-600 text-white' : 'bg-transparent text-slate-300 hover:bg-white/10'"
             @click="onSwitchRole(r)"
           >
             {{ ROLE_LABELS[r] }}
@@ -114,32 +126,31 @@ function onLogout() {
           <span class="font-bold text-white truncate">{{ auth.user?.clubName || CLUB_NAME }}</span>
         </div>
       </template>
-      <nav class="space-y-0.5">
-        <RouterLink
-          v-for="link in navLinks"
-          :key="link.to"
-          :to="link.to"
-          class="nav-link"
-          :active-class="link.exact ? '' : ACTIVE_LINK_CLASS"
-          :exact-active-class="ACTIVE_LINK_CLASS"
-          @click="drawerOpen = false"
-        >
-          <i :class="link.icon" class="text-base"></i>
-          {{ link.label }}
-        </RouterLink>
+      <nav class="space-y-3" aria-label="Menu">
+        <div v-for="(group, gi) in navGroups" :key="gi" class="space-y-0.5">
+          <p v-if="group.section" class="nav-section">{{ group.section }}</p>
+          <RouterLink
+            v-for="link in group.links"
+            :key="link.to"
+            :to="link.to"
+            class="nav-link"
+            :active-class="link.exact ? '' : ACTIVE_LINK_CLASS"
+            :exact-active-class="ACTIVE_LINK_CLASS"
+            @click="drawerOpen = false"
+          >
+            <i :class="link.icon" class="text-base"></i>
+            {{ link.label }}
+          </RouterLink>
+        </div>
       </nav>
       <div class="px-2 pt-4 mt-4 border-t border-white/10 space-y-2">
-        <div v-if="auth.roles.length > 1" class="flex gap-1">
+        <div v-if="auth.roles.length > 1" class="flex gap-1 rounded-lg bg-white/[0.06] p-[3px]">
           <button
             v-for="r in auth.roles"
             :key="r"
             type="button"
-            class="flex-1 text-xs px-1.5 py-1 rounded-md border transition-colors"
-            :class="
-              auth.activeRole === r
-                ? 'bg-brand-600 border-brand-600 text-white font-medium'
-                : 'bg-transparent border-white/15 text-slate-300 hover:bg-white/10'
-            "
+            class="flex-1 h-[30px] text-xs font-semibold rounded-md transition-colors"
+            :class="auth.activeRole === r ? 'bg-brand-600 text-white' : 'bg-transparent text-slate-300 hover:bg-white/10'"
             @click="onSwitchRole(r)"
           >
             {{ ROLE_LABELS[r] }}
@@ -214,12 +225,21 @@ function onLogout() {
 </template>
 
 <style scoped>
+.nav-section {
+  margin: 0;
+  padding: 0 0.75rem 0.25rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #8b9ab3;
+}
 .nav-link {
   position: relative;
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 0.55rem 0.75rem;
+  padding: 0.5rem 0.75rem;
   border-radius: 0.6rem;
   font-size: 0.875rem;
   color: #aab6cb;

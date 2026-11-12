@@ -249,8 +249,8 @@ const calendarOptions = computed(() => ({
     <Button label="Retour" icon="pi pi-arrow-left" text class="mb-3 -ml-2" @click="router.push('/admin/camps')" />
 
     <div v-if="camp" class="space-y-4">
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-        <p class="text-sm font-medium text-slate-600 mb-3">Informations</p>
+      <div class="card p-4">
+        <p class="section-title mb-3">Informations</p>
         <form class="grid grid-cols-1 gap-3 sm:grid-cols-2" @submit.prevent="onSaveInfo">
           <InputText v-model="editForm.name" placeholder="Nom" required class="w-full" />
           <InputText v-model="editForm.location" placeholder="Lieu" class="w-full" />
@@ -260,15 +260,15 @@ const calendarOptions = computed(() => ({
         </form>
       </div>
 
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+      <div class="card p-4">
         <div class="flex items-center justify-between gap-3 mb-3">
-          <p class="text-sm font-medium text-slate-600 min-w-0">Groupes du stage (initiation, perfectionnement…)</p>
+          <p class="section-title min-w-0">Groupes du stage (initiation, perfectionnement…)</p>
           <Button label="Ajouter" icon="pi pi-plus" size="small" class="shrink-0" @click="openCreateGroup" />
         </div>
         <ul class="divide-y divide-slate-100">
           <li v-for="g in camp.groups" :key="g.id" class="py-2 flex items-center justify-between gap-2">
             <div class="flex items-center gap-2 min-w-0 cursor-pointer" @click="router.push(`/admin/camp-groups/${g.id}`)">
-              <span class="font-medium text-sm text-sky-700 hover:underline truncate">{{ g.name }}</span>
+              <span class="font-medium text-sm text-brand-700 hover:underline truncate">{{ g.name }}</span>
               <Tag v-if="g.trainingPlan" severity="secondary" :value="g.trainingPlan.title" />
             </div>
             <Button icon="pi pi-times" severity="danger" text rounded size="small" class="shrink-0" @click="confirmRemoveGroup(g)" />
@@ -277,15 +277,15 @@ const calendarOptions = computed(() => ({
         </ul>
       </div>
 
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-        <p class="text-sm font-medium text-slate-600 mb-1">Joueurs inscrits ({{ camp.players.length }})</p>
+      <div class="card p-4">
+        <p class="section-title mb-1">Joueurs inscrits ({{ camp.players.length }})</p>
         <p class="text-xs text-slate-400 mb-3">Liste de référence des présences. Les entraineurs répartissent ensuite ces joueurs dans les groupes, période par période.</p>
         <CampRegistrations :camp-id="camp.id" :registrations="camp.players" @changed="loadCamp" />
       </div>
 
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+      <div class="card p-4">
         <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
-          <p class="text-sm font-medium text-slate-600">Journées ({{ camp.days.length }})</p>
+          <p class="section-title">Journées ({{ camp.days.length }})</p>
           <div class="flex gap-2">
             <Button label="Générer une période" icon="pi pi-clock" size="small" outlined @click="openGeneratePeriod" />
             <Button label="Ajouter des journées" icon="pi pi-plus" size="small" @click="openAddDay" />
@@ -318,14 +318,14 @@ const calendarOptions = computed(() => ({
                     </div>
 
                     <ul class="mt-2 flex flex-wrap gap-2">
-                      <li v-for="pg in period.groups" :key="pg.id" class="inline-flex items-center gap-0.5 bg-sky-50 border border-sky-200 rounded-full pl-1 pr-1 py-1">
+                      <li v-for="pg in period.groups" :key="pg.id" class="inline-flex items-center gap-0.5 bg-brand-50 border border-brand-200 rounded-full pl-1 pr-1 py-1">
                         <Button
                           :label="pg.group.name"
                           icon="pi pi-users"
                           text
                           size="small"
                           title="Gérer les encadrants et les joueurs de ce groupe sur cette période"
-                          class="!py-0.5 !px-2 !text-sky-700 !gap-1.5"
+                          class="!py-0.5 !px-2 !text-brand-700 !gap-1.5"
                           @click="router.push(`/admin/camp-period-groups/${pg.id}`)"
                         />
                         <Button icon="pi pi-times" severity="danger" text rounded size="small" class="!w-6 !h-6" aria-label="Retirer le groupe" @click="onRemovePeriodGroup(pg.id)" />

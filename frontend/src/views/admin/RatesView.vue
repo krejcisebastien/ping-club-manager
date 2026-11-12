@@ -71,43 +71,52 @@ async function onSave() {
 
 <template>
   <AppLayout title="Tarifs" :nav-links="navLinks">
-    <p class="text-sm text-slate-500 mb-4 max-w-3xl">
+    <h2 class="page-title">Tarifs des bénévoles</h2>
+    <p class="page-subtitle mb-6 max-w-3xl leading-relaxed">
       Pour chaque niveau, renseigne un montant puis choisis s'il s'applique à l'heure ou à la séance. À la séance, chaque séance
       d'entrainement et chaque période de stage compte pour un forfait ; à l'heure, on multiplie la durée par le tarif horaire.
     </p>
 
-    <div class="grid grid-cols-1 gap-4 lg:grid-cols-2 max-w-5xl">
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-        <p class="text-sm font-medium text-slate-600 mb-1">Entraineurs — niveau Adeps</p>
-        <p class="text-xs text-slate-400 mb-3">Selon le niveau attribué à chaque entraineur.</p>
-        <ul class="grid grid-cols-1 gap-4">
-          <li v-for="r in coachRates" :key="r.code" class="grid grid-cols-1 gap-2">
-            <span class="text-sm font-medium text-slate-700">{{ COACH_LEVEL_LABELS[r.code] }}</span>
-            <div class="grid grid-cols-1 gap-2 sm:grid-cols-[10rem_1fr] sm:items-center">
-              <InputNumber v-model="r.amount" mode="currency" currency="EUR" locale="fr-BE" :min="0" :max-fraction-digits="2" placeholder="—" :aria-label="`Montant ${r.basis === 'SESSION' ? 'par séance' : 'par heure'}`" class="w-full" input-class="w-full text-right" />
-              <SelectButton v-model="r.basis" :options="basisOptions" option-label="label" option-value="value" :allow-empty="false" class="w-full flex" />
-            </div>
+    <div class="grid grid-cols-1 gap-6 xl:grid-cols-2">
+      <div class="card p-5">
+        <div class="flex items-center gap-3 mb-3">
+          <span class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-brand-50 text-brand-600"><i class="pi pi-user" aria-hidden="true"></i></span>
+          <div>
+            <p class="section-title">Entraineurs — niveau Adeps</p>
+            <p class="text-xs text-slate-500">Selon le niveau attribué à chaque entraineur.</p>
+          </div>
+        </div>
+        <ul>
+          <!-- Libellé, montant puis base ; la base passe à la ligne si la carte est étroite. -->
+          <li v-for="r in coachRates" :key="r.code" class="flex flex-wrap items-center gap-3 py-2.5 border-t border-[#eef1f6]">
+            <span class="flex-1 basis-20 text-sm font-bold text-slate-900 whitespace-nowrap">{{ COACH_LEVEL_LABELS[r.code] }}</span>
+            <InputNumber v-model="r.amount" mode="currency" currency="EUR" locale="fr-BE" :min="0" :max-fraction-digits="2" placeholder="—" :aria-label="`Montant ${r.basis === 'SESSION' ? 'par séance' : 'par heure'}`" class="w-36 shrink-0" input-class="w-full text-right font-semibold" />
+            <SelectButton v-model="r.basis" :options="basisOptions" option-label="label" option-value="value" :allow-empty="false" class="basis-toggle shrink-0" />
           </li>
         </ul>
       </div>
 
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-        <p class="text-sm font-medium text-slate-600 mb-1">Sparrings — série</p>
-        <p class="text-xs text-slate-400 mb-3">Déduite du classement du sparring (NC compte dans la série E).</p>
-        <ul class="grid grid-cols-1 gap-4">
-          <li v-for="r in sparringRates" :key="r.code" class="grid grid-cols-1 gap-2">
-            <span class="text-sm font-medium text-slate-700">{{ SERIES_LABELS[r.code] }}</span>
-            <div class="grid grid-cols-1 gap-2 sm:grid-cols-[10rem_1fr] sm:items-center">
-              <InputNumber v-model="r.amount" mode="currency" currency="EUR" locale="fr-BE" :min="0" :max-fraction-digits="2" placeholder="—" :aria-label="`Montant ${r.basis === 'SESSION' ? 'par séance' : 'par heure'}`" class="w-full" input-class="w-full text-right" />
-              <SelectButton v-model="r.basis" :options="basisOptions" option-label="label" option-value="value" :allow-empty="false" class="w-full flex" />
-            </div>
+      <div class="card p-5">
+        <div class="flex items-center gap-3 mb-3">
+          <span class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-violet-50 text-violet-600"><i class="pi pi-bolt" aria-hidden="true"></i></span>
+          <div>
+            <p class="section-title">Sparrings — série</p>
+            <p class="text-xs text-slate-500">Déduite du classement du sparring (NC compte dans la série E).</p>
+          </div>
+        </div>
+        <ul>
+          <!-- Libellé, montant puis base ; la base passe à la ligne si la carte est étroite. -->
+          <li v-for="r in sparringRates" :key="r.code" class="flex flex-wrap items-center gap-3 py-2.5 border-t border-[#eef1f6]">
+            <span class="flex-1 basis-20 text-sm font-bold text-slate-900 whitespace-nowrap">{{ SERIES_LABELS[r.code] }}</span>
+            <InputNumber v-model="r.amount" mode="currency" currency="EUR" locale="fr-BE" :min="0" :max-fraction-digits="2" placeholder="—" :aria-label="`Montant ${r.basis === 'SESSION' ? 'par séance' : 'par heure'}`" class="w-36 shrink-0" input-class="w-full text-right font-semibold" />
+            <SelectButton v-model="r.basis" :options="basisOptions" option-label="label" option-value="value" :allow-empty="false" class="basis-toggle shrink-0" />
           </li>
         </ul>
       </div>
     </div>
 
-    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 mt-4 max-w-5xl">
-      <p class="text-sm font-medium text-slate-600 mb-1">Plafonds des indemnités de volontariat</p>
+    <div class="card p-5 mt-6">
+      <p class="section-title mb-1">Plafonds des indemnités de volontariat</p>
       <p class="text-xs text-slate-400 mb-3">
         Par année civile, identiques pour les entraineurs et les sparrings. Une année sans ligne reprend les plafonds de la plus récente
         année précédente.
@@ -132,9 +141,11 @@ async function onSave() {
           <Button icon="pi pi-trash" severity="danger" text rounded aria-label="Retirer l'année" class="!hidden sm:!inline-flex" @click="removeCapYear(i)" />
         </div>
       </div>
-      <Button label="Ajouter une année" icon="pi pi-plus" text class="mt-2" @click="addCapYear" />
+      <Button label="Ajouter une année" icon="pi pi-plus" text class="mt-3" @click="addCapYear" />
     </div>
 
-    <Button label="Enregistrer les tarifs et plafonds" :loading="saving" class="mt-4" @click="onSave" />
+    <div class="flex justify-end mt-6">
+      <Button label="Enregistrer les tarifs et plafonds" :loading="saving" @click="onSave" />
+    </div>
   </AppLayout>
 </template>

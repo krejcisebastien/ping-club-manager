@@ -94,7 +94,7 @@ watch(() => props.playerId, load);
 </script>
 
 <template>
-  <div v-if="loaded && !denied" class="bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col">
+  <div v-if="loaded && !denied" class="card flex flex-col">
     <div ref="listEl" class="p-4 space-y-3 overflow-y-auto max-h-[60vh]">
       <p v-if="!messages.length" class="text-sm text-slate-400 text-center py-6">
         {{ asPlayer ? "Pose ici tes questions à tes entraineurs : un conseil après un match, un geste à travailler…" : "Aucun message pour l'instant." }}
@@ -106,10 +106,10 @@ watch(() => props.playerId, load);
         :class="m.author.isMe ? 'ml-auto items-end' : 'items-start'"
       >
         <p class="text-xs text-slate-500 mb-0.5">
-          <span class="font-medium" :class="m.author.side === 'staff' ? 'text-sky-700' : 'text-slate-700'">{{ m.author.isMe ? "Moi" : m.author.name }}</span>
+          <span class="font-medium" :class="m.author.side === 'staff' ? 'text-brand-700' : 'text-slate-700'">{{ m.author.isMe ? "Moi" : m.author.name }}</span>
           · {{ formatWhen(m.createdAt) }}
         </p>
-        <div class="rounded-2xl px-3 py-2 text-sm whitespace-pre-line break-words" :class="m.author.isMe ? 'bg-sky-600 text-white rounded-br-sm' : 'bg-slate-100 text-slate-800 rounded-bl-sm'">
+        <div class="rounded-2xl px-3 py-2 text-sm whitespace-pre-line break-words" :class="m.author.isMe ? 'bg-brand-600 text-white rounded-br-sm' : 'bg-slate-100 text-slate-800 rounded-bl-sm'">
           {{ m.body }}
         </div>
         <button v-if="m.canDelete" type="button" class="text-xs text-slate-400 hover:text-red-600 mt-0.5" @click="remove(m)">Supprimer</button>

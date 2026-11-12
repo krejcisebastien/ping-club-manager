@@ -40,7 +40,7 @@ async function onSubmit() {
 
       <p v-if="!token" class="text-sm text-red-600">
         Ce lien de réinitialisation est invalide.
-        <RouterLink to="/forgot-password" class="text-sky-600 hover:text-sky-700">Redemander un lien</RouterLink>
+        <RouterLink to="/forgot-password" class="text-brand-600 hover:text-brand-700">Redemander un lien</RouterLink>
       </p>
 
       <div v-else-if="done" class="space-y-1">
@@ -51,26 +51,26 @@ async function onSubmit() {
         <p class="text-sm text-slate-600">Choisis ton nouveau mot de passe.</p>
 
         <div class="space-y-1">
-          <label class="text-sm font-medium text-slate-600" for="password">Nouveau mot de passe</label>
+          <label class="section-title" for="password">Nouveau mot de passe</label>
           <input
             id="password"
             v-model="password"
             type="password"
             required
             minlength="8"
-            class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500"
+            class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500"
           />
         </div>
 
         <div class="space-y-1">
-          <label class="text-sm font-medium text-slate-600" for="confirmPassword">Confirmer le mot de passe</label>
+          <label class="section-title" for="confirmPassword">Confirmer le mot de passe</label>
           <input
             id="confirmPassword"
             v-model="confirmPassword"
             type="password"
             required
             minlength="8"
-            class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500"
+            class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500"
           />
         </div>
 
@@ -79,7 +79,7 @@ async function onSubmit() {
         <button
           type="submit"
           :disabled="loading"
-          class="w-full rounded-lg bg-sky-600 text-white py-2 font-medium hover:bg-sky-700 disabled:opacity-60"
+          class="w-full rounded-lg bg-brand-600 text-white py-2 font-medium hover:bg-brand-700 disabled:opacity-60"
         >
           {{ loading ? "Enregistrement..." : "Choisir ce mot de passe" }}
         </button>

@@ -139,7 +139,7 @@ function formatDate(d) {
       </ul>
     </div>
 
-    <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+    <div class="flex flex-col gap-6">
       <div class="card">
         <div class="card-head">
           <h3 class="card-title"><span class="dot bg-emerald-500"></span>Entrainements à venir</h3>

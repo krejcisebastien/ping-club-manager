@@ -34,7 +34,7 @@ const formatWhen = (d) => new Date(d).toLocaleString("fr-FR", { dateStyle: "shor
         {{ isManager ? "Responsable de la cellule entrainement : tu vois les échanges de tous les joueurs." : "Les échanges des joueurs de tes groupes." }}
         Pour écrire à un joueur qui n'a pas encore de fil, ouvre sa fiche dans <strong>Joueurs</strong>.
       </p>
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 divide-y divide-slate-100">
+      <div class="card divide-y divide-slate-100">
         <p v-if="!loading && !threads.length" class="p-4 text-sm text-slate-400">Aucun échange pour l'instant.</p>
         <button
           v-for="t in threads"

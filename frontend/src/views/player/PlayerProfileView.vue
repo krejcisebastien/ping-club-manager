@@ -54,8 +54,8 @@ async function onSave() {
 
 <template>
   <form class="grid grid-cols-1 gap-4 max-w-3xl" @submit.prevent="onSave">
-    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 grid grid-cols-1 gap-3">
-      <p class="text-sm font-medium text-slate-600">Identité</p>
+    <div class="card p-4 grid grid-cols-1 gap-3">
+      <p class="section-title">Identité</p>
       <div>
         <label class="text-xs text-slate-500 block mb-1">Photo</label>
         <ImageUpload v-model="form.photoUrl" :max-size-mb="1" />
@@ -81,8 +81,8 @@ async function onSave() {
       </div>
     </div>
 
-    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 grid grid-cols-1 gap-3">
-      <p class="text-sm font-medium text-slate-600">Coordonnées</p>
+    <div class="card p-4 grid grid-cols-1 gap-3">
+      <p class="section-title">Coordonnées</p>
       <div>
         <label class="text-xs text-slate-500 block mb-1">Téléphone</label>
         <InputText v-model="form.phone" type="tel" class="w-full" />
@@ -99,8 +99,8 @@ async function onSave() {
       </div>
     </div>
 
-    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 grid grid-cols-1 gap-3">
-      <p class="text-sm font-medium text-slate-600">Mon jeu</p>
+    <div class="card p-4 grid grid-cols-1 gap-3">
+      <p class="section-title">Mon jeu</p>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <label class="text-xs text-slate-500 block mb-1">Main</label>

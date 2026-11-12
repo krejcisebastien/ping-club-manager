@@ -90,15 +90,16 @@ function onDelete(coach) {
 
 <template>
   <AppLayout title="Entraineurs" :nav-links="navLinks">
-    <div class="flex flex-col items-stretch sm:flex-row sm:items-center sm:justify-between mb-4 gap-3">
-      <h2 class="text-sm font-medium text-slate-600">{{ coaches.length }} entraineur(s)</h2>
-      <div class="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2">
-        <div class="relative sm:w-64">
-          <i class="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-          <InputText v-model="filters.global.value" placeholder="Rechercher…" class="w-full pl-9" />
-        </div>
-        <Button class="w-full sm:w-auto" label="Nouvel entraineur" icon="pi pi-plus" @click="openCreate" />
+    <div class="mb-5">
+      <h2 class="page-title">Entraineurs</h2>
+      <p class="page-subtitle">{{ coaches.length }} entraineur(s)</p>
+    </div>
+    <div class="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2 mb-4">
+      <div class="relative sm:w-72">
+        <i class="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+        <InputText v-model="filters.global.value" placeholder="Rechercher…" class="w-full pl-9" />
       </div>
+      <Button class="w-full sm:w-auto sm:ml-auto" label="Nouvel entraineur" icon="pi pi-plus" @click="openCreate" />
     </div>
 
     <DataTable responsive-layout="stack" breakpoint="768px"
@@ -109,7 +110,7 @@ function onDelete(coach) {
       paginator
       :rows="10"
       :rows-per-page-options="[10, 25, 50]"
-      class="bg-white rounded-xl shadow border border-slate-200 overflow-hidden clickable-rows"
+      class="card overflow-hidden clickable-rows"
       striped-rows
       @row-click="openEdit($event.data)"
     >

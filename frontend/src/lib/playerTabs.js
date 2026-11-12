@@ -8,9 +8,16 @@ export const PLAYER_TABS = [
   { key: "resultats", label: "Résultats et compétitions", short: "Résultats" },
 ];
 
-export function useTabQuery(route, router) {
+// Fiche vue par le staff : les statistiques de présence ont leur propre onglet.
+export const STAFF_PLAYER_TABS = [
+  PLAYER_TABS[0],
+  { key: "statistiques", label: "Statistiques", short: "Stats" },
+  ...PLAYER_TABS.slice(1),
+];
+
+export function useTabQuery(route, router, tabs = PLAYER_TABS) {
   return computed({
-    get: () => (PLAYER_TABS.some((t) => t.key === route.query.onglet) ? route.query.onglet : "fiche"),
+    get: () => (tabs.some((t) => t.key === route.query.onglet) ? route.query.onglet : "fiche"),
     set: (key) => router.replace({ query: { ...route.query, onglet: key } }),
   });
 }

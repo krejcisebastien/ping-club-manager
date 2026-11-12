@@ -4,7 +4,6 @@ import Dialog from "primevue/dialog";
 import Button from "primevue/button";
 import InputText from "primevue/inputtext";
 import Dropdown from "primevue/dropdown";
-import Tag from "primevue/tag";
 import Avatar from "primevue/avatar";
 import { useToast } from "primevue/usetoast";
 import AppLayout from "../../components/AppLayout.vue";
@@ -22,13 +21,13 @@ const selectedSeasonId = ref("");
 const groups = ref([]);
 const allPlayers = ref([]);
 const loading = ref(true);
-const searchQuery = ref("");
 
-const filteredGroups = computed(() => {
-  const q = searchQuery.value.trim().toLowerCase();
-  if (!q) return groups.value;
-  return groups.value.filter((g) => g.name.toLowerCase().includes(q) || g.rankingCriteria?.toLowerCase().includes(q));
-});
+// Teintes des pastilles d'icône et des avatars, attribuées par position.
+const GROUP_TONES = ["bg-brand-50 text-brand-600", "bg-emerald-50 text-emerald-600", "bg-violet-50 text-violet-600", "bg-orange-50 text-orange-700"];
+const AVATAR_TONES = [
+  ["#dbe8fe", "#1d42d8"], ["#d1fae5", "#047857"], ["#ffedd5", "#c2410c"], ["#ede9fe", "#6d28d9"], ["#ffe4e6", "#be123c"],
+];
+const MAX_FACES = 6;
 
 const groupDialogVisible = ref(false);
 const editingGroupId = ref(null);
@@ -130,59 +129,57 @@ async function onRemovePlayer(playerId) {
 
 <template>
   <AppLayout title="Groupes d'entrainement" :nav-links="navLinks">
-    <div class="mb-4 max-w-xs">
-      <label class="text-xs text-slate-500 block mb-1">Saison</label>
-      <Dropdown v-model="selectedSeasonId" :options="seasons" option-label="name" option-value="id" class="w-full" />
+    <div class="mb-5">
+      <h2 class="page-title">Groupes</h2>
+      <p class="page-subtitle">{{ groups.length }} groupe(s)</p>
     </div>
-
-    <div class="flex flex-col items-stretch sm:flex-row sm:items-center sm:justify-between mb-4 gap-3">
-      <h2 class="text-sm font-medium text-slate-600">{{ filteredGroups.length }} groupe(s)</h2>
-      <div class="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2">
-        <div class="relative sm:w-64">
-          <i class="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-          <InputText v-model="searchQuery" placeholder="Rechercher…" class="w-full pl-9" />
-        </div>
-        <Button v-if="auth.isAdmin" class="w-full sm:w-auto" label="Nouveau groupe" icon="pi pi-plus" @click="openCreate" />
-      </div>
+    <div class="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2 mb-4">
+      <Dropdown v-model="selectedSeasonId" :options="seasons" option-label="name" option-value="id" class="w-full sm:w-56" aria-label="Saison" />
+      <Button v-if="auth.isAdmin" class="w-full sm:w-auto sm:ml-auto" label="Nouveau groupe" icon="pi pi-plus" @click="openCreate" />
     </div>
 
     <div v-if="loading" class="text-slate-400 text-sm py-4">Chargement…</div>
-    <p v-else-if="!filteredGroups.length" class="text-slate-400 text-sm py-4">
-      {{ searchQuery ? "Aucun résultat." : "Aucun groupe pour cette saison." }}
+    <p v-else-if="!groups.length" class="text-slate-400 text-sm py-4">
+      Aucun groupe pour cette saison.
     </p>
 
-    <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div v-else class="grid grid-cols-1 lg:grid-cols-2 gap-5">
       <div
-        v-for="g in filteredGroups"
+        v-for="(g, gi) in groups"
         :key="g.id"
-        class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 hover:shadow-md hover:border-sky-200 transition-shadow cursor-pointer"
+        class="card p-5 flex flex-col gap-4 hover:shadow-md hover:border-brand-200 transition-shadow cursor-pointer"
         @click="openManage(g)"
       >
-        <div class="flex items-start justify-between gap-2 mb-1">
-          <div class="min-w-0">
-            <p class="font-medium text-slate-800 truncate">{{ g.name }}</p>
-            <p v-if="g.rankingCriteria" class="text-xs text-slate-400 truncate">{{ g.rankingCriteria }}</p>
+        <div class="flex items-start gap-3">
+          <span class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" :class="GROUP_TONES[gi % GROUP_TONES.length]">
+            <i class="pi pi-users" aria-hidden="true"></i>
+          </span>
+          <div class="flex-1 min-w-0">
+            <h3 class="text-[1.0625rem] font-bold text-slate-900 truncate" :title="g.name">{{ g.name }}</h3>
+            <p v-if="g.rankingCriteria" class="text-[0.8125rem] text-slate-500 whitespace-nowrap truncate">{{ g.rankingCriteria }}</p>
           </div>
-          <div class="flex items-center gap-1 shrink-0">
-            <Tag severity="secondary" :value="`${g.playerCount}`" />
-            <Button v-if="auth.isAdmin" icon="pi pi-pencil" severity="secondary" text rounded aria-label="Modifier" @click.stop="openEdit(g)" />
-          </div>
+          <Button v-if="auth.isAdmin" icon="pi pi-pencil" severity="secondary" text rounded aria-label="Modifier le groupe" @click.stop="openEdit(g)" />
         </div>
 
-        <div v-if="g.players.length" class="flex flex-wrap gap-1.5 mt-3">
-          <span
-            v-for="p in g.players"
-            :key="p.id"
-            class="inline-flex items-center gap-1.5 bg-slate-50 border border-slate-100 text-slate-600 text-xs rounded-full pl-1 pr-2.5 py-0.5"
-          >
-            <Avatar :label="initials(p)" shape="circle" style="width: 1.25rem; height: 1.25rem; font-size: 0.6rem; background-color: #e2e8f0; color: #475569" />
-            {{ fullName(p) }}
-          </span>
-          <span v-if="g.playerCount > g.players.length" class="text-xs text-slate-400 self-center px-1">
-            +{{ g.playerCount - g.players.length }}
+        <div class="flex items-center flex-wrap gap-y-2">
+          <template v-if="g.players.length">
+            <span
+              v-for="(p, i) in g.players.slice(0, MAX_FACES)"
+              :key="p.id"
+              class="w-[34px] h-[34px] rounded-full border-2 border-white inline-flex items-center justify-center text-[11px] font-bold"
+              :class="i ? '-ml-2' : ''"
+              :style="{ background: AVATAR_TONES[(i + gi) % 5][0], color: AVATAR_TONES[(i + gi) % 5][1] }"
+              :title="fullName(p)"
+            >{{ initials(p) }}</span>
+            <span v-if="g.playerCount > Math.min(g.players.length, MAX_FACES)" class="ml-3 text-[0.8125rem] text-slate-500">
+              + {{ g.playerCount - Math.min(g.players.length, MAX_FACES) }} autres
+            </span>
+          </template>
+          <span v-else class="text-[0.8125rem] text-slate-400">Aucun joueur.</span>
+          <span class="ml-auto inline-flex items-center rounded-full bg-slate-100 text-slate-700 px-2.5 py-1 text-xs font-semibold whitespace-nowrap">
+            {{ g.playerCount }} joueur{{ g.playerCount > 1 ? "s" : "" }}
           </span>
         </div>
-        <p v-else class="text-xs text-slate-400 mt-3">Aucun joueur.</p>
       </div>
     </div>
 

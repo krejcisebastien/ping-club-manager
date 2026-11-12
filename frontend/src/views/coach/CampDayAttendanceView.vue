@@ -104,7 +104,7 @@ function rowColor(row) {
   <AppLayout title="Présences — journée de stage" :nav-links="navLinks">
     <Button label="Retour" icon="pi pi-arrow-left" text class="mb-3 -ml-2" @click="router.back()" />
 
-    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+    <div class="card p-4">
       <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
         <div>
           <p class="font-medium text-slate-700 capitalize">{{ dayLabel }}</p>
@@ -132,7 +132,7 @@ function rowColor(row) {
               <template v-if="row.cells[period.id]">
                 <label class="text-xs text-slate-500 block mb-1">
                   {{ period.label }} <span class="text-slate-400">{{ period.startTime }}–{{ period.endTime }}</span>
-                  <span v-if="row.cells[period.id].groupName" class="text-sky-600"> · {{ row.cells[period.id].groupName }}</span>
+                  <span v-if="row.cells[period.id].groupName" class="text-brand-600"> · {{ row.cells[period.id].groupName }}</span>
                 </label>
                 <Dropdown v-model="row.cells[period.id].status" :options="ATTENDANCE_STATUS_OPTIONS" option-label="label" option-value="value" class="w-full">
                   <template #value="{ value }"><Tag v-if="value" :severity="ATTENDANCE_STATUS_SEVERITY[value]" :value="ATTENDANCE_STATUS_LABELS[value]" /><span v-else class="text-slate-400 text-sm">À encoder</span></template>

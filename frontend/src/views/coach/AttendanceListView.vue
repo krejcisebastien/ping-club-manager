@@ -71,13 +71,13 @@ watch(selectedTrainingId, loadOccurrences);
       </div>
     </div>
 
-    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-      <p class="text-sm font-medium text-slate-600 mb-3">Séances</p>
+    <div class="card p-4">
+      <p class="section-title mb-3">Séances</p>
       <ul class="divide-y divide-slate-100">
         <li
           v-for="o in occurrences"
           :key="o.id"
-          class="py-3 flex items-center justify-between cursor-pointer hover:text-sky-600"
+          class="py-3 flex items-center justify-between cursor-pointer hover:text-brand-600"
           @click="router.push(`/coach/attendance/${o.id}`)"
         >
           <span>{{ new Date(o.date).toLocaleDateString("fr-FR") }} · {{ o.startTime }}–{{ o.endTime }}</span>

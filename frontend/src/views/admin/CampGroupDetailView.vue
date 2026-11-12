@@ -67,8 +67,8 @@ async function onRemoveCoach(assignmentId) {
     <Button label="Retour" icon="pi pi-arrow-left" text class="mb-3 -ml-2" @click="router.push(`/admin/camps/${group?.campId}`)" />
 
     <div v-if="group" class="space-y-4">
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-        <p class="text-sm font-medium text-slate-600 mb-3">Informations</p>
+      <div class="card p-4">
+        <p class="section-title mb-3">Informations</p>
         <form class="grid grid-cols-1 gap-3 sm:grid-cols-2" @submit.prevent="onSaveInfo">
           <InputText v-model="editForm.name" placeholder="Nom" required class="w-full" />
           <Dropdown v-model="editForm.trainingPlanId" :options="trainingPlans" option-label="title" option-value="id" show-clear placeholder="Plan d'entrainement…" class="w-full" />
@@ -76,8 +76,8 @@ async function onRemoveCoach(assignmentId) {
         </form>
       </div>
 
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-        <p class="text-sm font-medium text-slate-600 mb-1">Encadrants par défaut</p>
+      <div class="card p-4">
+        <p class="section-title mb-1">Encadrants par défaut</p>
         <p class="text-xs text-slate-400 mb-3">Affectés automatiquement à chaque période où ce groupe est programmé. Modifiable ensuite au cas par cas sur une période.</p>
         <CoachAssignmentList :assignments="group.coaches" :coaches="coaches" :sparrings="sparrings" empty-label="Aucun encadrant par défaut." @add="onAddCoach" @remove="onRemoveCoach" />
       </div>

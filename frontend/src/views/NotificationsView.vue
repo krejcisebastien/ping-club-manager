@@ -41,14 +41,14 @@ onMounted(async () => {
     <div class="max-w-xl">
       <p v-if="loading" class="text-sm text-slate-500"><i class="pi pi-spin pi-spinner mr-2"></i>Chargement…</p>
       <p v-else-if="error" class="text-sm text-red-600">{{ error }}</p>
-      <div v-else-if="!notifications.length" class="bg-white rounded-xl shadow border border-slate-200 p-6 text-center text-sm text-slate-500">
+      <div v-else-if="!notifications.length" class="card p-6 text-center text-sm text-slate-500">
         <i class="pi pi-bell text-2xl text-slate-300 mb-2 block"></i>
         Aucune notification pour l'instant. Tu seras prévenu ici quand une de tes séances est annulée, déplacée, ou quand tu es ajouté à
         l'encadrement.
       </div>
-      <ul v-else class="bg-white rounded-xl shadow border border-slate-200 divide-y divide-slate-100 overflow-hidden">
-        <li v-for="n in notifications" :key="n.id" class="flex gap-3 px-4 py-3" :class="n.readAt ? '' : 'bg-sky-50'">
-          <span class="mt-1.5 h-2 w-2 shrink-0 rounded-full" :class="n.readAt ? 'bg-transparent' : 'bg-sky-600'" aria-hidden="true"></span>
+      <ul v-else class="card divide-y divide-slate-100 overflow-hidden">
+        <li v-for="n in notifications" :key="n.id" class="flex gap-3 px-4 py-3" :class="n.readAt ? '' : 'bg-brand-50'">
+          <span class="mt-1.5 h-2 w-2 shrink-0 rounded-full" :class="n.readAt ? 'bg-transparent' : 'bg-brand-600'" aria-hidden="true"></span>
           <div class="min-w-0 flex-1">
             <div class="flex items-baseline justify-between gap-2">
               <p class="text-sm font-medium text-slate-800">{{ n.title }}</p>
