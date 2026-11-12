@@ -2,6 +2,35 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Police de l'interface (PrimeVue impose la sienne sur ses composants). */
+body,
+.p-component,
+.p-inputtext,
+.p-button {
+  font-family: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif !important;
+}
+body {
+  background-color: #f4f6fb;
+  color: #0f172a;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Menu mobile (Sidebar PrimeVue) dans les couleurs de la barre latérale desktop. */
+.app-drawer.p-sidebar {
+  background: #0b1b34;
+  color: #cbd5e1;
+  border: 0;
+}
+.app-drawer .p-sidebar-header {
+  padding: 1rem 1rem 0.5rem;
+}
+.app-drawer .p-sidebar-close {
+  color: #cbd5e1 !important;
+}
+.app-drawer .p-sidebar-content {
+  padding: 0 0.75rem 1rem;
+}
+
 /* Le conteneur .p-dialog lui-même n'a pas de fond opaque (seuls ses enfants
    header/content en ont un) : invisible la plupart du temps car ces enfants
    se touchent, mais un espace transparent apparaît par endroits sur mobile,
@@ -45,8 +74,8 @@
 .p-dropdown:not(.p-disabled).p-focus,
 .p-multiselect:not(.p-disabled).p-focus,
 .p-calendar .p-inputtext:enabled:focus {
-  border-color: #0284c7 !important; /* sky-600 */
-  box-shadow: 0 0 0 1px #0284c7 !important;
+  border-color: #2554eb !important; /* brand-600 */
+  box-shadow: 0 0 0 1px #2554eb !important;
 }
 
 .p-checkbox .p-checkbox-box {
@@ -67,13 +96,13 @@
 }
 
 .p-button:not(.p-button-text):not(.p-button-outlined):not(.p-button-link):not(.p-button-secondary):not(.p-button-danger) {
-  background-color: #0284c7 !important; /* sky-600 */
-  border-color: #0284c7 !important;
+  background-color: #2554eb !important; /* brand-600 */
+  border-color: #2554eb !important;
   color: #fff !important;
 }
 .p-button:not(.p-button-text):not(.p-button-outlined):not(.p-button-link):not(.p-button-secondary):not(.p-button-danger):not(.p-disabled):hover {
-  background-color: #0369a1 !important; /* sky-700 */
-  border-color: #0369a1 !important;
+  background-color: #1d42d8 !important; /* brand-700 */
+  border-color: #1d42d8 !important;
 }
 
 .p-button.p-button-secondary:not(.p-button-text):not(.p-button-outlined) {
@@ -207,7 +236,7 @@
   margin-bottom: 0.5rem;
 }
 .rich-text-content a {
-  color: #0284c7;
+  color: #2554eb;
   text-decoration: underline;
 }
 
@@ -249,8 +278,8 @@
 }
 .p-dropdown-item.p-highlight,
 .p-multiselect-item.p-highlight {
-  background: #e0f2fe;
-  color: #0369a1;
+  background: #dbe8fe;
+  color: #1d42d8;
   font-weight: 500;
 }
 .p-dropdown-filter-container {
@@ -312,7 +341,7 @@
   margin: 0.6rem 0.5rem;
 }
 .eval-slider .p-slider-range {
-  background: var(--slider-color, #0284c7);
+  background: var(--slider-color, #2554eb);
   border-radius: 999px;
   position: absolute;
   height: 100%;
@@ -325,7 +354,7 @@
   margin-top: -0.6rem;
   margin-left: -0.6rem;
   background: #fff;
-  border: 2px solid var(--slider-color, #0284c7);
+  border: 2px solid var(--slider-color, #2554eb);
   border-radius: 50%;
   box-shadow: 0 1px 3px rgb(15 23 42 / 0.2);
   transition: transform 0.15s;
@@ -395,7 +424,7 @@
   color: #cbd5e1;
 }
 .eval-rating .p-rating-item.p-rating-item-active .p-rating-icon {
-  color: var(--rating-color, #0284c7);
+  color: var(--rating-color, #2554eb);
 }
 .eval-rating .p-rating-cancel {
   color: #94a3b8;
