@@ -55,8 +55,8 @@ const hasItems = computed(() => (props.evaluation.itemScores ?? []).length > 0);
 
     <div>
       <div class="flex items-baseline justify-between gap-2 mb-2">
-        <p class="text-sm font-medium text-slate-600">Par critère</p>
-        <button v-if="hasItems" type="button" class="text-xs text-sky-700 hover:underline" @click="showItems = !showItems">
+        <p class="section-title">Par critère</p>
+        <button v-if="hasItems" type="button" class="text-xs text-brand-700 hover:underline" @click="showItems = !showItems">
           {{ showItems ? "Masquer le détail" : "Voir le détail des points" }}
         </button>
       </div>

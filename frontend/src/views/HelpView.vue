@@ -86,8 +86,8 @@ watch(activeChapterId, () => {
           class="inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm transition-colors"
           :class="
             !results && c.id === activeChapter?.id
-              ? 'bg-sky-600 border-sky-600 text-white'
-              : 'bg-white border-slate-200 text-slate-600 hover:border-sky-300 hover:text-sky-700'
+              ? 'bg-brand-600 border-brand-600 text-white'
+              : 'bg-white border-slate-200 text-slate-600 hover:border-brand-300 hover:text-brand-700'
           "
           @click="selectChapter(c.id)"
         >
@@ -107,13 +107,13 @@ watch(activeChapterId, () => {
       <article
         v-for="{ chapter, section } in results"
         :key="section.id"
-        class="bg-white rounded-xl shadow-sm border border-slate-200 p-4"
+        class="card p-4"
       >
-        <p class="text-xs text-sky-700 mb-1"><i :class="chapter.icon" class="text-xs mr-1" aria-hidden="true"></i>{{ chapter.title }}</p>
+        <p class="text-xs text-brand-700 mb-1"><i :class="chapter.icon" class="text-xs mr-1" aria-hidden="true"></i>{{ chapter.title }}</p>
         <h2 class="font-semibold text-slate-800 mb-2">{{ section.title }}</h2>
         <!-- Contenu statique de lib/help.js (jamais de saisie utilisateur). -->
         <div class="help-body" v-html="section.body"></div>
-        <button type="button" class="mt-3 text-sm text-sky-700 hover:underline" @click="goToSection(section.id)">
+        <button type="button" class="mt-3 text-sm text-brand-700 hover:underline" @click="goToSection(section.id)">
           Voir dans le chapitre
         </button>
       </article>
@@ -124,13 +124,13 @@ watch(activeChapterId, () => {
 
     <!-- Chapitre -->
     <div v-else-if="activeChapter" class="lg:grid lg:grid-cols-[15rem_1fr] lg:gap-6 lg:items-start">
-      <nav class="hidden lg:block lg:sticky lg:top-4 bg-white rounded-xl shadow-sm border border-slate-200 p-3" aria-label="Sommaire">
+      <nav class="hidden lg:block lg:sticky lg:top-4 card p-3" aria-label="Sommaire">
         <p class="text-xs font-medium uppercase tracking-wide text-slate-400 mb-2 px-2">{{ activeChapter.title }}</p>
         <a
           v-for="s in activeChapter.sections"
           :key="s.id"
           :href="`?s=${s.id}`"
-          class="block rounded-lg px-2 py-1.5 text-sm text-slate-600 hover:bg-slate-50 hover:text-sky-700"
+          class="block rounded-lg px-2 py-1.5 text-sm text-slate-600 hover:bg-slate-50 hover:text-brand-700"
           @click.prevent="goToSection(s.id)"
         >
           {{ s.title }}
@@ -143,7 +143,7 @@ watch(activeChapterId, () => {
           :id="`help-${s.id}`"
           :key="s.id"
           :open="isOpen(s.id)"
-          class="group bg-white rounded-xl shadow-sm border border-slate-200 scroll-mt-20"
+          class="group card scroll-mt-20"
           @toggle="toggle(s.id, $event)"
         >
           <summary class="flex cursor-pointer list-none items-center justify-between gap-3 p-4 font-medium text-slate-800">

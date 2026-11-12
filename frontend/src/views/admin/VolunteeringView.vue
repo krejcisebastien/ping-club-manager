@@ -101,23 +101,24 @@ async function download() {
 
 <template>
   <AppLayout title="Fiches bénévolat" :nav-links="navLinks">
-    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 mb-4">
-      <p class="text-xs text-slate-400 mb-3">
+    <h2 class="page-title">Note de défraiement</h2>
+    <p class="page-subtitle mb-6 max-w-3xl leading-relaxed">
         Prépare la note de défraiement d'un entraineur ou d'un sparring : une ligne par séance d'entrainement ou période de stage où il est
         affecté et qui a eu lieu (séances annulées ou à venir exclues), valorisée selon son tarif (à l'heure ou à la séance).
-      </p>
-      <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+    </p>
+    <div class="card p-5 mb-6">
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-3 sm:items-end">
         <div>
-          <label class="text-xs text-slate-500 block mb-1">Bénévole</label>
-          <SelectButton v-model="type" :options="typeOptions" option-label="label" option-value="value" :allow-empty="false" class="w-full flex" />
+          <label class="field-label">Bénévole</label>
+          <SelectButton v-model="type" :options="typeOptions" option-label="label" option-value="value" :allow-empty="false" class="basis-toggle w-full [&>.p-button]:!flex-1" />
         </div>
         <div>
-          <label class="text-xs text-slate-500 block mb-1">Personne</label>
+          <label class="field-label">Personne</label>
           <Dropdown v-model="personId" :options="people" option-label="label" option-value="value" filter placeholder="Choisir…" class="w-full" />
         </div>
         <div>
-          <label class="text-xs text-slate-500 block mb-1">Mois</label>
-          <Calendar v-model="month" view="month" date-format="MM yy" show-icon class="w-full" input-class="w-full capitalize" />
+          <label class="field-label">Mois</label>
+          <Calendar v-model="month" view="month" date-format="MM yy" show-icon class="w-full" input-class="w-full capitalize whitespace-nowrap" />
         </div>
       </div>
     </div>
@@ -130,10 +131,10 @@ async function download() {
         <p v-for="w in sheet.warnings" :key="w"><i class="pi pi-exclamation-triangle mr-2"></i>{{ w }}</p>
       </div>
 
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+      <div class="card p-5">
         <div class="flex items-start justify-between gap-3 flex-wrap mb-3">
           <div class="min-w-0">
-            <p class="font-medium text-slate-800">{{ sheet.person.lastName }} {{ sheet.person.firstName }}</p>
+            <p class="section-title">{{ sheet.person.lastName }} {{ sheet.person.firstName }}</p>
             <p class="text-xs text-slate-500">{{ sheet.person.address || "Adresse non renseignée" }}</p>
             <p class="text-xs text-slate-500">{{ sheet.person.iban || "N° de compte non renseigné" }}</p>
           </div>
@@ -145,7 +146,7 @@ async function download() {
 
         <ul class="divide-y divide-slate-100 text-sm">
           <!-- Mobile : date | montant, puis nature | heures ; à partir de sm : 4 colonnes. -->
-          <li class="py-2 hidden sm:grid grid-cols-[9rem_5rem_1fr_6rem] gap-2 text-xs text-slate-400">
+          <li class="py-2 hidden sm:grid grid-cols-[9rem_5rem_1fr_6rem] gap-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
             <span>Date</span><span class="text-right">Heures</span><span>Nature de la prestation</span><span class="text-right">Total</span>
           </li>
           <li v-for="line in sheet.lines" :key="line.id" class="py-2 grid grid-cols-[1fr_auto] gap-x-3 gap-y-0.5 sm:grid-cols-[9rem_5rem_1fr_6rem] sm:gap-2 items-baseline">
@@ -155,20 +156,20 @@ async function download() {
             <span class="order-2 sm:order-none text-right tabular-nums font-medium" :class="line.dayOverCap ? 'text-amber-600' : ''">{{ eur(line.amount) }}</span>
           </li>
           <li v-if="!sheet.lines.length" class="py-3 text-slate-400">Aucune prestation en {{ monthLabel }}.</li>
-          <li v-else class="py-2 grid grid-cols-[1fr_auto] gap-x-3 sm:grid-cols-[9rem_5rem_1fr_6rem] sm:gap-2 font-semibold">
+          <li v-else class="py-3 grid grid-cols-[1fr_auto] gap-x-3 sm:grid-cols-[9rem_5rem_1fr_6rem] sm:gap-2 font-extrabold">
             <span>Total</span><span class="order-4 sm:order-none text-right tabular-nums">{{ hours(sheet.totalHours) }}</span><span class="order-3 sm:order-none"></span>
             <span class="order-2 sm:order-none text-right tabular-nums">{{ eur(sheet.total) }}</span>
           </li>
         </ul>
       </div>
 
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+      <div class="card p-4">
         <div class="flex items-baseline justify-between text-sm mb-2">
           <span class="text-slate-600">Cumul {{ sheet.year.year }} (du 1er janvier au {{ dateLabel(sheet.to) }})</span>
           <span class="tabular-nums"><strong>{{ eur(sheet.year.total) }}</strong> <span class="text-slate-400">/ {{ eur(sheet.year.cap) }}</span></span>
         </div>
         <div class="h-2 rounded-full bg-slate-100 overflow-hidden">
-          <div class="h-full rounded-full" :class="sheet.year.total > sheet.year.cap ? 'bg-red-500' : 'bg-sky-500'" :style="{ width: `${Math.min(100, (sheet.year.total / sheet.year.cap) * 100)}%` }"></div>
+          <div class="h-full rounded-full" :class="sheet.year.total > sheet.year.cap ? 'bg-red-500' : 'bg-brand-500'" :style="{ width: `${Math.min(100, (sheet.year.total / sheet.year.cap) * 100)}%` }"></div>
         </div>
       </div>
 

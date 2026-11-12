@@ -66,7 +66,7 @@ async function onSave() {
   <AppLayout title="Répartition — journée de stage" :nav-links="navLinks">
     <Button label="Retour" icon="pi pi-arrow-left" text class="mb-3 -ml-2" @click="router.back()" />
 
-    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+    <div class="card p-4">
       <div class="mb-3">
         <p class="font-medium text-slate-700 capitalize">{{ dayLabel }}</p>
         <p class="text-sm text-slate-500">

@@ -72,14 +72,14 @@ watch(selectedCampId, () => loadCamp());
       </div>
     </div>
 
-    <div v-if="camp" class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 mb-3">
-      <p class="text-sm font-medium text-slate-600 mb-1">Joueurs inscrits ({{ camp.players.length }})</p>
+    <div v-if="camp" class="card p-4 mb-3">
+      <p class="section-title mb-1">Joueurs inscrits ({{ camp.players.length }})</p>
       <p class="text-xs text-slate-400 mb-3">Liste de référence des présences. Chaque période, répartis-les dans les groupes.</p>
       <CampRegistrations :camp-id="camp.id" :registrations="camp.players" @changed="loadCamp(true)" />
     </div>
 
     <div class="grid grid-cols-1 gap-3">
-      <div v-for="day in days" :key="day.id" class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+      <div v-for="day in days" :key="day.id" class="card p-4">
         <div class="flex items-center justify-between flex-wrap gap-2">
           <p class="font-medium text-slate-700 capitalize">{{ day.date }}</p>
           <div class="flex flex-wrap gap-2">

@@ -43,6 +43,8 @@ const form = ref(emptyForm());
 const saving = ref(false);
 
 const categoryFilter = ref(null);
+// Pastilles de couleur des puces de catégorie, attribuées par position.
+const CATEGORY_DOTS = ["#2554eb", "#059669", "#7c3aed", "#ea580c", "#e11d48", "#0891b2", "#ca8a04"];
 const difficultyFilter = ref(null);
 
 const filteredExercises = computed(() =>
@@ -168,33 +170,57 @@ async function onAiConfirm() {
 
 <template>
   <AppLayout title="Bibliothèque d'exercices" :nav-links="navLinks">
-    <div class="flex flex-col items-stretch sm:flex-row sm:items-center sm:justify-between mb-4 gap-3">
-      <h2 class="text-sm font-medium text-slate-600">{{ filteredExercises.length }} exercice(s)</h2>
-      <div class="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2">
-        <div class="relative sm:w-56">
+    <div class="mb-5 flex flex-col sm:flex-row sm:items-end gap-3">
+      <div class="flex-1 min-w-0">
+        <h2 class="page-title">Exercices</h2>
+        <p class="page-subtitle">{{ filteredExercises.length }} exercice(s)</p>
+      </div>
+      <div class="flex flex-col sm:flex-row gap-2">
+        <Button class="w-full sm:w-auto" label="Générer avec l'IA" icon="pi pi-sparkles" severity="secondary" outlined @click="openAiGenerate" />
+        <Button class="w-full sm:w-auto" label="Nouvel exercice" icon="pi pi-plus" @click="openCreate" />
+      </div>
+    </div>
+
+    <div class="card p-4 mb-4 space-y-3">
+      <div class="flex flex-col sm:flex-row gap-2">
+        <div class="relative flex-1 sm:max-w-sm">
           <i class="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-          <InputText v-model="filters.global.value" placeholder="Rechercher…" class="w-full pl-9" />
+          <InputText v-model="filters.global.value" placeholder="Rechercher un exercice…" class="w-full pl-9" />
         </div>
-        <Dropdown
-          v-model="categoryFilter"
-          :options="EXERCISE_CATEGORY_OPTIONS"
-          option-label="label"
-          option-value="value"
-          placeholder="Toutes catégories"
-          show-clear
-          class="w-full sm:w-56"
-        />
         <Dropdown
           v-model="difficultyFilter"
           :options="EXERCISE_DIFFICULTY_OPTIONS"
           option-label="label"
           option-value="value"
-          placeholder="Toutes difficultés"
+          placeholder="Difficulté"
           show-clear
-          class="w-full sm:w-52"
+          class="w-full sm:w-44"
+          aria-label="Difficulté"
         />
-        <Button class="w-full sm:w-auto" label="Générer avec l'IA" icon="pi pi-sparkles" severity="secondary" outlined @click="openAiGenerate" />
-        <Button class="w-full sm:w-auto" label="Nouvel exercice" icon="pi pi-plus" @click="openCreate" />
+      </div>
+      <div>
+        <p class="field-label mb-2">Catégorie</p>
+        <div class="flex flex-wrap gap-1.5" role="group" aria-label="Catégorie">
+          <button
+            type="button"
+            class="filter-chip"
+            :class="{ 'filter-chip-active': !categoryFilter }"
+            :aria-pressed="!categoryFilter"
+            @click="categoryFilter = null"
+          >Toutes</button>
+          <button
+            v-for="(c, ci) in EXERCISE_CATEGORY_OPTIONS"
+            :key="c.value"
+            type="button"
+            class="filter-chip"
+            :class="{ 'filter-chip-active': categoryFilter === c.value }"
+            :aria-pressed="categoryFilter === c.value"
+            @click="categoryFilter = categoryFilter === c.value ? null : c.value"
+          >
+            <span class="w-2 h-2 rounded-full shrink-0" :style="{ background: CATEGORY_DOTS[ci % CATEGORY_DOTS.length] }"></span>
+            {{ c.label }}
+          </button>
+        </div>
       </div>
     </div>
 
@@ -206,7 +232,7 @@ async function onAiConfirm() {
       paginator
       :rows="10"
       :rows-per-page-options="[10, 25, 50]"
-      class="bg-white rounded-xl shadow border border-slate-200 overflow-hidden clickable-rows"
+      class="card overflow-hidden clickable-rows"
       striped-rows
       @row-click="onRowClick"
     >
@@ -367,3 +393,29 @@ async function onAiConfirm() {
     </Dialog>
   </AppLayout>
 </template>
+
+<style scoped>
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  height: 30px;
+  padding: 0 0.75rem;
+  border-radius: 999px;
+  border: 1px solid #dbe1ea;
+  background: #fff;
+  color: #334155;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+}
+.filter-chip:hover {
+  border-color: #93b8fd;
+}
+.filter-chip-active {
+  background: #2554eb;
+  border-color: #2554eb;
+  color: #fff;
+}
+</style>

@@ -184,7 +184,7 @@ function onLogout() {
 <template>
   <AppLayout title="Mon compte" :nav-links="auth.licenseActive ? navLinks : []">
     <div class="max-w-xl space-y-4">
-      <div class="bg-white rounded-xl shadow border border-slate-200 p-5 space-y-1">
+      <div class="card p-5 space-y-1">
         <h2 class="font-medium text-slate-800">Compte</h2>
         <p class="text-sm text-slate-600 break-all">{{ auth.user?.email }}</p>
         <p class="text-sm text-slate-500">
@@ -192,7 +192,7 @@ function onLogout() {
         </p>
       </div>
 
-      <div class="bg-white rounded-xl shadow border border-slate-200 p-5 space-y-3">
+      <div class="card p-5 space-y-3">
         <h2 class="font-medium text-slate-800">Notifications</h2>
         <p v-if="notifState === 'native'" class="text-sm text-slate-600">
           Les notifications de cet appareil se règlent dans les réglages du téléphone.
@@ -238,7 +238,7 @@ function onLogout() {
         </div>
       </div>
 
-      <div v-if="hasCalendar && auth.licenseActive" class="bg-white rounded-xl shadow border border-slate-200 p-5 space-y-3">
+      <div v-if="hasCalendar && auth.licenseActive" class="card p-5 space-y-3">
         <h2 class="font-medium text-slate-800">Calendrier</h2>
         <p class="text-sm text-slate-600">
           Retrouve tes séances d'entrainement et tes stages dans ton agenda (Google, iPhone, Outlook). Ils se mettent à jour
@@ -262,13 +262,13 @@ function onLogout() {
             </div>
             <p class="text-xs text-slate-500 mt-1">
               Ce lien est personnel : ne le partage pas.
-              <button type="button" class="text-sky-700 underline" @click="onResetCalendar">Générer un nouveau lien</button>
+              <button type="button" class="text-brand-700 underline" @click="onResetCalendar">Générer un nouveau lien</button>
             </p>
           </div>
         </template>
       </div>
 
-      <form class="bg-white rounded-xl shadow border border-slate-200 p-5 space-y-3" @submit.prevent="onChangePassword">
+      <form class="card p-5 space-y-3" @submit.prevent="onChangePassword">
         <h2 class="font-medium text-slate-800">Mot de passe</h2>
         <div>
           <label class="text-xs text-slate-500 block mb-1">Mot de passe actuel</label>

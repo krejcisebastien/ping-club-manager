@@ -246,8 +246,8 @@ const calendarOptions = computed(() => ({
     <Button label="Retour" icon="pi pi-arrow-left" text class="mb-3 -ml-2" @click="router.push('/admin/trainings')" />
 
     <div v-if="training" class="space-y-4">
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-        <p class="text-sm font-medium text-slate-600 mb-3">Informations</p>
+      <div class="card p-4">
+        <p class="section-title mb-3">Informations</p>
         <form class="grid grid-cols-1 gap-3 sm:grid-cols-2" @submit.prevent="onSaveInfo">
           <InputText v-model="editForm.name" placeholder="Nom" required class="w-full" />
           <Dropdown v-model="editForm.groupId" :options="groups" option-label="name" option-value="id" required class="w-full" />
@@ -258,8 +258,9 @@ const calendarOptions = computed(() => ({
         </form>
       </div>
 
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-        <p class="text-sm font-medium text-slate-600 mb-1">Encadrants par défaut</p>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+      <div class="card p-5">
+        <p class="section-title mb-1">Encadrants par défaut</p>
         <p class="text-xs text-slate-400 mb-3">Affectés automatiquement à chaque nouvelle séance générée. Modifiable ensuite au cas par cas sur une séance.</p>
         <CoachAssignmentList
           :assignments="training.coaches"
@@ -271,17 +272,18 @@ const calendarOptions = computed(() => ({
         />
       </div>
 
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-        <p class="text-sm font-medium text-slate-600 mb-3">Générer les séances de la période</p>
-        <form class="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:items-end" @submit.prevent="onGenerate">
+      <div class="card p-5">
+        <p class="section-title mb-3">Générer les séances de la période</p>
+        <form class="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:items-end" @submit.prevent="onGenerate">
           <Calendar v-model="generateForm.startDate" date-format="dd/mm/yy" show-icon placeholder="Du" required class="w-full" input-class="w-full" />
           <Calendar v-model="generateForm.endDate" date-format="dd/mm/yy" show-icon placeholder="Au" required class="w-full" input-class="w-full" />
-          <Button type="submit" label="Générer" :loading="generating" />
+          <Button type="submit" label="Générer les séances" icon="pi pi-sparkles" :loading="generating" class="w-fit" />
         </form>
       </div>
+      </div>
 
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-        <p class="text-sm font-medium text-slate-600 mb-3">Séances ({{ occurrences.length }})</p>
+      <div class="card p-4">
+        <p class="section-title mb-3">Séances ({{ occurrences.length }})</p>
         <TabView lazy>
           <TabPanel header="Liste">
             <DataTable responsive-layout="stack" breakpoint="768px" :value="occurrences" paginator :rows="10" :rows-per-page-options="[10, 25, 50]" class="border border-slate-200 rounded-lg overflow-hidden">

@@ -111,7 +111,7 @@ function onDelete() {
   <AppLayout :title="exercise ? exercise.title : 'Exercice'" :nav-links="navLinks">
     <Button label="Retour" icon="pi pi-arrow-left" text class="mb-3 -ml-2" @click="router.push('/coach/exercises')" />
 
-    <div v-if="exercise" class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+    <div v-if="exercise" class="card p-4">
       <form v-if="editing" class="grid grid-cols-1 gap-3" @submit.prevent="onSave">
         <div>
           <label class="text-xs text-slate-500 block mb-1">Titre</label>

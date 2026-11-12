@@ -26,13 +26,13 @@ onMounted(async () => {
 
 <template>
   <AppLayout title="Mon espace joueur" :nav-links="navLinks">
-    <div v-if="!loading" class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+    <div v-if="!loading" class="card p-4">
       <p class="text-sm text-slate-500 mb-3">Choisis un joueur</p>
       <ul class="divide-y divide-slate-100">
         <li
           v-for="p in players"
           :key="p.id"
-          class="py-3 cursor-pointer hover:text-sky-600"
+          class="py-3 cursor-pointer hover:text-brand-600"
           @click="router.push(`/player/${p.id}`)"
         >
           {{ fullName(p) }}

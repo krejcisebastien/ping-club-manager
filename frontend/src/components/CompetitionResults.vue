@@ -167,10 +167,10 @@ const chartOptions = {
 <template>
   <div v-if="data" class="space-y-4">
     <!-- Situation et actualisation -->
-    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+    <div class="card p-4">
       <div class="flex flex-wrap items-start gap-3">
         <div class="flex-1 min-w-[12rem]">
-          <p class="text-sm font-medium text-slate-600">Résultats AFTT</p>
+          <p class="section-title">Résultats AFTT</p>
           <p v-if="current" class="text-sm text-slate-700 mt-1">
             Classement <strong>{{ current.ranking ?? "—" }}</strong>
             <template v-if="current.ladiesRanking"> · dames <strong>{{ current.ladiesRanking }}</strong></template>
@@ -199,9 +199,9 @@ const chartOptions = {
     </div>
 
     <!-- Classement numérique (points relevés chaque jour sur data.aftt.be) -->
-    <div v-if="latestPoints" class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+    <div v-if="latestPoints" class="card p-4">
       <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-        <p class="text-sm font-medium text-slate-600">Classement numérique {{ latestPoints.seasonName }}</p>
+        <p class="section-title">Classement numérique {{ latestPoints.seasonName }}</p>
         <p class="text-xs text-slate-400">Relevé du {{ formatDate(latestPoints.date) }} · source data.aftt.be</p>
       </div>
       <div class="flex flex-wrap items-baseline gap-x-6 gap-y-1 mt-2">
@@ -236,27 +236,27 @@ const chartOptions = {
         </span>
       </div>
 
-      <p v-if="!results.length" class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 text-sm text-slate-400">
+      <p v-if="!results.length" class="card p-4 text-sm text-slate-400">
         {{ ladiesView ? "Aucun match dames pour cette saison." : "Aucun match pour cette saison." }}
       </p>
 
       <template v-else>
         <!-- Bilan -->
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+          <div class="card p-4">
             <p class="text-xs text-slate-500 mb-1">Matchs joués</p>
             <p class="text-2xl font-semibold text-slate-800 tabular-nums">{{ totals.played }}</p>
             <p v-if="walkovers" class="text-xs text-slate-400">+ {{ walkovers }} forfait(s) non compté(s)</p>
           </div>
-          <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+          <div class="card p-4">
             <p class="text-xs text-slate-500 mb-1">Victoires</p>
             <p class="text-2xl font-semibold text-green-700 tabular-nums">{{ totals.wins }}</p>
           </div>
-          <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+          <div class="card p-4">
             <p class="text-xs text-slate-500 mb-1">Défaites</p>
             <p class="text-2xl font-semibold text-red-600 tabular-nums">{{ totals.losses }}</p>
           </div>
-          <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+          <div class="card p-4">
             <p class="text-xs text-slate-500 mb-1">Taux de victoire</p>
             <p class="text-2xl font-semibold text-slate-800 tabular-nums">{{ pct(totals.rate) }}</p>
           </div>
@@ -264,8 +264,8 @@ const chartOptions = {
 
         <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <!-- Par classement adverse -->
-          <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-            <p class="text-sm font-medium text-slate-600 mb-3">Par classement adverse</p>
+          <div class="card p-4">
+            <p class="section-title mb-3">Par classement adverse</p>
             <ul class="space-y-2">
               <li v-for="row in perRanking" :key="row.ranking" class="grid grid-cols-[2.5rem_1fr_9.25rem] items-center gap-3 text-sm">
                 <span class="font-semibold text-slate-700">{{ row.ranking }}</span>
@@ -280,8 +280,8 @@ const chartOptions = {
           </div>
 
           <!-- Selon l'écart de classement -->
-          <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-            <p class="text-sm font-medium text-slate-600 mb-1">Face à des adversaires…</p>
+          <div class="card p-4">
+            <p class="section-title mb-1">Face à des adversaires…</p>
             <p class="text-xs text-slate-400 mb-3">Par rapport à son classement de la saison du match.</p>
             <ul class="divide-y divide-slate-100 text-sm">
               <li v-for="s in STRENGTH_LABELS" :key="s.key" class="py-2 flex items-center justify-between gap-2">
@@ -296,8 +296,8 @@ const chartOptions = {
         </div>
 
         <!-- Évolution dans le temps -->
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-          <p class="text-sm font-medium text-slate-600">Évolution dans le temps</p>
+        <div class="card p-4">
+          <p class="section-title">Évolution dans le temps</p>
           <p class="text-xs text-slate-400 mb-3">
             Victoires / matchs contre chaque classement,
             {{ allSeasons ? "saison par saison" : "mois par mois" }}.
@@ -341,8 +341,8 @@ const chartOptions = {
         </div>
 
         <!-- Historique -->
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-          <p class="text-sm font-medium text-slate-600 mb-2">Historique des rencontres</p>
+        <div class="card p-4">
+          <p class="section-title mb-2">Historique des rencontres</p>
           <div class="divide-y divide-slate-100">
             <section v-for="day in days.slice(0, visibleDays)" :key="day.key" class="py-3">
               <div class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 mb-1">

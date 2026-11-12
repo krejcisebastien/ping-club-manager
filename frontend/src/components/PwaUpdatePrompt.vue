@@ -46,7 +46,7 @@ function reload() {
     role="status"
     class="fixed inset-x-3 bottom-3 z-50 mx-auto flex max-w-md items-center gap-3 rounded-lg border border-slate-200 bg-white p-3 shadow-lg"
   >
-    <i class="pi pi-refresh text-sky-600" aria-hidden="true"></i>
+    <i class="pi pi-refresh text-brand-600" aria-hidden="true"></i>
     <span class="flex-1 text-sm text-slate-700">Nouvelle version disponible.</span>
     <Button label="Plus tard" text size="small" @click="needRefresh = false" />
     <Button label="Mettre à jour" size="small" @click="reload" />

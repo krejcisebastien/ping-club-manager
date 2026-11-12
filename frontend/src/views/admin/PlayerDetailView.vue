@@ -1,6 +1,6 @@
 <script setup>
 import TabBar from "../../components/TabBar.vue";
-import { PLAYER_TABS, useTabQuery } from "../../lib/playerTabs.js";
+import { STAFF_PLAYER_TABS, useTabQuery } from "../../lib/playerTabs.js";
 import { ref, computed, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import Button from "primevue/button";
@@ -32,7 +32,7 @@ const router = useRouter();
 const toast = useToast();
 const playerId = route.params.id;
 
-const activeTab = useTabQuery(route, router);
+const activeTab = useTabQuery(route, router, STAFF_PLAYER_TABS);
 const upcoming = ref(null);
 
 const traitOptions = [
@@ -90,6 +90,29 @@ async function loadStats() {
     return;
   }
   stats.value = (await api.get(`/players/${playerId}/stats`, { params: { seasonId: statsSeasonId.value } })).data.stats;
+}
+// Pastilles de l'en-tête : âge, dernier classement, main dominante.
+const headerPills = computed(() => {
+  const p = player.value;
+  if (!p) return [];
+  const pills = [];
+  if (p.birthDate) {
+    const b = new Date(p.birthDate);
+    const now = new Date();
+    const age = now.getFullYear() - b.getFullYear() - (now < new Date(now.getFullYear(), b.getMonth(), b.getDate()) ? 1 : 0);
+    pills.push({ label: `${age} ans` });
+  }
+  const latest = [...rankings.value].sort((a, b) => new Date(b.effectiveDate) - new Date(a.effectiveDate))[0];
+  if (latest) pills.push({ label: `Classement ${latest.rankingValue}`, brand: true });
+  const hand = dominantHandOptions.find((o) => o.value === p.dominantHand);
+  if (hand) pills.push({ label: hand.label });
+  return pills;
+});
+function playerInitials(p) {
+  return `${p.lastName?.[0] ?? ""}${p.firstName?.[0] ?? ""}`.toUpperCase();
+}
+function ratePercent(rate) {
+  return rate == null ? 0 : Math.round(rate * 100);
 }
 function formatRate(rate) {
   return rate == null ? "—" : `${Math.round(rate * 100)}%`;
@@ -305,105 +328,112 @@ function pointStatusSeverity(status) {
 
 <template>
   <AppLayout :title="player ? fullName(player) : 'Joueur'" :nav-links="navLinks">
-    <Button label="Retour" icon="pi pi-arrow-left" text class="mb-3 -ml-2" @click="router.push('/admin/players')" />
+    <Button label="Joueurs" icon="pi pi-arrow-left" text class="mb-3 -ml-2" @click="router.push('/admin/players')" />
 
     <div v-if="player">
-      <TabBar v-model="activeTab" :tabs="PLAYER_TABS" aria-label="Volets de la fiche joueur" />
+      <section class="card overflow-hidden mb-6">
+        <div class="h-[88px] bg-[radial-gradient(80%_160%_at_100%_0%,#1e3fa8_0%,#0b1b34_70%)]"></div>
+        <div class="flex flex-wrap items-start gap-x-5 gap-y-3 px-6 pb-5 -mt-11">
+          <img
+            v-if="player.photoUrl"
+            :src="player.photoUrl"
+            alt=""
+            class="w-24 h-24 rounded-full object-cover border-4 border-white shadow-[0_6px_16px_rgba(15,23,42,0.12)] bg-white"
+          />
+          <span
+            v-else
+            class="w-24 h-24 rounded-full bg-brand-100 text-brand-700 border-4 border-white flex items-center justify-center text-[2rem] font-extrabold shadow-[0_6px_16px_rgba(15,23,42,0.12)]"
+          >{{ playerInitials(player) }}</span>
+          <div class="flex-1 basis-64 sm:pt-[58px]">
+            <h2 class="text-[1.625rem] font-extrabold tracking-tight text-slate-900">{{ fullName(player) }}</h2>
+            <div class="flex flex-wrap gap-2 mt-2">
+              <span
+                v-for="pill in headerPills"
+                :key="pill.label"
+                class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold whitespace-nowrap"
+                :class="pill.brand ? 'bg-brand-50 text-brand-700' : 'bg-slate-100 text-slate-700'"
+              >{{ pill.label }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="px-4 border-t border-slate-100 [&>nav]:mb-0 [&>nav]:border-b-0">
+          <TabBar v-model="activeTab" :tabs="STAFF_PLAYER_TABS" aria-label="Volets de la fiche joueur" />
+        </div>
+      </section>
       <div v-show="activeTab === 'fiche'" role="tabpanel">
           <div class="space-y-4">
-          <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-            <p class="text-sm font-medium text-slate-600 mb-3">Signalétique</p>
-            <form class="grid grid-cols-1 gap-3 sm:grid-cols-2" @submit.prevent="onSaveInfo">
-              <div class="sm:col-span-2">
-                <label class="text-xs text-slate-500 block mb-1">Photo</label>
-                <ImageUpload v-model="editForm.photoUrl" :max-size-mb="1" />
-              </div>
-              <div>
-                <label class="text-xs text-slate-500 block mb-1">Prénom</label>
-                <InputText v-model="editForm.firstName" required class="w-full" />
-              </div>
-              <div>
-                <label class="text-xs text-slate-500 block mb-1">Nom</label>
-                <InputText v-model="editForm.lastName" required class="w-full" />
-              </div>
-              <div>
-                <label class="text-xs text-slate-500 block mb-1">Date de naissance</label>
-                <Calendar v-model="editForm.birthDate" date-format="dd/mm/yy" show-icon required class="w-full" input-class="w-full" />
-              </div>
-              <div>
-                <label class="text-xs text-slate-500 block mb-1">N° de licence</label>
-                <InputText v-model="editForm.licenseNumber" class="w-full" />
-              </div>
-              <div>
-                <label class="text-xs text-slate-500 block mb-1">Téléphone du joueur</label>
-                <InputText v-model="editForm.phone" class="w-full" />
-              </div>
-              <div>
-                <label class="text-xs text-slate-500 block mb-1">Main dominante</label>
-                <Dropdown
-                  v-model="editForm.dominantHand"
-                  :options="dominantHandOptions"
-                  option-label="label"
-                  option-value="value"
-                  show-clear
-                  placeholder="Non renseigné"
-                  class="w-full"
-                />
-              </div>
-              <div class="sm:col-span-2">
-                <label class="text-xs text-slate-500 block mb-1">Style de jeu</label>
-                <InputText v-model="editForm.playStyle" placeholder="ex. offensif, pivot appuyé..." class="w-full" />
-              </div>
-              <div>
-                <label class="text-xs text-slate-500 block mb-1">Contact d'urgence — nom</label>
-                <InputText v-model="editForm.emergencyContactName" class="w-full" />
-              </div>
-              <div>
-                <label class="text-xs text-slate-500 block mb-1">Contact d'urgence — téléphone</label>
-                <InputText v-model="editForm.emergencyContactPhone" class="w-full" />
-              </div>
-              <Button type="submit" label="Enregistrer" :loading="savingInfo" class="sm:col-span-2 w-fit" />
-            </form>
-          </div>
-
-          <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-            <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
-              <p class="text-sm font-medium text-slate-600">Statistiques</p>
-              <Dropdown
-                v-model="statsSeasonId"
-                :options="seasons"
-                option-label="name"
-                option-value="id"
-                placeholder="Saison…"
-                class="w-48"
-                @change="loadStats"
-              />
-            </div>
-            <div v-if="stats" class="grid grid-cols-2 gap-3">
-              <div>
-                <p class="text-xs text-slate-500 mb-1">Présence entrainements</p>
-                <p class="text-2xl font-semibold text-slate-800">{{ formatRate(stats.training.attendanceRate) }}</p>
-                <p class="text-xs text-slate-400">{{ stats.training.hours }} h cumulées</p>
-                <p class="text-xs text-slate-400">
-                  {{ stats.training.counts.PRESENT }} présent(s) · {{ stats.training.counts.ABSENT }} absent(s) · {{ stats.training.counts.LATE }}
-                  retard(s) · {{ stats.training.counts.EXCUSED }} excusé(s)
-                </p>
-              </div>
-              <div>
-                <p class="text-xs text-slate-500 mb-1">Présence stages</p>
-                <p class="text-2xl font-semibold text-slate-800">{{ formatRate(stats.camp.attendanceRate) }}</p>
-                <p class="text-xs text-slate-400">{{ stats.camp.hours }} h cumulées</p>
-                <p class="text-xs text-slate-400">
-                  {{ stats.camp.counts.PRESENT }} présent(s) · {{ stats.camp.counts.ABSENT }} absent(s) · {{ stats.camp.counts.LATE }} retard(s) ·
-                  {{ stats.camp.counts.EXCUSED }} excusé(s)
-                </p>
+          <form class="card p-6 flex flex-col gap-7" @submit.prevent="onSaveInfo">
+            <div>
+              <p class="eyebrow mb-4">Identité</p>
+              <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div class="sm:col-span-2">
+                  <label class="field-label">Photo</label>
+                  <ImageUpload v-model="editForm.photoUrl" :max-size-mb="1" />
+                </div>
+                <div>
+                  <label class="field-label" for="pf-first">Prénom</label>
+                  <InputText id="pf-first" v-model="editForm.firstName" required class="w-full" />
+                </div>
+                <div>
+                  <label class="field-label" for="pf-last">Nom</label>
+                  <InputText id="pf-last" v-model="editForm.lastName" required class="w-full" />
+                </div>
+                <div>
+                  <label class="field-label">Date de naissance</label>
+                  <Calendar v-model="editForm.birthDate" date-format="dd/mm/yy" show-icon required class="w-full" input-class="w-full" />
+                </div>
+                <div>
+                  <label class="field-label" for="pf-lic">N° de licence</label>
+                  <InputText id="pf-lic" v-model="editForm.licenseNumber" class="w-full" />
+                </div>
               </div>
             </div>
-            <p v-else class="text-slate-400 text-sm">Aucune saison disponible.</p>
-          </div>
+            <div>
+              <p class="eyebrow mb-4">Jeu</p>
+              <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                  <label class="field-label">Main dominante</label>
+                  <Dropdown
+                    v-model="editForm.dominantHand"
+                    :options="dominantHandOptions"
+                    option-label="label"
+                    option-value="value"
+                    show-clear
+                    placeholder="Non renseigné"
+                    class="w-full"
+                  />
+                </div>
+                <div>
+                  <label class="field-label" for="pf-style">Style de jeu</label>
+                  <InputText id="pf-style" v-model="editForm.playStyle" placeholder="ex. offensif, pivot appuyé..." class="w-full" />
+                </div>
+              </div>
+            </div>
+            <div>
+              <p class="eyebrow mb-4">Contacts</p>
+              <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                  <label class="field-label" for="pf-phone">Téléphone du joueur</label>
+                  <InputText id="pf-phone" v-model="editForm.phone" class="w-full" />
+                </div>
+                <div class="hidden sm:block"></div>
+                <div>
+                  <label class="field-label" for="pf-ecn">Contact d'urgence</label>
+                  <InputText id="pf-ecn" v-model="editForm.emergencyContactName" class="w-full" />
+                </div>
+                <div>
+                  <label class="field-label" for="pf-ecp">Téléphone d'urgence</label>
+                  <InputText id="pf-ecp" v-model="editForm.emergencyContactPhone" class="w-full" />
+                </div>
+              </div>
+            </div>
+            <div class="flex justify-end pt-5 border-t border-slate-100">
+              <Button type="submit" label="Enregistrer" :loading="savingInfo" />
+            </div>
+          </form>
 
-          <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-            <p class="text-sm font-medium text-slate-600 mb-3">Classement</p>
+          <div class="card p-4">
+            <p class="section-title mb-3">Classement</p>
             <ul class="divide-y divide-slate-100 mb-3 text-sm">
               <li v-for="r in rankings" :key="r.id" class="py-1.5 flex items-center justify-between">
                 <span class="font-medium">{{ r.rankingValue }}</span>
@@ -418,8 +448,8 @@ function pointStatusSeverity(status) {
             </div>
           </div>
 
-          <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-            <p class="text-sm font-medium text-slate-600 mb-3">Matériel</p>
+          <div class="card p-4">
+            <p class="section-title mb-3">Matériel</p>
             <ul class="divide-y divide-slate-100 mb-3 text-sm">
               <li v-for="e in equipment" :key="e.id" class="py-1.5 flex items-center justify-between">
                 <span>{{ e.type }} <span class="text-slate-400">{{ e.brand }} {{ e.model }}</span></span>
@@ -437,16 +467,52 @@ function pointStatusSeverity(status) {
           </div>
 
           <div v-show="messagesAccess" class="space-y-2">
-            <p class="text-sm font-medium text-slate-600">Échanges avec le joueur</p>
+            <p class="section-title">Échanges avec le joueur</p>
             <PlayerMessages :player-id="player.id" @loaded="(data) => (messagesAccess = !!data)" />
           </div>
 
           </div>
       </div>
+      <div v-show="activeTab === 'statistiques'" role="tabpanel">
+        <section class="card p-6 flex flex-col gap-5">
+          <div class="flex items-center justify-between flex-wrap gap-2">
+            <p class="eyebrow">Statistiques</p>
+            <Dropdown
+              v-model="statsSeasonId"
+              :options="seasons"
+              option-label="name"
+              option-value="id"
+              placeholder="Saison…"
+              class="w-48"
+              aria-label="Saison"
+              @change="loadStats"
+            />
+          </div>
+          <template v-if="stats">
+            <div v-for="row in [
+              { label: 'Présence entrainements', data: stats.training, color: 'bg-brand-600' },
+              { label: 'Présence stages', data: stats.camp, color: 'bg-violet-600' },
+            ]" :key="row.label">
+              <div class="flex justify-between text-sm">
+                <span class="font-semibold">{{ row.label }}</span>
+                <span class="font-extrabold">{{ formatRate(row.data.attendanceRate) }}</span>
+              </div>
+              <div class="h-2 rounded-full bg-[#eef1f6] mt-2">
+                <div class="h-full rounded-full" :class="row.color" :style="{ width: ratePercent(row.data.attendanceRate) + '%' }"></div>
+              </div>
+              <p class="mt-1.5 text-xs text-slate-500">
+                {{ row.data.hours }} h cumulées · {{ row.data.counts.PRESENT }} présent(s) · {{ row.data.counts.ABSENT }} absent(s) ·
+                {{ row.data.counts.LATE }} retard(s) · {{ row.data.counts.EXCUSED }} excusé(s)
+              </p>
+            </div>
+          </template>
+          <p v-else class="text-slate-400 text-sm">Aucune saison disponible.</p>
+        </section>
+      </div>
       <div v-show="activeTab === 'evaluations'" role="tabpanel">
           <div class="space-y-4">
-          <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-            <p class="text-sm font-medium text-slate-600 mb-3">Évaluation sportive</p>
+          <div class="card p-4">
+            <p class="section-title mb-3">Évaluation sportive</p>
 
             <div v-if="latestEvaluation" class="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
               <div>
@@ -483,7 +549,7 @@ function pointStatusSeverity(status) {
                   <button
                     type="button"
                     class="w-full py-1.5 px-2 -mx-2 rounded-md flex items-center justify-between gap-2 text-left hover:bg-slate-50"
-                    :class="e.id === selectedEvaluation?.id ? 'bg-sky-50' : ''"
+                    :class="e.id === selectedEvaluation?.id ? 'bg-brand-50' : ''"
                     @click="selectedEvaluationId = e.id"
                   >
                     <span class="min-w-0">
@@ -511,7 +577,7 @@ function pointStatusSeverity(status) {
               </div>
               <p class="text-xs text-slate-400">
                 Les critères dotés de points d'évaluation se notent point par point (1 à 5, moyenne x 2) ; sans point noté, le curseur
-                donne la note directe. <RouterLink to="/admin/evaluation-grid" class="text-sky-600 hover:underline">Gérer la grille</RouterLink>
+                donne la note directe. <RouterLink to="/admin/evaluation-grid" class="text-brand-600 hover:underline">Gérer la grille</RouterLink>
               </p>
     <p class="text-xs text-slate-400 flex flex-wrap gap-x-3 gap-y-0.5">
                 <span v-for="s in EVALUATION_SCALE" :key="s.value"><strong class="font-semibold text-slate-500">{{ s.value }}</strong> = {{ s.label }}</span>
@@ -550,8 +616,8 @@ function pointStatusSeverity(status) {
             </form>
           </div>
 
-          <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-            <p class="text-sm font-medium text-slate-600 mb-3">Points forts / défauts</p>
+          <div class="card p-4">
+            <p class="section-title mb-3">Points forts / défauts</p>
             <ul class="divide-y divide-slate-100 mb-3 text-sm">
               <li v-for="t in traits" :key="t.id" class="py-1.5 flex items-center gap-2">
                 <Tag :severity="t.category === 'STRENGTH' ? 'success' : 'danger'" :value="t.category === 'STRENGTH' ? '+' : '−'" />
@@ -566,8 +632,8 @@ function pointStatusSeverity(status) {
             </div>
           </div>
 
-          <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-            <p class="text-sm font-medium text-slate-600 mb-3">Points à travailler</p>
+          <div class="card p-4">
+            <p class="section-title mb-3">Points à travailler</p>
             <ul class="divide-y divide-slate-100 mb-3 text-sm">
               <li v-for="pt in pointsToWork" :key="pt.id" class="py-1.5 flex items-center justify-between gap-2">
                 <span>{{ pt.description }}</span>
@@ -590,8 +656,8 @@ function pointStatusSeverity(status) {
             </div>
           </div>
 
-          <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-            <p class="text-sm font-medium text-slate-600 mb-3">Notes d'évolution</p>
+          <div class="card p-4">
+            <p class="section-title mb-3">Notes d'évolution</p>
             <ul class="divide-y divide-slate-100 mb-3 text-sm">
               <li v-for="n in evolutionNotes" :key="n.id" class="py-1.5">
                 <span class="text-xs text-slate-400">{{ new Date(n.date).toLocaleDateString("fr-FR") }}</span>

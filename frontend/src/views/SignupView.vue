@@ -50,7 +50,7 @@ async function onSubmit() {
 
       <p v-if="enabled === false" class="text-sm text-slate-600">
         La création de club n'est pas ouverte pour le moment.
-        <RouterLink to="/login" class="text-sky-600 hover:text-sky-700">Retour à la connexion</RouterLink>
+        <RouterLink to="/login" class="text-brand-600 hover:text-brand-700">Retour à la connexion</RouterLink>
       </p>
 
       <form v-else-if="enabled" class="space-y-4" @submit.prevent="onSubmit">
@@ -60,48 +60,48 @@ async function onSubmit() {
         </p>
 
         <div class="space-y-1">
-          <label class="text-sm font-medium text-slate-600" for="clubName">Nom du club</label>
+          <label class="section-title" for="clubName">Nom du club</label>
           <input
             id="clubName"
             v-model="clubName"
             type="text"
             required
-            class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500"
+            class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500"
           />
         </div>
 
         <div class="space-y-1">
-          <label class="text-sm font-medium text-slate-600" for="email">Ton email</label>
+          <label class="section-title" for="email">Ton email</label>
           <input
             id="email"
             v-model="email"
             type="email"
             required
-            class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500"
+            class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500"
           />
         </div>
 
         <div class="space-y-1">
-          <label class="text-sm font-medium text-slate-600" for="password">Mot de passe</label>
+          <label class="section-title" for="password">Mot de passe</label>
           <input
             id="password"
             v-model="password"
             type="password"
             required
             minlength="8"
-            class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500"
+            class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500"
           />
         </div>
 
         <div class="space-y-1">
-          <label class="text-sm font-medium text-slate-600" for="confirmPassword">Confirmer le mot de passe</label>
+          <label class="section-title" for="confirmPassword">Confirmer le mot de passe</label>
           <input
             id="confirmPassword"
             v-model="confirmPassword"
             type="password"
             required
             minlength="8"
-            class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500"
+            class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500"
           />
         </div>
 
@@ -110,12 +110,12 @@ async function onSubmit() {
         <button
           type="submit"
           :disabled="loading"
-          class="w-full rounded-lg bg-sky-600 text-white py-2 font-medium hover:bg-sky-700 disabled:opacity-60"
+          class="w-full rounded-lg bg-brand-600 text-white py-2 font-medium hover:bg-brand-700 disabled:opacity-60"
         >
           {{ loading ? "Création..." : "Créer mon club" }}
         </button>
 
-        <RouterLink to="/login" class="block text-center text-sm text-sky-600 hover:text-sky-700">
+        <RouterLink to="/login" class="block text-center text-sm text-brand-600 hover:text-brand-700">
           J'ai déjà un compte
         </RouterLink>
       </form>

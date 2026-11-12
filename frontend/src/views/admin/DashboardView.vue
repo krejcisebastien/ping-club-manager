@@ -92,22 +92,22 @@ function formatDate(d) {
 <template>
   <AppLayout title="Espace administrateur" :nav-links="navLinks">
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-3 mb-6">
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+      <div class="card p-4">
         <p class="text-sm text-slate-500">Saisons</p>
         <p class="text-2xl font-semibold">{{ seasons.length }}</p>
       </div>
-      <RouterLink to="/admin/players" class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 hover:ring-1 hover:ring-sky-300">
+      <RouterLink to="/admin/players" class="card p-4 hover:ring-1 hover:ring-brand-300">
         <p class="text-sm text-slate-500">Joueurs</p>
         <p class="text-2xl font-semibold">{{ players.length }}</p>
       </RouterLink>
-      <RouterLink to="/admin/coaches" class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 hover:ring-1 hover:ring-sky-300">
+      <RouterLink to="/admin/coaches" class="card p-4 hover:ring-1 hover:ring-brand-300">
         <p class="text-sm text-slate-500">Entraineurs</p>
         <p class="text-2xl font-semibold">{{ coaches.length }}</p>
       </RouterLink>
     </div>
 
     <div class="flex items-center justify-between mb-4 gap-3 flex-wrap">
-      <h2 class="text-sm font-medium text-slate-600">Saisons</h2>
+      <h2 class="section-title">Saisons</h2>
       <div class="flex items-center gap-2 flex-1 sm:flex-none flex-wrap">
         <div class="relative flex-1 sm:w-64 min-w-[10rem]">
           <i class="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
@@ -125,7 +125,7 @@ function formatDate(d) {
       paginator
       :rows="10"
       :rows-per-page-options="[10, 25, 50]"
-      class="bg-white rounded-xl shadow border border-slate-200 overflow-hidden clickable-rows"
+      class="card overflow-hidden clickable-rows"
       striped-rows
       @row-click="openEdit($event.data)"
     >

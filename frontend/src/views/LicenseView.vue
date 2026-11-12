@@ -71,7 +71,7 @@ onBeforeUnmount(() => clearInterval(poll));
 <template>
   <AppLayout title="Licence du club" :nav-links="auth.licenseActive ? navLinks : []">
     <div class="max-w-xl space-y-4">
-      <p v-if="waiting" class="rounded-lg border border-sky-300 bg-sky-50 px-4 py-3 text-sm text-sky-900">
+      <p v-if="waiting" class="rounded-lg border border-brand-300 bg-brand-50 px-4 py-3 text-sm text-brand-900">
         <i class="pi pi-spin pi-spinner mr-2"></i>Paiement reçu, activation de la licence en cours…
       </p>
       <p v-else-if="checkout === 'cancelled'" class="rounded-lg border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-700">
@@ -84,7 +84,7 @@ onBeforeUnmount(() => clearInterval(poll));
       </div>
 
       <template v-if="auth.isAdmin">
-        <div class="bg-white rounded-xl shadow border border-slate-200 p-5 space-y-3">
+        <div class="card p-5 space-y-3">
           <template v-if="license?.onlinePaymentEnabled">
             <h3 class="font-medium text-slate-800">Paiement en ligne</h3>
             <p class="text-sm text-slate-600">Abonnement annuel réglé par carte sur une page sécurisée. L'accès s'ouvre dès le paiement.</p>
@@ -112,7 +112,7 @@ onBeforeUnmount(() => clearInterval(poll));
           </h3>
           <p class="text-sm text-slate-600">
             Pour régler par facture, contactez-nous : la licence est activée dès réception du paiement.
-            <a v-if="SUPPORT_EMAIL" :href="`mailto:${SUPPORT_EMAIL}`" class="text-sky-600 hover:text-sky-700">{{ SUPPORT_EMAIL }}</a>
+            <a v-if="SUPPORT_EMAIL" :href="`mailto:${SUPPORT_EMAIL}`" class="text-brand-600 hover:text-brand-700">{{ SUPPORT_EMAIL }}</a>
           </p>
           <p v-if="error" class="text-sm text-red-600">{{ error }}</p>
         </div>

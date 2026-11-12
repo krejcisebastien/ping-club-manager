@@ -47,7 +47,7 @@ onBeforeUnmount(() => clearTimeout(timer));
 </script>
 
 <template>
-  <section class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex flex-col sm:flex-row sm:items-center gap-3">
+  <section class="card p-4 flex flex-col sm:flex-row sm:items-center gap-3">
     <div class="flex-1 min-w-0">
       <h2 class="font-medium text-slate-800">Données TabT</h2>
       <p v-if="running" class="text-sm text-slate-600 mt-0.5" role="status">
@@ -59,7 +59,7 @@ onBeforeUnmount(() => clearTimeout(timer));
       </p>
       <p v-else class="text-sm text-slate-500 mt-0.5">Mises à jour chaque nuit. Tu peux aussi relancer tout le club maintenant (une fois par heure).</p>
       <div v-if="running" class="mt-2 h-1.5 rounded-full bg-slate-100 overflow-hidden" aria-hidden="true">
-        <div class="h-full bg-sky-600 transition-all" :style="{ width: `${progress}%` }"></div>
+        <div class="h-full bg-brand-600 transition-all" :style="{ width: `${progress}%` }"></div>
       </div>
     </div>
     <Button

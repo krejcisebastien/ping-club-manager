@@ -33,7 +33,7 @@ async function onSubmit() {
           Si un compte existe avec cet email, un lien de réinitialisation vient d'être envoyé. Pense à vérifier tes
           spams.
         </p>
-        <RouterLink to="/login" class="block text-center text-sm text-sky-600 hover:text-sky-700">
+        <RouterLink to="/login" class="block text-center text-sm text-brand-600 hover:text-brand-700">
           Retour à la connexion
         </RouterLink>
       </div>
@@ -42,13 +42,13 @@ async function onSubmit() {
         <p class="text-sm text-slate-600">Indique ton email, on t'envoie un lien pour choisir un nouveau mot de passe.</p>
 
         <div class="space-y-1">
-          <label class="text-sm font-medium text-slate-600" for="email">Email</label>
+          <label class="section-title" for="email">Email</label>
           <input
             id="email"
             v-model="email"
             type="email"
             required
-            class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500"
+            class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500"
           />
         </div>
 
@@ -57,12 +57,12 @@ async function onSubmit() {
         <button
           type="submit"
           :disabled="loading"
-          class="w-full rounded-lg bg-sky-600 text-white py-2 font-medium hover:bg-sky-700 disabled:opacity-60"
+          class="w-full rounded-lg bg-brand-600 text-white py-2 font-medium hover:bg-brand-700 disabled:opacity-60"
         >
           {{ loading ? "Envoi..." : "Envoyer le lien" }}
         </button>
 
-        <RouterLink to="/login" class="block text-center text-sm text-sky-600 hover:text-sky-700">
+        <RouterLink to="/login" class="block text-center text-sm text-brand-600 hover:text-brand-700">
           Retour à la connexion
         </RouterLink>
       </form>

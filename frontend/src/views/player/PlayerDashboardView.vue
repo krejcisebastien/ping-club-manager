@@ -14,10 +14,10 @@ const {
 
 <template>
   <div class="space-y-4">
-    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex items-center gap-4 flex-wrap">
+    <div class="card p-4 flex items-center gap-4 flex-wrap">
       <div class="flex items-center gap-4 min-w-0">
         <img v-if="player.photoUrl" :src="player.photoUrl" alt="" class="w-16 h-16 rounded-full object-cover shrink-0" />
-        <Avatar v-else :label="initials(player)" shape="circle" size="xlarge" class="shrink-0 bg-sky-100 text-sky-700" />
+        <Avatar v-else :label="initials(player)" shape="circle" size="xlarge" class="shrink-0 bg-brand-100 text-brand-700" />
         <div class="min-w-0">
           <p class="text-xl font-semibold text-slate-800">{{ fullName(player) }}</p>
           <div class="flex flex-wrap gap-2 mt-1">
@@ -28,28 +28,28 @@ const {
           </div>
         </div>
       </div>
-      <RouterLink :to="`/player/${player.id}/profile`" class="ml-auto text-sm text-sky-600 hover:underline">
+      <RouterLink :to="`/player/${player.id}/profile`" class="ml-auto text-sm text-brand-600 hover:underline">
         <i class="pi pi-pencil mr-1 text-xs"></i>Ma fiche
       </RouterLink>
     </div>
 
     <div class="grid gap-3 grid-cols-2 lg:grid-cols-4">
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+      <div class="card p-4">
         <p class="text-xs text-slate-500 mb-1">Niveau global</p>
         <p class="text-2xl font-semibold text-slate-800">{{ latestAverage != null ? latestAverage.toFixed(1) : "—" }}<span class="text-sm font-normal text-slate-400">/10</span></p>
         <p class="text-xs text-slate-400">{{ latest ? `évalué le ${formatDate(latest.date)}` : "pas encore évalué" }}</p>
       </div>
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+      <div class="card p-4">
         <p class="text-xs text-slate-500 mb-1">Présence entrainements</p>
         <p class="text-2xl font-semibold text-slate-800">{{ formatRate(stats?.training.attendanceRate) }}</p>
         <p class="text-xs text-slate-400">{{ stats?.training.hours ?? 0 }} h · {{ statsSeason?.name ?? "saison" }}</p>
       </div>
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+      <div class="card p-4">
         <p class="text-xs text-slate-500 mb-1">Présence stages</p>
         <p class="text-2xl font-semibold text-slate-800">{{ formatRate(stats?.camp.attendanceRate) }}</p>
         <p class="text-xs text-slate-400">{{ stats?.camp.hours ?? 0 }} h · {{ statsSeason?.name ?? "saison" }}</p>
       </div>
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+      <div class="card p-4">
         <p class="text-xs text-slate-500 mb-1">À travailler</p>
         <p class="text-2xl font-semibold text-slate-800">{{ openPoints.length }}</p>
         <p class="text-xs text-slate-400">point(s) en cours</p>
@@ -57,10 +57,10 @@ const {
     </div>
 
     <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
-      <div v-if="latest" class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+      <div v-if="latest" class="card p-4">
         <div class="flex items-center justify-between mb-2">
-          <p class="text-sm font-medium text-slate-600">Mon profil de jeu</p>
-          <RouterLink :to="{ path: `/player/${player.id}/profile`, query: { onglet: 'evaluations' } }" class="text-xs text-sky-600 hover:underline">Voir le rapport</RouterLink>
+          <p class="section-title">Mon profil de jeu</p>
+          <RouterLink :to="{ path: `/player/${player.id}/profile`, query: { onglet: 'evaluations' } }" class="text-xs text-brand-600 hover:underline">Voir le rapport</RouterLink>
         </div>
         <div class="h-64"><Chart type="radar" :data="radarData" :options="radarOptions" class="h-full" /></div>
         <p class="text-xs text-slate-500 mt-2">
@@ -68,8 +68,8 @@ const {
           à progresser : <strong>{{ weakestCriteria.label }}</strong> ({{ formatScore(latest[weakestCriteria.key]) }}/10)
         </p>
       </div>
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-        <p class="text-sm font-medium text-slate-600 mb-2">Ce que dit mon entraineur</p>
+      <div class="card p-4">
+        <p class="section-title mb-2">Ce que dit mon entraineur</p>
         <p v-if="latest?.note" class="text-sm text-slate-700 italic mb-3">« {{ latest.note }} »</p>
         <ul class="divide-y divide-slate-100 text-sm">
           <li v-for="n in evolutionNotes.slice(0, 3)" :key="n.id" class="py-2">

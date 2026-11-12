@@ -57,7 +57,7 @@ async function onRemovePlayer(playerId) {
     <Button label="Retour" icon="pi pi-arrow-left" text class="mb-3 -ml-2" @click="router.back()" />
 
     <div v-if="periodGroup" class="space-y-4">
-      <div class="flex items-center justify-between bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+      <div class="flex items-center justify-between card p-4">
         <p class="text-sm text-slate-600">
           <span class="font-medium">{{ periodGroup.group.name }}</span> — {{ periodGroup.period.label }}
           <span class="text-slate-400">({{ new Date(periodGroup.period.campDay.date).toLocaleDateString("fr-FR") }})</span>
@@ -66,14 +66,14 @@ async function onRemovePlayer(playerId) {
       </div>
 
       <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-          <p class="text-sm font-medium text-slate-600 mb-1">Encadrants</p>
+        <div class="card p-4">
+          <p class="section-title mb-1">Encadrants</p>
           <p class="text-xs text-slate-400 mb-3">Repris par défaut du groupe, modifiable ici pour cette période uniquement.</p>
           <CoachAssignmentList :assignments="periodGroup.coaches" :coaches="allCoaches" :sparrings="allSparrings" @add="onAddCoach" @remove="onRemoveCoach" />
         </div>
 
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-          <p class="text-sm font-medium text-slate-600 mb-1">Joueurs de ce groupe</p>
+        <div class="card p-4">
+          <p class="section-title mb-1">Joueurs de ce groupe</p>
           <p class="text-xs text-slate-400 mb-3">Choisis parmi les inscrits au stage. Un joueur n'est que dans un groupe par période.</p>
           <PlayerEnrollmentList :assignments="periodGroup.players" :players="registered" placeholder="Ajouter un joueur inscrit…" @add="onAddPlayer" @remove="onRemovePlayer" />
         </div>

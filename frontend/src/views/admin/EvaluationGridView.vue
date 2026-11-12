@@ -147,7 +147,7 @@ onMounted(load);
       </nav>
 
       <!-- Points du critère sélectionné -->
-      <section class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 min-w-0">
+      <section class="card p-4 min-w-0">
         <div class="flex items-baseline justify-between gap-3 mb-2">
           <h2 class="text-base font-semibold text-slate-800 flex items-center gap-2">
             <span class="w-3 h-3 rounded-full" :style="{ backgroundColor: current.color }"></span>{{ current.label }}

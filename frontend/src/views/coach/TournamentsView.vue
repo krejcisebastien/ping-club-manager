@@ -62,7 +62,7 @@ const record = (b) => `${b.wins} V – ${b.losses} D${b.walkovers ? ` (+${b.walk
   <AppLayout title="Tournois" :nav-links="navLinks">
     <div class="max-w-3xl space-y-4">
       <ClubSyncPanel v-if="auth.isAdmin" @finished="reloadAll" />
-      <section class="bg-white rounded-xl shadow-sm border border-slate-200">
+      <section class="card">
         <header class="p-4 border-b border-slate-100">
           <h2 class="font-medium text-slate-800">À venir</h2>
           <p class="text-xs text-slate-500 mt-0.5">Inscriptions AFTT des joueurs du club, mises à jour chaque nuit.</p>
@@ -72,14 +72,19 @@ const record = (b) => `${b.wins} V – ${b.losses} D${b.walkovers ? ` (+${b.walk
           <li v-for="t in upcomingTournaments" :key="t.id" class="px-4 py-3 flex items-start gap-3">
             <span class="w-20 shrink-0 text-sm font-medium text-slate-700 capitalize">{{ formatTournamentDay(t.date) }}</span>
             <span class="flex-1 min-w-0">
-              <span class="block font-medium text-slate-800 break-words">{{ t.name }}</span>
+              <span class="flex items-start justify-between gap-2">
+                <span class="font-medium text-slate-800 break-words min-w-0">{{ t.name }}</span>
+                <span class="shrink-0 inline-flex items-center rounded-full bg-brand-50 text-brand-700 px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap">
+                  {{ playersOf(t).length }} inscrit{{ playersOf(t).length > 1 ? "s" : "" }}
+                </span>
+              </span>
               <span v-if="venueLabel(t)" class="block text-xs text-slate-500">{{ venueLabel(t) }}</span>
               <span class="flex flex-wrap gap-x-3 gap-y-1 mt-1">
                 <button
                   v-for="p in playersOf(t)"
                   :key="p.player.id"
                   type="button"
-                  class="text-sm text-sky-700 hover:underline text-left"
+                  class="text-sm text-brand-700 hover:underline text-left"
                   @click="router.push(`/admin/players/${p.player.id}`)"
                 >
                   {{ p.player.firstName }} {{ p.player.lastName }}<span v-if="p.series.length" class="text-slate-500"> ({{ p.series.join(", ") }})</span>
@@ -116,7 +121,7 @@ const record = (b) => `${b.wins} V – ${b.losses} D${b.walkovers ? ` (+${b.walk
           <strong>{{ totals.tournaments }}</strong> tournoi(s) · <strong>{{ totals.players }}</strong> joueur(s) · {{ totals.wins }} victoire(s), {{ totals.losses }} défaite(s)
         </p>
 
-        <section v-for="t in data.tournaments" :key="t.name" class="bg-white rounded-xl shadow-sm border border-slate-200">
+        <section v-for="t in data.tournaments" :key="t.name" class="card">
           <header class="p-4 border-b border-slate-100">
             <h2 class="font-medium text-slate-800">{{ t.name }}</h2>
             <p class="text-xs text-slate-500 mt-0.5">{{ formatRange(t) }} · {{ t.players.length }} joueur(s) · {{ record(t) }}</p>
@@ -149,7 +154,7 @@ const record = (b) => `${b.wins} V – ${b.losses} D${b.walkovers ? ` (+${b.walk
                     </li>
                   </ul>
                 </div>
-                <button type="button" class="text-xs text-sky-700 hover:underline" @click="router.push(`/admin/players/${p.player.id}`)">Voir la fiche du joueur</button>
+                <button type="button" class="text-xs text-brand-700 hover:underline" @click="router.push(`/admin/players/${p.player.id}`)">Voir la fiche du joueur</button>
               </div>
             </li>
           </ul>

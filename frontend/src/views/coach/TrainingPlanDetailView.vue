@@ -85,7 +85,7 @@ async function onRemoveExercise(exerciseId) {
     <Button label="Retour" icon="pi pi-arrow-left" text class="mb-3 -ml-2" @click="router.back()" />
 
     <div v-if="plan" class="space-y-4">
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+      <div class="card p-4">
         <form v-if="editing" class="grid grid-cols-1 gap-3 sm:grid-cols-2" @submit.prevent="onSaveInfo">
           <div class="sm:col-span-2">
             <label class="text-xs text-slate-500 block mb-1">Titre</label>
@@ -124,11 +124,11 @@ async function onRemoveExercise(exerciseId) {
         </div>
       </div>
 
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-        <p class="text-sm font-medium text-slate-600 mb-3">Exercices du plan</p>
+      <div class="card p-4">
+        <p class="section-title mb-3">Exercices du plan</p>
         <ul class="divide-y divide-slate-100 mb-3">
           <li v-for="link in plan.exercises" :key="link.id" class="py-2 flex items-center justify-between text-sm">
-            <RouterLink :to="`/coach/exercises/${link.exercise.id}`" class="text-sky-600 hover:underline">{{ link.exercise.title }}</RouterLink>
+            <RouterLink :to="`/coach/exercises/${link.exercise.id}`" class="text-brand-600 hover:underline">{{ link.exercise.title }}</RouterLink>
             <Button icon="pi pi-times" severity="danger" text rounded size="small" aria-label="Retirer" @click="onRemoveExercise(link.exercise.id)" />
           </li>
           <li v-if="!plan.exercises.length" class="py-2 text-slate-400 text-sm">Aucun exercice rattaché.</li>

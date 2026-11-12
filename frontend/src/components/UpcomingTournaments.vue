@@ -45,10 +45,10 @@ function resultLabel(entry) {
 </script>
 
 <template>
-  <div v-if="registrations" class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+  <div v-if="registrations" class="card p-4">
     <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-      <p class="text-sm font-medium text-slate-600">Tournois de la saison</p>
-      <p v-if="syncing" class="text-xs text-sky-700"><i class="pi pi-spin pi-spinner text-xs mr-1"></i>Relecture des inscriptions en cours…</p>
+      <p class="section-title">Tournois de la saison</p>
+      <p v-if="syncing" class="text-xs text-brand-700"><i class="pi pi-spin pi-spinner text-xs mr-1"></i>Relecture des inscriptions en cours…</p>
       <p v-else class="text-xs text-slate-400">Inscriptions AFTT, mises à jour chaque nuit</p>
     </div>
 

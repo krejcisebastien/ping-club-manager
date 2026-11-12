@@ -2,8 +2,6 @@
 import { ref, computed } from "vue";
 import Button from "primevue/button";
 import Dropdown from "primevue/dropdown";
-import Avatar from "primevue/avatar";
-import Tag from "primevue/tag";
 import { fullName, initials as personInitials } from "../lib/name.js";
 
 const props = defineProps({
@@ -41,21 +39,26 @@ function onAdd() {
 
 <template>
   <div>
-    <ul class="divide-y divide-slate-100 mb-3">
-      <li v-for="a in assignments" :key="a.id" class="py-2 flex items-center justify-between gap-2">
-        <div class="flex items-center gap-2 min-w-0">
-          <Avatar
-            :label="initials(a)"
-            shape="circle"
-            class="shrink-0"
-            :style="a.coach ? { backgroundColor: '#e0f2fe', color: '#0369a1' } : { backgroundColor: '#ffedd5', color: '#c2410c' }"
-          />
-          <span class="font-medium text-slate-700 truncate">{{ personName(a) }}</span>
-          <Tag :severity="a.coach ? 'info' : 'warning'" :value="a.coach ? 'Entraineur' : 'Sparring'" />
-        </div>
-        <Button icon="pi pi-times" severity="danger" text rounded size="small" aria-label="Retirer" class="shrink-0" @click="emit('remove', a.id)" />
+    <!-- Encadrants : pastille bleue pour un entraineur, violette pour un sparring. -->
+    <ul class="flex flex-wrap gap-2 mb-3">
+      <li
+        v-for="a in assignments"
+        :key="a.id"
+        class="inline-flex items-center gap-2 max-w-full rounded-full border py-1 pl-1 pr-1.5 text-[0.8125rem] font-semibold text-slate-900"
+        :class="a.coach ? 'bg-brand-50 border-brand-100' : 'bg-violet-50 border-violet-100'"
+      >
+        <span
+          class="w-6 h-6 rounded-full inline-flex items-center justify-center text-[10px] shrink-0"
+          :class="a.coach ? 'bg-brand-100 text-brand-700' : 'bg-violet-100 text-violet-700'"
+        >{{ initials(a) }}</span>
+        <span class="truncate">{{ personName(a) }}</span>
+        <span
+          class="rounded-full px-2 py-0.5 text-[11px] font-bold text-white shrink-0"
+          :class="a.coach ? 'bg-brand-600' : 'bg-violet-600'"
+        >{{ a.coach ? "Entraineur" : "Sparring" }}</span>
+        <Button icon="pi pi-times" severity="secondary" text rounded size="small" aria-label="Retirer" class="shrink-0 !w-6 !h-6" @click="emit('remove', a.id)" />
       </li>
-      <li v-if="!assignments.length" class="py-2 text-slate-400 text-sm">{{ emptyLabel }}</li>
+      <li v-if="!assignments.length" class="py-1 text-slate-400 text-sm">{{ emptyLabel }}</li>
     </ul>
     <div class="flex flex-col gap-2">
       <div class="flex gap-2">
