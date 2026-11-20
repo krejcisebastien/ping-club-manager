@@ -17,9 +17,10 @@ const WSDL_URL = process.env.TABT_WSDL_URL || "https://resultats.aftt.be/api/?ws
 export const HISTORY_SEASONS = 3;
 
 export class TabtError extends Error {
-  constructor(message, { quota = false } = {}) {
+  constructor(message, { quota = false, code = null } = {}) {
     super(message);
     this.quota = quota;
+    this.code = code;
   }
 }
 
@@ -45,7 +46,8 @@ async function call(method, args) {
   } catch (err) {
     const fault = err?.root?.Envelope?.Body?.Fault;
     const message = fault?.faultstring || err.message;
-    throw new TabtError(`TabT : ${message}`, { quota: String(fault?.faultcode) === "34" || /quota/i.test(message) });
+    const code = fault?.faultcode == null ? null : String(fault.faultcode);
+    throw new TabtError(`TabT : ${message}`, { quota: code === "34" || /quota/i.test(message), code });
   }
 }
 
@@ -109,19 +111,40 @@ function toResult(playerId, season, e, ladies = false) {
 // qui ne sortent qu'avec cette catégorie, à côté du classement général.
 const LADIES_CATEGORY = 44;
 
+// ExtendedInformation (qui donne le sexe) exige un compte TabT qui en a le
+// droit : sinon TabT répond par l'erreur 27 et rien n'était importé. On la
+// demande tant que TabT l'accepte ; après un refus, on s'en passe.
+let extendedInformationRefused = false;
+const isExtendedInformationRefused = (err) => err instanceof TabtError && (err.code === "27" || /extended information/i.test(err.message));
+
+async function getMember(licence, season) {
+  if (!extendedInformationRefused) {
+    try {
+      const r = await call("GetMembers", { UniqueIndex: licence, Season: season, WithResults: true, ExtendedInformation: true });
+      return r.MemberEntries?.[0] ?? null;
+    } catch (err) {
+      if (!isExtendedInformationRefused(err)) throw err;
+      extendedInformationRefused = true;
+    }
+  }
+  const r = await call("GetMembers", { UniqueIndex: licence, Season: season, WithResults: true });
+  return r.MemberEntries?.[0] ?? null;
+}
+
 // Importe une saison TabT d'un joueur : remplace ses matchs de la saison et
 // met à jour sa situation (classement, club). Renvoie le nombre de matchs.
 // L'« ELO » que TabT peut renvoyer n'est pas le classement numérique AFTT
 // (points affichés sur data.aftt.be) : il n'est volontairement pas importé.
 async function syncSeason(playerId, licence, season, seasonName) {
   // ExtendedInformation donne le sexe (Gender). Elle renvoie aussi des données
-  // médicales, qui ne sont ni lues ni enregistrées.
-  const r = await call("GetMembers", { UniqueIndex: licence, Season: season, WithResults: true, ExtendedInformation: true });
-  const member = r.MemberEntries?.[0];
+  // médicales, qui ne sont ni lues ni enregistrées. Sans ce droit, le sexe est
+  // inconnu : la catégorie dames est alors demandée pour chaque joueur, et
+  // seule une joueuse y figure.
+  const member = await getMember(licence, season);
   if (!member) return null;
   const results = (member.ResultEntries ?? []).map((e) => toResult(playerId, season, e));
   let ladiesRanking = null;
-  if (member.Gender === "F") {
+  if (member.Gender === "F" || (member.Gender == null && extendedInformationRefused)) {
     const l = await call("GetMembers", { UniqueIndex: licence, Season: season, WithResults: true, PlayerCategory: LADIES_CATEGORY });
     const lady = l.MemberEntries?.[0];
     ladiesRanking = lady?.Ranking ?? null;

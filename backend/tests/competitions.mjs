@@ -221,14 +221,17 @@ try {
   // Client TabT simulé : une joueuse (Gender F) a un classement général et un
   // classement dames, avec des résultats distincts ; un joueur n'a que le général.
   const tabtCalls = [];
+  let refuseExtended = false;
   const entry = (date, matchId, won) => ({ Date: date, UniqueIndex: 1234, FirstName: "Eva", LastName: "Adv", Ranking: "B4", Result: won ? "V" : "D", SetFor: won ? 3 : 0, SetAgainst: won ? 0 : 3, CompetitionType: "C", Club: "Minerois", MatchId: matchId });
   soap.createClientAsync = async () => ({
     GetSeasonsAsync: async () => [{ CurrentSeason: 27, SeasonEntries: [{ Season: 27, Name: "2026-2027" }] }],
     GetMembersAsync: async (args) => {
       tabtCalls.push(args);
+      if (refuseExtended && args.ExtendedInformation) throw Object.assign(new Error("fault"), { root: { Envelope: { Body: { Fault: { faultcode: "27", faultstring: "You don't have permission to see extended information" } } } } });
       const lady = args.UniqueIndex === lic(1);
       if (args.PlayerCategory === 44) return [lady ? { MemberEntries: [{ UniqueIndex: lic(1), Ranking: "B2", ResultEntries: [entry("2026-10-03", "SD03/086", false), entry("2026-10-10", "SD03/090", true)] }] } : { MemberCount: 0 }];
-      return [{ MemberEntries: [{ UniqueIndex: args.UniqueIndex, Ranking: lady ? "C2" : "D0", Club: "N076", Gender: lady ? "F" : "M", MedicalAttestation: true, ResultEntries: [entry("2026-10-04", "HAI/01", true)] }] }];
+      const extended = args.ExtendedInformation ? { Gender: lady ? "F" : "M", MedicalAttestation: true } : {};
+      return [{ MemberEntries: [{ UniqueIndex: args.UniqueIndex, Ranking: lady ? "C2" : "D0", Club: "N076", ...extended, ResultEntries: [entry("2026-10-04", "HAI/01", true)] }] }];
     },
   });
   process.env.TABT_ACCOUNT ??= "test";
@@ -246,6 +249,23 @@ try {
   expect("joueur : pas de classement dames", otherSeason?.ranking === "D0" && otherSeason.ladiesRanking === null);
   const comp = (await call(aliceTok, "GET", `/players/${alice.id}/competition`)).json;
   expect("fiche : classement dames et matchs marqués", comp?.seasons?.find((x) => x.season === 27)?.ladiesRanking === "B2" && comp.results.filter((r) => r.season === 27 && r.ladies).length === 2);
+
+  // Compte TabT sans droit sur ExtendedInformation (erreur 27) : l'import ne
+  // doit pas échouer, et les résultats dames (tournoi en « Catégorie Dames »
+  // compris) sont repris via la catégorie dames.
+  refuseExtended = true;
+  await prisma.competitionResult.deleteMany({ where: { playerId: { in: [alice.id, other.id] } } });
+  let refusedError = null;
+  await syncPlayer({ id: alice.id, licenseNumber: String(lic(1)) }).catch((err) => (refusedError = err));
+  expect("sans ExtendedInformation : import de la joueuse réussi", refusedError === null, refusedError?.message);
+  const refusedResults = await prisma.competitionResult.findMany({ where: { playerId: alice.id, season: 27 } });
+  expect("sans ExtendedInformation : résultats dames repris", refusedResults.length === 3 && refusedResults.filter((r) => r.ladies).length === 2, String(refusedResults.length));
+  const extendedTries = tabtCalls.filter((a) => a.ExtendedInformation).length;
+  let otherError = null;
+  await syncPlayer({ id: other.id, licenseNumber: String(lic(2)) }).catch((err) => (otherError = err));
+  expect("sans ExtendedInformation : joueur importé sans résultats dames", otherError === null && (await prisma.competitionResult.count({ where: { playerId: other.id, season: 27, ladies: true } })) === 0);
+  expect("ExtendedInformation n'est plus redemandée après un refus", tabtCalls.filter((a) => a.ExtendedInformation).length === extendedTries);
+  refuseExtended = false;
 
   // ---------- Resynchronisation de tout le club ----------
   const seen = [];
