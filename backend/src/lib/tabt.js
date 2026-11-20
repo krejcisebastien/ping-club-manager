@@ -1,6 +1,6 @@
 import soap from "soap";
 import { prisma } from "./prisma.js";
-import { fetchNumericRanking, fetchPlayerSheet } from "./afttData.js";
+import { fetchActiveCounts, fetchNumericRanking, fetchPlayerSheet } from "./afttData.js";
 
 // Import des résultats de compétition depuis TabT, l'API de l'AFTT
 // (https://resultats.aftt.be/api). Identifiants : TABT_ACCOUNT / TABT_PASSWORD.
@@ -185,12 +185,28 @@ async function recordPoints(playerId, licence, seasonName) {
   if (!ranking) return;
   const now = new Date();
   const date = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
-  const data = { seasonName, points: ranking.points, rankingPosition: ranking.rankingPosition };
+  const data = {
+    seasonName,
+    points: ranking.points,
+    rankingPosition: ranking.rankingPosition,
+    ladiesRankingPosition: ranking.ladiesRankingPosition ?? null,
+  };
   await prisma.competitionPoints.upsert({
     where: { playerId_date: { playerId, date } },
     create: { playerId, date, ...data },
     update: data,
   });
+}
+
+// Nombre d'actifs du classement numérique : relevé au plus une fois par jour
+// (le premier joueur synchronisé du jour s'en charge), jamais bloquant.
+export async function recordActiveCounts({ fetchCounts = fetchActiveCounts } = {}) {
+  const now = new Date();
+  const date = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+  if (await prisma.numericRankingStats.findUnique({ where: { date } })) return false;
+  const counts = await fetchCounts();
+  await prisma.numericRankingStats.upsert({ where: { date }, create: { date, ...counts }, update: counts });
+  return true;
 }
 
 // Points de base de la saison, points des adversaires et +/- par match, lus
@@ -251,6 +267,11 @@ export async function syncPlayer(player, { delayMs = 0 } = {}) {
       await recordPoints(player.id, licence, names.get(current) ?? String(current));
     } catch (err) {
       pointsError = `Points AFTT non mis à jour : ${err.message}`;
+    }
+    try {
+      await recordActiveCounts();
+    } catch (err) {
+      console.warn(`Nombre d'actifs data.aftt.be non relevé : ${err.message}`);
     }
     await prisma.player.update({ where: { id: player.id }, data: { competitionSyncedAt: new Date(), competitionSyncError: pointsError } });
 

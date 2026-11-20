@@ -2,6 +2,8 @@ import { Router } from "express";
 import { requireAuth, requireRole } from "../middleware/auth.js";
 import { bilan, splitEventName } from "../lib/tournamentResults.js";
 import { clubSyncs, isTabtConfigured, startClubSync } from "../lib/tabt.js";
+import { estimateRanking } from "../lib/numericRanking.js";
+import { prisma } from "../lib/prisma.js";
 
 // Vue club des compétitions importées de TabT : les tournois d'une saison et,
 // pour chacun, les joueurs du club qui y ont joué, avec leurs séries et leur bilan.
@@ -112,6 +114,78 @@ router.post("/sync", requireRole("ADMIN"), async (req, res) => {
   };
   if (status !== "started") return res.status(409).json({ error: messages[status], sync: syncStatus(req.user.clubId) });
   res.json({ sync: syncStatus(req.user.clubId) });
+});
+
+// ---------- Points et classements estimés ----------
+// Pour chaque joueur ayant un n° de licence : classement et points de début de
+// la saison TabT la plus récente, +/- des matchs (fiche data.aftt.be), points
+// actuels et classement estimé d'après sa place au dernier relevé du
+// classement numérique et le tableau d'équivalence (src/lib/numericRanking.js).
+router.get("/rankings", async (req, res) => {
+  const latestSeason = await req.db.competitionSeason.findFirst({ orderBy: { season: "desc" }, select: { season: true, seasonName: true } });
+  // Nombre d'actifs : donnée nationale (hors isolation), dernier relevé connu.
+  const stats = await prisma.numericRankingStats.findFirst({ orderBy: { date: "desc" } });
+  const players = await req.db.player.findMany({
+    where: { licenseNumber: { not: null } },
+    select: { id: true, firstName: true, lastName: true, licenseNumber: true },
+  });
+  const season = latestSeason?.season ?? null;
+  const [seasons, results, points] = season == null
+    ? [[], [], []]
+    : await Promise.all([
+        req.db.competitionSeason.findMany({ where: { season } }),
+        req.db.competitionResult.findMany({ where: { season }, select: { playerId: true, pointsDelta: true } }),
+        req.db.competitionPoints.findMany({ where: { seasonName: latestSeason.seasonName }, orderBy: { date: "asc" } }),
+      ]);
+  const seasonOf = new Map(seasons.map((s) => [s.playerId, s]));
+  const lastPoints = new Map(points.map((p) => [p.playerId, p])); // trié par date : le dernier l'emporte
+  const deltas = new Map();
+  for (const r of results) {
+    const d = deltas.get(r.playerId) ?? { sum: 0, known: 0, matches: 0 };
+    d.matches++;
+    if (r.pointsDelta != null) {
+      d.sum += Number(r.pointsDelta);
+      d.known++;
+    }
+    deltas.set(r.playerId, d);
+  }
+
+  const rows = players
+    .filter((p) => p.licenseNumber.trim())
+    .map((p) => {
+      const s = seasonOf.get(p.id);
+      const last = lastPoints.get(p.id);
+      const d = deltas.get(p.id);
+      const basePoints = s?.basePoints == null ? null : Number(s.basePoints);
+      const delta = d?.known ? Math.round(d.sum * 100) / 100 : basePoints != null && d ? 0 : null;
+      // Points actuels : base + somme des +/- ; à défaut, ceux du dernier relevé.
+      const currentPoints = basePoints != null && delta != null ? Math.round((basePoints + delta) * 100) / 100 : last ? Number(last.points) : null;
+      return {
+        id: p.id,
+        firstName: p.firstName,
+        lastName: p.lastName,
+        startRanking: s?.ranking ?? null,
+        startLadiesRanking: s?.ladiesRanking ?? null,
+        basePoints,
+        delta,
+        matches: d?.matches ?? 0,
+        matchesWithoutDelta: d ? d.matches - d.known : 0,
+        currentPoints,
+        positionDate: last?.date ?? null,
+        rankingPosition: last?.rankingPosition ?? null,
+        ladiesRankingPosition: last?.ladiesRankingPosition ?? null,
+        estimate: stats && last?.rankingPosition ? estimateRanking("men", last.rankingPosition, stats.activePlayers) : null,
+        ladiesEstimate:
+          stats?.activeLadies && last?.ladiesRankingPosition ? estimateRanking("ladies", last.ladiesRankingPosition, stats.activeLadies) : null,
+      };
+    })
+    .sort((a, b) => (b.currentPoints ?? -Infinity) - (a.currentPoints ?? -Infinity) || a.lastName.localeCompare(b.lastName, "fr"));
+
+  res.json({
+    season: latestSeason,
+    stats: stats && { date: stats.date, activePlayers: stats.activePlayers, activeLadies: stats.activeLadies },
+    players: rows,
+  });
 });
 
 export default router;

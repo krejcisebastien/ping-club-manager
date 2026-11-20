@@ -16,6 +16,7 @@ const ADMIN_LINKS = [
   { section: "Pédagogie", to: "/coach/exercises", label: "Exercices", icon: "pi pi-book" },
   { section: "Pédagogie", to: "/coach/training-plans", label: "Plans d'entrainement", icon: "pi pi-clipboard" },
   { section: "Pédagogie", to: "/admin/evaluation-grid", label: "Grille d'évaluation", icon: "pi pi-list-check" },
+  { section: "Gestion du club", to: "/coach/rankings", label: "Classements", icon: "pi pi-chart-line" },
   { section: "Gestion du club", to: "/admin/rates", label: "Tarifs", icon: "pi pi-euro" },
   { section: "Gestion du club", to: "/admin/volunteering", label: "Fiches bénévolat", icon: "pi pi-file-excel" },
   { section: "Gestion du club", to: "/admin/users", label: "Utilisateurs", icon: "pi pi-key" },
@@ -34,6 +35,7 @@ const COACH_LINKS = [
   { section: "Pédagogie", to: "/coach/exercises", label: "Exercices", icon: "pi pi-book" },
   { section: "Pédagogie", to: "/coach/training-plans", label: "Plans d'entrainement", icon: "pi pi-clipboard" },
   { section: "Pédagogie", to: "/admin/evaluation-grid", label: "Grille d'évaluation", icon: "pi pi-list-check" },
+  { section: "Club", to: "/coach/rankings", label: "Classements", icon: "pi pi-chart-line" },
 ];
 
 // Menu de l'espace joueur : les liens dépendent du joueur affiché (un compte

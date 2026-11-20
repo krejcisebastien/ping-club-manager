@@ -4,12 +4,13 @@
 // elle peut changer sans préavis. Un seul appel léger par joueur et par jour.
 const SEARCH_URL = process.env.AFTT_DATA_SEARCH_URL || "https://data.aftt.be/ranking/recherche_ajax.php";
 const SHEET_URL = process.env.AFTT_DATA_SHEET_URL || "https://data.aftt.be/tools/fiche.php";
+const HOME_URL = process.env.AFTT_DATA_HOME_URL || "https://data.aftt.be/";
 const TIMEOUT_MS = 10_000;
 const USER_AGENT = "PingClubManager (suivi d'entrainement de clubs AFTT)";
 
 export class AfttDataError extends Error {}
 
-// Renvoie { points, rankingPosition } pour une licence, ou null si le joueur
+// Renvoie { points, rankingPosition, ladiesRankingPosition } pour une licence, ou null si le joueur
 // n'apparaît pas dans le classement numérique (ex. pas encore de match).
 export async function fetchNumericRanking(licence) {
   let res;
@@ -33,8 +34,13 @@ export async function fetchNumericRanking(licence) {
   if (!entry) return null;
   const points = Number(entry.Points);
   if (!Number.isFinite(points)) throw new AfttDataError("Points absents de la réponse de data.aftt.be.");
-  const position = Number.parseInt(entry.Ranking_Pos, 10);
-  return { points, rankingPosition: Number.isNaN(position) ? null : position };
+  const toPosition = (v) => {
+    const n = Number.parseInt(v, 10);
+    return Number.isNaN(n) ? null : n;
+  };
+  // Ranking_Pos : place au classement mixte ; Ranking_Pos_W : place parmi les
+  // dames de ce même classement (vide pour les messieurs).
+  return { points, rankingPosition: toPosition(entry.Ranking_Pos), ladiesRankingPosition: toPosition(entry.Ranking_Pos_W) };
 }
 
 // ---------- Fiche joueur (page HTML) ----------
@@ -88,4 +94,32 @@ export async function fetchPlayerSheet(licence) {
   }
   if (!res.ok) throw new AfttDataError(`fiche data.aftt.be : réponse ${res.status}.`);
   return parsePlayerSheet(await res.text());
+}
+
+// ---------- Nombre de joueurs actifs (page d'accueil) ----------
+// « 13 279 joueurs actifs hors NC » et « 1 484 joueuses actives hors NC » :
+// ils choisissent la colonne du tableau d'équivalence. Exporté pour les tests.
+export function parseActiveCounts(html) {
+  const text = html.replace(/<[^>]*>/g, " ").replace(/&nbsp;|&#160;/g, " ").replace(/\s+/g, " ");
+  const read = (label) => {
+    const m = text.match(new RegExp(`(\\d{1,3}(?:[ .\u00a0\u202f]\\d{3})*|\\d+)\\s*${label}`, "i"));
+    return m ? Number(m[1].replace(/\D/g, "")) : null;
+  };
+  const activePlayers = read("joueurs actifs hors NC");
+  // Garde-fou contre un nombre voisin lu par erreur (date, heure…).
+  if (!activePlayers || activePlayers < 1000) return null;
+  return { activePlayers, activeLadies: read("joueuses actives hors NC") };
+}
+
+export async function fetchActiveCounts() {
+  let res;
+  try {
+    res = await fetch(HOME_URL, { headers: { Accept: "text/html", "User-Agent": USER_AGENT }, signal: AbortSignal.timeout(TIMEOUT_MS) });
+  } catch (err) {
+    throw new AfttDataError(`accueil data.aftt.be injoignable (${err.name === "TimeoutError" ? "délai dépassé" : err.message}).`);
+  }
+  if (!res.ok) throw new AfttDataError(`accueil data.aftt.be : réponse ${res.status}.`);
+  const counts = parseActiveCounts(await res.text());
+  if (!counts) throw new AfttDataError("Nombre de joueurs actifs introuvable sur data.aftt.be (mise en page modifiée ?).");
+  return counts;
 }

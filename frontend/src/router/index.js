@@ -142,6 +142,12 @@ const routes = [
     meta: { roles: ["ADMIN", "COACH"] },
   },
   {
+    path: "/coach/rankings",
+    name: "coach-rankings",
+    component: () => import("../views/coach/RankingsView.vue"),
+    meta: { roles: ["ADMIN", "COACH"] },
+  },
+  {
     path: "/coach/attendance",
     name: "coach-attendance-list",
     component: () => import("../views/coach/AttendanceListView.vue"),

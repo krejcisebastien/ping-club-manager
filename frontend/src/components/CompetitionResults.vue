@@ -115,6 +115,12 @@ const sumDeltas = (matches) => {
   return known.length ? known.reduce((sum, m) => sum + m.pointsDelta, 0) : null;
 };
 const seasonGain = computed(() => sumDeltas((data.value?.results ?? []).filter((r) => r.season === current.value?.season)));
+// Points au moment de la consultation : points de base de la saison + somme des
+// +/- des matchs importés. À défaut de points de base, le dernier relevé.
+const currentPoints = computed(() => {
+  if (basePoints.value != null) return { value: basePoints.value + (seasonGain.value ?? 0), computed: true };
+  return latestPoints.value ? { value: latestPoints.value.points, computed: false } : null;
+});
 const pointsChartData = computed(() => ({
   labels: seasonPoints.value.map((p) => formatDate(p.date)),
   datasets: [
@@ -199,20 +205,23 @@ const chartOptions = {
     </div>
 
     <!-- Classement numérique (points relevés chaque jour sur data.aftt.be) -->
-    <div v-if="latestPoints" class="card p-4">
+    <div v-if="currentPoints" class="card p-4">
       <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-        <p class="section-title">Classement numérique {{ latestPoints.seasonName }}</p>
-        <p class="text-xs text-slate-400">Relevé du {{ formatDate(latestPoints.date) }} · source data.aftt.be</p>
+        <p class="section-title">Classement numérique {{ latestPoints?.seasonName ?? current?.seasonName }}</p>
+        <p v-if="latestPoints" class="text-xs text-slate-400">Relevé du {{ formatDate(latestPoints.date) }} · source data.aftt.be</p>
       </div>
       <div class="flex flex-wrap items-baseline gap-x-6 gap-y-1 mt-2">
-        <p class="text-3xl font-semibold text-slate-800 tabular-nums">{{ formatPoints(latestPoints.points) }} <span class="text-base font-normal text-slate-500">pts</span></p>
-        <p v-if="latestPoints.rankingPosition" class="text-sm text-slate-600">{{ latestPoints.rankingPosition }}<sup>e</sup> au ranking mixte <span class="text-slate-400">(sans les inactifs)</span></p>
-        <p v-if="pointsDelta" class="text-sm font-medium tabular-nums" :class="pointsDelta.value >= 0 ? 'text-green-700' : 'text-red-600'">
+        <div>
+          <p class="text-xs text-slate-500">{{ currentPoints.computed ? "Points actuels" : "Points au dernier relevé" }}</p>
+          <p class="text-3xl font-semibold text-slate-800 tabular-nums">{{ formatPoints(currentPoints.value) }} <span class="text-base font-normal text-slate-500">pts</span></p>
+        </div>
+        <p v-if="latestPoints?.rankingPosition" class="text-sm text-slate-600">{{ latestPoints.rankingPosition }}<sup>e</sup> au ranking mixte <span class="text-slate-400">(sans les inactifs)</span></p>
+        <p v-if="pointsDelta && !currentPoints.computed" class="text-sm font-medium tabular-nums" :class="pointsDelta.value >= 0 ? 'text-green-700' : 'text-red-600'">
           {{ pointsDelta.value >= 0 ? "+" : "−" }}{{ formatPoints(Math.abs(pointsDelta.value)) }} pts depuis le {{ formatDate(pointsDelta.since) }}
         </p>
       </div>
       <p v-if="basePoints != null || seasonGain != null" class="text-sm text-slate-600 mt-2">
-        <template v-if="basePoints != null">Points de base {{ formatPoints(basePoints) }}</template>
+        <template v-if="basePoints != null">Points de début de saison {{ formatPoints(basePoints) }}</template>
         <template v-if="basePoints != null && seasonGain != null"> · </template>
         <template v-if="seasonGain != null">
           gagnés en match cette saison :

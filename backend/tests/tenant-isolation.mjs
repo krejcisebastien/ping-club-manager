@@ -282,6 +282,24 @@ try {
   expect("B ne voit pas les résultats de compétition de A", compB.status === 404, `status ${compB.status}`);
   expect("B ne voit aucun résultat de A dans ses tables", (await tenantClient(B.user.clubId).competitionResult.count()) === 0);
   expect("B ne voit aucun relevé de points de A", (await tenantClient(B.user.clubId).competitionPoints.count()) === 0);
+  // Points et classements estimés (vue club) : seuls les joueurs du club, staff uniquement.
+  await prisma.player.update({ where: { id: player.id }, data: { licenseNumber: "123456" } });
+  await prisma.competitionSeason.update({ where: { playerId_season: { playerId: player.id, season: 27 } }, data: { basePoints: 1400 } });
+  const statsDate = new Date("2000-01-01");
+  const hadStats = await prisma.numericRankingStats.count();
+  if (!hadStats) await prisma.numericRankingStats.create({ data: { date: statsDate, activePlayers: 13279, activeLadies: 1484 } });
+  const rankA = await call(A.token, "GET", "/competitions/rankings");
+  const rowA = rankA.json?.players?.find((p) => p.id === player.id);
+  expect("A voit les points et classements de son joueur", rankA.status === 200 && rowA?.startRanking === "D4" && rowA.basePoints === 1400, JSON.stringify(rowA));
+  expect("points actuels = base + somme des +/-", rowA?.delta === -2.6 && rowA.currentPoints === 1397.4, JSON.stringify(rowA));
+  expect("classement estimé d'après la place au classement numérique", !!rowA?.estimate?.ranking, JSON.stringify(rowA?.estimate));
+  const rankB = await call(B.token, "GET", "/competitions/rankings");
+  expect("B ne voit aucun joueur de A dans les classements", rankB.status === 200 && !rankB.json.players.some((p) => p.id === player.id), JSON.stringify(rankB.json));
+  const playerToken = (await login(`joueur-a-${run}@test.local`)).token;
+  const rankPlayer = await call(playerToken, "GET", "/competitions/rankings");
+  expect("un joueur n'accède pas à la vue club des classements", rankPlayer.status === 403, `status ${rankPlayer.status}`);
+  if (!hadStats) await prisma.numericRankingStats.delete({ where: { date: statsDate } });
+  await prisma.player.update({ where: { id: player.id }, data: { licenseNumber: null } });
   const noLicence = await call(A.token, "POST", `/players/${player.id}/competition/refresh`, {});
   expect("actualisation refusée sans n° de licence", noLicence.status === 400, `status ${noLicence.status}`);
   await call(A.token, "PUT", `/players/${player.id}`, { licenseNumber: "abc" });

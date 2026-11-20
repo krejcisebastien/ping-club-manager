@@ -320,10 +320,22 @@ model CompetitionPoints {
   seasonName      String
   points          Decimal  @db.Decimal(8, 2)
   rankingPosition Int?
+  // Place parmi les dames du classement mixte (joueuses uniquement).
+  ladiesRankingPosition Int?
 
   player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
 
   @@unique([playerId, date])
+}
+
+// Nombre de joueurs actifs du classement numérique (hors NC), relevé chaque
+// jour sur data.aftt.be : il choisit la colonne du tableau d'équivalence
+// (src/lib/numericRanking.js). Donnée nationale, commune à tous les clubs :
+// hors isolation multi-tenant, lue et écrite avec le client prisma global.
+model NumericRankingStats {
+  date          DateTime @id @db.Date
+  activePlayers Int
+  activeLadies  Int?
 }
 
 // Un match individuel (championnat ou tournoi). Les lignes d'une saison sont
