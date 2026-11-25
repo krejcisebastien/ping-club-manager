@@ -157,9 +157,12 @@ router.get("/rankings", async (req, res) => {
       const last = lastPoints.get(p.id);
       const d = deltas.get(p.id);
       const basePoints = s?.basePoints == null ? null : Number(s.basePoints);
+      const bonusPoints = s?.bonusPoints == null ? 0 : Number(s.bonusPoints);
       const delta = d?.known ? Math.round(d.sum * 100) / 100 : basePoints != null && d ? 0 : null;
-      // Points actuels : base + somme des +/- ; à défaut, ceux du dernier relevé.
-      const currentPoints = basePoints != null && delta != null ? Math.round((basePoints + delta) * 100) / 100 : last ? Number(last.points) : null;
+      // Points actuels : base + bonus de début de saison + somme des +/- ; à
+      // défaut, ceux du dernier relevé.
+      const currentPoints =
+        basePoints != null && delta != null ? Math.round((basePoints + bonusPoints + delta) * 100) / 100 : last ? Number(last.points) : null;
       return {
         id: p.id,
         firstName: p.firstName,
@@ -167,6 +170,7 @@ router.get("/rankings", async (req, res) => {
         startRanking: s?.ranking ?? null,
         startLadiesRanking: s?.ladiesRanking ?? null,
         basePoints,
+        bonusPoints,
         delta,
         matches: d?.matches ?? 0,
         matchesWithoutDelta: d ? d.matches - d.known : 0,

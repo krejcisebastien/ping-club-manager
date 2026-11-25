@@ -55,12 +55,16 @@ function parseNumber(text) {
   return Number.isFinite(value) ? value : null;
 }
 
-// Extrait de la fiche : points de base et, par match, date, licence de
+// Extrait de la fiche : points de base, bonus de début de saison et, par match, date, licence de
 // l'adversaire, ses points et le +/- du joueur. Exporté pour les tests.
 export function parsePlayerSheet(html) {
   const base =
     html.match(/Points de base<\/span>\s*<span class="profile-metric-value">([^<]+)</) ??
     html.match(/<h5[^>]*>\s*Points de base\s*<\/h5>\s*<h3[^>]*>\s*([\d.,\s]+)\s*pts/);
+  // Bonus de début de saison, ajouté aux points de base (0 s'il n'y en a pas).
+  const bonus =
+    html.match(/Points bonus<\/span>\s*<span class="profile-metric-value">([^<]+)</) ??
+    html.match(/Bonus de début de saison\s*:\s*(?:<strong>)?\s*([+-−]?\s*[\d.,\s]+?)\s*pts/);
   const matches = [];
   for (const day of html.split(/class="card day-result-card/).slice(1)) {
     const d = day.match(/(\d{2})\/(\d{2})\/(\d{4})/);
@@ -79,7 +83,8 @@ export function parsePlayerSheet(html) {
       });
     }
   }
-  return { basePoints: base ? parseNumber(base[1]) : null, matches };
+  const bonusPoints = bonus ? parseNumber(bonus[1].replace("−", "-").replace("+", "")) : null;
+  return { basePoints: base ? parseNumber(base[1]) : null, bonusPoints, matches };
 }
 
 export async function fetchPlayerSheet(licence) {

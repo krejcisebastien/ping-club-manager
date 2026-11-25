@@ -65,7 +65,7 @@ const badgeClass = (t) =>
 
     <div class="card p-4 mb-4 text-sm text-slate-600 space-y-1">
       <p>
-        <strong class="font-medium text-slate-800">Points actuels</strong> = points de début de saison + somme des points gagnés ou perdus
+        <strong class="font-medium text-slate-800">Points actuels</strong> = points de début de saison + bonus de début de saison éventuel + somme des points gagnés ou perdus
         en match (données AFTT importées chaque nuit).
       </p>
       <p>
@@ -115,7 +115,10 @@ const badgeClass = (t) =>
         </template>
       </Column>
       <Column field="basePoints" header="Points début" sortable>
-        <template #body="{ data: p }"><span class="tabular-nums">{{ formatPoints(p.basePoints) }}</span></template>
+        <template #body="{ data: p }">
+          <span class="tabular-nums">{{ formatPoints(p.basePoints) }}</span>
+          <span v-if="p.bonusPoints" class="block text-xs text-green-700 tabular-nums">bonus +{{ formatPoints(p.bonusPoints) }}</span>
+        </template>
       </Column>
       <Column field="delta" header="Différentiel" sortable>
         <template #body="{ data: p }">

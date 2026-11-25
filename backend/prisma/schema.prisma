@@ -304,6 +304,8 @@ model CompetitionSeason {
   club          String?
   // Points de base de la saison (après dérive), lus sur data.aftt.be.
   basePoints    Decimal? @db.Decimal(8, 2)
+  // Bonus de début de saison (data.aftt.be), ajouté aux points de base.
+  bonusPoints   Decimal? @db.Decimal(8, 2)
   syncedAt      DateTime @default(now())
 
   player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)

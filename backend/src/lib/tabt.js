@@ -219,7 +219,9 @@ async function enrichFromSheet(playerId, licence, season) {
   const sheet = await fetchPlayerSheet(licence);
   const updates = [];
   if (sheet.basePoints != null) {
-    updates.push(prisma.competitionSeason.updateMany({ where: { playerId, season }, data: { basePoints: sheet.basePoints } }));
+    updates.push(
+      prisma.competitionSeason.updateMany({ where: { playerId, season }, data: { basePoints: sheet.basePoints, bonusPoints: sheet.bonusPoints ?? 0 } })
+    );
   }
   for (const m of sheet.matches) {
     updates.push(

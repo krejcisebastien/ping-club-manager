@@ -28,6 +28,7 @@ const card = (licence, oppPoints, delta, cls) => `
 const html = `
 <style>.match-card-modern{gap:9px}.match-delta.positive{color:green}</style>
 <div class="profile-metric"><span class="profile-metric-label">Points de base</span><span class="profile-metric-value">1 410,30</span></div>
+<div class="profile-metric bonus"><span class="profile-metric-label">Points bonus</span><span class="profile-metric-value">+115,14</span><span class="profile-metric-note">Ajoutés au début de la saison</span></div>
 <div class="card day-result-card w-100"><div class="day-result-header"><h6 class="m-0"><i></i> 24/09/2026 - HAI_VET03/002 - Luttre</h6>
   <span class="day-points-badge negative">Total : -0.52 pts</span></div>
   ${card(154781, "1224.45", "+2.6", "positive")}
@@ -45,6 +46,9 @@ expect("date du match", a.date.toISOString() === "2026-09-24T00:00:00.000Z" && c
 expect("licence de l'adversaire", a.opponentLicence === 154781 && b.opponentLicence === 100227);
 expect("points de l'adversaire", a.opponentPoints === 1224.45 && c.opponentPoints === 834.091);
 expect("gain et perte de points", a.pointsDelta === 2.6 && b.pointsDelta === -0.52 && c.pointsDelta === 0);
+expect("bonus de début de saison (format « +115,14 »)", sheet.bonusPoints === 115.14, String(sheet.bonusPoints));
+expect("bonus lu dans l'ancien bloc", parsePlayerSheet(`<div class="alert alert-success">Bonus de début de saison : <strong>+115,14 pts</strong></div>`).bonusPoints === 115.14);
+expect("pas de bonus : null", parsePlayerSheet(html.replace(/<div class="profile-metric bonus">.*?<\/div>/, "")).bonusPoints === null);
 expect("page vide ou modifiée : aucun plantage", parsePlayerSheet("<html>autre chose</html>").matches.length === 0);
 
 // Nombre d'actifs lu sur la page d'accueil.

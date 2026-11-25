@@ -103,15 +103,17 @@ const deltaClass = (v) => (v > 0 ? "text-green-700" : v < 0 ? "text-red-600" : "
 // Enrichissement data.aftt.be (facultatif) : points de base et +/- par match
 // de la saison en cours. Rien n'est affiché tant qu'il n'est pas disponible.
 const basePoints = computed(() => current.value?.basePoints ?? null);
+// Bonus de début de saison accordé par l'AFTT, ajouté aux points de base.
+const bonusPoints = computed(() => current.value?.bonusPoints || null);
 const sumDeltas = (matches) => {
   const known = matches.filter((m) => m.pointsDelta != null);
   return known.length ? known.reduce((sum, m) => sum + m.pointsDelta, 0) : null;
 };
 const seasonGain = computed(() => sumDeltas((data.value?.results ?? []).filter((r) => r.season === current.value?.season)));
-// Points au moment de la consultation : points de base de la saison + somme des
-// +/- des matchs importés. À défaut de points de base, le dernier relevé.
+// Points au moment de la consultation : points de base de la saison + bonus +
+// somme des +/- des matchs importés. À défaut de points de base, le dernier relevé.
 const currentPoints = computed(() => {
-  if (basePoints.value != null) return { value: basePoints.value + (seasonGain.value ?? 0), computed: true };
+  if (basePoints.value != null) return { value: basePoints.value + (bonusPoints.value ?? 0) + (seasonGain.value ?? 0), computed: true };
   return latestPoints.value ? { value: latestPoints.value.points, computed: false } : null;
 });
 const pointsChartData = computed(() => ({
@@ -215,6 +217,9 @@ const chartOptions = {
       </div>
       <p v-if="basePoints != null || seasonGain != null" class="text-sm text-slate-600 mt-2">
         <template v-if="basePoints != null">Points de début de saison {{ formatPoints(basePoints) }}</template>
+        <template v-if="basePoints != null && bonusPoints != null">
+          · bonus de début de saison <strong class="tabular-nums" :class="deltaClass(bonusPoints)">{{ formatDelta(bonusPoints) }} pts</strong>
+        </template>
         <template v-if="basePoints != null && seasonGain != null"> · </template>
         <template v-if="seasonGain != null">
           gagnés en match cette saison :
