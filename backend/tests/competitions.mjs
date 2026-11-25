@@ -229,7 +229,7 @@ try {
       tabtCalls.push(args);
       if (refuseExtended && args.ExtendedInformation) throw Object.assign(new Error("fault"), { root: { Envelope: { Body: { Fault: { faultcode: "27", faultstring: "You don't have permission to see extended information" } } } } });
       const lady = args.UniqueIndex === lic(1);
-      if (args.PlayerCategory === 44) return [lady ? { MemberEntries: [{ UniqueIndex: lic(1), Ranking: "B2", ResultEntries: [entry("2026-10-03", "SD03/086", false), entry("2026-10-10", "SD03/090", true)] }] } : { MemberCount: 0 }];
+      if (args.PlayerCategory === 44) return [lady ? { MemberEntries: [{ UniqueIndex: lic(1), Ranking: "B2", ResultEntries: [entry("2026-10-03", "SD03/086", false), entry("2026-10-10", "SD03/090", true), entry("2026-10-04", "HAI/01", true)] }] } : { MemberCount: 0 }];
       const extended = args.ExtendedInformation ? { Gender: lady ? "F" : "M", MedicalAttestation: true } : {};
       return [{ MemberEntries: [{ UniqueIndex: args.UniqueIndex, Ranking: lady ? "C2" : "D0", Club: "N076", ...extended, ResultEntries: [entry("2026-10-04", "HAI/01", true)] }] }];
     },
@@ -240,7 +240,7 @@ try {
   const aliceSeason = await prisma.competitionSeason.findUnique({ where: { playerId_season: { playerId: alice.id, season: 27 } } });
   expect("joueuse : classement général et dames", aliceSeason?.ranking === "C2" && aliceSeason.ladiesRanking === "B2", JSON.stringify(aliceSeason));
   const aliceResults = await prisma.competitionResult.findMany({ where: { playerId: alice.id, season: 27 } });
-  expect("joueuse : résultats dames importés à part", aliceResults.length === 3 && aliceResults.filter((r) => r.ladies).length === 2, String(aliceResults.length));
+  expect("joueuse : résultats dames importés à part, sans doublon du général", aliceResults.length === 3 && aliceResults.filter((r) => r.ladies).length === 2, String(aliceResults.length));
   expect("sexe demandé à TabT", tabtCalls.some((a) => a.ExtendedInformation === true && a.UniqueIndex === lic(1)));
   const ownerCalls = tabtCalls.length;
   await syncPlayer({ id: other.id, licenseNumber: String(lic(2)) }).catch(() => {});

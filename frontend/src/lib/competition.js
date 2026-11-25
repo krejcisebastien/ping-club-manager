@@ -89,7 +89,12 @@ export function groupByDay(results) {
   }
   return [...days.values()]
     .sort((a, b) => new Date(b.date) - new Date(a.date))
-    .map((d) => ({ ...d, summary: summarize(d.matches), clubs: [...new Set(d.matches.map((m) => m.opponentClub).filter(Boolean))] }));
+    .map((d) => ({
+      ...d,
+      summary: summarize(d.matches),
+      clubs: [...new Set(d.matches.map((m) => m.opponentClub).filter(Boolean))],
+      ladies: d.matches.some((m) => m.ladies),
+    }));
 }
 
 // Couleur d'une cellule selon le taux de victoire (rouge -> ambre -> vert).

@@ -148,7 +148,10 @@ async function syncSeason(playerId, licence, season, seasonName) {
     const l = await call("GetMembers", { UniqueIndex: licence, Season: season, WithResults: true, PlayerCategory: LADIES_CATEGORY });
     const lady = l.MemberEntries?.[0];
     ladiesRanking = lady?.Ranking ?? null;
-    results.push(...(lady?.ResultEntries ?? []).map((e) => toResult(playerId, season, e, true)));
+    // Résultats et points sont mixtes : un match déjà renvoyé par l'appel
+    // général (même jour, même adversaire) n'est pas compté deux fois.
+    const seen = new Set(results.map((r) => matchKey(r.date, r.opponentLicence)));
+    results.push(...(lady?.ResultEntries ?? []).map((e) => toResult(playerId, season, e, true)).filter((r) => r.opponentLicence == null || !seen.has(matchKey(r.date, r.opponentLicence))));
   }
 
   // Les matchs sont remplacés à chaque import : on reporte l'enrichissement

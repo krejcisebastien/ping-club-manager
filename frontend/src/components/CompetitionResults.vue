@@ -2,7 +2,6 @@
 import { ref, computed, onMounted, watch } from "vue";
 import Button from "primevue/button";
 import Dropdown from "primevue/dropdown";
-import SelectButton from "primevue/selectbutton";
 import Tag from "primevue/tag";
 import Chart from "primevue/chart";
 import { useToast } from "primevue/usetoast";
@@ -25,8 +24,6 @@ const toast = useToast();
 const data = ref(null);
 const refreshing = ref(false);
 const seasonFilter = ref(null);
-// Classement analysé (« general » ou « ladies », voir hasLadies).
-const category = ref("general");
 const DAYS_STEP = 15;
 const visibleDays = ref(DAYS_STEP);
 
@@ -53,17 +50,13 @@ async function refresh() {
 
 onMounted(load);
 watch(() => props.playerId, load);
-watch([seasonFilter, category], () => (visibleDays.value = DAYS_STEP));
+watch(seasonFilter, () => (visibleDays.value = DAYS_STEP));
 
-// Une joueuse a deux classements (général et dames) et deux séries de
-// résultats : on choisit lequel analyser.
+// Une joueuse a deux classements (général et dames), mais ses résultats et ses
+// points sont mixtes : les matchs dames (interclubs, critériums…) sont analysés
+// avec les autres, comme sur AFTT DATA, et seulement signalés « Dames ».
 const hasLadies = computed(() => (data.value?.seasons ?? []).some((s) => s.ladiesRanking) || (data.value?.results ?? []).some((r) => r.ladies));
-const CATEGORY_OPTIONS = [
-  { label: "Général", value: "general" },
-  { label: "Dames", value: "ladies" },
-];
-const ladiesView = computed(() => hasLadies.value && category.value === "ladies");
-const rankingOf = (s) => (ladiesView.value ? s?.ladiesRanking : s?.ranking) ?? null;
+const rankingOf = (s) => s?.ranking ?? null;
 
 const seasonNames = computed(() => new Map((data.value?.seasons ?? []).map((s) => [s.season, s.seasonName])));
 const rankingBySeason = computed(() => new Map((data.value?.seasons ?? []).map((s) => [s.season, rankingOf(s)])));
@@ -76,7 +69,7 @@ const selectedSeason = computed(() => (allSeasons.value ? null : data.value?.sea
 const current = computed(() => data.value?.seasons[0] ?? null);
 
 const results = computed(() =>
-  (data.value?.results ?? []).filter((r) => (allSeasons.value || r.season === seasonFilter.value) && !!r.ladies === ladiesView.value)
+  (data.value?.results ?? []).filter((r) => allSeasons.value || r.season === seasonFilter.value)
 );
 const totals = computed(() => summarize(results.value));
 const walkovers = computed(() => results.value.filter((r) => r.walkover).length);
@@ -239,14 +232,13 @@ const chartOptions = {
     <template v-if="data.seasons.length">
       <div class="flex flex-wrap items-center gap-3">
         <Dropdown v-model="seasonFilter" :options="seasonOptions" option-label="label" option-value="value" class="w-full sm:w-64" />
-        <SelectButton v-if="hasLadies" v-model="category" :options="CATEGORY_OPTIONS" option-label="label" option-value="value" :allow-empty="false" aria-label="Classement analysé" />
         <span v-if="rankingOf(selectedSeason)" class="text-sm text-slate-500">
-          {{ hasLadies ? "Classée" : "Classé" }} {{ rankingOf(selectedSeason) }}{{ ladiesView ? " en dames" : "" }} cette saison
+          {{ hasLadies ? "Classée" : "Classé" }} {{ rankingOf(selectedSeason) }}<template v-if="selectedSeason?.ladiesRanking"> ({{ selectedSeason.ladiesRanking }} en dames)</template> cette saison
         </span>
       </div>
 
       <p v-if="!results.length" class="card p-4 text-sm text-slate-400">
-        {{ ladiesView ? "Aucun match dames pour cette saison." : "Aucun match pour cette saison." }}
+        Aucun match pour cette saison.
       </p>
 
       <template v-else>
@@ -361,6 +353,7 @@ const chartOptions = {
                     · {{ day.eventName ?? (day.competition === "TOURNAMENT" ? "Tournoi" : "Championnat") }}
                     <template v-if="day.competition === 'CHAMPIONSHIP' && day.clubs.length"> · {{ day.clubs.join(", ") }}</template>
                   </span>
+                  <span v-if="day.ladies" class="ml-1 inline-flex items-center rounded-full bg-pink-50 px-2 py-0.5 text-[10px] font-medium text-pink-700 ring-1 ring-pink-200 align-middle">Dames</span>
                 </p>
                 <span class="text-xs text-slate-500 tabular-nums">
                   {{ day.summary.wins }} V – {{ day.summary.losses }} D
