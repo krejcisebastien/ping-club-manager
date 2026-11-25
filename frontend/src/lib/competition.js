@@ -18,24 +18,30 @@ export function summarize(results) {
   return { played: matches.length, wins, losses: matches.length - wins, rate: matches.length ? wins / matches.length : null };
 }
 
-// Bilan par classement adverse, dans l'ordre des classements (NC -> B0).
+// Un D2 dames n'est pas un D2 messieurs : les matchs de la catégorie dames
+// (adversaires classées en dames) sont comptés à part des autres.
+const opponentGroup = (r) => ({ key: `${r.ladies ? "F" : "G"}|${r.opponentRanking}`, ranking: r.opponentRanking, ladies: !!r.ladies });
+const byGroup = (a, b) => Number(a.ladies) - Number(b.ladies) || rankIndex(a.ranking) - rankIndex(b.ranking);
+
+// Bilan par classement adverse, dans l'ordre des classements (NC -> B0), les
+// classements dames après les autres.
 export function byOpponentRanking(results) {
   const groups = new Map();
   for (const r of played(results)) {
-    if (!groups.has(r.opponentRanking)) groups.set(r.opponentRanking, []);
-    groups.get(r.opponentRanking).push(r);
+    const g = opponentGroup(r);
+    if (!groups.has(g.key)) groups.set(g.key, { ...g, list: [] });
+    groups.get(g.key).list.push(r);
   }
-  return [...groups.entries()]
-    .map(([ranking, list]) => ({ ranking, ...summarize(list) }))
-    .sort((a, b) => rankIndex(a.ranking) - rankIndex(b.ranking));
+  return [...groups.values()].map(({ list, ...g }) => ({ ...g, ...summarize(list) })).sort(byGroup);
 }
 
 // Face à des adversaires mieux classés / de même classement / moins bien
-// classés, par rapport au classement du joueur la saison du match.
-export function byStrength(results, rankingBySeason) {
+// classés, par rapport au classement du joueur la saison du match (son
+// classement dames pour un match de la catégorie dames).
+export function byStrength(results, rankingBySeason, ladiesRankingBySeason = new Map()) {
   const buckets = { stronger: [], equal: [], weaker: [] };
   for (const r of played(results)) {
-    const own = rankIndex(rankingBySeason.get(r.season));
+    const own = rankIndex((r.ladies ? ladiesRankingBySeason : rankingBySeason).get(r.season));
     const opp = rankIndex(r.opponentRanking);
     if (own < 0 || opp < 0) continue;
     buckets[opp > own ? "stronger" : opp === own ? "equal" : "weaker"].push(r);
@@ -58,11 +64,11 @@ export function evolutionGrid(results, { seasonNames, singleSeason }) {
   const columnKey = (r) => (singleSeason ? monthKey(r.date) : r.season);
   const keys = [...new Set(matches.map(columnKey))].sort((a, b) => a - b);
   const columns = keys.map((k) => ({ key: k, label: singleSeason ? monthLabel(k) : seasonNames.get(k) ?? String(k) }));
-  const rankings = [...new Set(matches.map((r) => r.opponentRanking))].sort((a, b) => rankIndex(a) - rankIndex(b));
-  const rows = rankings.map((ranking) => ({
-    ranking,
+  const groups = [...new Map(matches.map((r) => [opponentGroup(r).key, opponentGroup(r)])).values()].sort(byGroup);
+  const rows = groups.map((g) => ({
+    ...g,
     cells: keys.map((k) => {
-      const list = matches.filter((r) => r.opponentRanking === ranking && columnKey(r) === k);
+      const list = matches.filter((r) => opponentGroup(r).key === g.key && columnKey(r) === k);
       return list.length ? summarize(list) : null;
     }),
   }));

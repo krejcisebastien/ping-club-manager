@@ -60,6 +60,7 @@ const rankingOf = (s) => s?.ranking ?? null;
 
 const seasonNames = computed(() => new Map((data.value?.seasons ?? []).map((s) => [s.season, s.seasonName])));
 const rankingBySeason = computed(() => new Map((data.value?.seasons ?? []).map((s) => [s.season, rankingOf(s)])));
+const ladiesRankingBySeason = computed(() => new Map((data.value?.seasons ?? []).map((s) => [s.season, s.ladiesRanking ?? null])));
 const seasonOptions = computed(() => [
   ...(data.value?.seasons ?? []).map((s) => ({ label: `Saison ${s.seasonName}`, value: s.season })),
   ...((data.value?.seasons?.length ?? 0) > 1 ? [{ label: "Toutes les saisons", value: "ALL" }] : []),
@@ -74,7 +75,7 @@ const results = computed(() =>
 const totals = computed(() => summarize(results.value));
 const walkovers = computed(() => results.value.filter((r) => r.walkover).length);
 const perRanking = computed(() => byOpponentRanking(results.value));
-const strength = computed(() => byStrength(results.value, rankingBySeason.value));
+const strength = computed(() => byStrength(results.value, rankingBySeason.value, ladiesRankingBySeason.value));
 const grid = computed(() => evolutionGrid(results.value, { seasonNames: seasonNames.value, singleSeason: !allSeasons.value }));
 const days = computed(() => groupByDay(results.value));
 
@@ -294,8 +295,8 @@ const chartOptions = {
           <div class="card p-4">
             <p class="section-title mb-3">Par classement adverse</p>
             <ul class="space-y-2">
-              <li v-for="row in perRanking" :key="row.ranking" class="grid grid-cols-[2.5rem_1fr_9.25rem] items-center gap-3 text-sm">
-                <span class="font-semibold text-slate-700">{{ row.ranking }}</span>
+              <li v-for="row in perRanking" :key="row.key" class="grid items-center gap-3 text-sm" :class="hasLadies ? 'grid-cols-[4.25rem_1fr_9.25rem]' : 'grid-cols-[2.5rem_1fr_9.25rem]'">
+                <span class="font-semibold text-slate-700 whitespace-nowrap">{{ row.ranking }}<span v-if="row.ladies" class="ml-1 text-[10px] font-medium text-pink-700">dames</span></span>
                 <div class="h-2.5 rounded-full bg-red-100 overflow-hidden" :title="`${row.wins} V – ${row.losses} D`">
                   <div class="h-full bg-green-500" :style="{ width: `${row.rate * 100}%` }"></div>
                 </div>
@@ -309,7 +310,9 @@ const chartOptions = {
           <!-- Selon l'écart de classement -->
           <div class="card p-4">
             <p class="section-title mb-1">Face à des adversaires…</p>
-            <p class="text-xs text-slate-400 mb-3">Par rapport à son classement de la saison du match.</p>
+            <p class="text-xs text-slate-400 mb-3">
+              Par rapport à son classement de la saison du match{{ hasLadies ? " (son classement dames pour les matchs dames)" : "" }}.
+            </p>
             <ul class="divide-y divide-slate-100 text-sm">
               <li v-for="s in STRENGTH_LABELS" :key="s.key" class="py-2 flex items-center justify-between gap-2">
                 <span class="text-slate-700">{{ s.label }}</span>
@@ -341,8 +344,8 @@ const chartOptions = {
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="row in grid.rows" :key="row.ranking">
-                  <th class="sticky left-0 bg-white text-left">{{ row.ranking }}</th>
+                <tr v-for="row in grid.rows" :key="row.key">
+                  <th class="sticky left-0 bg-white text-left whitespace-nowrap">{{ row.ranking }}<span v-if="row.ladies" class="ml-1 text-[10px] font-medium text-pink-700">dames</span></th>
                   <td v-for="(cell, i) in row.cells" :key="i">
                     <span v-if="cell" class="cell" :style="rateColor(cell.rate)" :title="`${cell.wins} victoire(s) sur ${cell.played}`">
                       {{ cell.wins }}/{{ cell.played }}
