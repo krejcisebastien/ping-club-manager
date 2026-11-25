@@ -40,7 +40,22 @@ const formatDate = (d) => new Date(d).toLocaleDateString("fr-FR");
 const formatPoints = (v) => (v == null ? "—" : v.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
 const formatDelta = (v) => (v == null ? "—" : `${v > 0 ? "+" : v < 0 ? "−" : "±"}${formatPoints(Math.abs(v))}`);
 const deltaClass = (v) => (v > 0 ? "text-green-700" : v < 0 ? "text-red-600" : "text-slate-500");
-const places = (n) => `${n.toLocaleString("fr-FR")} place${n > 1 ? "s" : ""}`;
+// Le ranking AFTT est calculé sur les points du 1er du mois : on l'indique
+// d'après le dernier relevé.
+const rankingMonth = computed(() => {
+  const dates = players.value.map((p) => p.positionDate).filter(Boolean).map((d) => new Date(d));
+  if (!dates.length) return null;
+  const last = new Date(Math.max(...dates));
+  return new Date(Date.UTC(last.getUTCFullYear(), last.getUTCMonth(), 1));
+});
+const rankingMonthLabel = computed(() =>
+  rankingMonth.value ? `Points au 1er ${rankingMonth.value.toLocaleDateString("fr-FR", { month: "short", timeZone: "UTC" })}` : "Points du ranking"
+);
+// Classements voisins de l'estimation : « B4 (14 pl.) » au-dessus, « C0 (50 pl.) » en dessous.
+const neighbours = (e) => [
+  ...(e.upper ? [{ key: "upper", label: e.upper, places: e.placesToUpper }] : []),
+  ...(e.lower ? [{ key: "lower", label: e.lower, places: e.placesToLower }] : []),
+];
 // Évolution par rapport au classement de début de saison.
 const trend = (from, to) => {
   if (!from || !to || from === to) return "same";
@@ -67,6 +82,10 @@ const badgeClass = (t) =>
       <p>
         <strong class="font-medium text-slate-800">Points actuels</strong> = points de début de saison + bonus de début de saison éventuel + somme des points gagnés ou perdus
         en match (données AFTT importées chaque nuit).
+      </p>
+      <p>
+        <strong class="font-medium text-slate-800">{{ rankingMonthLabel }}</strong> : points officiels AFTT, recalculés le 1er de chaque mois ; c'est sur eux que
+        se calcule la place au ranking.
       </p>
       <p>
         <strong class="font-medium text-slate-800">Classement estimé</strong> : place du joueur au dernier relevé du classement numérique,
@@ -129,30 +148,39 @@ const badgeClass = (t) =>
       <Column field="currentPoints" header="Points actuels" sortable>
         <template #body="{ data: p }"><span class="tabular-nums font-semibold text-slate-800">{{ formatPoints(p.currentPoints) }}</span></template>
       </Column>
-      <Column header="Classement estimé" style="min-width: 15rem">
+      <Column field="rankingPoints" :header="rankingMonthLabel" sortable>
+        <template #body="{ data: p }"><span class="tabular-nums">{{ formatPoints(p.rankingPoints) }}</span></template>
+      </Column>
+      <Column header="Classement estimé" style="min-width: 19rem">
         <template #body="{ data: p }">
           <div v-if="p.estimate" class="space-y-1.5">
             <div>
-              <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-sm font-semibold ring-1" :class="badgeClass(trend(p.startRanking, p.estimate.ranking))">
-                {{ p.estimate.ranking }}
-              </span>
-              <span class="text-xs text-slate-500 ml-1.5">{{ p.rankingPosition.toLocaleString("fr-FR") }}<sup>e</sup></span>
-              <p class="text-xs text-slate-500 mt-0.5">
-                <template v-if="p.estimate.upper">à {{ places(p.estimate.placesToUpper) }} de {{ p.estimate.upper }}</template>
-                <template v-if="p.estimate.upper && p.estimate.lower"> · </template>
-                <template v-if="p.estimate.lower">à {{ places(p.estimate.placesToLower) }} de {{ p.estimate.lower }}</template>
-              </p>
+              <div class="flex flex-wrap items-center gap-1.5">
+                <span v-if="p.estimate.upper" class="neighbour" :title="`${p.estimate.upper} à ${p.estimate.placesToUpper} place(s)`">
+                  {{ p.estimate.upper }} <span class="font-normal">({{ p.estimate.placesToUpper.toLocaleString("fr-FR") }} pl.)</span>
+                </span>
+                <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-sm font-semibold ring-1" :class="badgeClass(trend(p.startRanking, p.estimate.ranking))">
+                  {{ p.estimate.ranking }}
+                </span>
+                <span v-if="p.estimate.lower" class="neighbour" :title="`${p.estimate.lower} à ${p.estimate.placesToLower} place(s)`">
+                  {{ p.estimate.lower }} <span class="font-normal">({{ p.estimate.placesToLower.toLocaleString("fr-FR") }} pl.)</span>
+                </span>
+              </div>
+              <p class="text-xs text-slate-500 mt-0.5">{{ p.rankingPosition.toLocaleString("fr-FR") }}<sup>e</sup> au ranking</p>
             </div>
             <div v-if="p.ladiesEstimate">
-              <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-sm font-semibold ring-1" :class="badgeClass(trend(p.startLadiesRanking, p.ladiesEstimate.ranking))">
-                {{ p.ladiesEstimate.ranking }} dames
-              </span>
-              <span class="text-xs text-slate-500 ml-1.5">{{ p.ladiesRankingPosition.toLocaleString("fr-FR") }}<sup>e</sup> dame</span>
-              <p class="text-xs text-slate-500 mt-0.5">
-                <template v-if="p.ladiesEstimate.upper">à {{ places(p.ladiesEstimate.placesToUpper) }} de {{ p.ladiesEstimate.upper }}</template>
-                <template v-if="p.ladiesEstimate.upper && p.ladiesEstimate.lower"> · </template>
-                <template v-if="p.ladiesEstimate.lower">à {{ places(p.ladiesEstimate.placesToLower) }} de {{ p.ladiesEstimate.lower }}</template>
-              </p>
+              <div class="flex flex-wrap items-center gap-1.5">
+                <span v-if="p.ladiesEstimate.upper" class="neighbour" :title="`${p.ladiesEstimate.upper} dames à ${p.ladiesEstimate.placesToUpper} place(s)`">
+                  {{ p.ladiesEstimate.upper }} <span class="font-normal">({{ p.ladiesEstimate.placesToUpper.toLocaleString("fr-FR") }} pl.)</span>
+                </span>
+                <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-sm font-semibold ring-1" :class="badgeClass(trend(p.startLadiesRanking, p.ladiesEstimate.ranking))">
+                  {{ p.ladiesEstimate.ranking }} dames
+                </span>
+                <span v-if="p.ladiesEstimate.lower" class="neighbour" :title="`${p.ladiesEstimate.lower} dames à ${p.ladiesEstimate.placesToLower} place(s)`">
+                  {{ p.ladiesEstimate.lower }} <span class="font-normal">({{ p.ladiesEstimate.placesToLower.toLocaleString("fr-FR") }} pl.)</span>
+                </span>
+              </div>
+              <p class="text-xs text-slate-500 mt-0.5">{{ p.ladiesRankingPosition.toLocaleString("fr-FR") }}<sup>e</sup> dame au ranking</p>
             </div>
           </div>
           <span v-else class="text-slate-400">—</span>
@@ -161,3 +189,19 @@ const badgeClass = (t) =>
     </DataTable>
   </AppLayout>
 </template>
+
+<style scoped>
+/* Classements voisins de l'estimation, en retrait du badge principal. */
+.neighbour {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  border-radius: 9999px;
+  padding: 0.05rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #64748b;
+  background: #fff;
+  box-shadow: inset 0 0 0 1px #e2e8f0;
+}
+</style>

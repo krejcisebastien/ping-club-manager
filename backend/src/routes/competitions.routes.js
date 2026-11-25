@@ -175,6 +175,9 @@ router.get("/rankings", async (req, res) => {
         matches: d?.matches ?? 0,
         matchesWithoutDelta: d ? d.matches - d.known : 0,
         currentPoints,
+        // Points AFTT du dernier relevé : ceux du 1er du mois, sur lesquels la
+        // place au ranking (et donc le classement estimé) est calculée.
+        rankingPoints: last ? Number(last.points) : null,
         positionDate: last?.date ?? null,
         rankingPosition: last?.rankingPosition ?? null,
         ladiesRankingPosition: last?.ladiesRankingPosition ?? null,
