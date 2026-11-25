@@ -116,16 +116,37 @@ const currentPoints = computed(() => {
   if (basePoints.value != null) return { value: basePoints.value + (bonusPoints.value ?? 0) + (seasonGain.value ?? 0), computed: true };
   return latestPoints.value ? { value: latestPoints.value.points, computed: false } : null;
 });
+// Courbe de la saison depuis le 1er juillet : points de base + bonus au début
+// de la saison, puis après chaque journée de matchs (+/- connus). À défaut de
+// points de base, les relevés quotidiens du classement numérique.
+const pointsCurve = computed(() => {
+  if (basePoints.value == null) return seasonPoints.value.map((p) => ({ date: p.date, points: p.points }));
+  const startYear = Number(/^(\d{4})/.exec(current.value?.seasonName ?? "")?.[1]);
+  if (!startYear) return [];
+  let points = basePoints.value + (bonusPoints.value ?? 0);
+  const curve = [{ date: new Date(Date.UTC(startYear, 6, 1)), points }];
+  const byDay = new Map();
+  for (const r of data.value?.results ?? []) {
+    if (r.season !== current.value.season || r.pointsDelta == null) continue;
+    const day = String(r.date).slice(0, 10);
+    byDay.set(day, (byDay.get(day) ?? 0) + r.pointsDelta);
+  }
+  for (const [day, delta] of [...byDay].sort(([a], [b]) => a.localeCompare(b))) {
+    points += delta;
+    curve.push({ date: new Date(day), points: Math.round(points * 100) / 100 });
+  }
+  return curve;
+});
 const pointsChartData = computed(() => ({
-  labels: seasonPoints.value.map((p) => formatDate(p.date)),
+  labels: pointsCurve.value.map((p) => formatDate(p.date)),
   datasets: [
     {
       label: "Points",
-      data: seasonPoints.value.map((p) => p.points),
+      data: pointsCurve.value.map((p) => p.points),
       borderColor: "#0284c7",
       backgroundColor: "#0284c7",
       tension: 0,
-      pointRadius: seasonPoints.value.length > 40 ? 0 : 2,
+      pointRadius: pointsCurve.value.length > 40 ? 0 : 2,
       pointHitRadius: 8,
     },
   ],
@@ -226,7 +247,7 @@ const chartOptions = {
           <strong class="tabular-nums" :class="deltaClass(seasonGain)">{{ formatDelta(seasonGain) }} pts</strong>
         </template>
       </p>
-      <div v-if="seasonPoints.length >= 2" class="h-44 mt-3">
+      <div v-if="pointsCurve.length >= 2" class="h-44 mt-3">
         <Chart type="line" :data="pointsChartData" :options="pointsChartOptions" class="h-full" />
       </div>
       <p v-else class="text-xs text-slate-400 mt-2">
