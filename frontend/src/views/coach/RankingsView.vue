@@ -5,6 +5,7 @@ import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import InputText from "primevue/inputtext";
 import AppLayout from "../../components/AppLayout.vue";
+import RankingEstimate from "../../components/RankingEstimate.vue";
 import { api } from "../../lib/api.js";
 import { fullName } from "../../lib/name.js";
 import { useNavLinks } from "../../composables/useNavLinks.js";
@@ -51,22 +52,6 @@ const rankingMonth = computed(() => {
 const rankingMonthLabel = computed(() =>
   rankingMonth.value ? `Points au 1er ${rankingMonth.value.toLocaleDateString("fr-FR", { month: "short", timeZone: "UTC" })}` : "Points du ranking"
 );
-// Classements voisins de l'estimation : « B4 (14 pl.) » au-dessus, « C0 (50 pl.) » en dessous.
-const neighbours = (e) => [
-  ...(e.upper ? [{ key: "upper", label: e.upper, places: e.placesToUpper }] : []),
-  ...(e.lower ? [{ key: "lower", label: e.lower, places: e.placesToLower }] : []),
-];
-// Évolution par rapport au classement de début de saison.
-const trend = (from, to) => {
-  if (!from || !to || from === to) return "same";
-  const order = ["A", "B0", "B2", "B4", "B6", "C0", "C2", "C4", "C6", "D0", "D2", "D4", "D6", "E0", "E2", "E4", "E6", "NC"];
-  const a = order.indexOf(from.startsWith("A") ? "A" : from);
-  const b = order.indexOf(to);
-  if (a < 0 || b < 0) return "same";
-  return b < a ? "up" : "down";
-};
-const badgeClass = (t) =>
-  t === "up" ? "bg-green-50 text-green-700 ring-green-200" : t === "down" ? "bg-red-50 text-red-700 ring-red-200" : "bg-slate-50 text-slate-700 ring-slate-200";
 </script>
 
 <template>
@@ -90,7 +75,8 @@ const badgeClass = (t) =>
       <p>
         <strong class="font-medium text-slate-800">Classement estimé</strong> : place du joueur au dernier relevé du classement numérique,
         reportée dans le tableau d'équivalence AFTT 2026-2027<template v-if="columnLabel"> ({{ columnLabel }})</template>.
-        Estimation indicative : le classement officiel dépend du nombre d'actifs à la date d'octroi.
+        Estimation indicative : le classement officiel dépend du nombre d'actifs à la date d'octroi. La jauge situe le joueur dans sa
+        tranche, du classement inférieur (à gauche) au classement supérieur (à droite), avec les places qui l'en séparent.
       </p>
       <p v-if="data && !data.stats" class="text-amber-700">
         <i class="pi pi-info-circle mr-1"></i>Nombre de joueurs actifs pas encore relevé : les classements estimés apparaîtront après la prochaine synchronisation.
@@ -151,37 +137,11 @@ const badgeClass = (t) =>
       <Column field="rankingPoints" :header="rankingMonthLabel" sortable>
         <template #body="{ data: p }"><span class="tabular-nums">{{ formatPoints(p.rankingPoints) }}</span></template>
       </Column>
-      <Column header="Classement estimé" style="min-width: 19rem">
+      <Column header="Classement estimé" style="min-width: 14rem">
         <template #body="{ data: p }">
-          <div v-if="p.estimate" class="space-y-1.5">
-            <div>
-              <div class="flex flex-wrap items-center gap-1.5">
-                <span v-if="p.estimate.upper" class="neighbour" :title="`${p.estimate.upper} à ${p.estimate.placesToUpper} place(s)`">
-                  {{ p.estimate.upper }} <span class="font-normal">({{ p.estimate.placesToUpper.toLocaleString("fr-FR") }} pl.)</span>
-                </span>
-                <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-sm font-semibold ring-1" :class="badgeClass(trend(p.startRanking, p.estimate.ranking))">
-                  {{ p.estimate.ranking }}
-                </span>
-                <span v-if="p.estimate.lower" class="neighbour" :title="`${p.estimate.lower} à ${p.estimate.placesToLower} place(s)`">
-                  {{ p.estimate.lower }} <span class="font-normal">({{ p.estimate.placesToLower.toLocaleString("fr-FR") }} pl.)</span>
-                </span>
-              </div>
-              <p class="text-xs text-slate-500 mt-0.5">{{ p.rankingPosition.toLocaleString("fr-FR") }}<sup>e</sup> au ranking</p>
-            </div>
-            <div v-if="p.ladiesEstimate">
-              <div class="flex flex-wrap items-center gap-1.5">
-                <span v-if="p.ladiesEstimate.upper" class="neighbour" :title="`${p.ladiesEstimate.upper} dames à ${p.ladiesEstimate.placesToUpper} place(s)`">
-                  {{ p.ladiesEstimate.upper }} <span class="font-normal">({{ p.ladiesEstimate.placesToUpper.toLocaleString("fr-FR") }} pl.)</span>
-                </span>
-                <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-sm font-semibold ring-1" :class="badgeClass(trend(p.startLadiesRanking, p.ladiesEstimate.ranking))">
-                  {{ p.ladiesEstimate.ranking }} dames
-                </span>
-                <span v-if="p.ladiesEstimate.lower" class="neighbour" :title="`${p.ladiesEstimate.lower} dames à ${p.ladiesEstimate.placesToLower} place(s)`">
-                  {{ p.ladiesEstimate.lower }} <span class="font-normal">({{ p.ladiesEstimate.placesToLower.toLocaleString("fr-FR") }} pl.)</span>
-                </span>
-              </div>
-              <p class="text-xs text-slate-500 mt-0.5">{{ p.ladiesRankingPosition.toLocaleString("fr-FR") }}<sup>e</sup> dame au ranking</p>
-            </div>
+          <div v-if="p.estimate" class="space-y-3 py-0.5">
+            <RankingEstimate :estimate="p.estimate" :position="p.rankingPosition" :start="p.startRanking" />
+            <RankingEstimate v-if="p.ladiesEstimate" :estimate="p.ladiesEstimate" :position="p.ladiesRankingPosition" :start="p.startLadiesRanking" ladies />
           </div>
           <span v-else class="text-slate-400">—</span>
         </template>
@@ -190,18 +150,3 @@ const badgeClass = (t) =>
   </AppLayout>
 </template>
 
-<style scoped>
-/* Classements voisins de l'estimation, en retrait du badge principal. */
-.neighbour {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.2rem;
-  border-radius: 9999px;
-  padding: 0.05rem 0.5rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #64748b;
-  background: #fff;
-  box-shadow: inset 0 0 0 1px #e2e8f0;
-}
-</style>
